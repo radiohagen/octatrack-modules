@@ -3,6 +3,7 @@
 - [Branching and releases](BRANCHING.md)
 - [Verification and evidence](VERIFICATION.md)
 - [Migration from the current fork](MIGRATION.md)
+- [Source import evidence](IMPORT_EVIDENCE.md)
 - [Octabam integration](../integration/README.md)
 
 Design decisions specific to a module belong beside that module. Shared platform

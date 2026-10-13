@@ -1,15 +1,18 @@
 # Migration from the Octabam fork
 
-This foundation does not move existing modules or change their active sources.
-The full fork remains the integration workspace. Extract one module at a time.
+The source import now contains eight feature modules and four support modules;
+see the [catalogue](../modules/README.md) and [import evidence](IMPORT_EVIDENCE.md).
+The full fork remains the active integration workspace. Existing releases and
+authority have not switched. Migrate external-author adapters one module at a time.
 
-## First candidate: ARP PRESETS
+## First external-adapter candidate: MIDI Arp Presets
 
 Inspected on 2026-10-13 at source commit
 `e753f1dc4206accd97ccc908d9a72d0d9c039cc8` in
 [mattiaswolff/octabam](https://github.com/mattiaswolff/octabam).
 It has its own module folder and two focused gates, making it a useful first
-candidate. This is a provenance starting point, not a claim that it is still the
+external-adapter candidate. Its source is already imported; this next stage
+changes how Octabam loads it, not whether its source is present here. This is a provenance starting point, not a claim that it is still the
 latest branch head. Recheck branches, working changes and integrated builds.
 
 Known extraction work: its Linked source currently uses an Octabam-root-relative
@@ -33,6 +36,6 @@ and retain any required thin gate adapters in Octabam.
 6. Only then switch the integration pin and declare the new module authoritative.
    Retain earlier branches and packages until their active dependencies are known.
 
-Inventory MIDI Follow, Harmony, loopback, routing and other work separately before
-extracting it: their shared hooks and bridge modules may need a coordinated import.
+The imported MIDI Follow, Harmony, Loopback, routing and support sources need
+coordinated external-adapter work: their shared hooks and bridge modules may need a coordinated import.
 Do not assume a folder copied out of the fork is already independently buildable.

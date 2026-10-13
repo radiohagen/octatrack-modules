@@ -2,8 +2,8 @@
 
 This is the author repository for Mattias's Octatrack modules. Octabam owns the
 builder, schema, shared emulator and toolchains. Read README.md, CONTRIBUTING.md
-and integration/README.md before firmware work. The initial repository contains
-structure only; do not claim that it contains or validates migrated modules.
+and integration/README.md before firmware work. The repository contains a source import of 12 modules. Read docs/IMPORT_EVIDENCE.md
+for the exact verification boundary; external-author adapters are not yet migrated.
 
 - After bootstrap, work in a separate Git worktree on `codex/<module>-<change>`.
   Never stash or edit another task's checkout. Preserve existing branches and evidence.
@@ -11,8 +11,10 @@ structure only; do not claim that it contains or validates migrated modules.
   Start from the nearest real Octabam analogue. `_template` is not executable.
 - Use Octabam's existing schema and claims. Do not introduce a second module API,
   discovery mechanism, firmware packer or copied toolchain.
-- Derive source paths from the manifest location. Keep gates module-owned where
-  possible; gate paths must satisfy the pinned Octabam schema.
+- Imported manifests and gates still use Octabam-root paths. Preserve them during
+  source import; stage into an isolated integration worktree for execution. A later
+  external-adapter migration must derive source paths from manifest location and
+  preserve gate execution under the pinned Octabam schema.
 - Verify extracted modules against their original commit before changing behavior.
   Preserve authorship, licensing and source/proof provenance.
 - Run `make check`. Firmware changes additionally require focused module gates,

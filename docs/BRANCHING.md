@@ -76,4 +76,4 @@ and a patch version for compatible fixes. Document compatibility explicitly.
 A release names the Octabam commit, module commit, selected remix, local image
 hash and verification limits. Keep proprietary or generated firmware files out
 of release assets. Never retarget a published tag. No initial version tag is
-created for this empty foundation.
+created for the initial foundation or source import.

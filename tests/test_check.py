@@ -50,6 +50,11 @@ class RepositoryChecks(unittest.TestCase):
         (self.root / 'link.py').symlink_to('source.py')
         self.assertTrue(check_files(self.root, ['link.py']))
 
+    def test_pinned_submodule_can_be_uninitialized(self):
+        name = 'modules/sophie/upstream'
+        self.assertEqual(check_files(self.root, [name], frozenset({name})), [])
+        self.assertTrue(check_files(self.root, [name]))
+
     def test_exact_pin_passes_and_moving_branch_fails(self):
         pin = {'repository': 'https://github.com/sambanks/octabam.git',
                'commit': 'a' * 40, 'status': 'reference-only',

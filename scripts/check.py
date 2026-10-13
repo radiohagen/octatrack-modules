@@ -37,11 +37,15 @@ def check_pin(path: Path) -> list[str]:
         return [f'Invalid Octabam pin: {exc}']
 
 
-def check_files(root: Path, paths: list[str]) -> list[str]:
+def check_files(root: Path, paths: list[str], gitlinks: frozenset[str] = frozenset()) -> list[str]:
     errors = []
     names = set(paths)
     modules = set()
     for name in paths:
+        # Git stores a submodule as a pinned commit, not as a regular file.
+        # Its contents are checked in the integration workspace, not traversed here.
+        if name in gitlinks:
+            continue
         relative = PurePosixPath(name)
         path = root / name
         if relative.suffix.lower() in FORBIDDEN or relative.parts[0] in LOCAL_ONLY:
@@ -81,13 +85,16 @@ def check_files(root: Path, paths: list[str]) -> list[str]:
 
 
 def main() -> int:
-    result = subprocess.run(['git', 'ls-files', '-z'], cwd=ROOT, check=True,
+    result = subprocess.run(['git', 'ls-files', '--stage', '-z'], cwd=ROOT, check=True,
                             capture_output=True)
-    paths = result.stdout.decode().rstrip('\0').split('\0') if result.stdout else []
+    entries = result.stdout.decode().rstrip('\0').split('\0') if result.stdout else []
+    paths = [entry.split('\t', 1)[1] for entry in entries]
+    gitlinks = frozenset(entry.split('\t', 1)[1] for entry in entries
+                         if entry.startswith('160000 '))
     if not paths:
         print('No tracked files. Add source files to the Git index first.', file=sys.stderr)
         return 1
-    errors = check_files(ROOT, paths) + check_pin(ROOT / 'integration/octabam.json')
+    errors = check_files(ROOT, paths, gitlinks) + check_pin(ROOT / 'integration/octabam.json')
     if errors:
         print('\n'.join(errors), file=sys.stderr)
         return 1

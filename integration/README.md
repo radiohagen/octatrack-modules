@@ -1,18 +1,42 @@
 # Octabam integration
 
-[octabam.json](octabam.json) records the exact upstream revision selected as the
-initial reference. It is a reference for extraction, **not a firmware compatibility
-certification**. No modules have been integrated or built from this repository yet.
-When migration requires a fork commit, update both repository and commit explicitly
-and record the reason in the PR.
+[octabam.json](octabam.json) pins the existing fork baseline needed by the imported
+modules. [sources.json](sources.json) records each module's origin and every
+imported file's original SHA-256. [Import evidence](../docs/IMPORT_EVIDENCE.md)
+distinguishes source identity, a combined build and physical behavior.
+
+## Current source-import workflow
+
+The imported source deliberately retains its native Octabam paths. Run
+`scripts/stage_octabam.py --octabam /path/to/isolated-worktree` to inspect the
+staging plan, then add `--apply` to copy it. The target must be a clean, separate
+Git worktree at the pinned commit; the main checkout and other revisions are
+refused. The script stages source only and never builds or accesses a device.
+Initialize required submodules and follow that worktree's setup instructions.
+Run gates from the resulting Octabam tree; running imported gates directly from
+this repo does not supply the builder, firmware or shared harness.
+
+The following author-adapter pattern is the **next migration stage**. It has not
+replaced this source-import workflow or any existing release path.
 
 ## Prepare the builder
 
-Use a separate Octabam checkout/worktree at the recorded commit. For example,
-clone `https://github.com/sambanks/octabam.git` into a sibling working directory,
-check out the exact commit from octabam.json, read its AGENTS.md, and follow its
-setup instructions. Initialise the required submodules. Supply your own stock OS
-and project fixtures locally. Do not repoint an active integration checkout.
+Use the existing local Octabam repository, which contains the pinned commit,
+to create a separate worktree at that commit. This baseline is **local-only**:
+GitHub could not resolve it during import. A fresh remote clone alone cannot
+reproduce it yet, and this task does not publish the private integration history.
+
+From the existing local Octabam repository:
+
+```sh
+git worktree add .claude/worktrees/module-integration \
+  -b codex/module-integration 3bd99bca5d44ae6257112747070be77fef110839
+```
+
+Read its AGENTS.md, initialize required submodules, and use the existing setup
+instructions for the toolchains and owner-supplied stock OS. Keep fixtures local.
+Do not repoint an active integration checkout. Publishing a reproducible supported
+builder baseline is required before presenting this as a fresh-clone build workflow.
 
 ## Import a migrated module
 

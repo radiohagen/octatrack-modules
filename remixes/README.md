@@ -1,10 +1,12 @@
 # Remix selections
 
-This directory is reserved for our documented module selections and combined
-acceptance cases. No remix is defined yet. Existing working selections stay in
-the Octabam fork during migration.
+The imported selections keep their native Octabam names, settings and module
+identifiers. They include the standard `mattias-bottleservice`, the separate
+`mattias-sophie-poc`, and focused selections under `test/` for the MIDI modules,
+Sophie and Post Fader. They are source definitions, not shipped firmware images.
 
-When adding one, use Octabam's native `remix.py` schema and a README beside it.
-Document the exact module pins and integration steps. Octabam discovers remixes
-inside its own tree; placing a selection here alone does not install it there.
-Run the shared builder and checks from the prepared Octabam integration worktree.
+Run them from the staged Octabam worktree. Their source commits and hashes are in
+[sources.json](../integration/sources.json). The standard selection uses the MIDI
+features and support modules, but does not select Sophie, Supersaw or Post Fader.
+Importing those experiments does not make them enabled by default or qualify
+mixed-engine playback. Keep each experiment's documented acceptance limits.

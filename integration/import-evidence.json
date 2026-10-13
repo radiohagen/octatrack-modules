@@ -1,0 +1,118 @@
+{
+  "date": "2026-10-13",
+  "baseline_commit": "3bd99bca5d44ae6257112747070be77fef110839",
+  "standard_build_command": "make bus REMIX=mattias-bottleservice BUILD=84",
+  "standard_image_identical_before_after_staging": true,
+  "identities": {
+    "stock": {
+      "sha256": "164f31224bf61181e3f50e7dec40df9afcae5b16dbf6e4c0d0cc5e986af0a84e",
+      "bytes": 1112560
+    },
+    "standard": {
+      "sha256": "95bfbd3b7da5d81f42d7adeab2a3ced2d1d69ba05694b16daba5b6598b3f1d21",
+      "bytes": 1180638
+    },
+    "harmony-plocks": {
+      "sha256": "1db734bea6a05cbb1fe49dcf7526db8fc7a47ba55028180b8711376ddee06c42",
+      "bytes": 1146940
+    },
+    "dsp_asm": {
+      "sha256": "23047635db619ebd89dd3ae2bb1f3bf74e295f70dc7c56a62acfeb8c3db9ed6e",
+      "bytes": 174168
+    },
+    "gcc": "m68k-elf-gcc (GCC) 16.2.0"
+  },
+  "initial_focused_gates": [
+    {
+      "gate": "verify_arp_presets",
+      "returncode": 0,
+      "seconds": 1.03
+    },
+    {
+      "gate": "verify_midi_scales",
+      "returncode": 0,
+      "seconds": 0.93
+    },
+    {
+      "gate": "verify_midi_part",
+      "returncode": 0,
+      "seconds": 0.38
+    },
+    {
+      "gate": "verify_midi_part_copy",
+      "returncode": 0,
+      "seconds": 3.21
+    },
+    {
+      "gate": "verify_midi_part_settings",
+      "returncode": 0,
+      "seconds": 1.07
+    },
+    {
+      "gate": "verify_midi_sram",
+      "returncode": 0,
+      "seconds": 24.58
+    },
+    {
+      "gate": "verify_midi_follow",
+      "returncode": 0,
+      "seconds": 33.67
+    },
+    {
+      "gate": "verify_midi_harmony",
+      "returncode": "timeout",
+      "seconds": 120.02
+    },
+    {
+      "gate": "verify_harmony_plocks",
+      "returncode": 1,
+      "seconds": 2.49
+    },
+    {
+      "gate": "verify_midi_loopback",
+      "returncode": 0,
+      "seconds": 33.76
+    },
+    {
+      "gate": "verify_midi_loopback_scenes",
+      "returncode": 0,
+      "seconds": 45.49
+    },
+    {
+      "gate": "verify_sophie",
+      "returncode": 0,
+      "seconds": 2.12
+    },
+    {
+      "gate": "verify_supersaw",
+      "returncode": 0,
+      "seconds": 1.36
+    }
+  ],
+  "dedicated_harmony_plocks": {
+    "build": "make bus REMIX=harmony-plocks BUILD=I1",
+    "gate": ".venv/bin/python -u tools/verify/verify_harmony_plocks.py",
+    "returncode": 0
+  },
+  "hardware_tested": false,
+  "full_project_suite_run": false,
+  "dedicated_harmony": {
+    "gate": "verify_midi_harmony",
+    "selection": "harmony-plocks",
+    "returncode": 0,
+    "seconds": 452.13
+  },
+  "hosted_ci": {
+    "run_url": "https://github.com/mattiaswolff/octatrack-modules/actions/runs/38466776531",
+    "executed": false,
+    "reason": "Account billing/spending restriction; no steps started."
+  },
+  "post_fader": {
+    "build": "make bus REMIX=send-return-poc BUILD=P1",
+    "gate": ".venv/bin/python tools/verify/verify_postfader_hook.py send-return-poc",
+    "returncode": 0,
+    "installed_hook_cases": 256,
+    "image_sha256": "b25342d8f065e21086c63530e32b3183784516e999cefd05816ee5f9e80ba005",
+    "audio_project_gate_run": false
+  }
+}

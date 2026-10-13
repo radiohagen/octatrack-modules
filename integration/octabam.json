@@ -1,7 +1,8 @@
 {
-  "repository": "https://github.com/sambanks/octabam.git",
-  "commit": "c845059dff5d0da58218b965025a174643650998",
+  "repository": "https://github.com/mattiaswolff/octabam.git",
+  "commit": "3bd99bca5d44ae6257112747070be77fef110839",
   "recorded_on": "2026-10-13",
   "status": "reference-only",
-  "note": "Upstream main observed during repository bootstrap. No migrated modules or firmware compatibility claim."
+  "note": "Exact fork baseline for the 12-module source import; includes required STORE, retained P2, Synth bridges and shared verifier support. See docs/IMPORT_EVIDENCE.md for measured coverage. External adapters and hardware remain unverified. The baseline commit is present in the existing local Octabam repository but was not available through the public GitHub commit API during import; it has not been published by this task.",
+  "availability": "local-checkout-only"
 }
