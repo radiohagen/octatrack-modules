@@ -44,5 +44,7 @@ toolchains. Follow [integration](integration/README.md) when migrating a module.
 - Pin both repositories to commits for integration. Never silently follow a branch.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) and [branch strategy](docs/BRANCHING.md).
+Hosted CI and private branch protection currently have account restrictions;
+the branch guide records the actual settings and local-check fallback.
 No Elektron firmware, samples, card contents or generated firmware images belong
 in this repository or its GitHub releases. See [THIRD_PARTY.md](THIRD_PARTY.md).

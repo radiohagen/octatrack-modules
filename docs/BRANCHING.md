@@ -10,7 +10,29 @@ Folders separate modules; branches separate changes.
 After the initial bootstrap, use pull requests for changes to main. Use squash
 merges so each change is understandable and revertible. A solo maintainer may
 review and merge their own PR; do not require an unavailable second approver.
-Source CI must pass. Read the actual evidence before merging firmware changes.
+Source CI must pass when the runner can execute. If GitHub cannot start any steps
+because of an account/billing restriction, record that external blocker in the
+PR and run the identical `make check` locally on the final tree. Do not describe
+that as passing hosted CI. This exception does not apply to failing check steps
+or replace any required firmware checks. Read the evidence before merging.
+
+## GitHub settings at bootstrap
+
+Verified on 2026-10-13: this repository is private, `main` is the default,
+squash merging is enabled, merge/rebase merging is disabled, and merged remote
+branches are deleted automatically.
+
+GitHub refused branch protection because the account needs Pro for a private
+repository. PR/check requirements are therefore a documented convention, not
+server-enforced. When available, protect main with required PRs, the
+`source-checks` status, current-base checks, resolved conversations, linear
+history and no force pushes or deletion. Zero required approvals supports solo
+maintenance; review still happens on the PR.
+
+The first Actions job was also blocked before any steps started: GitHub reported
+failed recent payments or a spending limit requiring attention. The workflow is
+configured; it has not passed on a hosted runner. Local `make check` passed.
+After account access is restored, rerun the workflow and update this status.
 
 ## Feature branches and worktrees
 
