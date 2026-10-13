@@ -1,0 +1,7 @@
+{
+  "repository": "https://github.com/sambanks/octabam.git",
+  "commit": "c845059dff5d0da58218b965025a174643650998",
+  "recorded_on": "2026-10-13",
+  "status": "reference-only",
+  "note": "Upstream main observed during repository bootstrap. No migrated modules or firmware compatibility claim."
+}
