@@ -6,7 +6,7 @@ using the owner's copy of the official OS 1.40C.
 
 **Status: 12 modules imported — eight features and four supporting modules.**
 The source, generators, focused gates and native remix selections are preserved
-from exact commits in [the Octabam fork](https://github.com/mattiaswolff/octabam).
+with provenance from exact commits in [the Octabam fork](https://github.com/mattiaswolff/octabam).
 See the [module catalogue](modules/README.md) and
 [import evidence](docs/IMPORT_EVIDENCE.md).
 

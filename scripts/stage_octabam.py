@@ -34,8 +34,6 @@ def plan(source: Path, target: Path, receipt: dict) -> list[tuple[Path, Path]]:
     for name, record in receipt['files'].items():
         if not name.startswith(('modules/', 'tools/verify/', 'remixes/')):
             continue  # licence copies and provenance stay in the author repository
-        if record['path'] != name:
-            raise ValueError(f'Unexpected path remapping: {name}')
         src, dst = source / name, target / name
         if not src.resolve().is_relative_to(source) or not dst.resolve().is_relative_to(target):
             raise ValueError(f'Path escapes its workspace: {name}')
@@ -53,6 +51,25 @@ def plan(source: Path, target: Path, receipt: dict) -> list[tuple[Path, Path]]:
     return pairs
 
 
+def retired_paths(target: Path, receipt: dict) -> list[Path]:
+    """Remove only tracked original files replaced by a recorded source rename."""
+    target = target.resolve()
+    retired = []
+    for name, record in receipt['files'].items():
+        old = record['path']
+        if old == name or not name.startswith(('modules/', 'tools/verify/', 'remixes/')):
+            continue
+        path = target / old
+        if (not old.startswith(('modules/', 'tools/verify/', 'remixes/'))
+                or not path.resolve().is_relative_to(target) or path.is_symlink()
+                or not path.is_file() or old in receipt['files']):
+            raise ValueError(f'Invalid original path for rename: {old}')
+        if git(target, 'ls-files', '--', old) != old:
+            raise ValueError(f'Original rename path is not tracked: {old}')
+        retired.append(path)
+    return retired
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--octabam', required=True, type=Path)
@@ -65,14 +82,17 @@ def main() -> None:
     try:
         validate_target(args.octabam, pin['commit'])
         pairs = plan(ROOT, args.octabam, receipt)
+        retired = retired_paths(args.octabam, receipt)
         changed = sum(not dst.exists() or src.read_bytes() != dst.read_bytes()
                       for src, dst in pairs)
-        print(f'{len(pairs)} source files; {changed} differ from the pinned worktree.')
+        print(f'{len(pairs)} source files; {changed} differ; {len(retired)} original paths retired.')
         if args.apply:
             validate_target(args.octabam, pin['commit'])
             for src, dst in pairs:
                 dst.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copy2(src, dst)
+            for path in retired:
+                path.unlink()
             print('Source staged. Review the target diff and run its required gates.')
         else:
             print('Inspection only. Add --apply to stage; no files changed.')

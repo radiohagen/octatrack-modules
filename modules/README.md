@@ -13,14 +13,14 @@ See [import evidence](../docs/IMPORT_EVIDENCE.md) before interpreting test statu
 | [MIDI Harmony](midi-harmony/README.md) | Degree roots, chords, Chord Play, SIZE and voicing | Existing emulator evidence; hardware acceptance separate |
 | [MIDI Scales](midi-scales/README.md) | Seven diatonic modes in native KEY | Existing emulator evidence; hardware acceptance separate |
 | [MIDI Follow](midi-follow/README.md) | Root following, register and live response | Existing emulator evidence; hardware acceptance separate |
-| [MIDI Arp Presets](arp-presets/README.md) | Editable rhythms in native MIDI ARP SETUP | Existing emulator evidence; hardware acceptance separate |
+| [MIDI Arp Presets](midi-arp-presets/README.md) | Editable rhythms in native MIDI ARP SETUP | Existing emulator evidence; hardware acceptance separate |
 | [Sophie](sophie/README.md) | Octatrack adapter for Digisophie's FUSE voice | Experimental; original engine remains a pinned dependency |
 | [Supersaw](supersaw/README.md) | Seven-saw engine, sub and drive | Experimental; mixed-engine capacity remains unqualified |
 | [Post Fader](post-fader/README.md) | Optional sends following level, mute and solo | Experimental; preserves original contributor credit |
 
-The feature name is **MIDI Arp Presets**. Its existing build selector `ARP PRESETS`
-and directory `arp-presets` remain unchanged, so existing remixes and scripts
-continue to resolve it. The rename does not change the instrument's native ARP UI.
+**MIDI Arp Presets** uses build selector `MIDI ARP PRESETS` and directory
+`midi-arp-presets`. The standalone remix and verification scripts use the same
+MIDI prefix. Native ARP SETUP controls and rhythm labels are unchanged.
 
 ## Supporting modules
 

@@ -18,21 +18,21 @@ import toolpath  # noqa: E402,F401
 import ab_fixture, emu_card, ot_project as otp  # noqa: E402
 from remix import registry  # noqa: E402
 
-OUT = ROOT / 'out/arp-presets-port'
+OUT = ROOT / 'out/midi-arp-presets-port'
 DB = 0x400e21e0
 
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument('remix', nargs='?', default='arp-presets')
+    ap.add_argument('remix', nargs='?', default='midi-arp-presets')
     ap.add_argument('--project', default=os.environ.get('OT_PROJECT', ''))
     ap.add_argument('--midi-only', action='store_true', help='run only the playback cases while iterating')
     a = ap.parse_args()
-    if 'ARP PRESETS' not in registry.remix(a.remix).modules: return
+    if 'MIDI ARP PRESETS' not in registry.remix(a.remix).modules: return
     if not a.project:
-        print('  [SKIP] ARP PRESETS panel/save/MIDI: set OT_PROJECT or --project'); return
+        print('  [SKIP] MIDI ARP PRESETS panel/save/MIDI: set OT_PROJECT or --project'); return
     if not (ROOT / 'out/emu/ot_emu').is_file():
-        raise SystemExit('ARP PRESETS port gate requires make emu-cf')
+        raise SystemExit('MIDI ARP PRESETS port gate requires make emu-cf')
     OUT.mkdir(parents=True, exist_ok=True)
     project = ab_fixture.prepare(a.project, OUT / 'project')
     for f in project.glob('project.*'):
@@ -103,7 +103,7 @@ def main():
         assert cs[0xa6700:0xa6710] == bytes(16)
         # Render the actual LCD plane; the test asserts data, human QA checks pixels.
         subprocess.run([sys.executable, str(ROOT / 'tools/emu/lcd_view.py'), str(OUT / 'lcd.bin'),
-                        '--png', str(OUT / 'arp-presets.png')], check=True)
+                        '--png', str(OUT / 'midi-arp-presets.png')], check=True)
         print('  [PASS] native FUNC+AMP and A reports load tresillo in Part and retained SRAM', flush=True)
 
         if 'MIDI SCALES' in registry.remix(a.remix).modules:

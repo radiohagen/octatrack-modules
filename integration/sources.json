@@ -31,7 +31,7 @@
       "status": "source-imported"
     },
     {
-      "slug": "arp-presets",
+      "slug": "midi-arp-presets",
       "name": "MIDI Arp Presets",
       "role": "feature",
       "source_commit": "3bd99bca5d44ae6257112747070be77fef110839",
@@ -93,32 +93,32 @@
       "path": "LICENSE",
       "sha256": "f91a43799d9e31ccc3540f385f68c4d6ff5a096f93ae933be2ce98f6b3f7f113"
     },
-    "modules/arp-presets/README.md": {
+    "modules/midi-arp-presets/README.md": {
       "commit": "3bd99bca5d44ae6257112747070be77fef110839",
       "path": "modules/arp-presets/README.md",
       "sha256": "45282026c9d3d4259d385db0116e8860eeff51b64b35e0656885bb049bfb2566"
     },
-    "modules/arp-presets/generate.py": {
+    "modules/midi-arp-presets/generate.py": {
       "commit": "3bd99bca5d44ae6257112747070be77fef110839",
       "path": "modules/arp-presets/generate.py",
       "sha256": "943b8f32f5e757a7e09f9dbeb5baf6e30e2566dc1641d78139a54487a88af42f"
     },
-    "modules/arp-presets/hooks.s": {
+    "modules/midi-arp-presets/hooks.s": {
       "commit": "3bd99bca5d44ae6257112747070be77fef110839",
       "path": "modules/arp-presets/hooks.s",
       "sha256": "765d542b680b82e1d93a4dc8e6dacda130fe9fce1047ed54af32c9c6b5586e77"
     },
-    "modules/arp-presets/manifest.py": {
+    "modules/midi-arp-presets/manifest.py": {
       "commit": "3bd99bca5d44ae6257112747070be77fef110839",
       "path": "modules/arp-presets/manifest.py",
       "sha256": "629c1b86d44c1ebaae2270038376bc95aead8d309d96550099a764791ada761e"
     },
-    "modules/arp-presets/presets.c": {
+    "modules/midi-arp-presets/presets.c": {
       "commit": "3bd99bca5d44ae6257112747070be77fef110839",
       "path": "modules/arp-presets/presets.c",
       "sha256": "6e7129970cfca13e82e7d1b3fc9f455c6176618c67c37ab64e585c664ce4df30"
     },
-    "modules/arp-presets/presets.s": {
+    "modules/midi-arp-presets/presets.s": {
       "commit": "3bd99bca5d44ae6257112747070be77fef110839",
       "path": "modules/arp-presets/presets.s",
       "sha256": "d5f4e17c7df4c5752069db82bd07c4bfa3b0a775dd1a0fc9461cea9821869ac6"
@@ -708,12 +708,12 @@
       "path": "remixes/mattias-bottleservice/remix.py",
       "sha256": "7bdd89fd1f47ccbf5b0b5098e78ccf1ca49fac698796a75e5a5d479244362bd8"
     },
-    "remixes/test/arp-presets/README.md": {
+    "remixes/test/midi-arp-presets/README.md": {
       "commit": "3bd99bca5d44ae6257112747070be77fef110839",
       "path": "remixes/test/arp-presets/README.md",
       "sha256": "a9ad117f55201ec2766efec5a3a2fbb3f00b264218bd7a07a30819ded5974a1b"
     },
-    "remixes/test/arp-presets/remix.py": {
+    "remixes/test/midi-arp-presets/remix.py": {
       "commit": "3bd99bca5d44ae6257112747070be77fef110839",
       "path": "remixes/test/arp-presets/remix.py",
       "sha256": "8111f9123db936ab421c5530731c907765842f111f7b36cc603057db6f365c99"
@@ -883,12 +883,12 @@
       "path": "tools/verify/prepare_mattias_fixture.py",
       "sha256": "dad8460ddb39330c7b162a50f807baaee889dd51787f239cc69d787c59c17cd0"
     },
-    "tools/verify/verify_arp_presets.py": {
+    "tools/verify/verify_midi_arp_presets.py": {
       "commit": "3bd99bca5d44ae6257112747070be77fef110839",
       "path": "tools/verify/verify_arp_presets.py",
       "sha256": "b11625a9b0d565334a1d734595784cff8f94dfe350237ef779d3907c448b2474"
     },
-    "tools/verify/verify_arp_presets_port.py": {
+    "tools/verify/verify_midi_arp_presets_port.py": {
       "commit": "3bd99bca5d44ae6257112747070be77fef110839",
       "path": "tools/verify/verify_arp_presets_port.py",
       "sha256": "7525e914bf4cbd08c20bffa7e454c5cbdd92e57f3d9a60406cbc4ef132c833d7"

@@ -2,7 +2,8 @@
 
 [octabam.json](octabam.json) pins the existing fork baseline needed by the imported
 modules. [sources.json](sources.json) records each module's origin and every
-imported file's original SHA-256. [Import evidence](../docs/IMPORT_EVIDENCE.md)
+imported file's original SHA-256. File keys identify current paths; each record's
+`path` and hash preserve its original source location and bytes. [Import evidence](../docs/IMPORT_EVIDENCE.md)
 distinguishes source identity, a combined build and physical behavior.
 
 ## Current source-import workflow
@@ -11,7 +12,9 @@ The imported source deliberately retains its native Octabam paths. Run
 `scripts/stage_octabam.py --octabam /path/to/isolated-worktree` to inspect the
 staging plan, then add `--apply` to copy it. The target must be a clean, separate
 Git worktree at the pinned commit; the main checkout and other revisions are
-refused. The script stages source only and never builds or accesses a device.
+refused. Recorded renames also retire the tracked original files in that clean worktree,
+so both module names cannot be discovered at once. The script stages source only
+and never builds or accesses a device.
 Initialize required submodules and follow that worktree's setup instructions.
 Run gates from the resulting Octabam tree; running imported gates directly from
 this repo does not supply the builder, firmware or shared harness.
@@ -59,7 +62,8 @@ The author's manifest resolves source paths from its own `__file__`, so moving
 the checkout cannot silently select another copy of the source. Gate paths must
 satisfy Octabam's schema: currently repo-relative under `modules/` or `tools/`.
 Check gate execution and imports as part of extraction; a source path fix alone
-does not relocate the test harness. Preserve the module's native key and claims.
+does not relocate the test harness. Preserve the module's current key and claims. MIDI Arp Presets now uses
+`MIDI ARP PRESETS`; older external selections must be updated explicitly.
 
 This repository is private. Anyone consuming its submodule needs access; a public
 upstream PR must not acquire an inaccessible private dependency. Initially keep

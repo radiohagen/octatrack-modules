@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Exercise the built ARP PRESETS code and native editor in ColdFire Unicorn.
+"""Exercise the built MIDI ARP PRESETS code and native editor in ColdFire Unicorn.
 
 All presets, all Parts/tracks, first/last bank, exact write boundaries, CS1,
 live length, interrupt state, custom recognition, native C/F/LEVEL/rotation
@@ -123,11 +123,11 @@ class Machine:
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument('remix', nargs='?', default='arp-presets')
+    ap.add_argument('remix', nargs='?', default='midi-arp-presets')
     a = ap.parse_args()
-    if 'ARP PRESETS' not in registry.remix(a.remix).modules:
-        print('  [ -- ] no ARP PRESETS'); return
-    subprocess.run([sys.executable, str(ROOT / 'modules/arp-presets/generate.py'), '--check'], check=True)
+    if 'MIDI ARP PRESETS' not in registry.remix(a.remix).modules:
+        print('  [ -- ] no MIDI ARP PRESETS'); return
+    subprocess.run([sys.executable, str(ROOT / 'modules/midi-arp-presets/generate.py'), '--check'], check=True)
     for name, n, steps in PATTERNS:
         if name.startswith('E') and '/' in name:
             hits = {s - 1 for s in steps}

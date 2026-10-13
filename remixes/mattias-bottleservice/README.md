@@ -3,9 +3,9 @@
 Branch ownership, future changes and release steps are documented in the
 [fork workflow](https://github.com/mattiaswolff/octabam/blob/94fa3cdcb893c4f48a15533f1a49ea3546d7d12f/docs/guide/FORK_WORKFLOW.md).
 
-## OCTABAM84 ARP PRESETS package
+## OCTABAM84 MIDI Arp Presets package
 
-Adds the separate [ARP PRESETS](../../modules/arp-presets/README.md) module
+Adds the separate [MIDI Arp Presets](../../modules/midi-arp-presets/README.md) module
 to the complete OCTABAM83 selection. MIDI ARP SETUP: turn A to load one of
 16 rhythms, then edit steps natively; C is LEN and F is KEY, including the
 existing MIDI Scales modes. Presets replace the current arp, so copy an

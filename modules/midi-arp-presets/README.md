@@ -1,7 +1,7 @@
 # MIDI Arp Presets
 
-Display name: **MIDI Arp Presets**. The existing Octabam build key
-`ARP PRESETS` and directory `arp-presets` are retained for compatibility.
+Build selector: `MIDI ARP PRESETS`. Module and standalone remix: `midi-arp-presets`.
+The name is consistent across source, build selection and verification tools.
 
 A separate MIDI module for OS 1.40C. On **MIDI ARP SETUP** (FUNC + AMP),
 turn **A** to load a rhythm. The title shows `ARP A:TRESILLO`, for example.
@@ -125,7 +125,7 @@ the checked-in `presets.s` consumed by Linked, following BRAIN's approach.
 
 ## Verification
 
-`tools/verify/verify_arp_presets.py` executes the built code in ColdFire
+`tools/verify/verify_midi_arp_presets.py` executes the built code in ColdFire
 Unicorn: 1,088 applications covering 17 rhythms × 4 Parts × 8 tracks ×
 first/last bank; exact Part/CS1/live writes and dirty flags; custom matching,
 invalid contexts, encoder bounds, title text, ABI and interrupt-mask
@@ -134,7 +134,7 @@ All 96 SPD values and invalid inputs pass a rational musical-duration
 oracle, buffer bounds and ABI checks through the installed formatter.
 Display/LED calls are stubbed in that focused gate.
 
-`tools/verify/verify_arp_presets_port.py` stages a silent copy of
+`tools/verify/verify_midi_arp_presets_port.py` stages a silent copy of
 `OT_PROJECT` (or `--project`) and runs the native FUNC+AMP/A panel events,
 captures the LCD, browses to KENTBASS, saves through the PROJECT menu, and
 cold-loads the saved virtual card with its six offbeat attacks intact. With MIDI SCALES selected it also checks the F/A interaction
@@ -143,11 +143,13 @@ TRESILLO and 10 KENTBASS onsets from the same root; a switch to OCT332 while the
 held reaches +12 without another sequencer trig. Note releases are checked.
 `--midi-only` repeats just the playback cases during development.
 
-Run `make check REMIX=arp-presets OT_PROJECT=/path/to/project` for both gates
+Run `make check REMIX=midi-arp-presets OT_PROJECT=/path/to/project` for both gates
 and the repository checks. Only owned copies and virtual cards are modified.
-Passed on 2026-10-13 with a copy of OT-MIX-FLEX, including audio and reserve
+Historical pre-rename result: passed on 2026-10-13 with a copy of OT-MIX-FLEX, including audio and reserve
 write checks. The shared fixture's unrelated T2 FX2 CC40 probe was skipped
-because that probe requires a different effect; both ARP PRESETS gates ran.
+because that probe requires a different effect; both MIDI Arp Presets gates ran.
+
+Current rename checks are recorded in [the rename evidence](../../docs/MIDI_ARP_RENAME.md).
 
 Hardware acceptance remains open: encoder feel, live switching with external
 synths, physical MIDI timing and held-note behavior on the selected remix.

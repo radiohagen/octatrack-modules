@@ -36,7 +36,7 @@ After account access is restored, rerun the workflow and update this status.
 
 ## Feature branches and worktrees
 
-Examples: `codex/arp-presets-extraction`, `codex/midi-follow-octave`,
+Examples: `codex/midi-arp-presets-extraction`, `codex/midi-follow-octave`,
 `codex/integration-octabam-update`. Use a short-lived `codex/experiment-...` branch
 for a probe. Keep a useful experiment with a clear status; do not merge broken
 or undocumented work just to tidy branches.
@@ -45,8 +45,8 @@ From the main checkout:
 
 ```sh
 git fetch origin
-git worktree add .worktrees/arp-presets-extraction \
-  -b codex/arp-presets-extraction origin/main
+git worktree add .worktrees/midi-arp-presets-extraction \
+  -b codex/midi-arp-presets-extraction origin/main
 ```
 
 Push the branch and open a PR. Update from main before final verification. Do not

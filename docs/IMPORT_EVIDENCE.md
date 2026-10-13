@@ -1,5 +1,9 @@
 # Source import evidence — 2026-10-13
 
+This records the original import at `563040a7764b9b1e79febf08113d0931fc0c527d`.
+Later naming changes are recorded in [the rename evidence](MIDI_ARP_RENAME.md).
+The original paths and hashes below remain historical evidence.
+
 ## What was imported
 
 Eight feature modules and four supporting modules, listed in the
@@ -21,9 +25,9 @@ The main integration commit exists locally but was not resolvable through GitHub
 during import; the Post Fader commit was resolvable. No private integration history
 was published. See the local-worktree setup in the integration guide.
 
-**MIDI Arp Presets** is the feature's name here. Existing build selector
-`ARP PRESETS`, source paths and native UI remain compatible. No firmware behavior
-is changed by this name correction.
+At import, **MIDI Arp Presets** was a display-name correction only; the original
+build selector was `ARP PRESETS`. The subsequent rename updates code paths and
+selectors too; see the rename evidence above.
 
 ## Build identity
 

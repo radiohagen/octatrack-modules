@@ -4,7 +4,7 @@ import subprocess
 import tempfile
 import unittest
 
-from scripts.stage_octabam import plan, validate_target
+from scripts.stage_octabam import plan, retired_paths, validate_target
 
 
 class StageGuards(unittest.TestCase):
@@ -47,6 +47,26 @@ class StageGuards(unittest.TestCase):
         (self.work / 'modules').symlink_to(source / 'modules', target_is_directory=True)
         with self.assertRaisesRegex(ValueError, 'escapes'):
             plan(source, self.work, receipt)
+
+    def test_rename_preserves_origin_and_retires_only_tracked_files(self):
+        source = self.root / 'source'
+        old, new = 'modules/old/manifest.py', 'modules/new/manifest.py'
+        src, dst = source / new, self.work / old
+        src.parent.mkdir(parents=True)
+        dst.parent.mkdir(parents=True)
+        src.write_text('# new name')
+        dst.write_text('# original')
+        self.run_git('-C', str(self.work), 'add', old)
+        receipt = {'files': {new: {'path': old}}, 'submodules': {}}
+        self.assertEqual(plan(source, self.work, receipt), [(src.resolve(), self.work.resolve() / new)])
+        self.assertEqual(retired_paths(self.work, receipt), [dst.resolve()])
+        receipt['files'][new]['path'] = 'modules/untracked.py'
+        (self.work / 'modules/untracked.py').write_text('active work')
+        with self.assertRaisesRegex(ValueError, 'not tracked'):
+            retired_paths(self.work, receipt)
+        receipt['files'][new]['path'] = 'modules/../../outside.py'
+        with self.assertRaisesRegex(ValueError, 'Invalid original'):
+            retired_paths(self.work, receipt)
 
 
 if __name__ == '__main__':
