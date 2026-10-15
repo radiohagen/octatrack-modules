@@ -1,0 +1,16 @@
+{
+  "runtime_address": "0x40a955e0",
+  "entry_address": "0x400d6b80",
+  "native_upstream": "7579031e4ac61506a47175d5e19131aba274a7e6",
+  "provenance": "8f8e00d061d17a890a3b01d5f340492f912712e2",
+  "artifacts": {
+    "entry": {
+      "bytes": 64,
+      "sha256": "4de11692e14103dde57ed86c303a7332998c912fb8156fcf90b21a6f0ce32ca2"
+    },
+    "runtime": {
+      "bytes": 9476,
+      "sha256": "bf07dbc7a9a2afcecd1ca18f98a5baf9cb2e531654d4c1866a2bf4e5170470bd"
+    }
+  }
+}
