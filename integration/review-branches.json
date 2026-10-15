@@ -226,5 +226,7 @@
       "submission_qualification": "Rebase and make reach RUN=1 KEEP=1 before submission."
     }
   ],
-  "limits": "These are prepared candidates. Each needs current make reach qualification before submission. KITS has inherited broad-suite failures and is held. Later feature boundaries are documented but not yet submitted or qualified branches."
+  "limits": "These are prepared candidates. Each needs current make reach qualification before submission. KITS has inherited broad-suite failures and is held. Later feature boundaries are documented but not yet submitted or qualified branches.",
+  "current_qualification": "pr-readiness.json",
+  "qualification_note": "Original migration-time receipts below are historical; consult pr-readiness.json for the first three current candidates."
 }

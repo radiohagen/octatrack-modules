@@ -19,8 +19,10 @@ must be checked against its C sources and generators. Original credits remain.
 
 Shared platform work remains in the Octabam fork: STORE callback guards,
 KITS header initialization, PLOCKS edit/release, sparse SRAM claim checking,
-TEMPO SYNC unique symbols and emulator/test timing. These are explicit review
-items, not hidden dependencies inside the author-source pin.
+the historical TEMPO SYNC unique symbols and emulator/test timing. Current
+upstream now fixes symbol resolution generally; the TEMPO candidate is only
+additional regression coverage. These are explicit review items, not hidden
+dependencies inside the author-source pin.
 
 Harmony currently contains its degree engine, UI, Chord Play, native lifecycle,
 companion files and alternate retention implementations. The acceptance remix

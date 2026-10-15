@@ -75,14 +75,21 @@ Validation: commands and results on this rebased snapshot, including meaningful
 negative controls and selected combinations. State skips explicitly.
 Limits: hardware status, untested boundaries and why remaining work is separate.
 
-## Verified extraction dependency: TEMPO SYNC symbols
+## TEMPO SYNC: upstream already fixed the collision
 
-The MIDI-only extraction initially differed from the completed image by three
-bytes: the TEMPO SYNC hook target. Generic `cave`/`replay` symbols collided in
-the combined selection. Preserve the completed branch's unique
-`tempo_note_publish`/`tempo_note_replay` names and installed-hook gate as a
-small compatibility PR before the final bus selection. This introduces no new
-effect behavior; the wrong hook is measurable without a hardware claim.
+The completed migration needed unique `tempo_note_publish`/`tempo_note_replay`
+names because generic symbols collided in its older combined runtime. That
+historical result remains valid for the pinned integration snapshot.
+
+Current upstream `1915559` includes `b2a35a5`, which resolves linked symbols
+within their owning unit and fixes the collision generally. The prepared
+TEMPO SYNC contribution therefore retains upstream's source and symbol names
+and adds only an installed-hook regression gate. It is optional additional
+coverage, not a prerequisite for MIDI Scales or later MIDI feature merges.
+
+Upstream also now selects ATA WRITE GUARD in the official remixes. Reassess
+the previously proposed standalone PIO fix against that implementation before
+preparing it; do not submit a duplicate fix from the older integration.
 
 ## Prepared branch status
 
@@ -99,3 +106,10 @@ submodule pattern without including Harmony or the other modules in that
 author history. The remaining feature stages above are planned boundaries,
 not yet submission-ready branches. Prepare them sequentially after predecessor
 review; validate their adapters and exact combinations before opening PRs.
+
+## First three contributions
+
+The current preparation prioritizes PLOCKS, TEMPO SYNC regression coverage and
+standalone MIDI Scales. See [their review readiness record](PR_READINESS.md)
+for exact current bases, commands, results, limitations and PR descriptions.
+The older migration receipts remain historical evidence at their named commits.
