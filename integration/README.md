@@ -3,7 +3,7 @@
 The public [Octabam fork](https://github.com/radiohagen/octabam) contains the
 `codex/integrate/midi` branch. `octabam.json` pins a concrete commit containing
 shared fixes, module source and verification support. Unlike the earlier private
-import baseline, this commit will be available from a fresh public clone.
+import baseline, this commit is published for a fresh public clone.
 
 1. Clone `https://github.com/radiohagen/octabam.git` with its submodules.
 2. Create a separate worktree at the commit in `integration/octabam.json`.
@@ -23,3 +23,7 @@ Shared STORE, KITS, PLOCKS, emulator and ledger changes remain in Octabam.
 
 Source records preserve the original file SHA-256 and also the published hash
 where documentation links were made portable. Never silently advance pins.
+
+`make check` also verifies published source hashes and executable modes.
+For a deliberate source edit, update `published_sha256` in the same reviewed
+change and retain the original `commit`, `path` and `sha256` provenance.

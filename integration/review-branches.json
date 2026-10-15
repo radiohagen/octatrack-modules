@@ -1,0 +1,230 @@
+{
+  "upstream_submission_authorized": false,
+  "hardware_tested": false,
+  "branches": [
+    {
+      "branch": "codex/pr/plocks-editor",
+      "title": "Preserve page-two locks when releasing an edited trig",
+      "commit": "06e58817ba47a0f475d15276e563ec32fb8344be",
+      "base": "2d1cbcf471cf8b63e2279b3c372a6ebb47456a99",
+      "checks": [
+        {
+          "command": [
+            "git",
+            "submodule",
+            "update",
+            "--init",
+            "--recursive"
+          ],
+          "exit_code": 0,
+          "seconds": 18.72,
+          "log": "plocks-editor-0.log"
+        },
+        {
+          "command": [
+            "make",
+            "bus",
+            "REMIX=octabam-bus"
+          ],
+          "exit_code": 0,
+          "seconds": 40.59,
+          "log": "plocks-editor-1.log"
+        },
+        {
+          "command": [
+            "make",
+            "emu-cf"
+          ],
+          "exit_code": 0,
+          "seconds": 48.84,
+          "log": "plocks-editor-2.log"
+        },
+        {
+          "command": [
+            "python3",
+            "tools/verify/verify_docs.py"
+          ],
+          "exit_code": 0,
+          "seconds": 0.79,
+          "log": "plocks-editor-3.log"
+        },
+        {
+          "command": [
+            "$REVIEW_WORKTREES/pr-plocks-editor/.venv/bin/python",
+            "tools/verify/verify_plocksp2.py",
+            "octabam-bus",
+            "--project",
+            "$SOURCE_WORKTREE/out/track-completion-fixtures/base"
+          ],
+          "exit_code": 0,
+          "seconds": 141.49,
+          "log": "plocks-editor-4.log"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "branch": "codex/pr/kits-header",
+      "title": "Initialize all KITS record-header fields",
+      "commit": "eee6ad6b3a965bd79a9952221eda6a545e3a5861",
+      "base": "2d1cbcf471cf8b63e2279b3c372a6ebb47456a99",
+      "checks": [
+        {
+          "command": [
+            "git",
+            "submodule",
+            "update",
+            "--init",
+            "--recursive"
+          ],
+          "exit_code": 0,
+          "seconds": 20.51,
+          "log": "kits-header-0.log"
+        },
+        {
+          "command": [
+            "make",
+            "bus",
+            "REMIX=octabam-bus"
+          ],
+          "exit_code": 0,
+          "seconds": 41.02,
+          "log": "kits-header-1.log"
+        },
+        {
+          "command": [
+            "make",
+            "emu-cf"
+          ],
+          "exit_code": 0,
+          "seconds": 49.39,
+          "log": "kits-header-2.log"
+        },
+        {
+          "command": [
+            "python3",
+            "tools/verify/verify_docs.py"
+          ],
+          "exit_code": 0,
+          "seconds": 0.82,
+          "log": "kits-header-3.log"
+        },
+        {
+          "command": [
+            "$REVIEW_WORKTREES/pr-kits-header/.venv/bin/python",
+            "tools/verify/verify_kits.py",
+            "octabam-bus",
+            "--project",
+            "$SOURCE_WORKTREE/out/track-completion-fixtures/kits-v2/native/project",
+            "--strand-project",
+            "$SOURCE_WORKTREE/out/track-completion-fixtures/kits-v2/rejected-bank",
+            "--octakit-project",
+            "$SOURCE_WORKTREE/out/track-completion-fixtures/kits-v2/octakit-v3-synthetic"
+          ],
+          "exit_code": 1,
+          "seconds": 266.03,
+          "log": "kits-header-4.log"
+        }
+      ],
+      "passed": false,
+      "focused_regression": {
+        "command": ".venv/bin/python tools/verify/verify_kits_header.py",
+        "fixed_exit_code": 0,
+        "upstream_control_exit_code": 1,
+        "upstream_dirty_headers": 256,
+        "fixed_dirty_headers": 0,
+        "adjacent_payload_preserved": true
+      },
+      "baseline_comparison": {
+        "base": "2d1cbcf471cf8b63e2279b3c372a6ebb47456a99",
+        "same_three_failures": [
+          "progchg",
+          "trackbtn1",
+          "extplay"
+        ],
+        "detail": "staged=1 repointed=1; expected 0 in both fixed and upstream controls",
+        "status": "broader recall qualification pending"
+      }
+    },
+    {
+      "branch": "codex/pr/tempo-hook-symbols",
+      "title": "Give TEMPO SYNC hook symbols unambiguous names",
+      "commit": "06feb2130b5be0d99307fdc3ed7487c140045669",
+      "base": "2d1cbcf471cf8b63e2279b3c372a6ebb47456a99",
+      "checks": [
+        {
+          "command": [
+            "git",
+            "submodule",
+            "update",
+            "--init",
+            "--recursive"
+          ],
+          "exit_code": 0,
+          "seconds": 17.79,
+          "log": "tempo-hook-symbols-0.log"
+        },
+        {
+          "command": [
+            "make",
+            "bus",
+            "REMIX=octabam-bus"
+          ],
+          "exit_code": 0,
+          "seconds": 40.99,
+          "log": "tempo-hook-symbols-1.log"
+        },
+        {
+          "command": [
+            "make",
+            "emu-cf"
+          ],
+          "exit_code": 0,
+          "seconds": 40.42,
+          "log": "tempo-hook-symbols-2.log"
+        },
+        {
+          "command": [
+            "python3",
+            "tools/verify/verify_docs.py"
+          ],
+          "exit_code": 0,
+          "seconds": 0.8,
+          "log": "tempo-hook-symbols-3.log"
+        },
+        {
+          "command": [
+            "$REVIEW_WORKTREES/pr-tempo-hook-symbols/.venv/bin/python",
+            "tools/verify/verify_tempo_publish.py",
+            "octabam-bus"
+          ],
+          "exit_code": 0,
+          "seconds": 0.14,
+          "log": "tempo-hook-symbols-4.log"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "branch": "codex/pr/midi-scales",
+      "commit": "2be9078ff55160b27948dff5f4214e20802e6c22",
+      "author_commit": "9d31ce2ff977205bdd3c17a58e55f86bc11376ac",
+      "base": "2d1cbcf471cf8b63e2279b3c372a6ebb47456a99",
+      "general_check": {
+        "command": "BUILD=79 OCTABAM_PGO=0 make check REMIX=midi-scales",
+        "exit_code": 0,
+        "image_gates": 1,
+        "skips": [
+          "[SKIP] verify_reserve_writes: no project (OT_PROJECT=<dir> or ~/.octabam_project)",
+          "[SKIP] verify_set: no project (OT_PROJECT=<dir> or --project)"
+        ]
+      },
+      "native_adapter_image_identity": true,
+      "image_sha256": "d3a2476762978a946d1733c2f153ea23ab67b81ee40017d0349e2cbc65a3edcf",
+      "passed": true,
+      "hardware_tested": false,
+      "submission_qualification": "Rebase and make reach RUN=1 KEEP=1 before submission."
+    }
+  ],
+  "limits": "These are prepared candidates. Each needs current make reach qualification before submission. KITS has inherited broad-suite failures and is held. Later feature boundaries are documented but not yet submitted or qualified branches."
+}

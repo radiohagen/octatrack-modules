@@ -12,6 +12,7 @@ as a required integration fix.
 
 - [Module catalogue](modules/README.md)
 - [Build and integration](integration/README.md)
+- [Source review map](docs/REVIEW_MAP.md)
 - [Small upstream PR plan](docs/UPSTREAM_PLAN.md)
 - [Verification boundaries](docs/VERIFICATION.md)
 - [Source provenance](integration/sources.json)
@@ -24,3 +25,8 @@ No firmware, samples or device projects are distributed here.
 `main` is the reviewed migration source. Make future changes on short-lived
 `codex/<feature>` branches in worktrees. The migration preserves native build
 paths; per-module external adapters will be qualified in the upstream series.
+
+The first standalone contribution is [MIDI Scales](https://github.com/radiohagen/octabam/tree/codex/pr/midi-scales),
+with [only its own author source](https://github.com/radiohagen/octatrack-modules/tree/codex/pr/midi-scales)
+in the pinned submodule. [Candidate receipts](integration/review-branches.json)
+record each prepared branch’s checks and remaining submission requirements.

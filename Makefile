@@ -4,6 +4,7 @@ PYTHON ?= python3
 
 check:
 	$(PYTHON) scripts/check.py
+	$(PYTHON) scripts/verify_provenance.py
 	$(MAKE) test
 
 test:

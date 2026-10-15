@@ -1,7 +1,7 @@
 {
   "repository": "https://github.com/radiohagen/octabam.git",
-  "commit": "1172b1e9e0bec7232785591268dd97c5770c4b20",
+  "commit": "8f8e00d061d17a890a3b01d5f340492f912712e2",
   "recorded_on": "2026-10-15",
-  "status": "reference-only",
-  "note": "Public MIDI integration; selected firmware rebuild matches prior validated image. Migration general check is in progress. External adapters remain a separately verified step."
+  "status": "integration-verified",
+  "note": "MIDI-only integration: general check passes (46 image gates), with explicit project skips; final BUILD 79/PGO-off image is identical to the completed source image. Historical dedicated project suites are separate evidence. Hardware untested. Full source is staged natively; Scales has a separately verified author adapter review branch."
 }

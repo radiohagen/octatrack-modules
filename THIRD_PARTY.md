@@ -1,10 +1,11 @@
 # Licensing and attribution
 
 The imported MIDI and integration source originates from Mattias Wolff's
-Octabam work. Original author fields and notices are preserved, including the
+Octabam work. Original author names and notices are preserved, including the
 PIO fix's yvesrosius attribution. Imported files retain the Octabam MIT terms
-in [the original licence](licenses/octabam-MIT.txt). Hosting under radiohagen
-does not change authorship or relabel other contributors' work.
+in [the original licence](licenses/octabam-MIT.txt), also reproduced as the
+root [LICENSE](LICENSE) for repository tooling. Hosting under radiohagen
+updates operational source links but does not change authorship or relabel other contributors' work.
 
 Repository scaffolding is adapted from the owner's existing octatrack-modules
 repository. Its source provenance is recorded separately. No third-party
