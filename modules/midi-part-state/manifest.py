@@ -6,7 +6,7 @@ from remix.schema import Category, Claims, Detour, Gate, Kind, Linked, Module, P
 
 MODULE = Module(
     name='midi-part-state', key='MIDI PART STATE', kind=Kind.CF_PATCH,
-    category=Category.PARTS, author='Mattias Wolff',
+    category=Category.PARTS, author='radiohagen',
     author_url='https://github.com/radiohagen/octatrack-modules', proof=Proof.PORT,
     proof_note='verify_midi_part and verify_midi_part_copy: linked native boundaries; hardware untested',
     doc='Shared native Part settings and coherent copy/clear publication; no KITS dependency.',
