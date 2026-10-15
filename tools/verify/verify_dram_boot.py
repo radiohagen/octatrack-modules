@@ -1,0 +1,145 @@
+#!/usr/bin/env python3
+"""Boot the image just built under the ColdFire port and check that every
+DRAM payload octabam's loader carries actually lands.
+
+For the current REMIX (the image at out/mainos_bus.bin):
+  * the boot reaches the RTOS handoff, and the loader's entry ran exactly
+    once while its `fatal` hang never did -- so every hash gate passed;
+  * the octabam window (out/platform/runtime/runtime.bin, when the remix
+    has DRAM units) reads back equal to the linked runtime -- except for
+    bytes the runtime itself writes once it runs, which are counted and
+    printed, not hidden. Known cases: midi-scenes' state words; PLOCKS P2's
+    INITED sentinel, stamped with MAGIC ('PLK2') by plk_init the first time
+    it runs before handoff; BRAIN's brain_ts/brain_ts_last per-task CPU
+    table, written by brain_sched (the scheduler hook) on every task
+    switch from very early in boot, so a BRAIN-carrying remix always shows
+    some of these -- it is not a one-time stamp, and a boot that reaches
+    handoff later or schedules differently changes the count a little.
+
+SKIPs when the port is not built (`make emu-cf`) or the remix carries no
+DRAM payload. What this cannot see: caches (the port has none), the
+recorder, and anything after the handoff.
+"""
+import os
+import pathlib
+import subprocess
+import sys
+
+ROOT = pathlib.Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1])); import toolpath  # noqa: E402,F401  (every tools/ dir on sys.path)
+from remix import platform_build, registry  # noqa: E402
+
+EMU = ROOT / "out/emu/ot_emu"
+IMAGE = ROOT / "out/mainos_bus.bin"
+remix = registry.remix(os.environ.get("REMIX"))
+mods = [registry.modules()[k] for k in remix.modules]
+dram = any(u.dram for m in mods for u in getattr(m, "linked", ()))
+if not dram:
+    print(f"  [ -- ] verify_dram_boot: {remix.name} carries no DRAM payload")
+    sys.exit(0)
+if not EMU.exists():
+    print("  [SKIP] verify_dram_boot: the ColdFire port is not built (make emu-cf)")
+    sys.exit(0)
+
+# Build THIS remix's image first: `make verify` runs after the remix
+# self-test, which builds every remix in turn and leaves the last one at
+# out/mainos_bus.bin (and its loader at out/platform/). The first run of
+# this check booted `warped` while looking for midi-scenes' loader and
+# reported it never ran.
+env = dict(os.environ, REMIX=remix.name, XBUS="1", SPEC="1")
+env.setdefault("BUILD", "0")
+r = subprocess.run([sys.executable, str(ROOT / "tools/build/build_bus.py")], env=env,
+                   capture_output=True, text=True, cwd=ROOT)
+if r.returncode:
+    sys.exit(f"verify_dram_boot: building {remix.name} failed:\n{(r.stdout + r.stderr)[-1500:]}")
+
+nm = subprocess.run(["m68k-elf-nm", str(ROOT / "out/platform/loader.elf")],
+                    capture_output=True, text=True).stdout
+syms = {f[2]: int(f[0], 16) for f in (l.split() for l in nm.splitlines()) if len(f) == 3}
+entry, fatal = syms["octabam_bootstrap"], syms["fatal"]
+
+dumps, expects = [], []
+if dram:
+    import json
+    layout = json.loads((ROOT / "out/platform" / platform_build.LAYOUT).read_text())
+    raw = (ROOT / "out/platform/runtime/runtime.bin").read_bytes()
+    dumps.append((layout["base"], len(raw), ROOT / "out/_dump_octabam.bin"))
+    expects.append(("octabam reserve", raw))
+
+args = [str(EMU), "--image", str(IMAGE), "--max", "80000000",
+        "--watch-pc", f"0x{entry:x},0x{fatal:x}",
+        "--mem-dump", ";".join(f"0x{a:x},{n}={p}" for a, n, p in dumps)]
+r = subprocess.run(args, capture_output=True, text=True, cwd=ROOT)
+out = r.stdout
+handoff = "HANDOFF" in out
+hits = [l for l in out.splitlines() if l.strip().startswith("[") and " at 0x" in l]
+entry_hits = sum(1 for l in hits if f"at 0x{entry:x}" in l)
+fatal_hits = sum(1 for l in hits if f"at 0x{fatal:x}" in l)
+ok = handoff and entry_hits == 1 and fatal_hits == 0
+print(f"  [{'PASS' if ok else 'FAIL'}] verify_dram_boot: {remix.name} boots to the handoff; "
+      f"loader ran {entry_hits}x, its fatal hang {fatal_hits}x")
+# Native Part initialization can run after the loader and before handoff.
+# Only these named transient data arrays may differ because of that work;
+# never bless a containing function/section or widen the code-drift budget.
+part_state_ranges = []
+midisc_state = []
+plocks_state = []
+if any(m.key in ('MIDI PART STATE', 'MIDI SCENES', 'PLOCKS P2') for m in mods):
+    runtime_nm = subprocess.check_output([
+        'm68k-elf-nm', str(ROOT / 'out/platform/runtime/runtime.elf')], text=True)
+    runtime_symbols = {f[2]: int(f[0], 16) for f in
+                       (line.split() for line in runtime_nm.splitlines()) if len(f) == 3}
+    if any(m.key == 'MIDI PART STATE' for m in mods):
+        part_state_ranges = [(runtime_symbols[name], size) for name, size in
+                             (('mp_snapshot', 4*8*36), ('mp_part_epochs', 64*4))]
+    if any(m.key == 'PLOCKS P2' for m in mods):
+        # PLOCKS cold boot initializes its marker and checkpoints bank zero.
+        # Check exact words rather than raising the generic drift allowance.
+        plocks_state = [
+            (runtime_symbols[name], before, after)
+            for name, before, after in (
+                ('INITED', bytes(4), b'PLK2'),
+                ('NVBANK', b'\xff'*4, bytes(4)),
+                ('NVGEN', bytes(4), bytes.fromhex('00000001')),
+            )
+        ]
+    if 'msc21_ram' in runtime_symbols:
+        # PR #647 MIDISC2.1 initialization, measured against its unchanged
+        # release21 bytes. Check exact data transitions, not a whole unit or
+        # an increased tolerance that could conceal a modified instruction.
+        midisc_state = [
+            (runtime_symbols['msc21_ram'] + off, bytes(size), b'\xff'*size)
+            for off, size in ((0x1180,16),(0x1210,16),(0x12a0,16),(0x1330,16),(0x1a80,256))
+        ] + [
+            (runtime_symbols[name] + off, before, after)
+            for name, off, before, after in (
+                ('h_400d6586',0x33a,bytes(4),bytes.fromhex('400e21e0')),
+                ('h_400d6c84',0x60,b'\xff',b'\x00'),
+                ('h_400d6c84',0xdc,bytes(4),bytes.fromhex('400e21e0')),
+                ('h_400d6c84',0xe3,b'\xff',b'\x00'),
+            )
+        ]
+
+for (a, n, p), (label, raw) in zip(dumps, expects):
+    got = p.read_bytes() if p.exists() else b""
+    diff = [i for i in range(min(len(got), len(raw))) if got[i] != raw[i]]
+    transient = [i for i in diff if any(start <= a+i < start+size
+                                       for start, size in part_state_ranges)]
+    scene_state_ok = all(raw[start-a:start-a+len(before)] == before and
+                         got[start-a:start-a+len(after)] == after
+                         for start, before, after in midisc_state + plocks_state)
+    scene_transient = [i for i in diff if any(start <= a+i < start+len(before)
+                                             for start, before, _ in midisc_state + plocks_state)]
+    remaining = len(diff)-len(transient)-len(scene_transient)
+    # Upstream permits 64 self-written bytes for BRAIN scheduler counters.
+    # Keep the personal Part ranges and exact Scenes/PLOCKS checks as well.
+    fine = len(got) == len(raw) and remaining <= 64 and scene_state_ok
+    ok &= fine
+    print(f"  [{'PASS' if fine else 'FAIL'}] verify_dram_boot: {label} at 0x{a:08x} == linked "
+          f"runtime ({n:,} B) except {len(transient)} named Part-state byte(s), "
+          f"{len(scene_transient)} exact MIDI SCENES/PLOCKS initialization byte(s) and "
+          f"{remaining} other byte(s) the runtime wrote itself"
+          + (f" at +{diff[0]:#x}.." if diff else ""))
+    if not scene_state_ok:
+        print('  [FAIL] verify_dram_boot: MIDI SCENES/PLOCKS initialization differs from its exact expected state')
+sys.exit(0 if ok else 1)

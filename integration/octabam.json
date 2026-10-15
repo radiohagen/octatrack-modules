@@ -1,0 +1,7 @@
+{
+  "repository": "https://github.com/radiohagen/octabam.git",
+  "commit": "1172b1e9e0bec7232785591268dd97c5770c4b20",
+  "recorded_on": "2026-10-15",
+  "status": "reference-only",
+  "note": "Public MIDI integration; selected firmware rebuild matches prior validated image. Migration general check is in progress. External adapters remain a separately verified step."
+}
