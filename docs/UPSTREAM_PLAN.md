@@ -5,7 +5,8 @@ minimum supporting changes needed for native behavior and reliable validation.
 Excluded: MIDI Arp Presets/ARP templates, Sophie, Supersaw, new synth work,
 POST FADER and unrelated effects. Stock upstream modules stay intact.
 
-This is a preparation plan, not submitted PRs or a promise of upstream acceptance.
+The first three candidates are now draft PRs; [current status](PR_READINESS.md).
+The remaining stages are a preparation plan, not a promise of upstream acceptance.
 `codex/integrate/midi` is the complete verification branch, never the aggregate
 PR. `main` follows upstream without local features. Each review branch starts
 from current upstream main after its prerequisites merge. If a stack is needed

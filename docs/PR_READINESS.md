@@ -1,7 +1,11 @@
 # First three upstream contributions
 
 Preparation against upstream `1915559f023518700406d5e6090a164e49c8e3e7`.
-No upstream PR has been opened or merged.
+Three upstream draft PRs are open under radiohagen; none has been merged.
+
+- [PLOCKS #737](https://github.com/sambanks/octabam/pull/737)
+- [TEMPO SYNC coverage #738](https://github.com/sambanks/octabam/pull/738)
+- [MIDI Scales #739](https://github.com/sambanks/octabam/pull/739)
 
 | Contribution | Classification | Dependencies |
 |---|---|---|

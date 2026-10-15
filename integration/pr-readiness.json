@@ -1,6 +1,6 @@
 {
   "date": "2026-10-15",
-  "upstream_submission_authorized": false,
+  "upstream_submission_authorized": true,
   "hardware_tested": false,
   "branches": [
     {
@@ -33,7 +33,9 @@
         "[SKIP] verify_set: no project (OT_PROJECT=<dir> or --project)"
       ],
       "hardware_tested": false,
-      "upstream_pr_opened": false
+      "upstream_pr_opened": true,
+      "upstream_pr_url": "https://github.com/sambanks/octabam/pull/737",
+      "upstream_pr_draft": true
     },
     {
       "branch": "codex/pr/tempo-hook-symbols",
@@ -68,9 +70,11 @@
         "[SKIP] verify_set: no project (OT_PROJECT=<dir> or --project)"
       ],
       "hardware_tested": false,
-      "upstream_pr_opened": false,
+      "upstream_pr_opened": true,
       "initial_reach_failure": "Existing USB full-speed packet sizes 176/192 vs 344-368; unchanged-upstream control and subsequent reach passed, cause undetermined.",
-      "rerun_cache": "12/13 per-remix jobs cached; USB executed and passed"
+      "rerun_cache": "12/13 per-remix jobs cached; USB executed and passed",
+      "upstream_pr_url": "https://github.com/sambanks/octabam/pull/738",
+      "upstream_pr_draft": true
     },
     {
       "branch": "codex/pr/midi-scales",
@@ -106,7 +110,7 @@
         "[SKIP] verify_set: no project (OT_PROJECT=<dir> or --project)"
       ],
       "hardware_tested": false,
-      "upstream_pr_opened": false,
+      "upstream_pr_opened": true,
       "author_pin": "9d31ce2ff977205bdd3c17a58e55f86bc11376ac",
       "native_adapter_identity": {
         "base": "0x40a955e0",
@@ -127,7 +131,9 @@
           "label": "corrupt-reference",
           "exit": 2
         }
-      ]
+      ],
+      "upstream_pr_url": "https://github.com/sambanks/octabam/pull/739",
+      "upstream_pr_draft": true
     }
   ],
   "publication_audit": [
