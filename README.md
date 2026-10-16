@@ -1,10 +1,11 @@
-# MIDI Loopback source
+# radiohagen MIDI modules
 
-Module source maintained by radiohagen for
-[Octabam](https://github.com/sambanks/octabam). Octabam supplies the firmware
-builder and integration; this repository supplies the source used by its pinned adapter.
+Source for MIDI Harmony, MIDI Loopback and their native Part/retention support.
+Octabam adapters pin an explicit commit from this repository.
 
-See [controls and storage](modules/midi-loopback/README.md).
-No firmware, samples or device projects are distributed here.
+- [MIDI Harmony](modules/midi-harmony/README.md)
+- [MIDI Loopback](modules/midi-loopback/README.md)
+- [MIDI Part State](modules/midi-part-state/README.md)
+- [MIDI SRAM](modules/midi-sram/README.md)
 
-[Developer notes and verification](DEVELOPMENT.md).
+[Build references and provenance](DEVELOPMENT.md).

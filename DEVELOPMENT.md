@@ -20,3 +20,20 @@ its ratified standalone placement and checks both runtime and cold-entry
 hashes. GNU m68k tools must be on PATH. No firmware is needed for this check.
 The cross-unit runtime is checked together because its units refer to one
 another; independent `Linked.reference` links cannot resolve those references.
+
+## Harmony source increment
+
+Harmony and MIDI SRAM runtime sources are reconciled with author review
+`86249aba3723dac0dc2a82bc278d95fcfd093d5d`; the observer load guard preserves
+valid saved roots during native bank publication. No persistence format change
+is involved. The starting Loopback/Part State pin is `c9915c1`.
+
+`make check` rebuilds the independent Harmony/Part State reference in all
+three supported retention layouts, checks the unchanged Loopback reference,
+and verifies generated assembly against the C sources. `harmony-reference.json`
+records the reference address, units, source commit and hashes. The Octabam
+adapter must compare its compiled objects with the corresponding reference.
+These checks establish source/build agreement, not hardware acceptance.
+
+The author branch contains source only. Firmware, project cards, captures of
+private project data and samples are never publication artifacts.
