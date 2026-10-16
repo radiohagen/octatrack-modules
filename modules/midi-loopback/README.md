@@ -1,154 +1,54 @@
 # MIDI Loopback
 
-Internal routing of MIDI-track sequenced and live notes, CCs, pitch bend,
-channel pressure and Part bank/program changes through the normal MIDI receiver. All eight source
-tracks and output channels 1–16 are supported at these producer boundaries.
-The receiver's channel assignments, CC/note receive switches and note maps
-still decide which audio controls respond. The routing window does not block
-native received-MIDI track-selection commands.
+Routes MIDI-track output into the Octatrack's own MIDI receiver, with optional
+DIN/USB output. Use it to sequence audio-track controls without a loopback cable.
 
-## On the Octatrack
+## Use
 
-On a MIDI track, open **NOTE SETUP** with **FUNC + SRC**. Turn **A: CHAN**
-to choose its output channel, then **press A**. The press applies the pending
-channel exactly as before and opens **ROUTING** for that track.
+1. Open a MIDI track's **NOTE SETUP** with **FUNC + SRC**.
+2. Set **A: CHAN**, then press A to apply the channel and open **ROUTING**.
+3. Turn **A: DEST**:
 
-Turn **A: DEST** in the window:
+| DEST | Output |
+| --- | --- |
+| EXT | DIN/USB only; the default. |
+| INT | Internal receiver only. |
+| BOTH | One internal copy plus DIN/USB output. |
 
-| DEST | Track output |
-|---|---|
-| EXT | Existing DIN/USB output only; default. |
-| INT | Internal delivery; bypass the shared DIN/USB sender. |
-| BOTH | One internal copy plus existing DIN/USB output. |
+Edits apply immediately. Press A, YES or NO to close. A track/page key closes
+the window first; press it again to change selection. CHAN shows **I** for INT
+or **B** for BOTH. CHAN OFF disables sequencer output.
 
-Edits apply immediately. A press, YES or NO closes the window. Track/page
-keys close it first; a second press changes selection. B–F are inactive;
-transport and chromatic keys pass through. CHAN shows an **I** suffix for INT
-or **B** for BOTH (for example `2I`); EXT keeps the normal channel display.
-CHAN OFF still disables sequencer output.
+For example, MIDI T1 on channel 1 with INT and CC 34 can control audio T1's
+FILTER BASE when that track receives channel 1 and audio CC reception is enabled.
 
-DEST belongs to each MIDI track in each native Part. Part Save/Reload/Clear,
-copy/paste and project save/load use the existing native storage. Playback
-reads each track's playing Part, independently of the Part selected for editing.
-Fresh Parts use EXT. No parameter locks or separate settings file are added.
-The shared `MIDI PART STATE` module is required; KITS is not required; its combination is not qualified here.
+## Routing behavior
 
-Changing the playing destination releases held notes at their original
-channel/destinations. Part replacement also releases the outgoing ownership;
-late stock releases are consumed without sending a second note-off. A channel
-change is observed at the next sequencer boundary, or immediately after the
-CHAN press. Other tracks' notes remain owned by their original tracks.
+- Covers sequencer/arp notes, live trig keys, preview, track CCs and LFOs,
+  pitch bend, channel pressure, Part bank/program messages and STOP panic.
+- Internal events reach audio listeners and the audio-mode auto-channel.
+  They do not feed MIDI-track forwarding or recording back into the route.
+- Audio receive channels, receive switches and note maps still determine the
+  response. Normal DIN/USB input retains its native routing.
+- Clock, transport, SysEx and project-wide program-change sync are unchanged.
+  Audio-knob feedback and CC Direct Connect are separate paths.
+- Changing DEST or replacing a Part releases held notes through their original
+  routes. Internal queue overload can drop new events; BOTH still sends externally.
 
-For example, M1 on channel 1 with INT and CC1 assigned to CC 34 can sequence
-T1 FILTER BASE, provided T1 receives channel 1 and audio CC reception is on.
-M2 can remain EXT for an external synth. Stock arbitration between tracks
-sharing a channel, pitch or CC still happens before these hooks; routes do
-not create independent copies of the stock note pool or CC cache.
+**Avoid overlapping internal and external notes on the same channel and pitch.**
+They share the native receiver's note state: the first note-off ends the note,
+even if the other source still holds it.
 
-## Boundaries
+## Storage and composition
 
-The destination covers sequencer and arp output, live trig keys and preview,
-CC locks/LFOs and panel controls, pitch bend, channel pressure, Part
-BANK/SBNK/PROG and STOP's
-CC123 panic. Held releases retain their original destinations. Two-byte
-pressure/program packets and paired bank messages retain their wire lengths.
+DEST is stored per MIDI track in each native Part. Part save/reload/clear,
+copy/paste and project save/load carry it; fresh Parts use EXT. Playback uses
+the playing Part, independently of the Part selected for editing.
 
-Clock, transport, song position, SysEx and the project-wide program-change
-sync sender are global rather than MIDI-track output; their behavior stays
-unchanged. Received-MIDI forwarding, CC Direct Connect and audio-knob
-feedback are input/feedback paths, not new internally copied track events.
-The generic received-parameter setter remains excluded to prevent recirculation.
-For internal packets, the receiver uses a private channel map containing audio
-listeners and audio-mode auto-channel only. MIDI-track forwarding/recording is
-excluded, so internal packets cannot escape through input echo or feed back
-through another MIDI track. Normal DIN/USB input retains the native channel map.
+Requires **MIDI Part State**. With MIDI Scenes, select the **MIDI Loopback /
+MIDI Scenes bridge** to route its additional producers. KITS is not required.
 
-Use dedicated channels/pitches without overlapping external held notes.
-Stock's incoming-note bookkeeping is shared by channel and pitch; receiver
-ownership across independent external and internal senders is not separated.
-Changing audio receive assignments while notes are held and cross-project
-transitions during playback remain unproved. Audio locks/scenes and dense
-simultaneous external traffic still need separate integration tests.
+Stock 1.40C resets the routing flags to EXT when loading. Saving the current
+bank on stock persists that reset. Keep a separate project copy to preserve routes.
 
-## Implementation
-
-Four ColdFire DRAM units, no DSP effect slot. SETUP offset 12 is owned by
-MIDI PART STATE: DEST uses bits 2–3 and preserves the other bits. Bits 0–1 are reserved
-for future shared MIDI settings. DEST 3 or invalid flags decode as EXT. `lb_routes[8]` is an applied
-runtime cache; tools must use `lb_dest_write(track, route)` to edit native
-settings. `lb_set_route` remains the low-level cache/cleanup helper.
-
-Boundaries:
-
-| Boundary | Purpose |
-|---|---|
-| Pinned sender operands in track producers and cleanup routines | Route complete channel messages before `midi_send` at `0x40010bc8`, leaving USB-MIDI's entry hook intact. |
-| `0x4009f794` | Synchronize native Part destinations and effective output channels at sequencer entry. |
-| `0x40005558` | Alternate native and internal messages in the MIDI task, then use the installed dispatch table and handlers. |
-| `0x4009f26e` and cached live sender operands | Capture live CC/bend/pressure before the tail restores source track. |
-| `0x4009ecb4` | Part setup sender: track in `a3`, bank/Part from its arguments. |
-| `0x4009ea68`, `0x4009ea96`, `0x4009eb50` | Live notes: source track in `d5`, UI Part destination. |
-| `0x4009f288` | STOP panic combines routes of tracks assigned to each channel. |
-
-The live branches retain track identity in `d7` and qualify the parent
-return address `0x4005542c`. Trig preview (`0x40043b0e`) also qualifies. The generic received-MIDI setter
-(`0x40054f74`) is excluded without a global origin flag. The MIDI LFO engine
-writes the modulated parameter array used by the two sequencer CC producers.
-All patched operands and displaced instructions are pinned in the manifest.
-
-The byte parser is untouched. A 256-entry ring holds complete messages.
-The consumer copies each message to a stable slot before releasing capacity.
-One coalesced wake token uses the native MIDI queue; a full native queue does
-not receive an extra token. Internal and native messages alternate while both
-are available. The wake token never reaches the MIDI handler table.
-
-The ownership table covers all 2,048 channel/pitch pairs, storing source track
-and the destinations used at note-on. New internal note-ons/controllers stop at 127
-pending messages; at most 128 internally held pitches reserve 128 release
-slots across all channels. An INT admission failure leaves a tombstone so
-its later release does not leak externally; BOTH still sends the event
-externally. Counters expose accepted/delivered messages, drops and high water.
-Cleanup scans a bounded ownership table with interrupts masked and uses the
-stock sender for external releases. Its worst-case hardware cost and UART
-backpressure are not yet measured.
-
-The platform reserve takes approximately 10 MB of sample memory when added
-to an otherwise stock image. The module's linked code/state uses only a
-small portion of that existing reserve; consult the build layout for size.
-
-## Verification and limits
-
-This contribution selects only Loopback and Part State on stock effects.
-Its gates execute the linked code, installed hooks and native queue/receiver
-routines. They cover all eight tracks, channels 1–16, EXT/INT/BOTH, message
-lengths, live/sequence producers, route changes, ownership, queue fairness,
-saturation, release reservation and overload recovery. Part tests compare
-native copy/clear bytes and registers before and after installing the hooks,
-including interrupted replacement with readers observing the outgoing snapshot.
-
-Full-firmware tests use a disposable copy of a local project and a virtual card:
-
-```sh
-make check REMIX=midi-loopback
-.venv/bin/python tools/verify/verify_midi_loopback.py --project /path/to/project
-.venv/bin/python tools/verify/verify_midi_loopback.py --routing --project /path/to/project
-.venv/bin/python tools/verify/verify_midi_loopback.py --controls --project /path/to/project
-.venv/bin/python tools/verify/verify_midi_part_port.py --project /path/to/project
-.venv/bin/python tools/verify/verify_midi_loopback_ui_port.py --project /path/to/project
-.venv/bin/python tools/verify/verify_midi_loopback_producers_port.py midi-loopback --project /path/to/project
-```
-
-The routing window test delivers physical-panel event reports to the emulator;
-it checks CHAN activation, DEST, unused controls, closing keys, transport,
-project save, disk reload, retained-memory resume and fresh-project EXT.
-This is not physical hardware testing. Control fixtures also use direct
-native encoder calls and identify that narrower boundary in their receipts.
-
-Original implementation and historical combination evidence are retained at
-integration commit `8f8e00d061d17a890a3b01d5f340492f912712e2` in
-radiohagen/octabam. They are not current qualification for this branch.
-The Scenes bridge, Follow and Harmony are separate contributions. MIDI Scenes
-is explicitly incompatible until its producers are routed through the bridge.
-Stock DIN behavior is covered; USB-host and combined-module acceptance remain
-separate qualification. No hardware flash, MIDI timing or worst-case interrupt
-latency has been measured for this contribution.
+[Implementation, provenance and verification](DEVELOPMENT.md).

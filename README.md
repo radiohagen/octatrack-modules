@@ -1,22 +1,10 @@
-# MIDI Loopback and Part State author source
+# MIDI Loopback source
 
-A narrow source branch for the matching `codex/pr/midi-loopback` contribution
-in [radiohagen/octabam](https://github.com/radiohagen/octabam).
+Module source maintained by radiohagen for
+[Octabam](https://github.com/sambanks/octabam). Octabam supplies the firmware
+builder and integration; this repository supplies the source used by its pinned adapter.
 
-Only Loopback and its Part State dependency are included. The assembly comes
-unchanged from completed integration `8f8e00d061d17a890a3b01d5f340492f912712e2`
-(original completion `03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d`). The unused
-Follow/Harmony NOTE SETUP staging unit is omitted. Manifests resolve assembly
-relative to their own location; Octabam owns adapters, gates and test remixes.
-Conditional assembly for future consumers is retained for provenance but is
-not selected or qualified by this contribution.
+See [controls and storage](modules/midi-loopback/README.md).
+No firmware, samples or device projects are distributed here.
 
-Read [Loopback](modules/midi-loopback/README.md) and
-[Part State](modules/midi-part-state/README.md). No firmware, private projects
-or samples are included. Hardware acceptance remains outstanding.
-
-`python3 tools/verify_reference.py` assembles and links the author source at
-its ratified standalone placement and checks both runtime and cold-entry
-hashes. GNU m68k tools must be on PATH. No firmware is needed for this check.
-The cross-unit runtime is checked together because its units refer to one
-another; independent `Linked.reference` links cannot resolve those references.
+[Developer notes and verification](DEVELOPMENT.md).
