@@ -16,3 +16,6 @@ bank files are not rewritten merely by loading. Keep a separate project copy
 when preserving module settings matters.
 
 [API, storage layout, provenance and verification](DEVELOPMENT.md).
+
+The NOTE SETUP confirmation preserves live Follow and Harmony settings while
+committing native fields.

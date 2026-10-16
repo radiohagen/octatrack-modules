@@ -1,10 +1,11 @@
-# MIDI Loopback source
+# MIDI Follow and Loopback source
 
 Module source maintained by radiohagen for
-[Octabam](https://github.com/sambanks/octabam). Octabam supplies the firmware
-builder and integration; this repository supplies the source used by its pinned adapter.
+[Octabam](https://github.com/sambanks/octabam).
 
-See [controls and storage](modules/midi-loopback/README.md).
-No firmware, samples or device projects are distributed here.
+- [MIDI Follow](modules/midi-follow/README.md): follow another MIDI track's root while keeping an independent rhythm.
+- [MIDI Loopback](modules/midi-loopback/README.md): choose external, internal or both destinations.
+- [MIDI Part State](modules/midi-part-state/README.md): shared native Part settings.
 
-[Developer notes and verification](DEVELOPMENT.md).
+Octabam supplies the builder. Firmware, samples and device projects are not distributed.
+[Developer notes](DEVELOPMENT.md) describe source provenance and verification.

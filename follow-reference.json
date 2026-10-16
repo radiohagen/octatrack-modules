@@ -1,0 +1,16 @@
+{
+  "runtime_address": "0x40a955e0",
+  "source_commit": "86249aba3723dac0dc2a82bc278d95fcfd093d5d",
+  "upstream_base": "c3f37e531f6b072b8197d93f173e063b55249363",
+  "prerequisite_author_commit": "c9915c12d8e1628a096a3df20f3c0d0b71842f33",
+  "artifacts": {
+    "follow": {
+      "bytes": 7148,
+      "sha256": "72edad6b4d8dc8a620694e1ae497f67df52f538b87fc3831aeb919e3c180d488"
+    },
+    "follow-loopback": {
+      "bytes": 14196,
+      "sha256": "32c846485e6e2d0846e004ea4415221302fdd15993b3884eead3364a0b1e6b6e"
+    }
+  }
+}

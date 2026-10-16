@@ -20,3 +20,15 @@ its ratified standalone placement and checks both runtime and cold-entry
 hashes. GNU m68k tools must be on PATH. No firmware is needed for this check.
 The cross-unit runtime is checked together because its units refer to one
 another; independent `Linked.reference` links cannot resolve those references.
+
+## Follow source addition
+
+The Follow source is reconciled with author review commit
+`86249aba3723dac0dc2a82bc278d95fcfd093d5d`, developed against Octabam
+`c3f37e531f6b072b8197d93f173e063b55249363`. This branch extends the reviewed
+Loopback/Part State source at `c9915c12d8e1628a096a3df20f3c0d0b71842f33`.
+
+`make check` reproduces the existing Loopback reference and independent Follow
+and Follow/Loopback references. The integration gate re-links its actual
+compiled objects at the same fixed placement and compares their bytes.
+No firmware is included in these references. Hardware acceptance is separate.

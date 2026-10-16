@@ -39,3 +39,10 @@ covers project save/load and retained resume. No hardware acceptance is claimed.
 The source is extracted from integration `8f8e00d061d17a890a3b01d5f340492f912712e2`.
 Future Harmony/SRAM conditionals remain dormant source; the Follow/Harmony
 NOTE SETUP staging hook is omitted from this standalone contribution.
+
+## NOTE SETUP confirmation
+
+The setup unit refreshes only the module-owned staged source/HARM fields from
+the selected Part before the native confirmation copy. It does not replay
+mode conversion or change CHAN/BANK/PROG/SBNK. The settings gate covers all
+four Parts and eight tracks, including unrelated fields.
