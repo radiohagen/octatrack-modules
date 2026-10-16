@@ -51,7 +51,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/harmony-plocks/README.md",
       "sha256": "5124b20741b7290cd7186425660410623767423699e01e97e49d4f5faaea14b4",
-      "published_sha256": "5124b20741b7290cd7186425660410623767423699e01e97e49d4f5faaea14b4",
+      "published_sha256": "7bf13d46e8e7d7b616e15f286b1a9db8f33e5167c37d3d3a21c3e5385812fae9",
       "source_mode": "100644"
     },
     "modules/harmony-plocks/bridge.s": {
@@ -73,7 +73,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-follow/README.md",
       "sha256": "b984d044ef4eb3bec749dd2752d07d004c137dc95d51cab13aca4bf8aa5e4b2c",
-      "published_sha256": "b984d044ef4eb3bec749dd2752d07d004c137dc95d51cab13aca4bf8aa5e4b2c",
+      "published_sha256": "8adb230eb0a1cf17d09b7ec384d92cf3673cb6966424aaee37cfa4d934f4a855",
       "source_mode": "100644"
     },
     "modules/midi-follow/manifest.py": {
@@ -123,7 +123,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-harmony/README.md",
       "sha256": "2503b41cfcdfaae42effb0ec2c17a9c6a3f0ffd11f74e623d3f78d94c7d4704e",
-      "published_sha256": "2503b41cfcdfaae42effb0ec2c17a9c6a3f0ffd11f74e623d3f78d94c7d4704e",
+      "published_sha256": "9305a740c40108aec598374af7052ac4998d715453c2dd1e8552f13216c7b38f",
       "source_mode": "100644"
     },
     "modules/midi-harmony/VOICING.md": {
@@ -221,7 +221,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-harmony/degrees/README.md",
       "sha256": "00e9b47b948ffc4e6e46a62aba5fbb1f7e56a992a1b965665c3bf7d49a2b9cce",
-      "published_sha256": "00e9b47b948ffc4e6e46a62aba5fbb1f7e56a992a1b965665c3bf7d49a2b9cce",
+      "published_sha256": "e80692bb5058b26c56120b2cf0dda629e57e14961472ec4a10287c8c6c13a294",
       "source_mode": "100644"
     },
     "modules/midi-harmony/degrees/SCENES.md": {
@@ -558,7 +558,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-loopback/README.md",
       "sha256": "c1cb745934351515f196bcc441726a492d8cd3151d59532539fac82fe1abbf31",
-      "published_sha256": "c1cb745934351515f196bcc441726a492d8cd3151d59532539fac82fe1abbf31",
+      "published_sha256": "7da489bf48dba2cc7c25bcd282d94a8b6e6fb24f1929dfc158f9fc63e637e1b6",
       "source_mode": "100644"
     },
     "modules/midi-loopback/loopback.s": {
@@ -601,7 +601,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-loopback-scenes/README.md",
       "sha256": "bbf26adc6ca71cde425f8db1b36c618114ce0097ccebdc7da382bc90e5614250",
-      "published_sha256": "bbf26adc6ca71cde425f8db1b36c618114ce0097ccebdc7da382bc90e5614250",
+      "published_sha256": "94f180f8603465c1a8e6e42836dce2a51e7c88e2f0da840d1aceb3a78e401ef8",
       "source_mode": "100644"
     },
     "modules/midi-loopback-scenes/bridge.s": {
@@ -623,7 +623,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-part-state/README.md",
       "sha256": "0ae279aa0608c564929adde53d5debf54b20a0dd69430482c45aeeb731f6eff4",
-      "published_sha256": "0ae279aa0608c564929adde53d5debf54b20a0dd69430482c45aeeb731f6eff4",
+      "published_sha256": "1c210b6bd42c830f4953dd3debb9b651eaf86c9375f561edafef41566b76364b",
       "source_mode": "100644"
     },
     "modules/midi-part-state/entry.s": {
@@ -666,7 +666,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-scales/README.md",
       "sha256": "6e4bed6bc1dd7865ed2325a35d52053ae56ad902b6bc09ae2026dd5beaf049f2",
-      "published_sha256": "6e4bed6bc1dd7865ed2325a35d52053ae56ad902b6bc09ae2026dd5beaf049f2",
+      "published_sha256": "175f030806ca238f2af5b2c752c4dcee4256c82e991e7d9adfcd0e621feb6377",
       "source_mode": "100644"
     },
     "modules/midi-scales/manifest.py": {
@@ -688,7 +688,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-sram/README.md",
       "sha256": "1142643d9758ec20f1a9aa0792cf215ebae632aeed8f3d41926b35028487baf8",
-      "published_sha256": "1142643d9758ec20f1a9aa0792cf215ebae632aeed8f3d41926b35028487baf8",
+      "published_sha256": "35424d387c5df044b730c3ccbea2d846565bc84a269a49106d5fed192ac7ebb4",
       "source_mode": "100644"
     },
     "modules/midi-sram/generate.py": {
@@ -724,7 +724,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/pio-write-fix/README.md",
       "sha256": "2eee68c25224379fddcd10d325c1f374cb25079e349290d2b6e1b92dafbd69b1",
-      "published_sha256": "ef0aeca8bd8147fdcad2f1030e5212b73c0eb23e1d125e79dc6e02be09d16a93",
+      "published_sha256": "33ffa431dc1fa23400fce8b115db6f9adad1521505abb8aa48d8a51f34666d34",
       "source_mode": "100644"
     },
     "modules/pio-write-fix/first.s": {
@@ -746,7 +746,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/quantizer-midi-drawer/README.md",
       "sha256": "5f4e48b619ccd2c1a5528eeac06f945fbf3fad4528bf09da937691a09dd09140",
-      "published_sha256": "5f4e48b619ccd2c1a5528eeac06f945fbf3fad4528bf09da937691a09dd09140",
+      "published_sha256": "5800a46ffad974ad439301a8d088ebe1bec55b76e650e57d2a10abb8d9cb8d8c",
       "source_mode": "100644"
     },
     "modules/quantizer-midi-drawer/drawer.s": {
@@ -768,7 +768,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "remixes/harmony-track-bus/README.md",
       "sha256": "52021999ce360179e508f20b8219c78f07dfb60ebec9ace277c1686ef3900b34",
-      "published_sha256": "6d107a6c4825573feda974cca9cab61c25d90d42276aeeece2fe0757fc9f27e3",
+      "published_sha256": "a4c6fe5305890cb7ec3de845a8a6f471c2cd1b2f16f98cc27c28c6238ab34a45",
       "source_mode": "100644",
       "migration_note": "Public branch instructions and links updated; original source validation explicitly marked historical."
     },
@@ -783,7 +783,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "remixes/test/harmony-degrees/README.md",
       "sha256": "3738e6edeb85096b07ca75e4b085cb3500bd7da950beabf3e2ff2247895f775e",
-      "published_sha256": "3738e6edeb85096b07ca75e4b085cb3500bd7da950beabf3e2ff2247895f775e",
+      "published_sha256": "aeedc1685fc197d29652da010e82352339aa40c4a1b7d59933730c9ee00b0ac6",
       "source_mode": "100644"
     },
     "remixes/test/harmony-degrees/remix.py": {
@@ -797,7 +797,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "remixes/test/harmony-plocks/README.md",
       "sha256": "ecc64f90735db6f062dfb01c46bf49e714dfbf9787c47409f2271e6e56158509",
-      "published_sha256": "ecc64f90735db6f062dfb01c46bf49e714dfbf9787c47409f2271e6e56158509",
+      "published_sha256": "12e44ae9d84e51d95838e1abd0b0ba2151cb39b1dd67a66ab1359386cac3f0d8",
       "source_mode": "100644"
     },
     "remixes/test/harmony-plocks/remix.py": {
@@ -811,7 +811,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "remixes/test/midi-ensemble/README.md",
       "sha256": "ced1ec5bf012b0bef8b754deb7427908d45a12344d2a18aa556ef2437758f3ac",
-      "published_sha256": "ced1ec5bf012b0bef8b754deb7427908d45a12344d2a18aa556ef2437758f3ac",
+      "published_sha256": "04c6d32c902956d2f783e5b6011c184bbefd3a5183fbd0979f601de9e0dd01ff",
       "source_mode": "100644"
     },
     "remixes/test/midi-ensemble/remix.py": {
@@ -825,7 +825,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "remixes/test/midi-follow/README.md",
       "sha256": "89656abfdb4588fc8000b9965d84f19e0b5b57ee1dd105a5d67fbe42c8fb286d",
-      "published_sha256": "89656abfdb4588fc8000b9965d84f19e0b5b57ee1dd105a5d67fbe42c8fb286d",
+      "published_sha256": "66e188c2c1e920592439c11c957d9ab4c1ba4e9a5f1b19d6c30d999ff0ea8d76",
       "source_mode": "100644"
     },
     "remixes/test/midi-follow/remix.py": {
@@ -839,7 +839,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "remixes/test/midi-harmony/README.md",
       "sha256": "2ae231d6451acb319613b03e1a82d5e865115d6400b9d4e7b59f8597fb6dd7b2",
-      "published_sha256": "2ae231d6451acb319613b03e1a82d5e865115d6400b9d4e7b59f8597fb6dd7b2",
+      "published_sha256": "4aa70e80df76c599c0c8ac7c1269ad905ed01aa1cea54670c89c17870dedbccd",
       "source_mode": "100644"
     },
     "remixes/test/midi-harmony/remix.py": {
@@ -853,7 +853,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "remixes/test/midi-harmony-follow/README.md",
       "sha256": "14564996ba773865230bec020561b461f59f16bd126b98f478cef712177a3a49",
-      "published_sha256": "14564996ba773865230bec020561b461f59f16bd126b98f478cef712177a3a49",
+      "published_sha256": "9bfdb7d038465e76d360338959eacede2d72a57d8d496c23500e486b1bd90028",
       "source_mode": "100644"
     },
     "remixes/test/midi-harmony-follow/remix.py": {
@@ -867,7 +867,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "remixes/test/midi-loopback/README.md",
       "sha256": "80e7d45457217bc27d55368e09f1b5765115e3961000ddf26b3938ad5fd09ef1",
-      "published_sha256": "80e7d45457217bc27d55368e09f1b5765115e3961000ddf26b3938ad5fd09ef1",
+      "published_sha256": "106c53a8d5fa604bb4a11b2a9495aae126a8d208d2fa15b9ae94f79d7e37cc04",
       "source_mode": "100644"
     },
     "remixes/test/midi-loopback/remix.py": {
@@ -881,7 +881,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "remixes/test/midi-loopback-follow/README.md",
       "sha256": "cd7bdd741ad67ec9735f5ecf11dc0c2cf74c61d45913be453c1866a09b6aad49",
-      "published_sha256": "cd7bdd741ad67ec9735f5ecf11dc0c2cf74c61d45913be453c1866a09b6aad49",
+      "published_sha256": "2913dfd4438196bc04a6debbc0fa5cfd6017e389cb33425336f92401f15aa040",
       "source_mode": "100644"
     },
     "remixes/test/midi-loopback-follow/remix.py": {
@@ -895,7 +895,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "remixes/test/midi-loopback-usb/README.md",
       "sha256": "5ad1cbecae47c3b73ec9abbc807857618dce3646956260d700012de3ed4ed1f2",
-      "published_sha256": "b945c2a295d29243dc8bcd340b0fbc89d12f99a107e1985780f6f789a7c770a1",
+      "published_sha256": "05b26d585fc907f9dbd881dc9b31bac3c8162cb93b0356318fc678bb4b4924cf",
       "source_mode": "100644"
     },
     "remixes/test/midi-loopback-usb/remix.py": {
@@ -909,7 +909,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "remixes/test/midi-part-state/README.md",
       "sha256": "4d0dc02cba8558a06bd605bac3af87ca34e28a829d72a305cbfc5a490de152bc",
-      "published_sha256": "4d0dc02cba8558a06bd605bac3af87ca34e28a829d72a305cbfc5a490de152bc",
+      "published_sha256": "1ba7430a97fd13aec2306aeef3899218fe45e72e8a3b02f349d46348e00ec613",
       "source_mode": "100644"
     },
     "remixes/test/midi-part-state/remix.py": {
@@ -923,7 +923,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "remixes/test/midi-scales/README.md",
       "sha256": "347d15ff881bc0a1b91de8ca1ada7c9919156e22f209dbb41dcda1728904d63a",
-      "published_sha256": "347d15ff881bc0a1b91de8ca1ada7c9919156e22f209dbb41dcda1728904d63a",
+      "published_sha256": "1a81ae1611001aa17e91ec9195d19cf53c011312379554d5c45a9bfe8b448040",
       "source_mode": "100644"
     },
     "remixes/test/midi-scales/remix.py": {
@@ -937,7 +937,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "remixes/test/midi-sram/README.md",
       "sha256": "4a75e91007144afc2edccb37443ac562819c3846f007c9c59dd4a3574dbfaf87",
-      "published_sha256": "4a75e91007144afc2edccb37443ac562819c3846f007c9c59dd4a3574dbfaf87",
+      "published_sha256": "43194acdc7ad060306f94166190ed4b4fd9a405a46690d72657a8f9cb22f7680",
       "source_mode": "100644"
     },
     "remixes/test/midi-sram/remix.py": {
@@ -951,7 +951,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "remixes/test/pio-write-fix/README.md",
       "sha256": "46c4eafb517be6d2b95a173216cdb9f92aa4b51c5e3eb1f784f35d05227269f8",
-      "published_sha256": "46c4eafb517be6d2b95a173216cdb9f92aa4b51c5e3eb1f784f35d05227269f8",
+      "published_sha256": "42a1781dfe8aca568f2c09619c051bc32a9918b366c4fa11b4d73fd5f3d98f4d",
       "source_mode": "100644"
     },
     "remixes/test/pio-write-fix/remix.py": {
@@ -1507,6 +1507,181 @@
       "sha256": "2300e56a6b3c11080312b5f47fba0391851d48dc1aacdd6dae5563e4cd7d7bf0",
       "published_sha256": "2300e56a6b3c11080312b5f47fba0391851d48dc1aacdd6dae5563e4cd7d7bf0",
       "source_mode": "100644"
+    },
+    "modules/midi-part-state/DEVELOPMENT.md": {
+      "path": "modules/midi-part-state/DEVELOPMENT.md",
+      "sha256": "0ae279aa0608c564929adde53d5debf54b20a0dd69430482c45aeeb731f6eff4",
+      "published_sha256": "0ae279aa0608c564929adde53d5debf54b20a0dd69430482c45aeeb731f6eff4",
+      "source_mode": "100644",
+      "origin": "Split from adjacent README in this repository; historical evidence is retained in the text."
+    },
+    "modules/midi-follow/DEVELOPMENT.md": {
+      "path": "modules/midi-follow/DEVELOPMENT.md",
+      "sha256": "b984d044ef4eb3bec749dd2752d07d004c137dc95d51cab13aca4bf8aa5e4b2c",
+      "published_sha256": "b984d044ef4eb3bec749dd2752d07d004c137dc95d51cab13aca4bf8aa5e4b2c",
+      "source_mode": "100644",
+      "origin": "Split from adjacent README in this repository; historical evidence is retained in the text."
+    },
+    "modules/harmony-plocks/DEVELOPMENT.md": {
+      "path": "modules/harmony-plocks/DEVELOPMENT.md",
+      "sha256": "5124b20741b7290cd7186425660410623767423699e01e97e49d4f5faaea14b4",
+      "published_sha256": "5124b20741b7290cd7186425660410623767423699e01e97e49d4f5faaea14b4",
+      "source_mode": "100644",
+      "origin": "Split from adjacent README in this repository; historical evidence is retained in the text."
+    },
+    "modules/midi-loopback/DEVELOPMENT.md": {
+      "path": "modules/midi-loopback/DEVELOPMENT.md",
+      "sha256": "c1cb745934351515f196bcc441726a492d8cd3151d59532539fac82fe1abbf31",
+      "published_sha256": "c1cb745934351515f196bcc441726a492d8cd3151d59532539fac82fe1abbf31",
+      "source_mode": "100644",
+      "origin": "Split from adjacent README in this repository; historical evidence is retained in the text."
+    },
+    "modules/midi-loopback-scenes/DEVELOPMENT.md": {
+      "path": "modules/midi-loopback-scenes/DEVELOPMENT.md",
+      "sha256": "bbf26adc6ca71cde425f8db1b36c618114ce0097ccebdc7da382bc90e5614250",
+      "published_sha256": "bbf26adc6ca71cde425f8db1b36c618114ce0097ccebdc7da382bc90e5614250",
+      "source_mode": "100644",
+      "origin": "Split from adjacent README in this repository; historical evidence is retained in the text."
+    },
+    "modules/quantizer-midi-drawer/DEVELOPMENT.md": {
+      "path": "modules/quantizer-midi-drawer/DEVELOPMENT.md",
+      "sha256": "5f4e48b619ccd2c1a5528eeac06f945fbf3fad4528bf09da937691a09dd09140",
+      "published_sha256": "5f4e48b619ccd2c1a5528eeac06f945fbf3fad4528bf09da937691a09dd09140",
+      "source_mode": "100644",
+      "origin": "Split from adjacent README in this repository; historical evidence is retained in the text."
+    },
+    "modules/midi-harmony/DEVELOPMENT.md": {
+      "path": "modules/midi-harmony/DEVELOPMENT.md",
+      "sha256": "2503b41cfcdfaae42effb0ec2c17a9c6a3f0ffd11f74e623d3f78d94c7d4704e",
+      "published_sha256": "2503b41cfcdfaae42effb0ec2c17a9c6a3f0ffd11f74e623d3f78d94c7d4704e",
+      "source_mode": "100644",
+      "origin": "Split from adjacent README in this repository; historical evidence is retained in the text."
+    },
+    "modules/midi-scales/DEVELOPMENT.md": {
+      "path": "modules/midi-scales/DEVELOPMENT.md",
+      "sha256": "6e4bed6bc1dd7865ed2325a35d52053ae56ad902b6bc09ae2026dd5beaf049f2",
+      "published_sha256": "6e4bed6bc1dd7865ed2325a35d52053ae56ad902b6bc09ae2026dd5beaf049f2",
+      "source_mode": "100644",
+      "origin": "Split from adjacent README in this repository; historical evidence is retained in the text."
+    },
+    "modules/midi-sram/DEVELOPMENT.md": {
+      "path": "modules/midi-sram/DEVELOPMENT.md",
+      "sha256": "1142643d9758ec20f1a9aa0792cf215ebae632aeed8f3d41926b35028487baf8",
+      "published_sha256": "1142643d9758ec20f1a9aa0792cf215ebae632aeed8f3d41926b35028487baf8",
+      "source_mode": "100644",
+      "origin": "Split from adjacent README in this repository; historical evidence is retained in the text."
+    },
+    "modules/pio-write-fix/DEVELOPMENT.md": {
+      "path": "modules/pio-write-fix/DEVELOPMENT.md",
+      "sha256": "ef0aeca8bd8147fdcad2f1030e5212b73c0eb23e1d125e79dc6e02be09d16a93",
+      "published_sha256": "ef0aeca8bd8147fdcad2f1030e5212b73c0eb23e1d125e79dc6e02be09d16a93",
+      "source_mode": "100644",
+      "origin": "Split from adjacent README in this repository; historical evidence is retained in the text."
+    },
+    "modules/midi-harmony/degrees/DEVELOPMENT.md": {
+      "path": "modules/midi-harmony/degrees/DEVELOPMENT.md",
+      "sha256": "00e9b47b948ffc4e6e46a62aba5fbb1f7e56a992a1b965665c3bf7d49a2b9cce",
+      "published_sha256": "00e9b47b948ffc4e6e46a62aba5fbb1f7e56a992a1b965665c3bf7d49a2b9cce",
+      "source_mode": "100644",
+      "origin": "Split from adjacent README in this repository; historical evidence is retained in the text."
+    },
+    "remixes/harmony-track-bus/DEVELOPMENT.md": {
+      "path": "remixes/harmony-track-bus/DEVELOPMENT.md",
+      "sha256": "6d107a6c4825573feda974cca9cab61c25d90d42276aeeece2fe0757fc9f27e3",
+      "published_sha256": "6d107a6c4825573feda974cca9cab61c25d90d42276aeeece2fe0757fc9f27e3",
+      "source_mode": "100644",
+      "origin": "Split from adjacent README in this repository; historical evidence is retained in the text."
+    },
+    "remixes/test/midi-part-state/DEVELOPMENT.md": {
+      "path": "remixes/test/midi-part-state/DEVELOPMENT.md",
+      "sha256": "4d0dc02cba8558a06bd605bac3af87ca34e28a829d72a305cbfc5a490de152bc",
+      "published_sha256": "4d0dc02cba8558a06bd605bac3af87ca34e28a829d72a305cbfc5a490de152bc",
+      "source_mode": "100644",
+      "origin": "Split from adjacent README in this repository; historical evidence is retained in the text."
+    },
+    "remixes/test/midi-follow/DEVELOPMENT.md": {
+      "path": "remixes/test/midi-follow/DEVELOPMENT.md",
+      "sha256": "89656abfdb4588fc8000b9965d84f19e0b5b57ee1dd105a5d67fbe42c8fb286d",
+      "published_sha256": "89656abfdb4588fc8000b9965d84f19e0b5b57ee1dd105a5d67fbe42c8fb286d",
+      "source_mode": "100644",
+      "origin": "Split from adjacent README in this repository; historical evidence is retained in the text."
+    },
+    "remixes/test/harmony-degrees/DEVELOPMENT.md": {
+      "path": "remixes/test/harmony-degrees/DEVELOPMENT.md",
+      "sha256": "3738e6edeb85096b07ca75e4b085cb3500bd7da950beabf3e2ff2247895f775e",
+      "published_sha256": "3738e6edeb85096b07ca75e4b085cb3500bd7da950beabf3e2ff2247895f775e",
+      "source_mode": "100644",
+      "origin": "Split from adjacent README in this repository; historical evidence is retained in the text."
+    },
+    "remixes/test/midi-loopback-follow/DEVELOPMENT.md": {
+      "path": "remixes/test/midi-loopback-follow/DEVELOPMENT.md",
+      "sha256": "cd7bdd741ad67ec9735f5ecf11dc0c2cf74c61d45913be453c1866a09b6aad49",
+      "published_sha256": "cd7bdd741ad67ec9735f5ecf11dc0c2cf74c61d45913be453c1866a09b6aad49",
+      "source_mode": "100644",
+      "origin": "Split from adjacent README in this repository; historical evidence is retained in the text."
+    },
+    "remixes/test/harmony-plocks/DEVELOPMENT.md": {
+      "path": "remixes/test/harmony-plocks/DEVELOPMENT.md",
+      "sha256": "ecc64f90735db6f062dfb01c46bf49e714dfbf9787c47409f2271e6e56158509",
+      "published_sha256": "ecc64f90735db6f062dfb01c46bf49e714dfbf9787c47409f2271e6e56158509",
+      "source_mode": "100644",
+      "origin": "Split from adjacent README in this repository; historical evidence is retained in the text."
+    },
+    "remixes/test/midi-loopback/DEVELOPMENT.md": {
+      "path": "remixes/test/midi-loopback/DEVELOPMENT.md",
+      "sha256": "80e7d45457217bc27d55368e09f1b5765115e3961000ddf26b3938ad5fd09ef1",
+      "published_sha256": "80e7d45457217bc27d55368e09f1b5765115e3961000ddf26b3938ad5fd09ef1",
+      "source_mode": "100644",
+      "origin": "Split from adjacent README in this repository; historical evidence is retained in the text."
+    },
+    "remixes/test/midi-harmony-follow/DEVELOPMENT.md": {
+      "path": "remixes/test/midi-harmony-follow/DEVELOPMENT.md",
+      "sha256": "14564996ba773865230bec020561b461f59f16bd126b98f478cef712177a3a49",
+      "published_sha256": "14564996ba773865230bec020561b461f59f16bd126b98f478cef712177a3a49",
+      "source_mode": "100644",
+      "origin": "Split from adjacent README in this repository; historical evidence is retained in the text."
+    },
+    "remixes/test/midi-loopback-usb/DEVELOPMENT.md": {
+      "path": "remixes/test/midi-loopback-usb/DEVELOPMENT.md",
+      "sha256": "b945c2a295d29243dc8bcd340b0fbc89d12f99a107e1985780f6f789a7c770a1",
+      "published_sha256": "b945c2a295d29243dc8bcd340b0fbc89d12f99a107e1985780f6f789a7c770a1",
+      "source_mode": "100644",
+      "origin": "Split from adjacent README in this repository; historical evidence is retained in the text."
+    },
+    "remixes/test/midi-harmony/DEVELOPMENT.md": {
+      "path": "remixes/test/midi-harmony/DEVELOPMENT.md",
+      "sha256": "2ae231d6451acb319613b03e1a82d5e865115d6400b9d4e7b59f8597fb6dd7b2",
+      "published_sha256": "2ae231d6451acb319613b03e1a82d5e865115d6400b9d4e7b59f8597fb6dd7b2",
+      "source_mode": "100644",
+      "origin": "Split from adjacent README in this repository; historical evidence is retained in the text."
+    },
+    "remixes/test/midi-scales/DEVELOPMENT.md": {
+      "path": "remixes/test/midi-scales/DEVELOPMENT.md",
+      "sha256": "347d15ff881bc0a1b91de8ca1ada7c9919156e22f209dbb41dcda1728904d63a",
+      "published_sha256": "347d15ff881bc0a1b91de8ca1ada7c9919156e22f209dbb41dcda1728904d63a",
+      "source_mode": "100644",
+      "origin": "Split from adjacent README in this repository; historical evidence is retained in the text."
+    },
+    "remixes/test/midi-sram/DEVELOPMENT.md": {
+      "path": "remixes/test/midi-sram/DEVELOPMENT.md",
+      "sha256": "4a75e91007144afc2edccb37443ac562819c3846f007c9c59dd4a3574dbfaf87",
+      "published_sha256": "4a75e91007144afc2edccb37443ac562819c3846f007c9c59dd4a3574dbfaf87",
+      "source_mode": "100644",
+      "origin": "Split from adjacent README in this repository; historical evidence is retained in the text."
+    },
+    "remixes/test/midi-ensemble/DEVELOPMENT.md": {
+      "path": "remixes/test/midi-ensemble/DEVELOPMENT.md",
+      "sha256": "ced1ec5bf012b0bef8b754deb7427908d45a12344d2a18aa556ef2437758f3ac",
+      "published_sha256": "ced1ec5bf012b0bef8b754deb7427908d45a12344d2a18aa556ef2437758f3ac",
+      "source_mode": "100644",
+      "origin": "Split from adjacent README in this repository; historical evidence is retained in the text."
+    },
+    "remixes/test/pio-write-fix/DEVELOPMENT.md": {
+      "path": "remixes/test/pio-write-fix/DEVELOPMENT.md",
+      "sha256": "46c4eafb517be6d2b95a173216cdb9f92aa4b51c5e3eb1f784f35d05227269f8",
+      "published_sha256": "46c4eafb517be6d2b95a173216cdb9f92aa4b51c5e3eb1f784f35d05227269f8",
+      "source_mode": "100644",
+      "origin": "Split from adjacent README in this repository; historical evidence is retained in the text."
     }
   },
   "submodules": {}
