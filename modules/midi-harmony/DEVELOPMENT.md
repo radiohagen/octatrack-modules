@@ -1,5 +1,7 @@
 # midi-harmony implementation and verification
 
+Octabam verification commands below run from the integration checkout.
+
 MIDI Harmony supplies scale-degree roots, generated chords and CHORD PLAY.
 Include `MIDI HARMONY`, `MIDI PART STATE` and `STORE` in a remix.
 MIDI FOLLOW and MIDI SCALES are optional. Degree support is part of Harmony;

@@ -1,39 +1,36 @@
-# MIDI Loopback and Part State author source
+# MIDI Harmony author source
 
-A narrow source branch for the matching `codex/pr/midi-loopback` contribution
-in [radiohagen/octabam](https://github.com/radiohagen/octabam).
+This branch contains MIDI Harmony, MIDI Loopback and MIDI Part State plus MIDI SRAM.
 
-Only Loopback and its Part State dependency are included. The assembly comes
-unchanged from completed integration `8f8e00d061d17a890a3b01d5f340492f912712e2`
-(original completion `03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d`). The unused
-Follow/Harmony NOTE SETUP staging unit is omitted. Manifests resolve assembly
-relative to their own location; Octabam owns adapters, gates and test remixes.
-Conditional assembly for future consumers is retained for provenance but is
-not selected or qualified by this contribution.
+Manifests resolve assembly relative to this repository. Octabam owns the
+adapters, full-firmware tests, screenshots and test remixes. Commands naming
+`tools/verify/` in module developer notes run from that Octabam checkout,
+not this source repository.
 
-Read [Loopback](modules/midi-loopback/README.md) and
-[Part State](modules/midi-part-state/README.md). No firmware, private projects
-or samples are included. Hardware acceptance remains outstanding.
+## Build references
 
-`python3 tools/verify_reference.py` assembles and links the author source at
-its ratified standalone placement and checks both runtime and cold-entry
-hashes. GNU m68k tools must be on PATH. No firmware is needed for this check.
-The cross-unit runtime is checked together because its units refer to one
-another; independent `Linked.reference` links cannot resolve those references.
+Run `make check` with GNU m68k tools on PATH. No Elektron firmware is needed.
+The existing Loopback runtime and cold-entry reference remains checked by
+`tools/verify_reference.py`.
 
-## Harmony source increment
+`tools/verify_harmony_reference.py` independently links Harmony with Part
+State in LEGACY, SHARED and MIDI TRACK layouts. `harmony-reference.json` records
+the placement, units and hashes. The Octabam adapter compares its compiled
+objects with the corresponding reference. The two generator checks reproduce
+checked-in assembly from the Harmony and degree C sources.
 
-Harmony and MIDI SRAM runtime sources are reconciled with author review
-`86249aba3723dac0dc2a82bc278d95fcfd093d5d`; the observer load guard preserves
-valid saved roots during native bank publication. No persistence format change
-is involved. The starting Loopback/Part State pin is `c9915c1`.
+## Provenance and boundaries
 
-`make check` rebuilds the independent Harmony/Part State reference in all
-three supported retention layouts, checks the unchanged Loopback reference,
-and verifies generated assembly against the C sources. `harmony-reference.json`
-records the reference address, units, source commit and hashes. The Octabam
-adapter must compare its compiled objects with the corresponding reference.
-These checks establish source/build agreement, not hardware acceptance.
+The starting Loopback/Part State source is
+`c9915c12d8e1628a096a3df20f3c0d0b71842f33`, derived from completed integration
+`8f8e00d061d17a890a3b01d5f340492f912712e2` and original completion
+`03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d`. The added runtime is reconciled with
+author review `86249aba3723dac0dc2a82bc278d95fcfd093d5d`, developed against
+Octabam `c3f37e531f6b072b8197d93f173e063b55249363`.
 
-The author branch contains source only. Firmware, project cards, captures of
-private project data and samples are never publication artifacts.
+The load observer guard preserves valid saved roots during native bank
+publication without changing the persistence format.
+
+Reference agreement establishes source/build consistency, not hardware
+acceptance. Firmware, virtual cards, private project data and samples are
+not publication artifacts.

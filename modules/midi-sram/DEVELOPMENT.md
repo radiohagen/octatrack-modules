@@ -1,5 +1,7 @@
 # midi-sram implementation and verification
 
+Octabam verification commands below run from the integration checkout.
+
 Opt-in support module for compositions that need additional retained capacity.
 Select `MIDI SRAM` with `MIDI PART STATE`. It adds no panel control and provides
 16,384 retained bytes in fields 30/31 of each native MIDI step record in the
