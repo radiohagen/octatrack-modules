@@ -1,5 +1,7 @@
 # midi-follow implementation and verification
 
+Octabam verification commands below run from the integration checkout.
+
 Each MIDI track can follow another MIDI track's chord root while keeping its
 own rhythm, velocity and note length. By default, FIXED octave 3 with TRAN=0 uses MIDI notes 36–47:
 C → F → G gives 36 → 41 → 43. The follower's TRAN adds a signed semitone
@@ -229,6 +231,6 @@ This exercises linked ColdFire code, not physical outgoing-MIDI timing.
 Run `make check REMIX=midi-follow` for the standalone module. The manifest
 runs linked routing, register, response and graph stress checks. With a prepared
 project copy, `verify_midi_follow_response_port.py --project DIR` checks LIVE
-response through emulated panel events and MIDI output. Combined Harmony
-settings/persistence coverage lives in `verify_midi_harmony_port.py --settings-only`,
-and NOTE SETUP confirmation in `verify_midi_setup_port.py`.
+response through emulated panel events and MIDI output. `verify_midi_follow.py midi-follow --project DIR` covers routing, controls and
+mutes. `verify_midi_part_settings.py` covers NOTE SETUP confirmation. Harmony
+combinations have separate integration tests.
