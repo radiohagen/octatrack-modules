@@ -139,15 +139,16 @@
   "artifacts": {
     "LEGACY": {
       "bytes": 59948,
-      "sha256": "e59a7132b3e3ba52708026eb084e985e2ab51ee394e03ba83cdf54ae7aac3017"
+      "sha256": "f0e983a6bf027bd5c8cb04ddcb608be0a6e180e6be72de5a99431c99ebb3fa82"
     },
     "SHARED": {
       "bytes": 59948,
-      "sha256": "b67140422e45c8acc79dfb85d5763df5d8641485707b7c8f814659253d198732"
+      "sha256": "f3f26442ac70c47103eaee7f406fa252bc2fc3887abd90d905538593093772ce"
     },
     "MIDI TRACK": {
-      "bytes": 64872,
-      "sha256": "73264435261426981d40db92845a24893f46980a3a4e821d5e6decbcab441bf9"
+      "bytes": 64664,
+      "sha256": "a1e9e8034e83722811b4d2ad7aaa1241f1cf25fdd3e8f928560e0b24b5ad0fdc"
     }
-  }
+  },
+  "revision_note": "Track keys inherit native dispatch, closing the detail window and selecting the requested track on one press; measured against stock 1.40C TEMPO over MIDI NOTE SETUP."
 }

@@ -1,7 +1,8 @@
 /* Harmony window: native window/input-layer pattern from the Tuner module.
  * NOTE SETUP F press opens it; A=HARM, B=VOIC, C=SPRD, D=ROOT, E=SIZE.
- * Track is fixed while open. Track/page keys close the window; a subsequent
- * press selects the track/page. Transport and chromatic keys pass through.
+ * Track is fixed while open. Native track keys close the window and select
+ * the requested track in one press. Page keys close it first.
+ * Transport and chromatic keys pass through.
  * Six-cell layout: top row HARM/VOIC/SPRD, ROOT/SIZE below HARM/VOIC; track in footer.
  * Values use the stock PLAYBACK 3/5/3/4/4-position selector widgets.
  * No UI-task/ISR hook: redraw only on open or an encoder edit.
@@ -411,8 +412,9 @@ mh_page_sprd_format:
 mh_page_layer:
     .long 0,mh_page_keys,mh_page_encs,0,0,-1,-1
 mh_page_keys:
+    /* Track keys inherit stock dispatch: close the modal and select in one press. */
     /* The opening F key's release is consumed; only a new press closes. */
-    .irp key,0x31,0x32,0x3d,0x22,0x23,0x24,0x25,0x26,0x35,0x10,0x11,0x12,0x13,0x14,0x15,0x16,0x17
+    .irp key,0x31,0x32,0x3d,0x22,0x23,0x24,0x25,0x26,0x35
     .byte \key,0
     .long mh_page_close,0,0,0,0
     .word 0,0
