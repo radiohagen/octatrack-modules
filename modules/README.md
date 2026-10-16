@@ -13,9 +13,5 @@
 | PIO Write Fix | Existing first-sector ordering fix, without STEM REC |
 | Quantizer MIDI Drawer | Preserve native MIDI octave rendering beside Quantizer |
 
-The first four are user-facing features. The others are support or compatibility
-changes; the two general fixes should be proposed separately upstream.
-
-No synth additions, MIDI Arp Presets/ARP templates or POST FADER are selected.
-Module READMEs retain historical measurements; consult the current verification
-record before treating them as evidence for a new build.
+The first four provide player controls. The others provide shared storage,
+integration or compatibility support. Open a module's README for its behavior.
