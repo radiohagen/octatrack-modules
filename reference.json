@@ -9,8 +9,9 @@
       "sha256": "4de11692e14103dde57ed86c303a7332998c912fb8156fcf90b21a6f0ce32ca2"
     },
     "runtime": {
-      "bytes": 9476,
-      "sha256": "bf07dbc7a9a2afcecd1ca18f98a5baf9cb2e531654d4c1866a2bf4e5170470bd"
+      "bytes": 9268,
+      "sha256": "90e4fd52eb8126c15b72533772b5e4cacad1941ea6309d4930281495eb357f0f"
     }
-  }
+  },
+  "revision_note": "Track keys inherit native dispatch, closing the detail window and selecting the requested track on one press; measured against stock 1.40C TEMPO over MIDI NOTE SETUP."
 }
