@@ -30,3 +30,13 @@ Octabam `c3f37e531f6b072b8197d93f173e063b55249363`.
 Reference agreement establishes source/build consistency, not hardware
 acceptance. Firmware, virtual cards, private project data and samples are
 not publication artifacts.
+
+## Detail-window track navigation
+
+Track keys inherit the native input handler. One press closes the detail
+window and selects the requested track; reopening captures that track as the
+edit owner. The custom layer must not consume track presses or releases.
+This matches the stock 1.40C TEMPO popup over MIDI NOTE SETUP, measured with
+physical panel reports under the full firmware emulator. It is not hardware
+acceptance. Reproduce the ownership and playback regression with Octabam's
+`tools/verify/verify_midi_detail_tracks_port.py` and a disposable local fixture.

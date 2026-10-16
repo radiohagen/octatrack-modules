@@ -5,12 +5,13 @@
   "prerequisite_author_commit": "c9915c12d8e1628a096a3df20f3c0d0b71842f33",
   "artifacts": {
     "follow": {
-      "bytes": 7148,
-      "sha256": "72edad6b4d8dc8a620694e1ae497f67df52f538b87fc3831aeb919e3c180d488"
+      "bytes": 6940,
+      "sha256": "aa9732ef57122c4340f5d00e76f70fff6e1cc89b9e7e2aef1608cb316043520d"
     },
     "follow-loopback": {
-      "bytes": 14196,
-      "sha256": "32c846485e6e2d0846e004ea4415221302fdd15993b3884eead3364a0b1e6b6e"
+      "bytes": 13780,
+      "sha256": "a321055bd9ff3a11f77227842b5930f3aa7425290efc161680fd8f59293381b0"
     }
-  }
+  },
+  "revision_note": "Track keys inherit native dispatch, closing the detail window and selecting the requested track on one press; measured against stock 1.40C TEMPO over MIDI NOTE SETUP."
 }
