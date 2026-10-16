@@ -1,0 +1,153 @@
+{
+  "source_commit": "86249aba3723dac0dc2a82bc278d95fcfd093d5d",
+  "upstream_base": "c3f37e531f6b072b8197d93f173e063b55249363",
+  "runtime_address": "0x40a955e0",
+  "units": [
+    [
+      "chordpart",
+      "modules/midi-harmony/chord-part.s"
+    ],
+    [
+      "harmonyownership",
+      "modules/midi-harmony/ownership.s"
+    ],
+    [
+      "harmonysettings",
+      "modules/midi-harmony/settings.s"
+    ],
+    [
+      "midiharmony",
+      "modules/midi-harmony/harmony.s"
+    ],
+    [
+      "harmonyvoice",
+      "modules/midi-harmony/voicing.s"
+    ],
+    [
+      "harmonysize",
+      "modules/midi-harmony/size.s"
+    ],
+    [
+      "harmonypage",
+      "modules/midi-harmony/page.s"
+    ],
+    [
+      "harmonychords",
+      "modules/midi-harmony/chords.s"
+    ],
+    [
+      "chorddisplay",
+      "modules/midi-harmony/chord-display.s"
+    ],
+    [
+      "chordname",
+      "modules/midi-harmony/chord-name.s"
+    ],
+    [
+      "chordoperations",
+      "modules/midi-harmony/chord-operations.s"
+    ],
+    [
+      "chordfiles",
+      "modules/midi-harmony/chord-files.s"
+    ],
+    [
+      "chordrecord",
+      "modules/midi-harmony/chord-record.s"
+    ],
+    [
+      "chordsequence",
+      "modules/midi-harmony/chord-sequence.s"
+    ],
+    [
+      "chordui",
+      "modules/midi-harmony/chord-ui.s"
+    ],
+    [
+      "chordlocks",
+      "modules/midi-harmony/locks.s"
+    ],
+    [
+      "harmonyplay",
+      "modules/midi-harmony/play.s"
+    ],
+    [
+      "degreecodec",
+      "modules/midi-harmony/degrees/codec.s"
+    ],
+    [
+      "degreeroots",
+      "modules/midi-harmony/degrees/roots.s"
+    ],
+    [
+      "degreeaccess",
+      "modules/midi-harmony/degrees/part-access.s"
+    ],
+    [
+      "degreescenes",
+      "modules/midi-harmony/degrees/scenes.s"
+    ],
+    [
+      "degreesceneaccess",
+      "modules/midi-harmony/degrees/scene-access.s"
+    ],
+    [
+      "degreecore",
+      "modules/midi-harmony/degrees/core.s"
+    ],
+    [
+      "degreepacked",
+      "modules/midi-harmony/degrees/packed.s"
+    ],
+    [
+      "degreestorage",
+      "modules/midi-harmony/degrees/storage.s"
+    ],
+    [
+      "degreeevents",
+      "modules/midi-harmony/degrees/events.s"
+    ],
+    [
+      "degreerecording",
+      "modules/midi-harmony/degrees/recording.s"
+    ],
+    [
+      "degreeui",
+      "modules/midi-harmony/degrees/ui.s"
+    ],
+    [
+      "degreepanel",
+      "modules/midi-harmony/degrees/panel.s"
+    ],
+    [
+      "degreeoperations",
+      "modules/midi-harmony/degrees/operations.s"
+    ],
+    [
+      "degreeedit",
+      "modules/midi-harmony/degrees/edit-hooks.s"
+    ],
+    [
+      "degreepool",
+      "modules/midi-harmony/degrees/pool.s"
+    ],
+    [
+      "degreehooks",
+      "modules/midi-harmony/degrees/hooks.s"
+    ]
+  ],
+  "artifacts": {
+    "LEGACY": {
+      "bytes": 59948,
+      "sha256": "e59a7132b3e3ba52708026eb084e985e2ab51ee394e03ba83cdf54ae7aac3017"
+    },
+    "SHARED": {
+      "bytes": 59948,
+      "sha256": "b67140422e45c8acc79dfb85d5763df5d8641485707b7c8f814659253d198732"
+    },
+    "MIDI TRACK": {
+      "bytes": 64872,
+      "sha256": "73264435261426981d40db92845a24893f46980a3a4e821d5e6decbcab441bf9"
+    }
+  }
+}
