@@ -214,7 +214,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-harmony/degrees/KITS.md",
       "sha256": "019fdf4ffc8a5396551842562b5f4ce9ee8b96b2f1736e7a3d54149255038879",
-      "published_sha256": "019fdf4ffc8a5396551842562b5f4ce9ee8b96b2f1736e7a3d54149255038879",
+      "published_sha256": "4d6ce6d261529395c3e13e00bf32a38c2b49e97154a46d6be2c6ead246847ba9",
       "source_mode": "100644"
     },
     "modules/midi-harmony/degrees/README.md": {
