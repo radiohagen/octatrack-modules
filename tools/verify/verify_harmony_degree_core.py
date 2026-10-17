@@ -32,6 +32,11 @@ def main():
         (out/'remix.inc').write_text(f'.set MP_DEFINE,1\n.set HD_FOLLOW,1\n.set HD_SCENES,0\n.set HD_SCALES,{int(scales)}\n')
         (out/'stub.s').write_text("""
 .data
+.text
+.global ha_enabled_c
+ha_enabled_c: moveq #0,%d0
+rts
+.data
 .global hd_nv_base
 .set hd_nv_base,0x100fd560
 .global ch_lock_table,ch_nv_bank,ch_lock_status
@@ -48,6 +53,7 @@ mp_part_epochs: .space 256
 """)
         objects = []
         for name, source in [('codec', ROOT/'modules/midi-harmony/degrees/codec.s'),
+                             ('accumulator', ROOT/'modules/midi-harmony/degrees/accumulator.s'),
                              ('roots', ROOT/'modules/midi-harmony/degrees/roots.s'),
                              ('core', ROOT/'modules/midi-harmony/degrees/core.s'),
                              ('access', ROOT/'modules/midi-harmony/degrees/part-access.s'),

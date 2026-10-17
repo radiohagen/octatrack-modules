@@ -73,27 +73,31 @@ alongside their native counterparts. Corrupt or mismatched storage cannot
 publish partially validated data. A rejected working save cannot overwrite
 the stored bank/companion backup. Native bank and companion writes remain
 separate filesystem operations; arbitrary power-loss atomicity is not claimed.
-No earlier experimental format is migrated. Harmony uses its own companion
-identity and rejects incompatible experimental CHRD formats.
+Harmony uses its own companion identity and rejects incompatible experimental
+CHRD formats. MIDI TRACK upgrades validated HDP3/HMT1 as described below.
 
 KITS uses the same native Part fields and requires no special adapter.
 The optional MIDI SCENES adapter uses upstream's full-table scene API.
 Its [compatibility boundaries and validation](SCENES.md) are documented
 separately. See [native Part storage and KITS boundaries](KITS.md).
 
-## Compact HDP3 / HDN3 storage
+## Compact Harmony storage
 
 The experimental `RETENTION=MIDI TRACK` layout uses fields 30/31 of each
 MIDI step in the current-bank CS1 mirror. Each step's ten-bit DEG/CHRD token
 is stored at that **same pattern, track and step**. No track borrows another
 track's capacity. All 8,192 steps can carry both locks. Part defaults remain
 native Part data and runtime ownership/voicing history remain transient.
+ACC adds a four-bit amount in the same step word. Zero means inherit, one
+means OFF, 2…8 encode −7…−1, and 9…15 encode +1…+7. There is no freeze code.
 
-Each 128-byte lane uses the upper six bits of steps 1..22 for its own
-16-byte header: version, bank, lane, representation/scale, status, three
-reserved zero bytes, generation, and checksum. Remaining upper bits are zero.
-Step 0's upper six bits are the commit marker. The lane checksum covers its
-header identity and canonical 81-byte HDP3 payload. All lanes must have the
+HMT2 uses each word's low ten bits for DEG/CHRD, next four for ACC, and top
+two for metadata. Step 0's top two bits are the aligned commit marker.
+Steps 1…63 carry an 11-byte header (version, representation/scale, status,
+generation and checksum), four setting bytes, four default-amount bits, and
+two zero reserved bits. Expected bank/lane identity is included in the hash
+without spending stored bytes. The checksum covers that identity, header
+fields and the canonical 81-byte root lane plus 37-byte ACC lane. All lanes must have the
 same bank generation/status and pass validation before any runtime data is
 published. Lane 0's marker is cleared before changes and published last in
 one aligned word write. Bulk encoding and writes run with interrupts enabled;
@@ -118,15 +122,35 @@ fields are reverse-engineered reclamation, not an official free-space contract.
 The old `LEGACY` and `SHARED` layouts remain available for focused historical
 checks; neither is selected by the experimental remix. Do not combine SHARED
 with unmodified upstream PLOCKS. There is no automatic migration from either
-old SRAM layout: save the project with the previous firmware first. Existing
-HDP3 companion files and working tables are unchanged.
+old SRAM layout: save the project with the previous firmware first.
+Validated HDP3 companions and HMT1 track-local checkpoints upgrade with ACC
+OFF. The new track-local writer emits HMT2 and HDP4. Invalid checkpoints never
+partially publish; invalid companions remain protected against overwriting.
+
+HDP4 keeps the HDP3 10,368-byte root/quality payload unchanged, then appends
+128 ACC lanes of 37 bytes: 32 packed amount bytes followed by signed LOW,
+HIGH, BOUND, RESET and default amount. Its version-4 header is still 32 bytes,
+making a 15,136-byte companion. Validation checks the complete payload before
+publishing either roots, qualities or ACC. The default cannot be INHERIT.
+All SRAM metadata/configuration still fits in the existing 16,384-byte pool;
+PLOCKS and MIDI Scenes lose no capacity. Working configuration adds 75,776
+DRAM bytes across 16 banks; phase/direction uses 128 bytes per active MIDI
+track, plus event identity bookkeeping. The phase is never written to SRAM.
+
+Stock 1.40C does not interpret these companions. MIDI SRAM strips all reclaimed
+bytes from native bank files, so ACC adds no new native field values. An older
+Harmony build cannot read HDP4/HMT2; save a disposable backup before switching.
+Stock edits that change Harmony's native NOTE/trig fingerprint can cause a
+later Harmony load to reject the companion. Physical stock round-trip and
+power-off results must be reported separately from emulator/file checks.
 
 Each of 128 lanes stores one byte (`state*84 + outgoingScale`) and 64 ten-bit
 values (`degreeIndex*9 + qualityIndex`, MSB first). Degree index 84 and quality
 index 8 mean unlocked. Thus the payload is 128 × 81 = 10,368 bytes, plus its
 32-byte bank/version/checksum header. Every step can have both locks; there
 is no sparse limit, lossy truncation, variable worst case or overflow journal.
-HDP3 files and HDN3 retention use version 3. HDP0 remains the empty marker.
+Historical LEGACY/SHARED builds retain HDP3/HDN3 version 3 and no ACC UI.
+HDP0 remains the empty marker in all builds.
 
 **Snapshot reconstruction is an invariant, not a guess.** Every HARM root
 publication writes native NOTE and its runtime edit snapshot as the degree's
@@ -162,10 +186,55 @@ As with previous retention, power loss during an invalidated
 or incomplete checkpoint falls back to validated companions; this does not
 claim atomic unsaved-edit recovery at every power-loss instruction.
 
-No earlier Harmony format is migrated. Use a disposable project copy for
-first testing; remove its old `hdeg*.work` / `hdeg*.strd` companions to start
-fresh. Existing incompatible companions are rejected and protected from
-being overwritten by a save. Preserve the originals with the older firmware.
+Apart from the HDP3/HMT1 upgrade, earlier Harmony formats are not migrated.
+Use a disposable project copy for first testing. Incompatible companions are
+rejected and protected from being overwritten by a save; preserve the originals
+with the older firmware.
+
+## Accumulator hook and UI provenance
+
+Transport reset observes both native start stores: cold start at `0x4009c3d4`
+and resume at `0x4009c4d4`, replaying `move.l d0,0x800065b8` after preserving
+the caller's registers. These stores are documented in
+`docs/firmware/STEM_REC.md` section 1.3. The earlier cold-start staging-copy
+hook alone missed STOP/PLAY resume. Both edges now request a reset; the next
+actual note event resolves its incoming pattern's reset policy. The port gate
+checks a real STOP/PLAY journey, while linked checks cover both continuations,
+register/stack preservation and the NONE policy.
+
+The successful-note continuations at `0x4009fbb2` and `0x4009fcfa` follow the
+stock sender calls at `0x4009fbac` and `0x4009fcf4`. Disassembly of stock 1.40C
+(MAIN OS base `0x40000400`) shows ownership-rejected paths bypass these calls.
+The six claimed bytes replay the original sign-extended status-byte load into
+D1/D0 respectively; no interior branch target was found in the native path.
+The accumulator additionally excludes zero velocity and live arp pools.
+The linked gate exercises both continuations; the full-firmware gate observes
+sequenced notes, chord tones and arp repeats. Physical DIN timing remains untested.
+
+The window reuses native modal creation/input layers and encoder widgets.
+Its right-hand separators call stock's alternating-pixel line routine
+`0x40012004(surface,x0,y0,x1,y1,phase)`, also used by native SETUP drawing;
+selector and footer boundaries use `0x40012254`. No UI work runs in the
+sequencer or interrupt hooks. The port gate supplies physical button/encoder
+events and captures both sections for visual inspection.
+
+The pixel gate measures composed 1-bpp LCD ink, including the longest captured
+labels, against the native frame and dotted cell boundaries. Horizontal padding
+differs by at most one pixel (at most half a pixel of centre error); vertical
+padding is 1/1 pixels for CHORD groups and 4/4 for ACCUM groups. Each of A–F is
+also exercised independently through panel events in both sections: A/B/C map
+to the top row, D to the bottom-left cell, and empty E/F cells ignore turns.
+The checks compare the complete Harmony Part settings and ACC configuration,
+not just the intended field. Held-trig settings remain track-wide and held E
+press on NOTE MAIN restores inheritance. This is emulator LCD/input evidence,
+not physical encoder or display acceptance.
+
+The Part initialization harness retains the common degree-aware instruction
+allowance instead of overriding it with a smaller one-million-instruction cap.
+With ACC, linked `ch_lock_init` completes after 1,023,352 emulated instructions;
+the old cap stopped inside `hd_roots_reset_c`, before the return assertion.
+The unchanged Part/default/inheritance assertions pass with the existing
+degree-aware budget. This count is harness evidence, not hardware timing.
 
 `verify_harmony_degree_packed.py` checks independent bitstream oracles, dense
 banks, malformed payload rejection before publication, post-checkpoint native

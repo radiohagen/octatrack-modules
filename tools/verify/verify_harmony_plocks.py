@@ -170,7 +170,7 @@ def main():
     m.call('store_bankw_mid',stop=0x400918b0,regs={UC_M68K_REG_D6:1})
     assert u.reg_read(UC_M68K_REG_A7) == m.stack
     assert m.files['/SET/PROJECT/p2lk01.work'][16:] == p2
-    assert m.files['/SET/PROJECT/hdeg01.work'][:4] == b'HDP3'
+    assert m.files['/SET/PROJECT/hdeg01.work'][:4] == (b'HDP4' if track else b'HDP3')
     m.files['/SET/PROJECT/bank01.work'] = bytes(u.mem_read(BANK,STRIDE))
     dst, src = m.scratch+0x300, m.scratch+0x400
     u.mem_write(dst,b'/SET/PROJECT/bank01.strd\0')

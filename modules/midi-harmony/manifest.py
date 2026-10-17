@@ -6,7 +6,8 @@ from remix.schema import Apply, Option, Setting, Store, Category, Claims, Detour
 def follow_inc(modules):
     return (('.set HAVE_FOLLOW,1\n' if 'MIDI FOLLOW' in modules else '') +
             ('.set HAVE_SCALES,1\n' if 'MIDI SCALES' in modules else '') +
-            ('.set HAVE_PLOCKS_BRIDGE,1\n' if 'HARMONY PLOCKS' in modules else ''))
+            ('.set HAVE_PLOCKS_BRIDGE,1\n' if 'HARMONY PLOCKS' in modules else '') +
+            ('.set HAVE_ACCUM,1\n' if modules['MIDI HARMONY'].build_values.get('RETENTION') == 'MIDI TRACK' else ''))
 
 
 def retention_inc(modules):
@@ -21,6 +22,15 @@ def retention_variant(values):
                        if unit.label == 'degreestorage' else unit for unit in MODULE.linked)
         return dict(requires=('MIDI PART STATE','STORE','MIDI SRAM'),
                     linked=linked + (Linked('degreetrack','modules/midi-harmony/degrees/track-retention.s',dram=True),),
+                    detours=MODULE.detours + (
+                        Detour(0x4009c3d4,bytes.fromhex('23c0800065b8'),'harmonyaccumaccess','ha_start_a',
+                               'ACC reset policy on native transport cold start'),
+                        Detour(0x4009c4d4,bytes.fromhex('23c0800065b8'),'harmonyaccumaccess','ha_start_b',
+                               'ACC reset policy on native transport resume'),
+                        Detour(0x4009fbb2,bytes.fromhex('7339400d807c'),'midiharmony','ha_sent_a',
+                               'advance ACC after successful native note-on'),
+                        Detour(0x4009fcfa,bytes.fromhex('7139400d807c'),'midiharmony','ha_sent_b',
+                               'advance ACC after native note ownership replacement')),
                     claims=replace(MODULE.claims,sram=()))
     if values['RETENTION'] == 'SHARED':
         return dict(requires=('MIDI PART STATE','STORE','MIDI SRAM'),
@@ -42,7 +52,9 @@ MODULE = Module(
             Linked('midiharmony', 'modules/midi-harmony/harmony.s', dram=True, include=follow_inc),
             Linked('harmonyvoice', 'modules/midi-harmony/voicing.s', dram=True),
             Linked('harmonysize', 'modules/midi-harmony/size.s', dram=True),
-            Linked('harmonypage', 'modules/midi-harmony/page.s', dram=True),
+            Linked('harmonypage', 'modules/midi-harmony/page.s', dram=True, include=follow_inc),
+            Linked('harmonyaccumulator', 'modules/midi-harmony/degrees/accumulator.s', dram=True),
+            Linked('harmonyaccumaccess', 'modules/midi-harmony/degrees/accumulator-access.s', dram=True, include=follow_inc),
             Linked('harmonychords', 'modules/midi-harmony/chords.s', dram=True),
             Linked('chorddisplay', 'modules/midi-harmony/chord-display.s', dram=True, include=follow_inc),
             Linked('chordname', 'modules/midi-harmony/chord-name.s', dram=True),
@@ -76,7 +88,7 @@ MODULE = Module(
             Linked('degreehooks', 'modules/midi-harmony/degrees/hooks.s', dram=True)),
     store=Store('mattias.midi-harmony'),
     settings=(Setting(1,'RETENTION',Option('LEGACY','SHARED','MIDI TRACK'),default='LEGACY',
-                      apply=Apply.BUILD,doc='Retained checkpoint allocation; HDP3 files are unchanged.'),),
+                      apply=Apply.BUILD,doc='MIDI TRACK adds degree ACC and HDP4; reads HDP3. LEGACY/SHARED retain HDP3.'),),
     variant=retention_variant,
     symbol_refs=(
         *(SymbolRef(addr, 0x400a74c0, 'harmonyplay', 'ch_play_modes', 'MIDI trig modes include CHORD PLAY') for addr in (0x40035a24,0x40051efc,0x40051f6c)),
@@ -170,7 +182,8 @@ MODULE = Module(
                     'Degree scene A seed/range before unchanged MIDISC hold', kind='jsr'),
              Detour(0x40052ec2, bytes.fromhex('4eb94006dbcc'), 'degreesceneaccess', 'hd_scene_hold_b',
                     'Degree scene B seed/range before unchanged MIDISC hold', kind='jsr')),
-    gates=(Gate('tools/verify/verify_harmony_store.py', stage='image', venv=True),
+    gates=(Gate('tools/verify/verify_harmony_accumulator.py', stage='image', venv=True),
+           Gate('tools/verify/verify_harmony_store.py', stage='image', venv=True),
            Gate('tools/verify/verify_harmony_load_hooks.py', stage='image', venv=True),
            Gate('tools/verify/verify_midi_harmony_stress.py', stage='image', venv=True),
            Gate('tools/verify/verify_harmony_size.py', stage='image', venv=True),

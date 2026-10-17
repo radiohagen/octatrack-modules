@@ -17,7 +17,7 @@ def install(m,data):
     else:m.uc.mem_write(m.sym['hd_nv_base'],bytes(data))
 
 def committed(m):
-    if track_layout(m):return int.from_bytes(m.uc.mem_read(BASE+OFFSETS[0],2),'big') & 0xfc00 == 0xac00
+    if track_layout(m):return int.from_bytes(m.uc.mem_read(BASE+OFFSETS[0],2),'big') & 0xc000 == 0x8000
     return bytes(m.uc.mem_read(m.sym['hd_nv_base'],4))==b'HDN3'
 
 

@@ -29,15 +29,14 @@ outside MIDI 0–127 is silent; OFF conversion clamps to that native range.
 
 Press **F** on NOTE SETUP to open **HARMONY**:
 
-| Knob | Setting | Values |
-| --- | --- | --- |
-| A | HARM | OFF / NOTE / CHORD |
-| B | VOIC | ROOT / AUTO / 1ST / 2ND / 3RD |
-| C | SPRD | CLOSE / OPEN / WIDE |
-| D | ROOT | KEEP / OMIT / -1 OCT / -2 OCT |
-| E | SIZE | NAT / 2 / 3 / 4 |
+With MIDI TRACK retention, UP/DOWN selects CHORD or ACCUM. CHORD uses
+A/B/C across the top for VOIC/SPRD/ROOT and D below A for SIZE. ACCUM uses
+the same positions for LOW/HIGH/BOUND and RESET. Empty E/F cells ignore turns.
+HARM remains on the parent NOTE SETUP F; no NOTE subsection is present.
+The historical LEGACY/SHARED window retains HARM/VOIC/SPRD/ROOT/SIZE on A–E.
+See the [user guide](README.md) for the values and accumulator workflow.
 
-F is inactive. YES, NO or F closes the window; track/page keys close it
+YES, NO or F closes the window; track/page keys close it
 before changing selection on a second press. Edits apply immediately. YES
 on NOTE SETUP preserves RFOL and HARM while confirming stock staged fields.
 Fresh Parts use HARM OFF, DEG `1:3`, CHRD TRI and ROOT/CLOSE/KEEP voicing and SIZE NAT.
@@ -148,9 +147,11 @@ Part/Kit recall supplies incoming defaults; explicit DEG/CHRD locks stay with
 patterns. Runtime roots, note ownership and AUTO history are not persisted.
 
 Keep `hdeg01.work`–`hdeg16.work` and their `.strd` companions with the project.
-They store pattern DEG/CHRD locks in compact HDP3 format. There is no migration
-from earlier Harmony formats or project-comment settings. Start with a project
-copy without older `hdeg` companions; incompatible files block overwriting saves. See [degree storage](degrees/README.md) for the
+With MIDI TRACK retention they store pattern DEG/CHRD locks and ACC configuration
+in HDP4 format. Valid HDP3 companions and HMT1 checkpoints upgrade with ACC OFF;
+other earlier formats and project-comment settings are not migrated. Older
+Harmony builds cannot read HDP4/HMT2. Use a disposable project copy;
+incompatible files block overwriting saves. See [degree storage](degrees/DEVELOPMENT.md) for the
 layout, failure handling and native boundary rules, [KITS](degrees/KITS.md)
 and [MIDI Scenes](degrees/SCENES.md) for composition details. Combining Harmony with PLOCKS P2 requires the HARMONY PLOCKS bridge and
 compatible retention settings; their unadapted hooks overlap. For this branch's track-local experiment, select MIDI SRAM and Harmony `MIDI TRACK`;
@@ -180,9 +181,64 @@ with `--check`; edit the C source, never its generated assembly.
 
 Harmony is a STORE client (`ch_st_*` in `chord-files.s`). STORE owns native
 save/load/new-project/CS1/copy hooks and preserves the original caller
-identity. Harmony reads HDP3 after native banks and KITS, snapshots its own
+identity. Harmony reads its validated companions after native banks and KITS, snapshots its own
 retained allocation, and returns errors through STORE's checked callbacks.
 A failed companion save blocks native bank and P2 backup writes. The pattern
 and track copy bridge remains separate because it carries live MIDI/audio
-editing state, not project-file operations. HDP3, HDN3 and P2 capacities are
-unchanged by this registration.
+editing state, not project-file operations. STORE registration itself does not
+alter capacity. ACC's HDP4/HMT2 layout retains the same 16,384-byte MIDI SRAM
+allocation and leaves PLOCKS and Scenes capacity unchanged.
+
+## Accumulator validation
+
+Harmony is greenfield and has no released-user migration obligation. Existing
+historical format readers are implementation details, not a compatibility promise.
+Acceptance focuses on current settings, native project preservation and reliable
+save/reload/retained recovery.
+
+The import comes from preserved source commit `510e0aee`; per-file hashes
+are recorded in `integration/sources.json`. The focused linked gate covers
+boundary policies, reset policies, actual-sound advancement, dense packing,
+HDP3/HMT1 upgrades and native transport-hook ABI preservation. Its skip-advance
+negative control must fail.
+
+The full-firmware accumulator gate exercises real panel events, each A–F
+control independently in both sections, held trigs, transport restart,
+chord/arp output, Follow plus TRAN, retained restart and native project
+save/cold reload. The pixel gate measures actual composed LCD ink against
+cell boundaries. Dense coexistence covers all 8,192 Harmony/ACC steps,
+4,768 PLOCKS locks and 16,384 Scenes bytes.
+
+Run these in a staged Octabam worktree, not this source-only repository:
+
+```sh
+.venv/bin/python tools/verify/verify_harmony_accumulator.py harmony-track-bus
+.venv/bin/python tools/verify/verify_harmony_accumulator_port.py --project /path/to/copy
+.venv/bin/python tools/verify/verify_harmony_accumulator_ui.py out/harmony-accumulator-port/panel-note
+```
+
+These are software and emulator checks. They do not establish physical display,
+encoder, DIN timing or battery-backed power-off acceptance. See
+[implementation and measured layout](degrees/DEVELOPMENT.md).
+
+### Author-repository staging, 2026-10-17
+
+The current author source builds on the unchanged integration pin
+`8f8e00d061d17a890a3b01d5f340492f912712e2`, BUILD 80, PGO off.
+Its MAIN OS is 1,228,366 bytes, SHA-256
+`f5e043e953fc2f486b732e34c9c34bb45077143ede25be499bd7d7de092d2fd7`.
+It is not byte-identical to the earlier preserved-source image: 100 of 101
+runtime objects are identical; only BRAIN differs, because the author repo's
+existing module credits use `radiohagen`. Its generated credit strings account
+for the changed layout/relocations and compressed image.
+
+Source checks, all 15 author-repository tests, generated assembly, the staged
+linked accumulator gate and native Part initializer gate pass. Suppressing
+actual-sound advancement fails the negative control at the expected 48-versus-50
+assertion. An empty project directory initially invalidated the port test setup;
+the accumulator port gate now rejects it before building a fixture. Keep those
+failed runs separate from valid-project results.
+
+The preserved-source general check initially hit the old Part initializer
+instruction cap. The corrected focused gate passes without weakening its
+behavioral assertions; that initial general run is not a clean all-pass result.

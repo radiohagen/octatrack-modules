@@ -83,7 +83,9 @@ def main():
     u.mem_write(s['ch_lock_table']+3,b'\x04')
     assert m.call('ch_file_write',0)==1
     path='/SET/PROJECT/hdeg01.work';original=m.files[path]
-    assert len(original)==10400 and original[:8]==b'HDP3'+(3).to_bytes(4,'big')
+    version=4 if m.c('ha_enabled_c') else 3
+    assert len(original)==(15136 if version==4 else 10400)
+    assert original[:8]==f'HDP{version}'.encode()+version.to_bytes(4,'big')
     assert int.from_bytes(original[16:20],'big')==fnv(original[32:])
     # The validation helper may tail-call and rewrite its argument; the hash
     # wrapper must still hash the COMPLETE payload from its original pointer.
@@ -123,7 +125,8 @@ def main():
     result={'round_trip':'passed','incoming_part_default_preserved':'passed','full_payload_checksum':'passed','malformed_files':len(invalid),
             'injected_write_failures':4,'stored_backup_guard':'passed','hardware_tested':False}
     print(json.dumps(result))
-    (ROOT/'out/harmony-degrees/files.json').write_text(json.dumps(result,indent=2)+'\n')
+    out=ROOT/'out/harmony-degrees';out.mkdir(parents=True,exist_ok=True)
+    (out/'files.json').write_text(json.dumps(result,indent=2)+'\n')
 
 
 if __name__=='__main__':main()

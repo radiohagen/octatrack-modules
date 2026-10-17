@@ -14,8 +14,15 @@
         .set    IOB_LEN,    0x1000
 
     .set BANK_B,8192
+.ifdef HD_TRACK_SRAM
+    .set FILE_B,15104
+    .set FILE_MAGIC,0x48445034 /* HDP4: HDP3 roots plus ACC lanes */
+    .set FILE_VERSION,4
+.else
     .set FILE_B,10368
-    .set FILE_MAGIC,0x48445033 /* HDP3: packed quality, degree and exact NOTE snapshot */
+    .set FILE_MAGIC,0x48445033
+    .set FILE_VERSION,3
+.endif
     .set FILE_NONE,0x48445030  /* HDP0: explicit empty companion */
     .text
     .global ch_st_bankw_guard,ch_st_bankcopy_guard,ch_st_bankcopy_done
@@ -87,7 +94,7 @@ bl_loop:
 | hdr: d0 = bank -> HDR filled.
 hdr:    lea     HDR,%a0
         movel   #FILE_MAGIC,%a0@
-        moveq   #3,%d1
+        moveq   #FILE_VERSION,%d1
         movel   %d1,%a0@(4)
         movel   %d0,%a0@(8)
         movel   #FILE_B,%d1
@@ -292,10 +299,14 @@ ch_file_read:
     move.l HDR,%d0
     cmpi.l #FILE_NONE,%d0 /* explicit empty companion */
     beq.w .rd_none
+.ifdef HD_TRACK_SRAM
+    cmpi.l #0x48445033,%d0
+    beq.w .rd_legacy
+.endif
     cmpi.l #FILE_MAGIC,%d0
     bne.w .rd_bad
     move.l HDR+4,%d0
-    cmpi.l #3,%d0
+    cmpi.l #FILE_VERSION,%d0
     bne.w .rd_bad
     cmp.l HDR+8,%d2
     bne.w .rd_bad
@@ -318,6 +329,7 @@ ch_file_read:
     bne.w .rd_bad
     lea PAYLOAD,%a0
     bsr.w .payload_hash
+.rd_hash_ready:
     tst.l %d1
     beq.w .rd_bad
     cmp.l HDR+16,%d0
@@ -326,13 +338,48 @@ ch_file_read:
     move.l %d2,%d0
     bsr.w ch_native_hash
     cmp.l HDR+20,%d0
-    bne.s .rd_bad
+    bne.w .rd_bad
     bsr.w fclose
     move.l %d2,%d0
     lea PAYLOAD,%a0
     jsr hd_import
     moveq #1,%d3
-    bra.s .rd_status
+    bra.w .rd_status
+.ifdef HD_TRACK_SRAM
+.rd_legacy:
+    move.l HDR+4,%d0
+    cmpi.l #3,%d0
+    bne.w .rd_bad
+    cmp.l HDR+8,%d2
+    bne.w .rd_bad
+    move.l HDR+12,%d0
+    cmpi.l #10368,%d0
+    bne.w .rd_bad
+    move.l HDR+24,%d0
+    or.l HDR+28,%d0
+    bne.w .rd_bad
+    pea FOBJ
+    jsr 0x400148d4
+    addq.l #4,%sp
+    cmpi.l #10400,%d0
+    bne.w .rd_bad
+    lea PAYLOAD,%a0
+    move.l #10368,%d0
+    lea F_READ,%a1
+    bsr.w fio
+    cmpi.l #1,%d0
+    bne.w .rd_bad
+    pea PAYLOAD
+    jsr hd_packed_valid_c
+    addq.l #4,%sp
+    tst.l %d0
+    beq.w .rd_bad
+    pea PAYLOAD
+    jsr hd_legacy_hash_c /* hash original bytes, then append OFF defaults */
+    addq.l #4,%sp
+    moveq #1,%d1
+    bra.w .rd_hash_ready
+.endif
 .rd_none:
     pea FOBJ
     jsr 0x400148d4

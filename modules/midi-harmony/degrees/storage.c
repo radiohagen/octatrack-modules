@@ -5,10 +5,16 @@
 #ifdef HD_TRACK_SRAM
 #include "track-retention.h"
 /* Outer saver owns this staging buffer; retained reads occur during load. */
-static uint8_t track_payload[HD_PAYLOAD_BYTES];
+static uint8_t track_payload[HD_TRACK_PAYLOAD_BYTES];
 #endif
 
-enum { QUALITY_BYTES = HD_LOCKS, PAYLOAD_BYTES = HD_PAYLOAD_BYTES };
+enum { QUALITY_BYTES = HD_LOCKS,
+#ifdef HD_TRACK_SRAM
+       PAYLOAD_BYTES = HD_TRACK_PAYLOAD_BYTES
+#else
+       PAYLOAD_BYTES = HD_PAYLOAD_BYTES
+#endif
+};
 extern uint8_t ch_lock_table[16 * QUALITY_BYTES];
 extern uint8_t ch_lock_status[16];
 extern volatile uint32_t ch_nv_bank;
@@ -56,7 +62,17 @@ void hd_nv_poll_c(void) {
     if (pending && available && ch_nv_bank < HD_BANKS) hd_nv_save_c(ch_nv_bank);
 }
 int hd_payload_valid_c(const uint8_t *p) {
+#ifdef HD_TRACK_SRAM
+    if (!ha_valid_c(p+HD_PAYLOAD_BYTES)) return 0;
+#endif
     return hd_packed_valid_c(p);
+}
+uint32_t hd_legacy_hash_c(uint8_t *p) {
+    uint32_t result=hash(p,HD_PAYLOAD_BYTES,0x811c9dc5u);
+#ifdef HD_TRACK_SRAM
+    ha_blank_c(p+HD_PAYLOAD_BYTES);
+#endif
+    return result;
 }
 uint32_t hd_payload_hash_c(const uint8_t *p) {
     return hash(p, PAYLOAD_BYTES, 0x811c9dc5u);
@@ -70,11 +86,18 @@ int hd_export_c(unsigned bank, uint8_t *p) {
         ticket = generation;
         roots_ticket = hd_revision_c(bank);
         valid = hd_pack_c(&hd_banks[bank], ch_lock_table + bank*QUALITY_BYTES, p);
+#ifdef HD_TRACK_SRAM
+        ha_pack_c(bank,p+HD_PAYLOAD_BYTES);
+        valid = valid && ha_valid_c(p+HD_PAYLOAD_BYTES);
+#endif
     } while (ticket != generation || roots_ticket != hd_revision_c(bank));
     return valid;
 }
 void hd_import_c(unsigned bank, const uint8_t *p) {
-    if (bank >= 16 || !hd_unpack_c(&hd_banks[bank], ch_lock_table + bank*QUALITY_BYTES, p)) return;
+    if (bank >= 16 || !hd_payload_valid_c(p) || !hd_unpack_c(&hd_banks[bank], ch_lock_table + bank*QUALITY_BYTES, p)) return;
+#ifdef HD_TRACK_SRAM
+    ha_unpack_c(bank,p+HD_PAYLOAD_BYTES);
+#endif
     hd_bank_loaded_c(bank);
 }
 uint32_t hd_native_hash_c(unsigned bank, uint32_t h) {
@@ -101,6 +124,7 @@ void hd_nv_save_c(unsigned bank) {
         uint32_t roots_ticket = hd_revision_c(bank);
 #ifdef HD_TRACK_SRAM
         int valid = hd_pack_c(&hd_banks[bank], ch_lock_table + bank*QUALITY_BYTES, track_payload);
+        ha_pack_c(bank,track_payload+HD_PAYLOAD_BYTES);
         if (valid) valid = hd_track_write_c(track_payload, bank, ticket, ch_lock_status[bank]);
 #else
         int valid = hd_pack_c(&hd_banks[bank], ch_lock_table + bank*QUALITY_BYTES, NV_PAYLOAD);
@@ -149,6 +173,7 @@ int hd_nv_restore_c(unsigned bank) {
     if (!hd_track_read_c(track_payload, bank, &status) ||
         !hd_unpack_c(&hd_banks[bank], ch_lock_table + bank*QUALITY_BYTES, track_payload)) return 0;
     ch_lock_status[bank] = (uint8_t)status;
+    ha_unpack_c(bank,track_payload+HD_PAYLOAD_BYTES);
     ch_nv_bank = bank;
     hd_bank_loaded_c(bank);
     return 1;

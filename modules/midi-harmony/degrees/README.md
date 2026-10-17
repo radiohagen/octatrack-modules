@@ -17,10 +17,15 @@ remain attached to their patterns. Native NOTE fields hold canonical storage
 mirrors while HARM is active, so stock firmware can play different pitches.
 
 Each bank uses `hdegNN.work` and `hdegNN.strd` companions in the project directory.
-HDP3 validates the payload and its relationship to the native bank before use.
+MIDI TRACK stores roots, chord locks and accumulator configuration. Payloads and their
+relationship to the native bank are validated before use.
 Missing companions cannot guarantee recovery of the original Harmony data;
-incompatible or corrupt companions are protected from overwrite. Earlier Harmony formats are
-not migrated. Preserve an older project's files with its matching firmware.
+incompatible or corrupt companions are protected from overwrite.
+
+ACC uses one four-bit amount per step: INHERIT, OFF, or ±1…7 degrees. Default
+amount, limits, boundary and reset policy belong to the pattern/track. Runtime
+offsets are not saved. MIDI TRACK retains the configuration inside the same
+16,384 reclaimed MIDI bytes, with no reduction in PLOCKS or Scenes capacity.
 
 KITS recalls Part defaults; it does not move pattern locks. See
 [KITS](KITS.md), [Scenes](SCENES.md) and [Voicing](../VOICING.md).

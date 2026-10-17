@@ -33,12 +33,25 @@ initialization correction from OCTABAM85 (`44a7c6b9`). Shared copy/STORE
 integration, the PIO write fix and Quantizer MIDI drawer adapter remain selected.
 These are not removed by moving Harmony's retained data.
 
-HDP3 and P2LK project companion formats are unchanged. Old retained layouts
-are not migrated automatically: save with the previous firmware before
-switching. The MIDI bytes are reverse-engineered reclamation, not an official
+Harmony now writes HDP4/HMT2 with per-step ACC, upgrading valid HDP3/HMT1
+with ACC OFF. P2LK is unchanged. Other old retained layouts are not migrated
+automatically: save with the previous firmware before switching. Older Harmony
+builds cannot read the new layout. The MIDI bytes are reverse-engineered reclamation, not an official
 free-space contract. MIDI SRAM protects them against native bulk writes and
 strips them from native DRAM, clipboards and bank files; Harmony's lifecycle
 hooks perform the musical copy/clear operation and checkpoint the result.
+
+## Accumulator candidate
+
+The Harmony accumulator update is imported from preserved source
+`510e0aee`. It does not change the integration base pinned in
+`integration/octabam.json`, and the historical BUILD 79 results below do not
+qualify this new candidate. Its focused source-build evidence uses BUILD 80,
+PGO off, MAIN OS SHA-256
+`576403a42614a5b0a18c098a748ed9b9488ffed44f060f072a4dc9103fbd203b`.
+See [Harmony development](../../modules/midi-harmony/DEVELOPMENT.md) for
+the gates and hardware boundary. Retained storage capacity is unchanged;
+ACC adds 75,776 bytes of working configuration in DRAM plus transient phase.
 
 ## Historical completed-source validation
 

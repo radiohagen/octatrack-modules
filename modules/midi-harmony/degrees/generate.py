@@ -19,7 +19,7 @@ FLAGS = ['-mcpu=54455', '-O2', '-ffreestanding', '-fno-builtin', '-fno-common',
 def main():
     generated = {}
     with tempfile.TemporaryDirectory(prefix='harmony-degrees-generate-') as tmp:
-        for unit in ('core', 'packed', 'storage', 'events', 'ui', 'operations', 'roots', 'recording', 'scenes', 'track-retention', 'storage-track'):
+        for unit in ('core', 'packed', 'storage', 'events', 'ui', 'operations', 'roots', 'recording', 'scenes', 'track-retention', 'storage-track', 'accumulator'):
             dest = pathlib.Path(tmp)/f'{unit}.s'
             source = 'storage' if unit == 'storage-track' else unit
             defines = ['-DHD_TRACK_SRAM=1'] if unit == 'storage-track' else []
