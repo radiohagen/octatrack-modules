@@ -109,9 +109,15 @@ pending messages; at most 128 internally held pitches reserve 128 release
 slots across all channels. An INT admission failure leaves a tombstone so
 its later release does not leak externally; BOTH still sends the event
 externally. Counters expose accepted/delivered messages, drops and high water.
-Cleanup scans a bounded ownership table with interrupts masked and uses the
-stock sender for external releases. Its worst-case hardware cost and UART
-backpressure are not yet measured.
+Eight 16-bit volatile counters track live ownership per source track, including
+EXT notes. They are updated together with ownership under the same interrupt
+mask. Duplicate notes and release/drop tombstones add no count; releases debit
+the recorded owner, independently of the releasing producer. An empty track
+skips the ownership scan without clearing its late-release tombstones. A track
+with live notes still scans the bounded ownership table with interrupts masked
+and uses the stock sender for external releases. The counters use 16 bytes
+inside the existing platform reserve, with no allocation or storage-format change.
+Worst-case hardware cost and UART backpressure are not yet measured.
 
 The platform reserve takes approximately 10 MB of sample memory when added
 to an otherwise stock image. The module's linked code/state uses only a

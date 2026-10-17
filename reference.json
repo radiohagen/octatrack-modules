@@ -9,9 +9,9 @@
       "sha256": "4de11692e14103dde57ed86c303a7332998c912fb8156fcf90b21a6f0ce32ca2"
     },
     "runtime": {
-      "bytes": 9268,
-      "sha256": "90e4fd52eb8126c15b72533772b5e4cacad1941ea6309d4930281495eb357f0f"
+      "bytes": 9340,
+      "sha256": "c69e627267a9a1fd0e3e7d3c5414118171d1a1d03d4f3b72c101431bfa7c9bcc"
     }
   },
-  "revision_note": "Track keys inherit native dispatch, closing the detail window and selecting the requested track on one press; measured against stock 1.40C TEMPO over MIDI NOTE SETUP."
+  "revision_note": "Per-track live ownership counts skip empty cleanup while preserving original-destination releases and late-release tombstones; 16 bytes of volatile state within the existing platform reserve."
 }
