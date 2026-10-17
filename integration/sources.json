@@ -124,7 +124,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-harmony/README.md",
       "sha256": "2503b41cfcdfaae42effb0ec2c17a9c6a3f0ffd11f74e623d3f78d94c7d4704e",
-      "published_sha256": "91527108992a114d1d909972952d3c398cb661502cb89725bfdb7cfd79a2d41c",
+      "published_sha256": "6d076032989a0481e9219d5f5caf625965af8cf7ee0ca0e42430a7f9043a1a7f",
       "source_mode": "100644"
     },
     "modules/midi-harmony/VOICING.md": {
@@ -1304,7 +1304,7 @@
     "modules/midi-harmony/DEVELOPMENT.md": {
       "path": "modules/midi-harmony/DEVELOPMENT.md",
       "sha256": "2503b41cfcdfaae42effb0ec2c17a9c6a3f0ffd11f74e623d3f78d94c7d4704e",
-      "published_sha256": "68d4c8941358bd9b3b9ea336ac2837ca477a98c8848a1a13a6b8f068d0252948",
+      "published_sha256": "e2d44005827d0135759bf4e99ac84907532cb449c304cb8e795351e5f9d5ae9e",
       "source_mode": "100644",
       "origin": "Split from adjacent README in this repository; historical evidence is retained in the text."
     },

@@ -332,6 +332,22 @@ The full-port dense test passes on the combined image with 8,192 Harmony/ACC
 steps, 4,768 PLOCKS locks and 16,384 Scenes bytes. It checks native checkpoint,
 retained restarts, track clear, and new-project reset followed by restart.
 
+All 12 accumulator full-port result groups pass on the consolidated image:
+defaults/locks, sequence, retained restart, transport reset, navigation,
+measured pixels, positional encoders, held/native controls, project save/cold
+reload, chord, arp and Follow plus TRAN. Standalone Harmony also passes its
+complete native musical/control gate and dense retention gate, without optional
+Follow, Scales or PLOCKS dependencies.
+
+The direct combined image-gate run completes with **47 gates, zero failures**:
+`.venv/bin/python tools/verify/module_gates.py harmony-track-bus --stage image`.
+Project-dependent subcases explicitly skip without `OT_PROJECT`; they are not
+counted as tested. The separate accumulator and dense-coexistence port runs
+above do use valid disposable projects. The final MAIN OS hash still matches
+the frozen port candidate. All 57 Harmony runtime/source files match the author
+branch; all 239 original provenance records survive in current/retired entries.
+The BRAIN lock check also confirms the removed RETENTION key is retired.
+
 The pinned builder's broad `make verify` is not an all-pass receipt. Its shared
 documentation gate first needed generated indexes refreshed with `make docs`,
 then reported eight references inside its historical
