@@ -1585,7 +1585,7 @@
     "modules/midi-harmony/DEVELOPMENT.md": {
       "path": "modules/midi-harmony/DEVELOPMENT.md",
       "sha256": "2503b41cfcdfaae42effb0ec2c17a9c6a3f0ffd11f74e623d3f78d94c7d4704e",
-      "published_sha256": "f433acb25bce2dc881ba37290d90a71f5ce38b811049ee763fd8cf637a9a0b9d",
+      "published_sha256": "146fdcd81923162cca7cf5e803161b22b66b334804cbe272d0adf34959e97edf",
       "source_mode": "100644",
       "origin": "Split from adjacent README in this repository; historical evidence is retained in the text."
     },

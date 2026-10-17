@@ -239,6 +239,14 @@ assertion. An empty project directory initially invalidated the port test setup;
 the accumulator port gate now rejects it before building a fixture. Keep those
 failed runs separate from valid-project results.
 
+The fresh full-firmware accumulator run passes all 12 result groups on that
+staged image: panel defaults/locks, sequence, unsaved retained restart, native
+transport reset, setup navigation, measured pixels, each positional encoder,
+standard/held controls, native project save/cold reload, chord, arp and Follow
+plus TRAN. Follow's unchanged UI also passes its 32-render gate and full-port
+register/lifecycle suite. These results do not replace broader regression or
+physical-device acceptance.
+
 The preserved-source general check initially hit the old Part initializer
 instruction cap. The corrected focused gate passes without weakening its
 behavioral assertions; that initial general run is not a clean all-pass result.
