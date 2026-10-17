@@ -68,6 +68,33 @@ class StageGuards(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'Invalid original'):
             retired_paths(self.work, receipt)
 
+    def test_recorded_removal_and_absent_original(self):
+        old = 'modules/example/obsolete.s'
+        path = self.work / old
+        path.parent.mkdir(parents=True)
+        path.write_text('; original')
+        self.run_git('-C', str(self.work), 'add', old)
+        receipt = {'files': {}, 'retired_files': {old: {'path': old}}}
+        self.assertEqual(retired_paths(self.work, receipt), [path.resolve()])
+        receipt['retired_files']['modules/example/never-staged.s'] = {}
+        self.assertEqual(retired_paths(self.work, receipt), [path.resolve()])
+        receipt['files'][old] = {'path': old}
+        with self.assertRaisesRegex(ValueError, 'Invalid original'):
+            retired_paths(self.work, receipt)
+
+    def test_removal_rejects_untracked_and_symlink_targets(self):
+        old = 'modules/example/obsolete.s'
+        path = self.work / old
+        path.parent.mkdir(parents=True)
+        path.write_text('; user work')
+        receipt = {'files': {}, 'retired_files': {old: {}}}
+        with self.assertRaisesRegex(ValueError, 'not tracked'):
+            retired_paths(self.work, receipt)
+        path.unlink()
+        path.symlink_to(self.root / 'outside.s')
+        with self.assertRaisesRegex(ValueError, 'Invalid original'):
+            retired_paths(self.work, receipt)
+
 
 if __name__ == '__main__':
     unittest.main()
