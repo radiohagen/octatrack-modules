@@ -14,8 +14,6 @@ def build(out):
         subprocess.run(list(map(str, args)), check=True, stdout=subprocess.DEVNULL)
     entry = ROOT / 'modules/midi-part-state/entry.s'
     run('m68k-elf-as', '-mcpu=5407', '-o', out/'entry.o', entry)
-    run('m68k-elf-ld', '-Ttext=0x400d6b80', '-o', out/'entry.elf', out/'entry.o')
-    run('m68k-elf-objcopy', '-O', 'binary', out/'entry.elf', out/'entry.bin')
     units = [('midi-part-state', 'part'), ('midi-part-state', 'part-copy'),
              ('midi-loopback', 'loopback'), ('midi-loopback', 'producers'),
              ('midi-loopback', 'settings'), ('midi-loopback', 'page')]
@@ -31,6 +29,15 @@ def build(out):
     run('m68k-elf-ld', '-Ttext=0x40a955e0', '--defsym=mp_copy_target=0x400d6bb8',
         '--defsym=mp_init_target=0x400d6bbc', '-o', out/'runtime.elf', *objects)
     run('m68k-elf-objcopy', '-O', 'binary', out/'runtime.elf', out/'runtime.bin')
+    # Resolve activation operands from the actual standalone runtime link.
+    nm = subprocess.check_output(['m68k-elf-nm', str(out/'runtime.elf')], text=True)
+    symbols = {f[2]: int(f[0],16) for line in nm.splitlines()
+               if len(f := line.split()) == 3 and f[1] != 'U'}
+    run('m68k-elf-ld', '-Ttext=0x400d6b80',
+        '--defsym=mp_native_copy='+hex(symbols['mp_native_copy']),
+        '--defsym=mp_native_init='+hex(symbols['mp_native_init']),
+        '-o', out/'entry.elf', out/'entry.o')
+    run('m68k-elf-objcopy', '-O', 'binary', out/'entry.elf', out/'entry.bin')
     return {name: {'bytes': len((out/(name+'.bin')).read_bytes()),
                    'sha256': hashlib.sha256((out/(name+'.bin')).read_bytes()).hexdigest()}
             for name in ('entry', 'runtime')}

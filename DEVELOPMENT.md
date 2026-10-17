@@ -21,6 +21,23 @@ hashes. GNU m68k tools must be on PATH. No firmware is needed for this check.
 The cross-unit runtime is checked together because its units refer to one
 another; independent `Linked.reference` links cannot resolve those references.
 
+## Resident activation
+
+The post-loader activation body is also linked into the OS entry unit. Its
+callback addresses are mandatory `Linked.runtime_refs`, resolved from the
+selected runtime rather than frozen addresses. The declared `defsyms` values
+describe the standalone reference only. The original runtime body is retained
+unused to preserve runtime placement during validation. The standalone oracle
+links the runtime first, then resolves the resident body's operands from it.
+
+This keeps native startup order and DSP upload code unchanged. A placement
+prototype passed initial and requested cold startup with all module hooks
+enabled; the physical failure mechanism and repeated final-image hardware
+acceptance remain open. Octabam's activation gate compares registers, status,
+stack and callback stores before the native continuation, and rejects a
+deliberately corrupted callback. The build refuses missing providers, changed
+resident size or moved exports.
+
 ## Detail-window track navigation
 
 Track keys inherit the native input handler. One press closes the detail

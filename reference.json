@@ -5,13 +5,13 @@
   "provenance": "8f8e00d061d17a890a3b01d5f340492f912712e2",
   "artifacts": {
     "entry": {
-      "bytes": 64,
-      "sha256": "4de11692e14103dde57ed86c303a7332998c912fb8156fcf90b21a6f0ce32ca2"
+      "bytes": 98,
+      "sha256": "c7a3725b8e7b3ba4f830795b198e6800b2fbf9490bbd52e26e70c88252ec9b88"
     },
     "runtime": {
       "bytes": 9340,
       "sha256": "c69e627267a9a1fd0e3e7d3c5414118171d1a1d03d4f3b72c101431bfa7c9bcc"
     }
   },
-  "revision_note": "Per-track live ownership counts skip empty cleanup while preserving original-destination releases and late-release tombstones; 16 bytes of volatile state within the existing platform reserve."
+  "revision_note": "Resident Part activation publishes runtime-resolved callbacks after native platform load. Native startup and runtime bytes are preserved. Hardware placement prototype passed initial and one requested cold start; final source-built acceptance remains pending."
 }
