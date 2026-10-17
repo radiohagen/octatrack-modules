@@ -10,7 +10,6 @@ typedef struct {
 } HaLane;
 _Static_assert(sizeof(HaLane) == HA_LANE_BYTES, "accumulator lane ABI");
 extern HaLane ha_lanes[16][128];
-extern unsigned ha_enabled_c(void);
 int ha_amount_c(unsigned code);
 unsigned ha_lock_c(unsigned bank, unsigned pattern, unsigned track, unsigned step);
 void ha_set_c(unsigned bank, unsigned pattern, unsigned track, unsigned step, unsigned code);
@@ -24,7 +23,6 @@ void ha_sounded_c(unsigned track);
 int ha_valid_c(const volatile uint8_t *p);
 void ha_pack_c(unsigned bank, volatile uint8_t *p);
 void ha_unpack_c(unsigned bank, const volatile uint8_t *p);
-void ha_blank_c(volatile uint8_t *p);
 int ha_ui_value_c(int step);
 int ha_ui_edit_c(int delta, int toggle, int steps);
 int ha_setting_c(unsigned track, unsigned knob, int delta);

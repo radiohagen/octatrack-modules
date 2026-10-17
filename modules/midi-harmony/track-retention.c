@@ -4,7 +4,6 @@
  * default amount (4 bits), reserved (2 bits). Expected bank/lane identity
  * is hashed rather than stored. Lane 0 commits last after the outer
  * generation recheck. Every lane validates before ANY runtime publication.
- * A fully validated HMT1 checkpoint upgrades with ACC OFF.
  */
 #include "track-retention.h"
 #define MARK 0x8000u
@@ -72,37 +71,8 @@ int hd_track_write_c(const uint8_t *payload, unsigned bank, uint32_t ticket, uns
 void hd_track_commit_c(void) {
     *at(0,0) |= MARK;
 }
-static int legacy(uint8_t *payload, unsigned bank, unsigned *status) {
-    if ((*at(0,0)&0xfc00u)!=0xac00u) return 0;
-    uint32_t generation=0;
-    unsigned bank_status=0;
-    for (unsigned lane=0;lane<128;++lane) {
-        uint8_t h[16]={0};
-        uint8_t *p=payload+lane*81;
-        for (unsigned i=0;i<81;++i) p[i]=0;
-        for (unsigned step=0;step<64;++step) {
-            unsigned word=*at(lane,step),meta=word>>10;
-            if (!step) { if (meta!=43) return 0; }
-            else {
-                if ((step==22 && (meta&15)) || (step>22 && meta)) return 0;
-                append(h,(step-1)*6,6,meta,128);
-            }
-            append(p+1,step*10,10,word&TOKEN,640);
-        }
-        p[0]=h[3];
-        if (h[0]!=1 || h[1]!=bank || h[2]!=lane || h[4]>4 || h[5] || h[6] || h[7] ||
-            get32(h+12)!=hash(p,81,hash(h,12,0x811c9dc5u))) return 0;
-        if (!lane) { generation=get32(h+8);bank_status=h[4]; }
-        else if (get32(h+8)!=generation || h[4]!=bank_status) return 0;
-    }
-    if (!hd_packed_valid_c(payload)) return 0;
-    ha_blank_c(payload+HD_PAYLOAD_BYTES);
-    *status=bank_status;
-    return 1;
-}
 int hd_track_read_c(uint8_t *payload, unsigned bank, unsigned *status) {
     if (bank >= HD_BANKS || (*at(0,0) & ~DATA) != MARK) return 0;
-    if (legacy(payload,bank,status)) return 1;
     uint32_t generation=0;
     unsigned bank_status=0;
     for (unsigned lane=0; lane<HD_LANES; ++lane) {

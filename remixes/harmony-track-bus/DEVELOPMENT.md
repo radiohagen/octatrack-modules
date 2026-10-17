@@ -14,12 +14,12 @@ MIDI Arp Presets, FM Synth/Synth Machine, Sophie, Supersaw and POST FADER.
 
 ## Storage and integration boundaries
 
-Harmony uses `RETENTION=MIDI TRACK`: each step's degree/chord token occupies
+Harmony uses track-local retention: each step's degree/chord token occupies
 that same MIDI step's two reclaimed bytes. Metadata remains inside the same
 track. No track borrows another track's capacity, and Harmony reserves no
 contiguous tail SRAM. Native track clear removes its Harmony locks; copy,
 paste and undo carry the appropriate musical data. See the
-[layout and lifecycle contract](../../modules/midi-harmony/degrees/README.md).
+[layout and lifecycle contract](../../modules/midi-harmony/DEVELOPMENT.md).
 
 PLOCKS P2 keeps upstream's storage at `0x100f8600..0x100fbdf0`, its `P2NV`
 format and its 4,768-lock unsaved recovery capacity. There is no PLOCKS
@@ -33,10 +33,8 @@ initialization correction from OCTABAM85 (`44a7c6b9`). Shared copy/STORE
 integration, the PIO write fix and Quantizer MIDI drawer adapter remain selected.
 These are not removed by moving Harmony's retained data.
 
-Harmony now writes HDP4/HMT2 with per-step ACC, upgrading valid HDP3/HMT1
-with ACC OFF. P2LK is unchanged. Other old retained layouts are not migrated
-automatically: save with the previous firmware before switching. Older Harmony
-builds cannot read the new layout. The MIDI bytes are reverse-engineered reclamation, not an official
+Harmony writes HDP4/HMT2 with per-step ACC. P2LK is unchanged. There are no
+alternate Harmony retention layouts or migration readers. The MIDI bytes are reverse-engineered reclamation, not an official
 free-space contract. MIDI SRAM protects them against native bulk writes and
 strips them from native DRAM, clipboards and bank files; Harmony's lifecycle
 hooks perform the musical copy/clear operation and checkpoint the result.

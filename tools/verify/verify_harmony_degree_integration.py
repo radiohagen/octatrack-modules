@@ -106,9 +106,8 @@ def main():
     assert m.call('hd_capture',50,0)==36
     # Combined current-bank retention uses a separate identity.
     m.call('ch_nv_save',0)
-    from harmony_retained import committed, track_layout
+    from harmony_retained import committed
     assert committed(m)
-    if not track_layout(m): assert get(m.sym['hd_nv_base']+12,4)==10368
     assert m.call('ch_nv_restore',0)==1
     # Copy a degree while the native NOTE snapshot is stale, then paste into
     # another Part/key and an OFF track. Exercise actual native memcpy too.
@@ -259,7 +258,7 @@ def main():
     m.call('mh_set',0,1)
     before=bytes(u.mem_read(bank,0x9b340))
     degree_before=bytes(u.mem_read(s['hd_banks'],16768))
-    for slot in ((3,5) if m.c('ha_enabled_c') else (3,4,5)):
+    for slot in (3,5):
         m.c('ch_encoder',slot,4)
         m.c('ch_step_encoder',slot,4)
         m.c('ch_step_push',slot+56,1)

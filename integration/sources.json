@@ -52,7 +52,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/harmony-plocks/README.md",
       "sha256": "5124b20741b7290cd7186425660410623767423699e01e97e49d4f5faaea14b4",
-      "published_sha256": "7bf13d46e8e7d7b616e15f286b1a9db8f33e5167c37d3d3a21c3e5385812fae9",
+      "published_sha256": "fec5b03a9392e8d6611e27b3f613dc0a707134cc2bf481ebf9b548c35208012a",
       "source_mode": "100644"
     },
     "modules/harmony-plocks/bridge.s": {
@@ -124,21 +124,21 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-harmony/README.md",
       "sha256": "2503b41cfcdfaae42effb0ec2c17a9c6a3f0ffd11f74e623d3f78d94c7d4704e",
-      "published_sha256": "784e64bce22d63719ae3f28c586ac754ccac096b3e421ecf86823ae3fea23a50",
+      "published_sha256": "91527108992a114d1d909972952d3c398cb661502cb89725bfdb7cfd79a2d41c",
       "source_mode": "100644"
     },
     "modules/midi-harmony/VOICING.md": {
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-harmony/VOICING.md",
       "sha256": "9085a3817df718e2528ac77c77a6174e00e6c128c1343783ec85c946cbab4f5a",
-      "published_sha256": "9085a3817df718e2528ac77c77a6174e00e6c128c1343783ec85c946cbab4f5a",
+      "published_sha256": "0025c80eb2ef08e78a411019594098a1e20e8bcedaa39020bd87e2fdecfd8e10",
       "source_mode": "100644"
     },
     "modules/midi-harmony/brain.lock": {
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-harmony/brain.lock",
       "sha256": "24d718550cfbabb1783d8601d0d76d80ee6bfc6a4a1a317b8418d5f21d112785",
-      "published_sha256": "24d718550cfbabb1783d8601d0d76d80ee6bfc6a4a1a317b8418d5f21d112785",
+      "published_sha256": "8a6f28f2c7722ed51397fe51323bd070c3f52f0a1e36940f5b9715e93a712e5f",
       "source_mode": "100644"
     },
     "modules/midi-harmony/chord-display.s": {
@@ -152,7 +152,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-harmony/chord-files.s",
       "sha256": "02f409079874d434c3ed82a2557418df819b20fef566ffb402d8cc7efae41706",
-      "published_sha256": "47fbe75d271d3ed0d52ae20c006a6bdee293ef25af6b5238c387b72ec6fd5348",
+      "published_sha256": "9f350107098f3e649051b26baf34d8305a90d18a418f9ea4627061c7c68b7f69",
       "source_mode": "100644",
       "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
     },
@@ -196,7 +196,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-harmony/chord-ui.s",
       "sha256": "3d8521c1ea7868a37629b6fbfb54756c42ec97d2af9d861179012775fb2b80a3",
-      "published_sha256": "454e20d651239e46c44ef25648fcde533175d636d87e06b21377dc538636b0fb",
+      "published_sha256": "be15dba0c880f9edd858f02aa772cc6b8253334b405ae1f07f472c750a77153e",
       "source_mode": "100644",
       "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
     },
@@ -207,292 +207,18 @@
       "published_sha256": "b81a9ebf527c35f0a38e36d3bdcb27d82e190c2d6c255636d6c70125748adca2",
       "source_mode": "100644"
     },
-    "modules/midi-harmony/degrees/ACCEPTANCE.md": {
-      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
-      "path": "modules/midi-harmony/degrees/ACCEPTANCE.md",
-      "sha256": "3ab4a2799ca08f71667432da92a1f617558086d158bea193c2670b2ec64a0c56",
-      "published_sha256": "3ab4a2799ca08f71667432da92a1f617558086d158bea193c2670b2ec64a0c56",
-      "source_mode": "100644"
-    },
-    "modules/midi-harmony/degrees/KITS.md": {
-      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
-      "path": "modules/midi-harmony/degrees/KITS.md",
-      "sha256": "019fdf4ffc8a5396551842562b5f4ce9ee8b96b2f1736e7a3d54149255038879",
-      "published_sha256": "508e14e8b38be006bb64ca6fcbeecf83c5fac19dcc25ade3968b2b4fdc8350f9",
-      "source_mode": "100644"
-    },
-    "modules/midi-harmony/degrees/README.md": {
-      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
-      "path": "modules/midi-harmony/degrees/README.md",
-      "sha256": "00e9b47b948ffc4e6e46a62aba5fbb1f7e56a992a1b965665c3bf7d49a2b9cce",
-      "published_sha256": "b7921895a3f709a734a9315ed811ea8ead19e0c61b474c8a6f68e5bdbac6b5d8",
-      "source_mode": "100644"
-    },
-    "modules/midi-harmony/degrees/SCENES.md": {
-      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
-      "path": "modules/midi-harmony/degrees/SCENES.md",
-      "sha256": "1d298cc7ef6b209c136f06883b48959d9f6a4e9250fcc55db35bd5748e53ad91",
-      "published_sha256": "1d298cc7ef6b209c136f06883b48959d9f6a4e9250fcc55db35bd5748e53ad91",
-      "source_mode": "100644"
-    },
-    "modules/midi-harmony/degrees/codec.s": {
-      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
-      "path": "modules/midi-harmony/degrees/codec.s",
-      "sha256": "e778ae512c9c03a0aebbdd59d37b7a8d2d8eff562732280242268c0505cb0c66",
-      "published_sha256": "e778ae512c9c03a0aebbdd59d37b7a8d2d8eff562732280242268c0505cb0c66",
-      "source_mode": "100644"
-    },
-    "modules/midi-harmony/degrees/core.c": {
-      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
-      "path": "modules/midi-harmony/degrees/core.c",
-      "sha256": "0dcd55a24efbf37a30431fb37c6915cd8b75202287073dd93b04ea49bc1e9f45",
-      "published_sha256": "0ae96ec2fb414776ffae999d029c701b4f2b717f680b08d2190bbc523a312fc1",
-      "source_mode": "100644",
-      "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
-    },
-    "modules/midi-harmony/degrees/core.h": {
-      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
-      "path": "modules/midi-harmony/degrees/core.h",
-      "sha256": "e619e95a3698f8d2c24acbcd23f6c9faa63c4a62a8999e9a83fedb9f1b530260",
-      "published_sha256": "ded0c180dc462d19578c845c2aa52b1bdad2b472e1300c4396634a8e96754e9f",
-      "source_mode": "100644",
-      "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
-    },
-    "modules/midi-harmony/degrees/core.s": {
-      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
-      "path": "modules/midi-harmony/degrees/core.s",
-      "sha256": "6f09006c7387486e079e6ff9982972bc8307f8c9aaf150dde8f94a0e3266d91b",
-      "published_sha256": "4fc7109df266eba81180651d6a7745ed4d38dcf3d2eca632ef809aab5b68de33",
-      "source_mode": "100644",
-      "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
-    },
-    "modules/midi-harmony/degrees/edit-hooks.s": {
-      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
-      "path": "modules/midi-harmony/degrees/edit-hooks.s",
-      "sha256": "a13ee3dd55c007a4787596333d3ba452152359b936286aff2c7e121bcad42c69",
-      "published_sha256": "a13ee3dd55c007a4787596333d3ba452152359b936286aff2c7e121bcad42c69",
-      "source_mode": "100644"
-    },
-    "modules/midi-harmony/degrees/events.c": {
-      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
-      "path": "modules/midi-harmony/degrees/events.c",
-      "sha256": "beaaa9aa1a75e64fab80a16a6afc8c86129638baa9d195736244c6185f4ea9e8",
-      "published_sha256": "7cd73c8a69cca8aa94c14493f48cbe094e6db13891ba652cb204b70602ced7a3",
-      "source_mode": "100644",
-      "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
-    },
-    "modules/midi-harmony/degrees/events.s": {
-      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
-      "path": "modules/midi-harmony/degrees/events.s",
-      "sha256": "522903fbd2503053a3aaf8c9835ee95ceeb07f03a2a56cfd21cf1033f6901e30",
-      "published_sha256": "6ac0dff54f33375f9408f30ed5b267f81f89cc50cbbc47d97fa20b89d1cb14d3",
-      "source_mode": "100644",
-      "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
-    },
-    "modules/midi-harmony/degrees/generate.py": {
-      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
-      "path": "modules/midi-harmony/degrees/generate.py",
-      "sha256": "24a1c9eb31bccda869b3c4a0ab0f3c303becae38fa9a05095f8643f0a1f34d70",
-      "published_sha256": "9a40ecdaed9d7cdc805f61820aaae00676a83d43c9833db24f272d10707438e3",
-      "source_mode": "100644",
-      "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
-    },
-    "modules/midi-harmony/degrees/hooks.s": {
-      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
-      "path": "modules/midi-harmony/degrees/hooks.s",
-      "sha256": "3647bc4e78b124aebedef965eff1ecea6efc703ac70e16c59e42f2123684788f",
-      "published_sha256": "3647bc4e78b124aebedef965eff1ecea6efc703ac70e16c59e42f2123684788f",
-      "source_mode": "100644"
-    },
-    "modules/midi-harmony/degrees/operations.c": {
-      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
-      "path": "modules/midi-harmony/degrees/operations.c",
-      "sha256": "af6c37aab397417a125afc3abc39cae5c646c81d1bb4040fd8ebad6c6c8f7b4e",
-      "published_sha256": "69de2a9eeccf75f66cd753857ca2e9f3246799ab92cf14469f5edb2dfe85a19b",
-      "source_mode": "100644",
-      "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
-    },
-    "modules/midi-harmony/degrees/operations.s": {
-      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
-      "path": "modules/midi-harmony/degrees/operations.s",
-      "sha256": "c5f337d770da7b86b485f4469607d8e33b0eaf8a689c08ed9b40210293247606",
-      "published_sha256": "6c64e0385980e78598060e257909e25548a6d28517a74a5295721cfda29e4d47",
-      "source_mode": "100644",
-      "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
-    },
-    "modules/midi-harmony/degrees/packed.c": {
-      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
-      "path": "modules/midi-harmony/degrees/packed.c",
-      "sha256": "39cec93c513b040deae655b40c3279ae97af0e46dec06a5b882c0e1492b11697",
-      "published_sha256": "39cec93c513b040deae655b40c3279ae97af0e46dec06a5b882c0e1492b11697",
-      "source_mode": "100644"
-    },
-    "modules/midi-harmony/degrees/packed.h": {
-      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
-      "path": "modules/midi-harmony/degrees/packed.h",
-      "sha256": "3bcd89d00b29e8320c3f7ef8e30f3975518b1bde7544399d1adcd8dc80b46355",
-      "published_sha256": "3bcd89d00b29e8320c3f7ef8e30f3975518b1bde7544399d1adcd8dc80b46355",
-      "source_mode": "100644"
-    },
-    "modules/midi-harmony/degrees/packed.s": {
-      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
-      "path": "modules/midi-harmony/degrees/packed.s",
-      "sha256": "aca3b286fd10255f8df977d040b1b065e770bb8d5b069e8b55b9e569322c5bfb",
-      "published_sha256": "aca3b286fd10255f8df977d040b1b065e770bb8d5b069e8b55b9e569322c5bfb",
-      "source_mode": "100644"
-    },
-    "modules/midi-harmony/degrees/panel.s": {
-      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
-      "path": "modules/midi-harmony/degrees/panel.s",
-      "sha256": "36747da9645769dd25099eabffbf1becf8885b5046c5b981dfd51b86f11498a5",
-      "published_sha256": "39b698257d31db986c16b7e7ef7b72dbbdc6a7a39576e7c5b2dd4579751dbe19",
-      "source_mode": "100644",
-      "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
-    },
-    "modules/midi-harmony/degrees/part-access.s": {
-      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
-      "path": "modules/midi-harmony/degrees/part-access.s",
-      "sha256": "7cb3b1bbdafb1cb06cca721633f9fe0e90db2595205e8851711ce62f04e4c1b0",
-      "published_sha256": "7cb3b1bbdafb1cb06cca721633f9fe0e90db2595205e8851711ce62f04e4c1b0",
-      "source_mode": "100644"
-    },
-    "modules/midi-harmony/degrees/pool.s": {
-      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
-      "path": "modules/midi-harmony/degrees/pool.s",
-      "sha256": "24d0f0f81dadcc4cf01c0963d298a2278a4bec27438cf5b373e8be6aada64063",
-      "published_sha256": "24d0f0f81dadcc4cf01c0963d298a2278a4bec27438cf5b373e8be6aada64063",
-      "source_mode": "100644"
-    },
-    "modules/midi-harmony/degrees/recording.c": {
-      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
-      "path": "modules/midi-harmony/degrees/recording.c",
-      "sha256": "d4455ab41d06fd1d075b3353cc1e6663237bffac1f0f1352ae10610ff086613b",
-      "published_sha256": "d4455ab41d06fd1d075b3353cc1e6663237bffac1f0f1352ae10610ff086613b",
-      "source_mode": "100644"
-    },
-    "modules/midi-harmony/degrees/recording.s": {
-      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
-      "path": "modules/midi-harmony/degrees/recording.s",
-      "sha256": "1aa2e8c854e8c115a4c340cf443b4e7c4427b930c72db9716301aecedeb10210",
-      "published_sha256": "1aa2e8c854e8c115a4c340cf443b4e7c4427b930c72db9716301aecedeb10210",
-      "source_mode": "100644"
-    },
-    "modules/midi-harmony/degrees/roots.c": {
-      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
-      "path": "modules/midi-harmony/degrees/roots.c",
-      "sha256": "28fad13358d37a1817f0b9dc10282b3053ba87117d22c79db096b9c6fcea63cf",
-      "published_sha256": "28fad13358d37a1817f0b9dc10282b3053ba87117d22c79db096b9c6fcea63cf",
-      "source_mode": "100644"
-    },
-    "modules/midi-harmony/degrees/roots.h": {
-      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
-      "path": "modules/midi-harmony/degrees/roots.h",
-      "sha256": "9cdc343ebf2e22249b4d2c43a984e227559c6d1567800c412a3fca74b42e629b",
-      "published_sha256": "9cdc343ebf2e22249b4d2c43a984e227559c6d1567800c412a3fca74b42e629b",
-      "source_mode": "100644"
-    },
-    "modules/midi-harmony/degrees/roots.s": {
-      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
-      "path": "modules/midi-harmony/degrees/roots.s",
-      "sha256": "4f7ccacbc6ad2a2eaf74772beede99605b1a4a80b5819908a3bbfe878cde97af",
-      "published_sha256": "4f7ccacbc6ad2a2eaf74772beede99605b1a4a80b5819908a3bbfe878cde97af",
-      "source_mode": "100644"
-    },
-    "modules/midi-harmony/degrees/scene-access.s": {
-      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
-      "path": "modules/midi-harmony/degrees/scene-access.s",
-      "sha256": "057759bb2f56f9a31b931ea51d4d591d4e936ef0cdb7864b0454dadbf5780123",
-      "published_sha256": "057759bb2f56f9a31b931ea51d4d591d4e936ef0cdb7864b0454dadbf5780123",
-      "source_mode": "100644"
-    },
-    "modules/midi-harmony/degrees/scenes.c": {
-      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
-      "path": "modules/midi-harmony/degrees/scenes.c",
-      "sha256": "92e0761adec5b61e4c597a48e4c318eb0273743028320f38c1ec12307710fdba",
-      "published_sha256": "92e0761adec5b61e4c597a48e4c318eb0273743028320f38c1ec12307710fdba",
-      "source_mode": "100644"
-    },
-    "modules/midi-harmony/degrees/scenes.s": {
-      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
-      "path": "modules/midi-harmony/degrees/scenes.s",
-      "sha256": "073c28c125d1c1a8ba8c50019301c99d0acf0e3f3e8bfea728a0b6a7a82a4ed7",
-      "published_sha256": "073c28c125d1c1a8ba8c50019301c99d0acf0e3f3e8bfea728a0b6a7a82a4ed7",
-      "source_mode": "100644"
-    },
-    "modules/midi-harmony/degrees/storage-track.s": {
-      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
-      "path": "modules/midi-harmony/degrees/storage-track.s",
-      "sha256": "d813bcf2fee42ce3e2f9af3ef0cb75d9c63316697d2772894a424ad67af9cc2e",
-      "published_sha256": "d7b4fe2235424a0563677308e483c196128eed6046851260bdef71fe3fcf25cb",
-      "source_mode": "100644",
-      "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
-    },
-    "modules/midi-harmony/degrees/storage.c": {
-      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
-      "path": "modules/midi-harmony/degrees/storage.c",
-      "sha256": "02e6f4204ddebfcc6128a8379919ab1aae269bdd4bf1f285e3e5c80745dcda8f",
-      "published_sha256": "5b37d16b1d0b0999f4cc420a87ba31285d5ac55aa9f0e5417fca03ef4b0ff39f",
-      "source_mode": "100644",
-      "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
-    },
-    "modules/midi-harmony/degrees/storage.s": {
-      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
-      "path": "modules/midi-harmony/degrees/storage.s",
-      "sha256": "44b76769855b967e751a394d1a59aab5995b7d81597646292164a38bc74773bf",
-      "published_sha256": "dceca33a3bd5f9a68a0a33bdf35612ffb19a54d51ceca52f9b61fd652d0b5e42",
-      "source_mode": "100644",
-      "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
-    },
-    "modules/midi-harmony/degrees/track-retention.c": {
-      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
-      "path": "modules/midi-harmony/degrees/track-retention.c",
-      "sha256": "371295609e6058c25939563cac9b276c1febdaeb93b5c4c1e5fe33b37a0d0161",
-      "published_sha256": "d0847c62516f0a9fe5949ab318f166c33ba4d8c421cfa0e59bccccd9f461dd6c",
-      "source_mode": "100644",
-      "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
-    },
-    "modules/midi-harmony/degrees/track-retention.h": {
-      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
-      "path": "modules/midi-harmony/degrees/track-retention.h",
-      "sha256": "de4a1b6fac62755ea4266c418bf1671a6fc203da78d1cf9d0fde6e9a9e6d87be",
-      "published_sha256": "7613f831da025b9881fb242cbd6c26f0358909abae212cd6ca2e76a9943bee51",
-      "source_mode": "100644",
-      "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
-    },
-    "modules/midi-harmony/degrees/track-retention.s": {
-      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
-      "path": "modules/midi-harmony/degrees/track-retention.s",
-      "sha256": "273b3f6003844f1c796791764f50cd14ed36d869991b22d382a42c27d1cbbf44",
-      "published_sha256": "79f69c05c33aae2f904851fe714ad7682346938083015a11672651b402b65c69",
-      "source_mode": "100644",
-      "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
-    },
-    "modules/midi-harmony/degrees/ui.c": {
-      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
-      "path": "modules/midi-harmony/degrees/ui.c",
-      "sha256": "ed7b4574e7924802e14999be0f35c33ee2b907396110306fe76ac8f6f7e8cfdc",
-      "published_sha256": "ed7b4574e7924802e14999be0f35c33ee2b907396110306fe76ac8f6f7e8cfdc",
-      "source_mode": "100644"
-    },
-    "modules/midi-harmony/degrees/ui.s": {
-      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
-      "path": "modules/midi-harmony/degrees/ui.s",
-      "sha256": "10319a7b8b7279ea16a9e3de48ffa64d1de9ca32e28ff79309c8154ba0f09768",
-      "published_sha256": "10319a7b8b7279ea16a9e3de48ffa64d1de9ca32e28ff79309c8154ba0f09768",
-      "source_mode": "100644"
-    },
     "modules/midi-harmony/generate.py": {
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-harmony/generate.py",
       "sha256": "262e111325328c88c784f40c17ebd3defbf2be1e1e1278ba89fdd2408fd3a286",
-      "published_sha256": "262e111325328c88c784f40c17ebd3defbf2be1e1e1278ba89fdd2408fd3a286",
+      "published_sha256": "24242713528e85c0d00f35ef8081761ee0961180861bf6a0d4fe9618968dbd25",
       "source_mode": "100644"
     },
     "modules/midi-harmony/harmony.s": {
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-harmony/harmony.s",
       "sha256": "de9434a5d4ceb65664344ca39f132a00f605a020c2c4ae4954ff66fe480814d9",
-      "published_sha256": "07923c19fda8cd77529fb618be41603d60c7e6a90a4dee51d96c33c42393c1fa",
+      "published_sha256": "ab26b4d0a861147160eccac2e5956b998638318e3f08ed7fb4201cacdf31ae75",
       "source_mode": "100644",
       "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
     },
@@ -507,7 +233,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-harmony/manifest.py",
       "sha256": "8691286ad370961aafba521e00a070797d2b70f257dddea18eb4874f70893097",
-      "published_sha256": "5cf956364d8e21116e1c77283f8b7f61205291b48b9fdec0889ae2a473122d9f",
+      "published_sha256": "62ae14d0455d2d4fb815a22d6defd6e259d7745aecebd65dd1fc472cb82ecac8",
       "source_mode": "100644",
       "migration_note": "Operational author URL updated; original author name/credit preserved.",
       "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
@@ -523,7 +249,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-harmony/page.s",
       "sha256": "d5db930104a9b1a30bc0626d9a68a850b1833448ac9ccb4e0f6fe9c97bb9c20e",
-      "published_sha256": "bab3929939c0cab045c1970e2f63330b7a03be0c965151123503aa1e513c09ec",
+      "published_sha256": "36e6668e9480cdf7001cf8bcdf51f58dc7db0da790ac42d1d1fa916b0c0451c3",
       "source_mode": "100644",
       "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
     },
@@ -559,7 +285,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-harmony/size.s",
       "sha256": "6c532833ae77ee442078a95c078903fe221a251c8c8e4fa0fa859e72713f3ec0",
-      "published_sha256": "6c532833ae77ee442078a95c078903fe221a251c8c8e4fa0fa859e72713f3ec0",
+      "published_sha256": "bc531402eb51b4f5cce9fa758c1eab6e13a20c69cb1beacffb77b04c810cd6cc",
       "source_mode": "100644"
     },
     "modules/midi-harmony/voicing.s": {
@@ -798,21 +524,21 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "remixes/harmony-track-bus/remix.py",
       "sha256": "932901d41ef11553d4828a3ff7b3baa25a3fc3ca11983c52e531df019649e039",
-      "published_sha256": "51b802b19b5107aab1791e0fcb0588344df4c9f938f6d5893ff1745519ee6bfb",
+      "published_sha256": "7ace5d325014b72f64f452027d0fabf3517f9bf7a36686d572f1cf0fb0c7469f",
       "source_mode": "100644"
     },
     "remixes/test/harmony-degrees/README.md": {
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "remixes/test/harmony-degrees/README.md",
       "sha256": "3738e6edeb85096b07ca75e4b085cb3500bd7da950beabf3e2ff2247895f775e",
-      "published_sha256": "aeedc1685fc197d29652da010e82352339aa40c4a1b7d59933730c9ee00b0ac6",
+      "published_sha256": "9395e15a504463f9bbaf5e477c44618003c3f0705dc8576641c1ea8657a3b6e3",
       "source_mode": "100644"
     },
     "remixes/test/harmony-degrees/remix.py": {
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "remixes/test/harmony-degrees/remix.py",
       "sha256": "9a81aecdae7ecec400d9db0840c552a7f0b2347d513bf88e9bfdae4b5e5505cf",
-      "published_sha256": "4f0c7157f751aa1b88fe38c9b993f7e3e9c6e0d9a03b48ea0272eacb5a9640cc",
+      "published_sha256": "ee6250e12dd1c6181ed3ecd5b5f220f069a4c3c836cb441419cf63b4a036f105",
       "source_mode": "100644"
     },
     "remixes/test/harmony-plocks/README.md": {
@@ -826,7 +552,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "remixes/test/harmony-plocks/remix.py",
       "sha256": "cdad144aab1eee90f8b886e71ea51ea15aed5652952f1975e238d782b604667d",
-      "published_sha256": "8627416debd7f331db8439c329efb01e1bad31b736b79002c40bc8b61d972b22",
+      "published_sha256": "202d5a73e3e1d1154382f5c4ed15e90f9650a7682564e35713650a4e95f4f3a9",
       "source_mode": "100644"
     },
     "remixes/test/midi-ensemble/README.md": {
@@ -840,7 +566,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "remixes/test/midi-ensemble/remix.py",
       "sha256": "d4bf7e6b303bf15327c27655701c1431fa7476a23579edb9bd6b02d558461ac4",
-      "published_sha256": "f96d1c52224ed543b339c1f9ebe002eddfe759a211381f89aeed15041b3c7d8e",
+      "published_sha256": "7c8d963688f86a84b073e8ae756dfe37f3addea1f2cbbc635ce9ec9ec97434c5",
       "source_mode": "100644"
     },
     "remixes/test/midi-follow/README.md": {
@@ -868,7 +594,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "remixes/test/midi-harmony/remix.py",
       "sha256": "4ff913dc4f7cd7014f593e713a87c0cc6d547d01e6c918816ade4c28227d48a9",
-      "published_sha256": "32ee724b5cd876456843a68d17ecdbb4ee83bca68b8f4c66d07af2dae4422432",
+      "published_sha256": "325b226570f0fec2f464ae259fcdabb62932d0dd953b526e808049b93735532f",
       "source_mode": "100644"
     },
     "remixes/test/midi-harmony-follow/README.md": {
@@ -882,7 +608,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "remixes/test/midi-harmony-follow/remix.py",
       "sha256": "55a5303fed85d87e756c5206f9789ea248f39c9d0a9961a7c5292614a8ebd2a9",
-      "published_sha256": "efa5544fdc79c2cbf13b65cf2c977f78c46c27c079859780114192ae97f7a5a9",
+      "published_sha256": "9a41d5157a7a3b955a8e468c31eb5deae618f622fb23f4d06fa5064add933d0b",
       "source_mode": "100644"
     },
     "remixes/test/midi-loopback/README.md": {
@@ -910,7 +636,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "remixes/test/midi-loopback-follow/remix.py",
       "sha256": "9a9d98f1d7924945b9356ed3a6d20e9bbbc090d98d867ba5ebec87f54b08d909",
-      "published_sha256": "b75b209df59d217fc8459d085b21873327d707d0e9601ed10ba105e24b1c464f",
+      "published_sha256": "2d7ce21db57b5b02daca3bad8433b9556c81a631746571ec3cf5af4097eac8c2",
       "source_mode": "100644"
     },
     "remixes/test/midi-loopback-usb/README.md": {
@@ -1001,7 +727,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "tools/verify/harmony_retained.py",
       "sha256": "6a8f121e11aceb0a7af9c3d2bce3b5460b6337251552dc8a3f394d3c446f80ee",
-      "published_sha256": "f0ba4d3fdc31e8e432966cb4ded9e84cbc1fcbec0a6a13d1a224425dc69219e7",
+      "published_sha256": "fb2f80477a727a85f5004a807ba763608164ad43d9ba36984a32447feefd81a2",
       "source_mode": "100644",
       "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
     },
@@ -1116,14 +842,14 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "tools/verify/verify_harmony_degree_codec.py",
       "sha256": "bfe8a13b7c66ad13d476da1308953ef0f029ce7eeccd36681a9de56701f8796d",
-      "published_sha256": "bfe8a13b7c66ad13d476da1308953ef0f029ce7eeccd36681a9de56701f8796d",
+      "published_sha256": "9dbf4fe95de0c5016feca76db7d25d9fa53547a5ee59b0fe5cae53419c8ac94c",
       "source_mode": "100644"
     },
     "tools/verify/verify_harmony_degree_core.py": {
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "tools/verify/verify_harmony_degree_core.py",
       "sha256": "b2c4f457f361ea7247d5535c281e2927d6eea8d138e4fc563c4d6d1d0478e85b",
-      "published_sha256": "9b5dc666eeb18dda11380f783d94335dc9aeeed26d9b579ec831234495c367cf",
+      "published_sha256": "c917a48dec1150579843e1ff7e71e1e961103f948fadcfe9a0de752cfcfcd884",
       "source_mode": "100644",
       "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
     },
@@ -1131,7 +857,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "tools/verify/verify_harmony_degree_files.py",
       "sha256": "5c84b117cd30618261a9cbebf096a740ad24b8c91a0f807f0805733ba06c4b31",
-      "published_sha256": "ebafd58322a12674c00769901709c56008f926a01269b72ab1a6def60d94fc96",
+      "published_sha256": "156ca69b98c55be8007dbe7acf58d2566bacfff0935fb60606dbb7120721bdf1",
       "source_mode": "100644",
       "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
     },
@@ -1139,7 +865,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "tools/verify/verify_harmony_degree_integration.py",
       "sha256": "c22fccd73b1b26823b3faefa8e97638975a1ab086d4a8088f4595064f4ffb4bf",
-      "published_sha256": "b55395eb100ec9651a49c52d4ec040cb0fafaaacdc1e68c19910db8494e36797",
+      "published_sha256": "d147aa5ddb09e703ac8e1d985ce06f2d16fac97ace4c538961b2df9ee7709480",
       "source_mode": "100644",
       "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
     },
@@ -1154,7 +880,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "tools/verify/verify_harmony_degree_packed.py",
       "sha256": "b4c0d5dc3a126946d970ce0628f4b90428b9bec428e326cf34065258fa23f080",
-      "published_sha256": "b4c0d5dc3a126946d970ce0628f4b90428b9bec428e326cf34065258fa23f080",
+      "published_sha256": "8add5f4939827fb7850ad70486d6b59782abbd576309cdf41e4b1f45ce090e23",
       "source_mode": "100644"
     },
     "tools/verify/verify_harmony_degree_part_port.py": {
@@ -1183,14 +909,14 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "tools/verify/verify_harmony_degree_publication.py",
       "sha256": "9ea0216e541f1a18fc59d2fd948210739e78603d663b04dd8e7b990b0a94d0ff",
-      "published_sha256": "9ea0216e541f1a18fc59d2fd948210739e78603d663b04dd8e7b990b0a94d0ff",
+      "published_sha256": "5b0246aff6eeccce3d07db4f7a2c9d3927b8d2103a16f249815d66b79907a4b0",
       "source_mode": "100644"
     },
     "tools/verify/verify_harmony_degree_roots.py": {
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "tools/verify/verify_harmony_degree_roots.py",
       "sha256": "9b570f5fd46b34a5e397c527daf76063ba4b644167511adf86520cb154c3caee",
-      "published_sha256": "9b570f5fd46b34a5e397c527daf76063ba4b644167511adf86520cb154c3caee",
+      "published_sha256": "67918a48047d2732c9f3a52b7985649bf05ae47da35587e4b7c2fcabf1ecb836",
       "source_mode": "100644"
     },
     "tools/verify/verify_harmony_degree_scenes.py": {
@@ -1225,7 +951,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "tools/verify/verify_harmony_plocks.py",
       "sha256": "dc9c03c4db124e07b7275c1c3a04289a8459aacb5549ed8cdc0c0de57c9c396d",
-      "published_sha256": "b431ccd2e2592e94af24c1855d4a361e2345578ac235ceabd64bf28ac7ad0b0d",
+      "published_sha256": "d022c53d350ef3b52116a86e65aab226ee586a7151908a88ed4b2a923cff6ec8",
       "source_mode": "100644",
       "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
     },
@@ -1261,7 +987,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "tools/verify/verify_harmony_store.py",
       "sha256": "5d02ae963fe893d3ed87ba856bfe947eeb5dc0225e9c99c52c263c9cb2b1c7a0",
-      "published_sha256": "5d02ae963fe893d3ed87ba856bfe947eeb5dc0225e9c99c52c263c9cb2b1c7a0",
+      "published_sha256": "a66827d48c4698f7fd529222e674be6821c9e29d1b46bc4f0920a172646eafa4",
       "source_mode": "100644"
     },
     "tools/verify/verify_harmony_track_port.py": {
@@ -1276,16 +1002,9 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "tools/verify/verify_harmony_track_retention.py",
       "sha256": "43170a1c36c8d6973e627b0bbeb7d0203f9fe47a3d53e13305c8d9ddeb8a88be",
-      "published_sha256": "6658659ef2394bac0c3994680edb04cb02bf47181b10b49d6fc90c2d7b0b6b52",
+      "published_sha256": "5a306f27eb28445abdda9d8eeda87169380af955a08ceac84a2c177e8cee3d77",
       "source_mode": "100644",
       "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
-    },
-    "tools/verify/verify_integrated_retention_port.py": {
-      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
-      "path": "tools/verify/verify_integrated_retention_port.py",
-      "sha256": "0195f79cfd79667c45826628a0e9cc3289a5f77e4d5dba216fdf50b0b1275341",
-      "published_sha256": "0195f79cfd79667c45826628a0e9cc3289a5f77e4d5dba216fdf50b0b1275341",
-      "source_mode": "100644"
     },
     "tools/verify/verify_kits.py": {
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
@@ -1375,7 +1094,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "tools/verify/verify_midi_harmony.py",
       "sha256": "510be9ecd16ec88870f1cc8d87609539725a0d2dde47094b7f105eae8d308933",
-      "published_sha256": "5061352fd87b72943d7aef5879758d52612e7e0dd1176d0efecd1a56d97a5c72",
+      "published_sha256": "0e84820b3769ddcef028bae2b199580e87e36c5776f3646023364c145b15c5f7",
       "source_mode": "100644",
       "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
     },
@@ -1557,7 +1276,7 @@
     "modules/harmony-plocks/DEVELOPMENT.md": {
       "path": "modules/harmony-plocks/DEVELOPMENT.md",
       "sha256": "5124b20741b7290cd7186425660410623767423699e01e97e49d4f5faaea14b4",
-      "published_sha256": "5124b20741b7290cd7186425660410623767423699e01e97e49d4f5faaea14b4",
+      "published_sha256": "6f8ab79405ba9099794eb98fadbfa1c33afac79c54a73a78a7cc9aaf3f0c2e64",
       "source_mode": "100644",
       "origin": "Split from adjacent README in this repository; historical evidence is retained in the text."
     },
@@ -1585,7 +1304,7 @@
     "modules/midi-harmony/DEVELOPMENT.md": {
       "path": "modules/midi-harmony/DEVELOPMENT.md",
       "sha256": "2503b41cfcdfaae42effb0ec2c17a9c6a3f0ffd11f74e623d3f78d94c7d4704e",
-      "published_sha256": "146fdcd81923162cca7cf5e803161b22b66b334804cbe272d0adf34959e97edf",
+      "published_sha256": "68d4c8941358bd9b3b9ea336ac2837ca477a98c8848a1a13a6b8f068d0252948",
       "source_mode": "100644",
       "origin": "Split from adjacent README in this repository; historical evidence is retained in the text."
     },
@@ -1610,17 +1329,10 @@
       "source_mode": "100644",
       "origin": "Split from adjacent README in this repository; historical evidence is retained in the text."
     },
-    "modules/midi-harmony/degrees/DEVELOPMENT.md": {
-      "path": "modules/midi-harmony/degrees/DEVELOPMENT.md",
-      "sha256": "00e9b47b948ffc4e6e46a62aba5fbb1f7e56a992a1b965665c3bf7d49a2b9cce",
-      "published_sha256": "2f15ab2a6a20497fc0fb9aa1dc16f9f8be89559ed0b8d1512afd5d39ee805a59",
-      "source_mode": "100644",
-      "origin": "Split from adjacent README in this repository; historical evidence is retained in the text."
-    },
     "remixes/harmony-track-bus/DEVELOPMENT.md": {
       "path": "remixes/harmony-track-bus/DEVELOPMENT.md",
       "sha256": "6d107a6c4825573feda974cca9cab61c25d90d42276aeeece2fe0757fc9f27e3",
-      "published_sha256": "be916d72f40907013de34c5c752428c05e6fbc8170c8b971a789a24321b497ec",
+      "published_sha256": "b43896271ac22a473fa0a267e2be06fa6ea1e42cebca044183d845a8eece7432",
       "source_mode": "100644",
       "origin": "Split from adjacent README in this repository; historical evidence is retained in the text."
     },
@@ -1704,7 +1416,7 @@
     "remixes/test/midi-ensemble/DEVELOPMENT.md": {
       "path": "remixes/test/midi-ensemble/DEVELOPMENT.md",
       "sha256": "ced1ec5bf012b0bef8b754deb7427908d45a12344d2a18aa556ef2437758f3ac",
-      "published_sha256": "ced1ec5bf012b0bef8b754deb7427908d45a12344d2a18aa556ef2437758f3ac",
+      "published_sha256": "186090492e7724a45e8251a4e381d56bc08aeef4212dfd4b2e77edaa1929094e",
       "source_mode": "100644",
       "origin": "Split from adjacent README in this repository; historical evidence is retained in the text."
     },
@@ -1715,44 +1427,12 @@
       "source_mode": "100644",
       "origin": "Split from adjacent README in this repository; historical evidence is retained in the text."
     },
-    "modules/midi-harmony/degrees/accumulator-access.s": {
-      "commit": "510e0aee978275d729f0a9b1404b2b72536f7619",
-      "path": "modules/midi-harmony/degrees/accumulator-access.s",
-      "sha256": "6efc0e6b7586d269171d1afad3fb3469fba1fb5ac73a9d3d9010d5ad762536ec",
-      "source_mode": "100644",
-      "published_sha256": "6efc0e6b7586d269171d1afad3fb3469fba1fb5ac73a9d3d9010d5ad762536ec",
-      "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
-    },
-    "modules/midi-harmony/degrees/accumulator.c": {
-      "commit": "510e0aee978275d729f0a9b1404b2b72536f7619",
-      "path": "modules/midi-harmony/degrees/accumulator.c",
-      "sha256": "499cfde9a85f5af6e8c98b9c76a838952cc400e20ffc5089130567853b2a6908",
-      "source_mode": "100644",
-      "published_sha256": "499cfde9a85f5af6e8c98b9c76a838952cc400e20ffc5089130567853b2a6908",
-      "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
-    },
-    "modules/midi-harmony/degrees/accumulator.h": {
-      "commit": "510e0aee978275d729f0a9b1404b2b72536f7619",
-      "path": "modules/midi-harmony/degrees/accumulator.h",
-      "sha256": "6393b3dfc771584516e1e14ec541e6b8b4b739fae6fb87d3d59dc7249e7d16b7",
-      "source_mode": "100644",
-      "published_sha256": "6393b3dfc771584516e1e14ec541e6b8b4b739fae6fb87d3d59dc7249e7d16b7",
-      "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
-    },
-    "modules/midi-harmony/degrees/accumulator.s": {
-      "commit": "510e0aee978275d729f0a9b1404b2b72536f7619",
-      "path": "modules/midi-harmony/degrees/accumulator.s",
-      "sha256": "bcb65e38355a26b670c60a8a15cfefe41513dbea79e24728ba8495ee3cefceab",
-      "source_mode": "100644",
-      "published_sha256": "bcb65e38355a26b670c60a8a15cfefe41513dbea79e24728ba8495ee3cefceab",
-      "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
-    },
     "tools/verify/verify_harmony_accumulator.py": {
       "commit": "510e0aee978275d729f0a9b1404b2b72536f7619",
       "path": "tools/verify/verify_harmony_accumulator.py",
       "sha256": "9455c182737524a64e52a7210f0bb726e15fe78e58b9ae432a502b2e9413a987",
       "source_mode": "100644",
-      "published_sha256": "9455c182737524a64e52a7210f0bb726e15fe78e58b9ae432a502b2e9413a987",
+      "published_sha256": "110fd0c35c146eadfd4fa02be6cee9fa3089855b5c133166ed6eb5da97b87e6d",
       "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
     },
     "tools/verify/verify_harmony_accumulator_port.py": {
@@ -1770,7 +1450,329 @@
       "source_mode": "100644",
       "published_sha256": "225c85ec4a8bbb2a2c7d80ca975504885800b8aefbdad897b17e5b3d825cd82d",
       "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
+    },
+    "modules/midi-harmony/ACCEPTANCE.md": {
+      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
+      "path": "modules/midi-harmony/degrees/ACCEPTANCE.md",
+      "sha256": "3ab4a2799ca08f71667432da92a1f617558086d158bea193c2670b2ec64a0c56",
+      "published_sha256": "3ab4a2799ca08f71667432da92a1f617558086d158bea193c2670b2ec64a0c56",
+      "source_mode": "100644"
+    },
+    "modules/midi-harmony/KITS.md": {
+      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
+      "path": "modules/midi-harmony/degrees/KITS.md",
+      "sha256": "019fdf4ffc8a5396551842562b5f4ce9ee8b96b2f1736e7a3d54149255038879",
+      "published_sha256": "508e14e8b38be006bb64ca6fcbeecf83c5fac19dcc25ade3968b2b4fdc8350f9",
+      "source_mode": "100644"
+    },
+    "modules/midi-harmony/SCENES.md": {
+      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
+      "path": "modules/midi-harmony/degrees/SCENES.md",
+      "sha256": "1d298cc7ef6b209c136f06883b48959d9f6a4e9250fcc55db35bd5748e53ad91",
+      "published_sha256": "1d298cc7ef6b209c136f06883b48959d9f6a4e9250fcc55db35bd5748e53ad91",
+      "source_mode": "100644"
+    },
+    "modules/midi-harmony/accumulator-access.s": {
+      "commit": "510e0aee978275d729f0a9b1404b2b72536f7619",
+      "path": "modules/midi-harmony/degrees/accumulator-access.s",
+      "sha256": "6efc0e6b7586d269171d1afad3fb3469fba1fb5ac73a9d3d9010d5ad762536ec",
+      "source_mode": "100644",
+      "published_sha256": "77a27d5625bb6a6424ec36a3ed1bac105e388dd810f654551ff3ed415eb3a3ef",
+      "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
+    },
+    "modules/midi-harmony/accumulator.c": {
+      "commit": "510e0aee978275d729f0a9b1404b2b72536f7619",
+      "path": "modules/midi-harmony/degrees/accumulator.c",
+      "sha256": "499cfde9a85f5af6e8c98b9c76a838952cc400e20ffc5089130567853b2a6908",
+      "source_mode": "100644",
+      "published_sha256": "16bb8db7baee2b923d5a9bf8768172ce80b4b45bbd2e95f3ff5bdab9e9dceff0",
+      "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
+    },
+    "modules/midi-harmony/accumulator.h": {
+      "commit": "510e0aee978275d729f0a9b1404b2b72536f7619",
+      "path": "modules/midi-harmony/degrees/accumulator.h",
+      "sha256": "6393b3dfc771584516e1e14ec541e6b8b4b739fae6fb87d3d59dc7249e7d16b7",
+      "source_mode": "100644",
+      "published_sha256": "65c78322837b4d5b5214c898bebb90a94e79eb5aba15c6c5a0b4e5382bc6ad51",
+      "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
+    },
+    "modules/midi-harmony/accumulator.s": {
+      "commit": "510e0aee978275d729f0a9b1404b2b72536f7619",
+      "path": "modules/midi-harmony/degrees/accumulator.s",
+      "sha256": "bcb65e38355a26b670c60a8a15cfefe41513dbea79e24728ba8495ee3cefceab",
+      "source_mode": "100644",
+      "published_sha256": "8d8bbca3185b620f2d4b862fb26009a981da04eda7c5c993926656c4cc579689",
+      "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
+    },
+    "modules/midi-harmony/codec.s": {
+      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
+      "path": "modules/midi-harmony/degrees/codec.s",
+      "sha256": "e778ae512c9c03a0aebbdd59d37b7a8d2d8eff562732280242268c0505cb0c66",
+      "published_sha256": "e778ae512c9c03a0aebbdd59d37b7a8d2d8eff562732280242268c0505cb0c66",
+      "source_mode": "100644"
+    },
+    "modules/midi-harmony/core.c": {
+      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
+      "path": "modules/midi-harmony/degrees/core.c",
+      "sha256": "0dcd55a24efbf37a30431fb37c6915cd8b75202287073dd93b04ea49bc1e9f45",
+      "published_sha256": "0ae96ec2fb414776ffae999d029c701b4f2b717f680b08d2190bbc523a312fc1",
+      "source_mode": "100644",
+      "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
+    },
+    "modules/midi-harmony/core.h": {
+      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
+      "path": "modules/midi-harmony/degrees/core.h",
+      "sha256": "e619e95a3698f8d2c24acbcd23f6c9faa63c4a62a8999e9a83fedb9f1b530260",
+      "published_sha256": "c9359b490c5a8f3d992c65c52041c815ccb90a324ec07ead6ce60066d51d5511",
+      "source_mode": "100644",
+      "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
+    },
+    "modules/midi-harmony/core.s": {
+      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
+      "path": "modules/midi-harmony/degrees/core.s",
+      "sha256": "6f09006c7387486e079e6ff9982972bc8307f8c9aaf150dde8f94a0e3266d91b",
+      "published_sha256": "8c8e16f70fc010e9d08f2de788fd293e80d27ca8b5bd0d6b48e254d74e96dfd6",
+      "source_mode": "100644",
+      "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
+    },
+    "modules/midi-harmony/edit-hooks.s": {
+      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
+      "path": "modules/midi-harmony/degrees/edit-hooks.s",
+      "sha256": "a13ee3dd55c007a4787596333d3ba452152359b936286aff2c7e121bcad42c69",
+      "published_sha256": "a13ee3dd55c007a4787596333d3ba452152359b936286aff2c7e121bcad42c69",
+      "source_mode": "100644"
+    },
+    "modules/midi-harmony/events.c": {
+      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
+      "path": "modules/midi-harmony/degrees/events.c",
+      "sha256": "beaaa9aa1a75e64fab80a16a6afc8c86129638baa9d195736244c6185f4ea9e8",
+      "published_sha256": "7cd73c8a69cca8aa94c14493f48cbe094e6db13891ba652cb204b70602ced7a3",
+      "source_mode": "100644",
+      "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
+    },
+    "modules/midi-harmony/events.s": {
+      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
+      "path": "modules/midi-harmony/degrees/events.s",
+      "sha256": "522903fbd2503053a3aaf8c9835ee95ceeb07f03a2a56cfd21cf1033f6901e30",
+      "published_sha256": "ac082c479b30ab30d943e17633f59509f5244680446b0e14ee3a57979d53988d",
+      "source_mode": "100644",
+      "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
+    },
+    "modules/midi-harmony/hooks.s": {
+      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
+      "path": "modules/midi-harmony/degrees/hooks.s",
+      "sha256": "3647bc4e78b124aebedef965eff1ecea6efc703ac70e16c59e42f2123684788f",
+      "published_sha256": "3647bc4e78b124aebedef965eff1ecea6efc703ac70e16c59e42f2123684788f",
+      "source_mode": "100644"
+    },
+    "modules/midi-harmony/operations.c": {
+      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
+      "path": "modules/midi-harmony/degrees/operations.c",
+      "sha256": "af6c37aab397417a125afc3abc39cae5c646c81d1bb4040fd8ebad6c6c8f7b4e",
+      "published_sha256": "69de2a9eeccf75f66cd753857ca2e9f3246799ab92cf14469f5edb2dfe85a19b",
+      "source_mode": "100644",
+      "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
+    },
+    "modules/midi-harmony/operations.s": {
+      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
+      "path": "modules/midi-harmony/degrees/operations.s",
+      "sha256": "c5f337d770da7b86b485f4469607d8e33b0eaf8a689c08ed9b40210293247606",
+      "published_sha256": "a42510132e40d8696ed1d36949ee20f2cce4e55b1c641c4bf1546ec07c42964f",
+      "source_mode": "100644",
+      "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
+    },
+    "modules/midi-harmony/packed.c": {
+      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
+      "path": "modules/midi-harmony/degrees/packed.c",
+      "sha256": "39cec93c513b040deae655b40c3279ae97af0e46dec06a5b882c0e1492b11697",
+      "published_sha256": "39cec93c513b040deae655b40c3279ae97af0e46dec06a5b882c0e1492b11697",
+      "source_mode": "100644"
+    },
+    "modules/midi-harmony/packed.h": {
+      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
+      "path": "modules/midi-harmony/degrees/packed.h",
+      "sha256": "3bcd89d00b29e8320c3f7ef8e30f3975518b1bde7544399d1adcd8dc80b46355",
+      "published_sha256": "f382115597226a39a9746dca3af1f31b14c53880104d1d90aca61d950c05eb96",
+      "source_mode": "100644"
+    },
+    "modules/midi-harmony/packed.s": {
+      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
+      "path": "modules/midi-harmony/degrees/packed.s",
+      "sha256": "aca3b286fd10255f8df977d040b1b065e770bb8d5b069e8b55b9e569322c5bfb",
+      "published_sha256": "0a8ee7af82a3f39b9ebf2237a2621922a3f62183905b468713b9ab2cf33ee01c",
+      "source_mode": "100644"
+    },
+    "modules/midi-harmony/panel.s": {
+      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
+      "path": "modules/midi-harmony/degrees/panel.s",
+      "sha256": "36747da9645769dd25099eabffbf1becf8885b5046c5b981dfd51b86f11498a5",
+      "published_sha256": "39b698257d31db986c16b7e7ef7b72dbbdc6a7a39576e7c5b2dd4579751dbe19",
+      "source_mode": "100644",
+      "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
+    },
+    "modules/midi-harmony/part-access.s": {
+      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
+      "path": "modules/midi-harmony/degrees/part-access.s",
+      "sha256": "7cb3b1bbdafb1cb06cca721633f9fe0e90db2595205e8851711ce62f04e4c1b0",
+      "published_sha256": "7cb3b1bbdafb1cb06cca721633f9fe0e90db2595205e8851711ce62f04e4c1b0",
+      "source_mode": "100644"
+    },
+    "modules/midi-harmony/pool.s": {
+      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
+      "path": "modules/midi-harmony/degrees/pool.s",
+      "sha256": "24d0f0f81dadcc4cf01c0963d298a2278a4bec27438cf5b373e8be6aada64063",
+      "published_sha256": "9a764cb922f68f324b861ddddc44412034be6f20a639f2e0f52fdd7c8ee7cbe9",
+      "source_mode": "100644"
+    },
+    "modules/midi-harmony/recording.c": {
+      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
+      "path": "modules/midi-harmony/degrees/recording.c",
+      "sha256": "d4455ab41d06fd1d075b3353cc1e6663237bffac1f0f1352ae10610ff086613b",
+      "published_sha256": "d4455ab41d06fd1d075b3353cc1e6663237bffac1f0f1352ae10610ff086613b",
+      "source_mode": "100644"
+    },
+    "modules/midi-harmony/recording.s": {
+      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
+      "path": "modules/midi-harmony/degrees/recording.s",
+      "sha256": "1aa2e8c854e8c115a4c340cf443b4e7c4427b930c72db9716301aecedeb10210",
+      "published_sha256": "bbec80d103875d66982d7a8e1fc232b1bc8e918b352af2a9e72a48c4ac4645fe",
+      "source_mode": "100644"
+    },
+    "modules/midi-harmony/roots.c": {
+      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
+      "path": "modules/midi-harmony/degrees/roots.c",
+      "sha256": "28fad13358d37a1817f0b9dc10282b3053ba87117d22c79db096b9c6fcea63cf",
+      "published_sha256": "28fad13358d37a1817f0b9dc10282b3053ba87117d22c79db096b9c6fcea63cf",
+      "source_mode": "100644"
+    },
+    "modules/midi-harmony/roots.h": {
+      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
+      "path": "modules/midi-harmony/degrees/roots.h",
+      "sha256": "9cdc343ebf2e22249b4d2c43a984e227559c6d1567800c412a3fca74b42e629b",
+      "published_sha256": "9cdc343ebf2e22249b4d2c43a984e227559c6d1567800c412a3fca74b42e629b",
+      "source_mode": "100644"
+    },
+    "modules/midi-harmony/roots.s": {
+      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
+      "path": "modules/midi-harmony/degrees/roots.s",
+      "sha256": "4f7ccacbc6ad2a2eaf74772beede99605b1a4a80b5819908a3bbfe878cde97af",
+      "published_sha256": "b0cf165213a686c5794a7d1587e3a9f93592b52cd532b179d52fe98861a0783c",
+      "source_mode": "100644"
+    },
+    "modules/midi-harmony/scene-access.s": {
+      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
+      "path": "modules/midi-harmony/degrees/scene-access.s",
+      "sha256": "057759bb2f56f9a31b931ea51d4d591d4e936ef0cdb7864b0454dadbf5780123",
+      "published_sha256": "057759bb2f56f9a31b931ea51d4d591d4e936ef0cdb7864b0454dadbf5780123",
+      "source_mode": "100644"
+    },
+    "modules/midi-harmony/scenes.c": {
+      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
+      "path": "modules/midi-harmony/degrees/scenes.c",
+      "sha256": "92e0761adec5b61e4c597a48e4c318eb0273743028320f38c1ec12307710fdba",
+      "published_sha256": "92e0761adec5b61e4c597a48e4c318eb0273743028320f38c1ec12307710fdba",
+      "source_mode": "100644"
+    },
+    "modules/midi-harmony/scenes.s": {
+      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
+      "path": "modules/midi-harmony/degrees/scenes.s",
+      "sha256": "073c28c125d1c1a8ba8c50019301c99d0acf0e3f3e8bfea728a0b6a7a82a4ed7",
+      "published_sha256": "68dbbcf1d64fde3665f1ce868fe524967016cabfa9f5b4bd1c6a51199bd8e0a2",
+      "source_mode": "100644"
+    },
+    "modules/midi-harmony/storage.c": {
+      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
+      "path": "modules/midi-harmony/degrees/storage.c",
+      "sha256": "02e6f4204ddebfcc6128a8379919ab1aae269bdd4bf1f285e3e5c80745dcda8f",
+      "published_sha256": "4e6f0e60363b0a280cc5ef5f61cf0543372186d269d65edcaaa00cfc9a2b1c90",
+      "source_mode": "100644",
+      "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
+    },
+    "modules/midi-harmony/storage.s": {
+      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
+      "path": "modules/midi-harmony/degrees/storage.s",
+      "sha256": "44b76769855b967e751a394d1a59aab5995b7d81597646292164a38bc74773bf",
+      "published_sha256": "462abb9fed4dadb16cb43006e0307d86b6c8a902bb236cce3c6f1f4993c8ff0f",
+      "source_mode": "100644",
+      "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
+    },
+    "modules/midi-harmony/track-retention.c": {
+      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
+      "path": "modules/midi-harmony/degrees/track-retention.c",
+      "sha256": "371295609e6058c25939563cac9b276c1febdaeb93b5c4c1e5fe33b37a0d0161",
+      "published_sha256": "243ca977bf84000f18ad61246378feb68c4c19db82aa31e8ecb353b7b95e7cfc",
+      "source_mode": "100644",
+      "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
+    },
+    "modules/midi-harmony/track-retention.h": {
+      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
+      "path": "modules/midi-harmony/degrees/track-retention.h",
+      "sha256": "de4a1b6fac62755ea4266c418bf1671a6fc203da78d1cf9d0fde6e9a9e6d87be",
+      "published_sha256": "7613f831da025b9881fb242cbd6c26f0358909abae212cd6ca2e76a9943bee51",
+      "source_mode": "100644",
+      "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
+    },
+    "modules/midi-harmony/track-retention.s": {
+      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
+      "path": "modules/midi-harmony/degrees/track-retention.s",
+      "sha256": "273b3f6003844f1c796791764f50cd14ed36d869991b22d382a42c27d1cbbf44",
+      "published_sha256": "4ea788e23c1d292295f682004fa75d03acc1f110afd6f38e70b9c22bec1da544",
+      "source_mode": "100644",
+      "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
+    },
+    "modules/midi-harmony/ui.c": {
+      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
+      "path": "modules/midi-harmony/degrees/ui.c",
+      "sha256": "ed7b4574e7924802e14999be0f35c33ee2b907396110306fe76ac8f6f7e8cfdc",
+      "published_sha256": "ed7b4574e7924802e14999be0f35c33ee2b907396110306fe76ac8f6f7e8cfdc",
+      "source_mode": "100644"
+    },
+    "modules/midi-harmony/ui.s": {
+      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
+      "path": "modules/midi-harmony/degrees/ui.s",
+      "sha256": "10319a7b8b7279ea16a9e3de48ffa64d1de9ca32e28ff79309c8154ba0f09768",
+      "published_sha256": "f981fc1b87c4495e399f0d2fbe8e830034ec9e7370c08c4d70d0a19bc6171cdb",
+      "source_mode": "100644"
     }
   },
-  "submodules": {}
+  "submodules": {},
+  "retired_files": {
+    "modules/midi-harmony/degrees/DEVELOPMENT.md": {
+      "path": "modules/midi-harmony/degrees/DEVELOPMENT.md",
+      "sha256": "00e9b47b948ffc4e6e46a62aba5fbb1f7e56a992a1b965665c3bf7d49a2b9cce",
+      "published_sha256": "2f15ab2a6a20497fc0fb9aa1dc16f9f8be89559ed0b8d1512afd5d39ee805a59",
+      "source_mode": "100644",
+      "origin": "Split from adjacent README in this repository; historical evidence is retained in the text."
+    },
+    "modules/midi-harmony/degrees/README.md": {
+      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
+      "path": "modules/midi-harmony/degrees/README.md",
+      "sha256": "00e9b47b948ffc4e6e46a62aba5fbb1f7e56a992a1b965665c3bf7d49a2b9cce",
+      "published_sha256": "b7921895a3f709a734a9315ed811ea8ead19e0c61b474c8a6f68e5bdbac6b5d8",
+      "source_mode": "100644"
+    },
+    "modules/midi-harmony/degrees/generate.py": {
+      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
+      "path": "modules/midi-harmony/degrees/generate.py",
+      "sha256": "24a1c9eb31bccda869b3c4a0ab0f3c303becae38fa9a05095f8643f0a1f34d70",
+      "published_sha256": "9a40ecdaed9d7cdc805f61820aaae00676a83d43c9833db24f272d10707438e3",
+      "source_mode": "100644",
+      "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
+    },
+    "modules/midi-harmony/degrees/storage-track.s": {
+      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
+      "path": "modules/midi-harmony/degrees/storage-track.s",
+      "sha256": "d813bcf2fee42ce3e2f9af3ef0cb75d9c63316697d2772894a424ad67af9cc2e",
+      "published_sha256": "d7b4fe2235424a0563677308e483c196128eed6046851260bdef71fe3fcf25cb",
+      "source_mode": "100644",
+      "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
+    },
+    "tools/verify/verify_integrated_retention_port.py": {
+      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
+      "path": "tools/verify/verify_integrated_retention_port.py",
+      "sha256": "0195f79cfd79667c45826628a0e9cc3289a5f77e4d5dba216fdf50b0b1275341",
+      "published_sha256": "0195f79cfd79667c45826628a0e9cc3289a5f77e4d5dba216fdf50b0b1275341",
+      "source_mode": "100644"
+    }
+  }
 }

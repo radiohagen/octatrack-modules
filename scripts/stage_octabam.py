@@ -52,20 +52,29 @@ def plan(source: Path, target: Path, receipt: dict) -> list[tuple[Path, Path]]:
 
 
 def retired_paths(target: Path, receipt: dict) -> list[Path]:
-    """Remove only tracked original files replaced by a recorded source rename."""
+    """Retire recorded removals/renames, never unrelated or untracked content."""
     target = target.resolve()
     retired = []
+    originals = set(receipt.get('retired_files', {}))
     for name, record in receipt['files'].items():
         old = record['path']
         if old == name or not name.startswith(('modules/', 'tools/verify/', 'remixes/')):
             continue
+        originals.add(old)
+    for old in sorted(originals):
         path = target / old
         if (not old.startswith(('modules/', 'tools/verify/', 'remixes/'))
                 or not path.resolve().is_relative_to(target) or path.is_symlink()
-                or not path.is_file() or old in receipt['files']):
+                or old in receipt['files']):
             raise ValueError(f'Invalid original path for rename: {old}')
-        if git(target, 'ls-files', '--', old) != old:
+        tracked = git(target, 'ls-files', '--', old) == old
+        # A newly authored file may never have existed at the integration pin.
+        if not tracked and not path.exists():
+            continue
+        if not tracked:
             raise ValueError(f'Original rename path is not tracked: {old}')
+        if not path.is_file():
+            raise ValueError(f'Expected regular retired file: {old}')
         retired.append(path)
     return retired
 

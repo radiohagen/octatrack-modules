@@ -80,7 +80,6 @@ void hd_events_mode_c(unsigned track, unsigned mode);
 int hd_prepare_c(int native_note, unsigned track);
 int hd_payload_valid_c(const uint8_t *payload);
 uint32_t hd_payload_hash_c(const uint8_t *payload);
-uint32_t hd_legacy_hash_c(uint8_t *payload);
 int hd_export_c(unsigned bank, uint8_t *payload);
 void hd_import_c(unsigned bank, const uint8_t *payload);
 uint32_t hd_native_hash_c(unsigned bank, uint32_t hash);

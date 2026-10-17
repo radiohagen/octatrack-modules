@@ -43,7 +43,7 @@ int ha_amount_c(unsigned code) {
     return code<2 || code>15 ? 0 : code<9 ? (int)code-9 : (int)code-8;
 }
 unsigned ha_lock_c(unsigned bank, unsigned pattern, unsigned track, unsigned step) {
-    if (!ha_enabled_c() || bank>=16 || pattern>=16 || track>=8 || step>=64) return 0;
+    if (bank>=16 || pattern>=16 || track>=8 || step>=64) return 0;
     unsigned byte=ha_lanes[bank][pattern*8+track].amount[step/2];
     return (byte >> ((step&1) ? 0 : 4))&15;
 }
@@ -53,7 +53,7 @@ static void dirty(unsigned bank) {
     if (LONG(0x46c82456)==0x400e21e0u+bank*0x9b340u) LONG(0x100f8598)=1;
 }
 void ha_set_c(unsigned bank, unsigned pattern, unsigned track, unsigned step, unsigned code) {
-    if (!ha_enabled_c() || bank>=16 || pattern>=16 || track>=8 || step>=64 || code>15) return;
+    if (bank>=16 || pattern>=16 || track>=8 || step>=64 || code>15) return;
     uint16_t sr=mask();
     dirty(bank);
     unsigned shift=(step&1) ? 0 : 4;
@@ -70,7 +70,7 @@ void ha_transport_c(void) {
     for (unsigned track=0;track<8;++track) phases[track].restart=1;
 }
 void ha_settings_copy_c(unsigned bank, unsigned pattern, unsigned track, const HaLane *source) {
-    if (!ha_enabled_c() || bank>=16 || pattern>=16 || track>=8) return;
+    if (bank>=16 || pattern>=16 || track>=8) return;
     uint16_t sr=mask(); dirty(bank);
     HaLane *dst=&ha_lanes[bank][pattern*8+track];
     dst->lower=source->lower;dst->upper=source->upper;dst->boundary=source->boundary;
@@ -79,7 +79,7 @@ void ha_settings_copy_c(unsigned bank, unsigned pattern, unsigned track, const H
     unmask(sr);
 }
 void ha_fire_c(unsigned bank, unsigned pattern, unsigned track, unsigned step) {
-    if (!ha_enabled_c() || bank>=16 || pattern>=16 || track>=8 || step>=64) return;
+    if (bank>=16 || pattern>=16 || track>=8 || step>=64) return;
     HaPhase *p=&phases[track];
     const HaLane *c=&ha_lanes[bank][pattern*8+track];
     if (p->restart && (c->reset&1)) reset(p);
@@ -90,7 +90,7 @@ void ha_fire_c(unsigned bank, unsigned pattern, unsigned track, unsigned step) {
     p->captured=p->offset[step]; p->valid=1; p->sounded=0;
 }
 int ha_shift_c(int note, unsigned track, unsigned context) {
-    if (!ha_enabled_c() || track>=8 || context>=64 || note<0 || note>127) return note;
+    if (track>=8 || context>=64 || note<0 || note>127) return note;
     HaPhase *p=&phases[track];
     if (!p->valid) return note;
     const HaLane *c=&ha_lanes[p->bank][p->pattern*8+track];
@@ -101,7 +101,7 @@ int ha_shift_c(int note, unsigned track, unsigned context) {
     return hd_decode_c(hd_encode_c(note,scale)+p->captured,scale);
 }
 void ha_sounded_c(unsigned track) {
-    if (!ha_enabled_c() || track>=8) return;
+    if (track>=8) return;
     HaPhase *p=&phases[track];
     if (!p->valid || p->sounded) return;
     p->sounded=1;
@@ -131,10 +131,6 @@ int ha_valid_c(const volatile uint8_t *p) {
             p[34]>3 || p[35]>3 || p[36]<1 || p[36]>15) return 0;
     return 1;
 }
-void ha_blank_c(volatile uint8_t *p) {
-    HaLane lane; defaults(&lane);
-    for (unsigned i=0;i<128;++i) for (unsigned j=0;j<37;++j) *p++=((uint8_t *)&lane)[j];
-}
 void ha_pack_c(unsigned bank, volatile uint8_t *p) {
     const uint8_t *src=(const uint8_t *)ha_lanes[bank];
     for (unsigned i=0;i<HA_BANK_BYTES;++i) p[i]=src[i];
@@ -149,7 +145,7 @@ void ha_unpack_c(unsigned bank, const volatile uint8_t *p) {
 static int ui(unsigned *bank, unsigned *pattern, unsigned *track) {
     int context=hd_ui_context_c();
     *pattern=BYTE(0x100b14d0); *track=BYTE(0x100b14cc);
-    if (!ha_enabled_c() || context<0 || *pattern>=16 || *track>=8) return 0;
+    if (context<0 || *pattern>=16 || *track>=8) return 0;
     *bank=(unsigned)context/4;
     return hd_part_type_c(*bank,(unsigned)context%4,*track)!=0;
 }
@@ -191,7 +187,7 @@ int ha_ui_edit_c(int delta, int toggle, int steps) {
 }
 int ha_setting_c(unsigned track, unsigned knob, int delta) {
     int context=hd_ui_context_c(); unsigned pattern=BYTE(0x100b14d0);
-    if (!ha_enabled_c() || context<0 || track>=8 || pattern>=16 || knob>=4) return 0;
+    if (context<0 || track>=8 || pattern>=16 || knob>=4) return 0;
     unsigned bank=(unsigned)context/4;
     HaLane *c=&ha_lanes[bank][pattern*8+track];
     int old=knob==0 ? c->lower : knob==1 ? c->upper : knob==2 ? c->boundary : c->reset;

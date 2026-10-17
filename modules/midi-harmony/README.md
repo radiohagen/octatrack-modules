@@ -22,7 +22,7 @@ DEG `1:3` means degree 1 in tonic octave 3. Turn DEG to move through the scale;
 **FUNC + DEG** changes only the octave. Hold steps to edit DEG/CHRD locks;
 press the corresponding encoder while holding steps to toggle the locks.
 
-Press **F** on NOTE SETUP to open **HARMONY**. In MIDI TRACK builds,
+Press **F** on NOTE SETUP to open **HARMONY**.
 UP/DOWN selects CHORD or ACCUM. HARM OFF/NOTE/CHORD stays on the parent page.
 CHORD controls follow the displayed positions: A/B/C across the top and D
 at bottom left. Empty E/F cells ignore turns.
@@ -40,7 +40,7 @@ See [Voicing](VOICING.md) for the musical rules.
 
 ## Degree accumulator
 
-With `RETENTION=MIDI TRACK`, **NOTE MAIN E: ACC** edits the pattern/track's
+**NOTE MAIN E: ACC** edits the pattern/track's
 default amount: OFF or −7…−1 / +1…+7 scale degrees. Hold trigs and turn E for
 independent step overrides; press E while holding trigs to add/remove locks.
 An unlocked step inherits the default. OFF is an explicit override, not a
@@ -105,9 +105,9 @@ NOTE fields are storage mirrors and can play different pitches on stock.
 Stock also resets voicing/spread/root choices and clamps extended KEY modes
 to B Minor; saving persists those changes for the bank written.
 
-Requires **MIDI Part State** and **STORE**. PLOCKS P2 requires the **Harmony
+Requires **MIDI Part State**, **STORE** and **MIDI SRAM**. PLOCKS P2 requires the **Harmony
 PLOCKS bridge** and compatible retention settings. KITS libraries are per
 project; recalling a kit supplies Part defaults while pattern locks stay with
-the patterns. See [storage](degrees/README.md) and [KITS](degrees/KITS.md).
+the patterns. See [storage](DEVELOPMENT.md#compact-harmony-storage) and [KITS](KITS.md).
 
 [Implementation, provenance and verification](DEVELOPMENT.md).

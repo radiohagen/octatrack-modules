@@ -36,13 +36,7 @@ def machine():
 
 
 def main():
-    if 'hd_track_read_c' not in symbols():
-        print('[N/A] accumulator requires MIDI TRACK retention')
-        return
     m=machine();u=m.uc;s=m.sym
-    if not m.c('ha_enabled_c'):
-        print('[N/A] accumulator requires MIDI TRACK retention')
-        return
     if '--negative-control' in sys.argv:
         def no_advance(uc,pc,size,data):
             if pc==s['ha_sounded_c']:
@@ -174,11 +168,12 @@ def main():
     old_payload=new[32:32+10368]
     old=struct.pack('>8I',0x48445033,3,0,10368,fnv(old_payload),int.from_bytes(new[20:24],'big'),0,0)+old_payload
     m.files[path]=old;m.call('ch_file_read',0)
-    assert u.mem_read(s['ch_lock_status'],1)==b'\1'
-    defaults=(bytes(32)+bytes((0,7,0,3,1)))*128
-    assert bytes(u.mem_read(s['ha_lanes'],4736))==defaults
+    assert u.mem_read(s['ch_lock_status'],1)==b'\2'
+    assert m.call('ch_file_write',0)==0xfffffff9 and m.files[path]==old
+    m.files[path]=new;m.call('ch_file_read',0)
+    assert bytes(u.mem_read(s['ha_lanes'],4736))==expected
     assert bytes(u.mem_read(s['ch_lock_table'],8192))==q
-    print('[ok] HDP4 round trip; HDP3 upgrade preserves roots/qualities and starts ACC OFF',flush=True)
+    print('[ok] HDP4 round trip; obsolete HDP3 rejected and protected from overwrite',flush=True)
     legacy=bytearray()
     for lane in range(128):
         row=old_payload[lane*81:(lane+1)*81]
@@ -190,10 +185,10 @@ def main():
             top=43 if step==0 else (meta>>(6*(22-step)))&63 if step<=22 else 0
             legacy.extend(((top<<10)|((tokens>>(10*(63-step)))&1023)).to_bytes(2,'big'))
     retained.install(m,legacy);u.mem_write(s['ha_lanes'],bytes(expected))
-    assert m.c('hd_nv_restore_c',0)==1
-    assert bytes(u.mem_read(s['ha_lanes'],4736))==defaults
+    assert m.c('hd_nv_restore_c',0)==0
+    assert bytes(u.mem_read(s['ha_lanes'],4736))==expected
     assert bytes(u.mem_read(s['ch_lock_table'],8192))==q
-    print('[ok] validated HMT1 unsaved checkpoint upgrades with ACC OFF',flush=True)
+    print('[ok] obsolete HMT1 checkpoint rejected without publication',flush=True)
     # Carry actual musical config through the existing native memcpy bridge.
     u.mem_write(s['ha_lanes'],bytes(expected))
     for dst,src,length in ((BANK+0x8ed8+0x48d0,BANK+0x48d0,0x8b0),
@@ -207,7 +202,7 @@ def main():
     cleared=bytearray(before);cleared[1]&=0xf0
     assert bytes(u.mem_read(s['ha_lanes'],4736))==cleared
     print('[ok] native track/pattern clipboard bridge carries ACC; step clear is scoped',flush=True)
-    result=dict(boundary_outputs=counts,dense_steps=8192,legacy_project_upgrade=True,hardware_tested=False)
+    result=dict(boundary_outputs=counts,dense_steps=8192,obsolete_formats_rejected=True,hardware_tested=False)
     out=__import__('pathlib').Path(__file__).resolve().parents[2]/'out/harmony-accumulator'
     out.mkdir(parents=True,exist_ok=True);(out/'linked.json').write_text(json.dumps(result,indent=2)+'\n')
 

@@ -8,7 +8,7 @@ installed edit/clear bodies, SRAM protection and retention are executed.
 import json
 from unicorn import UC_HOOK_CODE, UC_HOOK_MEM_WRITE
 from unicorn.m68k_const import *
-from verify_harmony_plocks import Combined, BANK, STRIDE
+from verify_harmony_degree_files import Files, BANK, STRIDE
 from verify_harmony_degree_packed import oracle, mirror
 from verify_midi_sram import BASE, OFFSETS, SIZE
 from midi_machine import ROOT, InterruptMaskTrace
@@ -49,11 +49,9 @@ def header(data,lane=0):
 
 
 def main():
-    m=Combined();u=m.uc;s=m.sym
-    if not retained.track_layout(m):
-        print("[N/A] Harmony MIDI TRACK retention is not selected")
-        return
-    roots,qualities,_,_=m.seed()
+    m=Files();u=m.uc;s=m.sym
+    m.call('ch_lock_init')
+    roots,qualities=m.seed()
     # Exercise ALL 765 legal degree/chord pairs, including independent unlocks.
     roots=bytearray(roots);qualities=bytearray(qualities)
     for lane in range(128):

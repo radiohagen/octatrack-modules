@@ -88,7 +88,6 @@ ch_draw_value:
     move.l %d0,(%sp)
     bra.w .draw_restore
 .draw_chord:
-.ifdef HAVE_ACCUM
     cmpa.l #4,%a4
     bne.s .draw_not_accum
     moveq #0,%d0
@@ -100,7 +99,6 @@ ch_draw_value:
     move.l %d0,(%sp)
     bra.w .draw_restore
 .draw_not_accum:
-.endif
     cmpa.l #3,%a4
     bne.w .draw_restore
     moveq #0,%d0

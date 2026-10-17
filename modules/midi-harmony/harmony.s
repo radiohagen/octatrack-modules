@@ -276,7 +276,6 @@ mh_direct:
     cmpi.l #127,%d2
     bhi.w .gen_invalid
 .gen_accumulate:
-.ifdef HAVE_ACCUM
     tst.l %d5 /* Live keyboard pitches do not participate. */
     beq.s .gen_accum_done
     cmpi.l #127,%d2 /* Preserve Follow's signed register + TRAN path. */
@@ -289,7 +288,6 @@ mh_direct:
     cmpi.l #127,%d2
     bhi.w .gen_invalid
 .gen_accum_done:
-.endif
     add.l (%sp),%d2
     cmpi.l #2,%d5
     beq.s .gen_bounds

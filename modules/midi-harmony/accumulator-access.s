@@ -1,13 +1,5 @@
-.include "remix.inc"
     .text
-    .global ha_enabled_c,ha_shift,ha_sounded,ha_start_a,ha_start_b
-ha_enabled_c:
-.ifdef HAVE_ACCUM
-    moveq #1,%d0
-.else
-    moveq #0,%d0
-.endif
-    rts
+    .global ha_shift,ha_sounded,ha_start_a,ha_start_b
 /* d0 root pitch, d1 track, d2 context. Preserve all except result d0. */
 ha_shift:
     lea -12(%sp),%sp
@@ -49,7 +41,6 @@ ha_start_b:
     .global ha_ui_owned,ha_descriptor,ha_draw,ha_encoder,ha_step_encoder,ha_step_push
 ha_ui_owned:
     moveq #0,%d0
-.ifdef HAVE_ACCUM
     cmpi.l #4,%d1
     bne.s .ha_owned_done
     move.l %d1,-(%sp)
@@ -57,10 +48,8 @@ ha_ui_owned:
     jsr hd_ui_owned
     move.l (%sp)+,%d1
 .ha_owned_done:
-.endif
     rts
 ha_descriptor:
-.ifdef HAVE_ACCUM
     move.l #0x41434300,%d0
     move.l %d0,0x2e(%a0)
     clr.w 0x32(%a0)
@@ -74,7 +63,6 @@ ha_descriptor:
     move.l 0x18e(%a0),%d0
     ori.l #0x00010000,%d0
     move.l %d0,0x18e(%a0)
-.endif
     rts
 ha_draw:
     lea -12(%sp),%sp

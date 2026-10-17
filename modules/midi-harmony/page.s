@@ -1,16 +1,13 @@
 /* Harmony window: native window/input-layer pattern from the Tuner module.
- * NOTE SETUP F press opens it. MIDI TRACK: CHORD A-D=VOIC/SPRD/ROOT/SIZE,
+ * NOTE SETUP F press opens it. CHORD A-D=VOIC/SPRD/ROOT/SIZE,
  * ACCUM A-D=LOW/HIGH/BOUND/RESET; HARM stays on the parent NOTE SETUP page.
- * Historical layouts keep A-E=HARM/VOIC/SPRD/ROOT/SIZE.
  * Track is fixed while open. Track/page keys close the window; a subsequent
  * press selects the track/page. Transport and chromatic keys pass through.
- * MIDI TRACK grid: VOIC/SPRD/ROOT above SIZE; track in footer.
- * Historical grid: HARM/VOIC/SPRD above ROOT/SIZE.
+ * Grid: VOIC/SPRD/ROOT above SIZE; track in footer.
  * Values use the stock PLAYBACK 3/5/3/4/4-position selector widgets.
  * No UI-task/ISR hook: redraw only on open or an encoder edit.
  */
     .include "remix.inc"
-.ifdef HAVE_ACCUM
     /* Stock widgets are 19 pixels wide, centred at x+9. */
     .set PAGE_A,37
     .set PAGE_B,65
@@ -20,16 +17,6 @@
     .set ROOT_X,PAGE_C
     .set SIZE_X,PAGE_A
     .set ROOT_LABEL_Y,52
-.else
-    .set PAGE_A,10
-    .set PAGE_B,49
-    .set PAGE_C,87
-    .set VOIC_X,PAGE_B
-    .set SPRD_X,PAGE_C
-    .set ROOT_X,PAGE_A
-    .set SIZE_X,PAGE_B
-    .set ROOT_LABEL_Y,29
-.endif
     .text
     .global mh_page_open,mh_page_close,mh_page_noop,mh_page_encoder
     .global mh_page_win,mh_page_track,mh_page_draw
@@ -79,7 +66,6 @@ mh_page_encoder:
     move.l 20(%sp),%d3 /* signed detents */
     cmpi.l #4,%d2
     bhi.w .page_encoder_done
-.ifdef HAVE_ACCUM
     tst.l mh_page_tab
     beq.s .page_encoder_harmony
     cmpi.l #3,%d2
@@ -99,14 +85,11 @@ mh_page_encoder:
 .page_encoder_harmony:
     cmpi.l #3,%d2
     bhi.w .page_encoder_done
-.endif
     move.l %d2,%d0
     move.l %d3,%d1
     jsr mh_ui_delta
     move.l %d0,%d3
-.ifdef HAVE_ACCUM
     addq.l #1,%d2 /* A-D reuse the VOIC/SPRD/ROOT/SIZE setter dispatch. */
-.endif
     cmpi.l #4,%d2
     beq.w .page_size
     cmpi.l #3,%d2
@@ -268,23 +251,12 @@ mh_page_draw:
     move.l %a5,-(%sp)
     jsr 0x40035624
     addq.l #4,%sp
-.ifdef HAVE_ACCUM
     tst.l mh_page_tab
     bne.w .page_draw_accum
-.endif
     /* Native PLAYBACK selectors: exact count, with our value formatters.
      * ABI: widget(x,y,slot,value,flags,formatter,surface).
      * Full layout, no lock highlight; the modal owns its own surface.
      */
-.ifndef HAVE_ACCUM
-    move.l mh_page_track,%d0
-    jsr mh_get
-    move.l %d0,%d1
-    moveq #PAGE_A,%d0
-    lea mh_type_format,%a0
-    lea 0x40046d9c,%a1 /* three positions */
-    bsr.w .page_selector
-.endif
     move.l mh_page_track,%d0
     jsr mh_voic_get
     bsr.w .page_voic_index
@@ -306,11 +278,7 @@ mh_page_draw:
     moveq #ROOT_X,%d0
     lea mh_page_omit_format,%a0
     lea 0x40046c28,%a1 /* four-position ROOT widget */
-.ifdef HAVE_ACCUM
     bsr.w .page_selector
-.else
-    bsr.w .page_selector_bottom
-.endif
     move.l mh_page_track,%d0
     jsr mh_size_get
     move.l %d0,%d1
@@ -318,12 +286,6 @@ mh_page_draw:
     lea mh_page_size_format,%a0
     lea 0x40046c28,%a1
     bsr.w .page_selector_bottom
-.ifndef HAVE_ACCUM
-    moveq #PAGE_A+9,%d0
-    moveq #52,%d1
-    lea .page_harm_label,%a0
-    bsr.w .page_label
-.endif
     moveq #VOIC_X+9,%d0
     moveq #52,%d1
     lea .page_voic_label,%a0
@@ -341,7 +303,6 @@ mh_page_draw:
     lea .page_size_label,%a0
     bsr.w .page_label
     bra.w .page_draw_footer
-.ifdef HAVE_ACCUM
 .page_draw_accum:
     moveq #0,%d3
 .page_accum_loop:
@@ -399,7 +360,6 @@ mh_page_draw:
     addq.l #1,%d3
     cmpi.l #4,%d3
     bne.w .page_accum_loop
-.endif
 .page_draw_footer:
     bsr.w .page_grid
     move.l mh_page_track,%d0
@@ -413,7 +373,6 @@ mh_page_draw:
     moveq #4,%d1
     move.l %a2,%a0
     bsr.w .page_text
-.ifdef HAVE_ACCUM
     moveq #5,%d0
     moveq #49,%d1
     lea .page_tab_harm,%a0
@@ -438,7 +397,6 @@ mh_page_draw:
     move.l %a5,-(%sp)
     jsr 0x40012254
     lea 24(%sp),%sp
-.endif
     moveq #85,%d0
     moveq #4,%d1
     lea .page_back,%a0
@@ -453,9 +411,7 @@ mh_page_draw:
     lea -8(%sp),%sp
     movem.l %d2/%a2,(%sp)
     moveq #4,%d2
-.ifdef HAVE_ACCUM
     moveq #5,%d2
-.endif
     lea .page_grid_lines,%a2
 .page_grid_line:
     pea 1
@@ -464,13 +420,11 @@ mh_page_draw:
     move.l 4(%a2),-(%sp)
     move.l (%a2),-(%sp)
     move.l %a5,-(%sp)
-.ifdef HAVE_ACCUM
     cmpi.l #2,%d2
     bls.s .page_grid_solid
     jsr 0x40012004 /* stock alternating-pixel line, same six-argument ABI */
     bra.s .page_grid_next
 .page_grid_solid:
-.endif
     jsr 0x40012254
 .page_grid_next:
     lea 24(%sp),%sp
@@ -571,18 +525,11 @@ mh_page_sprd_format:
 .page_back: .asciz "NO:BACK"
     .balign 4
 .page_grid_lines:
-.ifdef HAVE_ACCUM
     .long 60,12,60,58
     .long 88,12,88,58
     .long 32,35,117,35
     .long 0,12,117,12
     .long 32,12,32,58
-.else
-    .long 38,12,38,58
-    .long 77,12,77,58
-    .long 0,35,115,35
-    .long 0,12,115,12
-.endif
 .page_omits: .long .page_keep,.page_omit_value,.page_down1,.page_down2
 .page_voices: .long .page_root,.page_first,.page_second,.page_third,.page_auto
 .page_spreads: .long .page_close,.page_open,.page_wide
@@ -590,14 +537,12 @@ mh_page_sprd_format:
 mh_page_layer:
     .long 0,mh_page_keys,mh_page_encs,0,0,-1,-1
 mh_page_keys:
-.ifdef HAVE_ACCUM
     .byte 0x33,0
     .long mh_page_up,0,0,0,0
     .word 0,0
     .byte 0x20,0
     .long mh_page_down,0,0,0,0
     .word 0,0
-.endif
     /* The opening F key's release is consumed; only a new press closes. */
     .irp key,0x31,0x32,0x3d,0x22,0x23,0x24,0x25,0x26,0x35,0x10,0x11,0x12,0x13,0x14,0x15,0x16,0x17
     .byte \key,0
@@ -624,7 +569,6 @@ mh_page_encs:
 mh_page_win: .long 0
 mh_page_track: .long 0
 mh_page_tab: .long 0
-.ifdef HAVE_ACCUM
 mh_page_up:
     clr.l mh_page_tab
     bra.w mh_page_draw
@@ -673,4 +617,3 @@ mh_page_down:
 .page_resets: .long .page_none,.page_start,.page_pattern,.page_both
 .page_accum_formats: .long .page_lower_format,.page_limit_format,.page_boundary_format,.page_reset_format
 .page_accum_labels: .long .page_lower,.page_upper,.page_boundary,.page_reset
-.endif
