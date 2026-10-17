@@ -51,6 +51,11 @@ an observed workaround rather than a general DSP-initialization fix.
 - Tested BIN SHA-256: `63e4fb7f008977eb561f055b255fad4252764e88b709b145995460ef2b223943`.
 - Linked runtime SHA-256: `812b0b3f7fcebc0a250a56a2b35004518f8dcec9817c15abc7c05ddd628baa6a`.
 
+The standalone PR implementation rebuilds the complete MAIN_OS byte for byte
+to the tested payload, including the linked runtime, startup sequence and
+placement. This transfers the existing device observations to that exact
+build without requiring a different firmware to be flashed.
+
 Image hashes identify the tested artifact without publishing firmware or
 requiring knowledge of local package names. Source/layout changes need a new
 image comparison; matching source modules alone is insufficient to transfer

@@ -221,5 +221,15 @@
       "route": "cable",
       "test": "recorder_start"
     }
-  ]
+  ],
+  "reproduction": {
+    "remix": "midi-loopback",
+    "build_label": "LJ",
+    "environment": {
+      "OCTABAM_PGO": "0"
+    },
+    "mainos_byte_identical": true,
+    "changed_bytes": 0,
+    "startup_build_flags_required": false
+  }
 }
