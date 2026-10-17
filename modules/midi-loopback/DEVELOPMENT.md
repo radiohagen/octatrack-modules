@@ -157,5 +157,8 @@ radiohagen/octabam. They are not current qualification for this branch.
 The Scenes bridge, Follow and Harmony are separate contributions. MIDI Scenes
 is explicitly incompatible until its producers are routed through the bridge.
 Stock DIN behavior is covered; USB-host and combined-module acceptance remain
-separate qualification. No hardware flash, MIDI timing or worst-case interrupt
-latency has been measured for this contribution.
+separate qualification. Scoped MKII playback and recorder-start measurements
+are recorded in [Hardware evidence](HARDWARE.md). Worst-case interrupt latency,
+dense-traffic behavior and full persistence/route-change hardware acceptance
+remain unmeasured. The required startup sequence preserves the tested
+composition; its cold-start workaround is empirical, with root cause open.

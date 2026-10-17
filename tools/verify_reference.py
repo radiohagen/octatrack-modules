@@ -18,7 +18,8 @@ def build(out):
     run('m68k-elf-objcopy', '-O', 'binary', out/'entry.elf', out/'entry.bin')
     units = [('midi-part-state', 'part'), ('midi-part-state', 'part-copy'),
              ('midi-loopback', 'loopback'), ('midi-loopback', 'producers'),
-             ('midi-loopback', 'settings'), ('midi-loopback', 'page')]
+             ('midi-loopback', 'settings'), ('midi-loopback', 'page'),
+             ('midi-loopback-startup', 'layout')]
     objects = []
     for i, (module, unit) in enumerate(units):
         folder = out/str(i)
@@ -29,11 +30,14 @@ def build(out):
         run('m68k-elf-as', '-mcpu=54455', '-I', folder, *defs, '-o', obj, ROOT/'modules'/module/(unit+'.s'))
         objects.append(obj)
     run('m68k-elf-ld', '-Ttext=0x40a955e0', '--defsym=mp_copy_target=0x400d6bb8',
-        '--defsym=mp_init_target=0x400d6bbc', '-o', out/'runtime.elf', *objects)
+        '--defsym=mp_init_target=0x400d6bbc', '--defsym=startup_trace=0x400d6c00', '-o', out/'runtime.elf', *objects)
     run('m68k-elf-objcopy', '-O', 'binary', out/'runtime.elf', out/'runtime.bin')
+    run('m68k-elf-as', '-mcpu=5475', '-o', out/'startup.o', ROOT/'modules/midi-loopback-startup/startup.s')
+    run('m68k-elf-ld', '-Ttext=0x400d6c00', '-o', out/'startup.elf', out/'startup.o')
+    run('m68k-elf-objcopy', '-O', 'binary', out/'startup.elf', out/'startup.bin')
     return {name: {'bytes': len((out/(name+'.bin')).read_bytes()),
                    'sha256': hashlib.sha256((out/(name+'.bin')).read_bytes()).hexdigest()}
-            for name in ('entry', 'runtime')}
+            for name in ('entry', 'runtime', 'startup')}
 
 
 def main():

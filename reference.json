@@ -9,9 +9,14 @@
       "sha256": "4de11692e14103dde57ed86c303a7332998c912fb8156fcf90b21a6f0ce32ca2"
     },
     "runtime": {
-      "bytes": 9340,
-      "sha256": "c69e627267a9a1fd0e3e7d3c5414118171d1a1d03d4f3b72c101431bfa7c9bcc"
+      "bytes": 9358,
+      "sha256": "812b0b3f7fcebc0a250a56a2b35004518f8dcec9817c15abc7c05ddd628baa6a"
+    },
+    "startup": {
+      "bytes": 848,
+      "sha256": "610258f25b54fbc605433e32e1e3e30ffc37bbc979cbb9f9c3254db09c6b60e5"
     }
   },
-  "revision_note": "Per-track live ownership counts skip empty cleanup while preserving original-destination releases and late-release tombstones; 16 bytes of volatile state within the existing platform reserve."
+  "revision_note": "Silent startup sequence and retained layout tail match the hardware-tested composition; Loopback/Part runtime prefix and cold entry unchanged.",
+  "startup_address": "0x400d6c00"
 }

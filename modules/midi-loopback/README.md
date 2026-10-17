@@ -46,10 +46,19 @@ DEST is stored per MIDI track in each native Part. Part save/reload/clear,
 copy/paste and project save/load carry it; fresh Parts use EXT. Playback uses
 the playing Part, independently of the Part selected for editing.
 
-Requires **MIDI Part State**. With MIDI Scenes, select the **MIDI Loopback /
+Requires **MIDI Part State** and the **MIDI Loopback startup sequence**. With MIDI Scenes, select the **MIDI Loopback /
 MIDI Scenes bridge** to route its additional producers. KITS is not required.
 
 Stock 1.40C resets the routing flags to EXT when loading. Saving the current
 bank on stock persists that reset. Keep a separate project copy to preserve routes.
 
+## Hardware status
+
+On one MKII, internal playback added 0.54 ms median delay; one internal
+recorder start added 0.73 ms relative to the native baseline. These are
+limited measurements, not a worst-case guarantee. The standalone composition
+includes a silent startup workaround that passed the reported longer-off
+boot checks; its root cause remains open.
+
+[Measurement method, exact image and limits](HARDWARE.md).
 [Implementation, provenance and verification](DEVELOPMENT.md).
