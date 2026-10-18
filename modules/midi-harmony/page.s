@@ -311,10 +311,13 @@ mh_page_draw:
      */
     moveq #0,%d0
     bsr.w .page_accum_setting
-    addi.l #63,%d0
+    addi.l #21,%d0
+    bpl.s .page_low_dial_range
+    moveq #0,%d0 /* preserved older bounds saturate the graphic, not the value */
+.page_low_dial_range:
     moveq #127,%d1
     mulu.l %d1,%d0
-    moveq #63,%d1
+    moveq #21,%d1
     divu.l %d1,%d0
     move.l %d0,%d1
     moveq #PAGE_A,%d0
@@ -322,9 +325,13 @@ mh_page_draw:
     bsr.w .page_dial
     moveq #1,%d0
     bsr.w .page_accum_setting
+    cmpi.l #21,%d0
+    ble.s .page_high_dial_range
+    moveq #21,%d0
+.page_high_dial_range:
     moveq #127,%d1
     mulu.l %d1,%d0
-    moveq #63,%d1
+    moveq #21,%d1
     divu.l %d1,%d0
     move.l %d0,%d1
     moveq #PAGE_B,%d0
@@ -689,5 +696,5 @@ mh_page_down:
 .page_accum_grid_lines:
     .long 60,2,60,58
     .long 88,2,88,58
-    .long 32,30,117,30
+    .long 32,30,116,30 /* stop before the frame: native clear excludes its edge */
     .long 32,2,32,58

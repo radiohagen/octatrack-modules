@@ -139,11 +139,13 @@ def main():
         assert cfg[32:37]==bytes((249,14,1,1,1)),list(cfg[:37])
         # Real encoder edits cover every switch position and longest signed
         # limits. No configuration or LCD pixels are injected.
-        for mode,(low,high) in enumerate(((-63,63),(-1,0),(0,7),(-63,63))):
+        for mode,(low,high) in enumerate(((-21,21),(-1,0),(0,7),(-21,21))):
             script=setup+'2100 key 0x20 down\n2200 key 0x20 up\n'
             at=2500
             # Space physical reports so redraws cannot coalesce a long sweep.
-            for knob,delta in enumerate((low,high-7,mode,mode-3)):
+            # Deliberately overshoot both limits to verify the three-octave cap.
+            for knob,delta in enumerate((low-2 if low==-21 else low,
+                                         high-7+2 if high==21 else high-7,mode,mode-3)):
                 for _ in range(abs(delta)):
                     script+=f'{at} enc {knob} {4 if delta>0 else -4}\n'
                     at+=100

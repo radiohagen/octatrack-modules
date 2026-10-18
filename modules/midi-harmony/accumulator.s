@@ -1633,7 +1633,7 @@ ha_setting_c:
 	moveq #63,%d2
 	cmp.l %d1,%d2
 	jlt .L293
-	move.w #-63,%a1
+	move.w #-21,%a1
 	add.l %d0,%d1
 	clr.l 24(%sp)
 .L252:
@@ -1768,13 +1768,13 @@ ha_setting_c:
 	jra .L298
 .L293:
 	moveq #63,%d1
-	move.w #-63,%a1
+	move.w #-21,%a1
 	add.l %d0,%d1
 	clr.l 24(%sp)
 	jra .L252
 .L292:
 	moveq #-63,%d1
-	move.w #-63,%a1
+	move.w #-21,%a1
 	add.l %d0,%d1
 	clr.l 24(%sp)
 	jra .L252
@@ -1855,7 +1855,7 @@ ha_setting_c:
 	jle .L259
 	moveq #-63,%d1
 .L260:
-	moveq #63,%d2
+	moveq #21,%d2
 	add.l %d0,%d1
 	sub.l %a1,%a1
 	move.l %d2,24(%sp)
@@ -1865,7 +1865,7 @@ ha_setting_c:
 	cmp.l %d1,%d2
 	jge .L260
 	moveq #63,%d1
-	moveq #63,%d2
+	moveq #21,%d2
 	add.l %d0,%d1
 	sub.l %a1,%a1
 	move.l %d2,24(%sp)

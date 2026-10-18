@@ -61,10 +61,15 @@ three bands separate; CHORD retains its existing footer.
 
 | Encoder | Setting | Values; default |
 | --- | --- | --- |
-| A | LOW | −63…0 degrees; 0 |
-| B | HIGH | 0…63 degrees; 7 |
+| A | LOW | −21…0 degrees; 0 |
+| B | HIGH | 0…21 degrees; 7 |
 | C | BOUND | WRAP / BOUNC / HOLD / ZERO; WRAP |
 | D | RESET | NONE / START / PAT / BOTH; BOTH |
+
+Seven scale degrees are one octave, so each limit allows up to three octaves.
+Existing projects with older, wider limits remain readable and keep their
+sound; editing either limit clamps that limit into the new range. The dial
+saturates at its endpoint for an older value, while the number stays accurate.
 
 These settings cannot be step-locked. Limits include both endpoints. WRAP
 wraps the overshoot, BOUNC reflects it and reverses direction, HOLD clamps,

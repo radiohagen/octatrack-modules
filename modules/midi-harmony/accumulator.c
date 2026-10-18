@@ -194,7 +194,9 @@ int ha_setting_c(unsigned track, unsigned knob, int delta) {
     if (!delta) return old;
     if (delta>63) delta=63;
     if (delta<-63) delta=-63;
-    int value=old+delta, lo=knob==0 ? -63 : 0, hi=knob==0 ? 0 : knob==1 ? 63 : 3;
+    /* Three-octave editing range. Keep the wider file validator so existing
+     * projects retain their sound; an explicit edit adopts the new range. */
+    int value=old+delta, lo=knob==0 ? -21 : 0, hi=knob==0 ? 0 : knob==1 ? 21 : 3;
     if (value<lo) value=lo;
     if (value>hi) value=hi;
     if (value==old) return old;
