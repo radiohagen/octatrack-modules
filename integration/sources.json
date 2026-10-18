@@ -124,7 +124,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-harmony/README.md",
       "sha256": "2503b41cfcdfaae42effb0ec2c17a9c6a3f0ffd11f74e623d3f78d94c7d4704e",
-      "published_sha256": "3b94ff6c103914de6deb911dce8929028cf89408801ad306afab609d6d1f2f3e",
+      "published_sha256": "f219da72570041d4b717a279b690ccd1c80153c8fe272fe27c62abcb6b65c398",
       "source_mode": "100644"
     },
     "modules/midi-harmony/VOICING.md": {
@@ -249,7 +249,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-harmony/page.s",
       "sha256": "d5db930104a9b1a30bc0626d9a68a850b1833448ac9ccb4e0f6fe9c97bb9c20e",
-      "published_sha256": "2d700c646c3e236a3a3bd9d09102c120b1b23292d4de7c84d48034450fdec5d9",
+      "published_sha256": "59f40f23370b1b443327a2658c5d0b1177dcc06a18db346abcf9fbe5df71253c",
       "source_mode": "100644",
       "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
     },
@@ -1432,7 +1432,7 @@
       "path": "tools/verify/verify_harmony_accumulator.py",
       "sha256": "9455c182737524a64e52a7210f0bb726e15fe78e58b9ae432a502b2e9413a987",
       "source_mode": "100644",
-      "published_sha256": "f42fbdf641e6a2f32f4b0b9b936b0c17ecd24cd006c56e705728c2435d2bd555",
+      "published_sha256": "4ba658fd6392c8ad7f676a09c13336865be4511dc42009343dee3e21ce7ee3df",
       "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
     },
     "tools/verify/verify_harmony_accumulator_port.py": {
@@ -1485,7 +1485,7 @@
       "path": "modules/midi-harmony/degrees/accumulator.c",
       "sha256": "499cfde9a85f5af6e8c98b9c76a838952cc400e20ffc5089130567853b2a6908",
       "source_mode": "100644",
-      "published_sha256": "429fafbdd659c0870caa22f4611de949d8b131164182d968f2ba99576fa6e511",
+      "published_sha256": "af3e0fb6a42ab7a7ef447c047ed357287a6dc59ecb950d1a8710f96b9b99988d",
       "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
     },
     "modules/midi-harmony/accumulator.h": {
@@ -1501,7 +1501,7 @@
       "path": "modules/midi-harmony/degrees/accumulator.s",
       "sha256": "bcb65e38355a26b670c60a8a15cfefe41513dbea79e24728ba8495ee3cefceab",
       "source_mode": "100644",
-      "published_sha256": "ec6d02593a198b06de8ecde56a29ea095f9e4ce7d91d49862f6615f2c43b81a5",
+      "published_sha256": "3756ccc91b230b26ba606718d54dcf8e1a09a4410fdd796075e74155c659d33a",
       "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
     },
     "modules/midi-harmony/codec.s": {

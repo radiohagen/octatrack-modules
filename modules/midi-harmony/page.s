@@ -312,9 +312,6 @@ mh_page_draw:
     moveq #0,%d0
     bsr.w .page_accum_setting
     addi.l #21,%d0
-    bpl.s .page_low_dial_range
-    moveq #0,%d0 /* preserved older bounds saturate the graphic, not the value */
-.page_low_dial_range:
     moveq #127,%d1
     mulu.l %d1,%d0
     moveq #21,%d1
@@ -325,10 +322,6 @@ mh_page_draw:
     bsr.w .page_dial
     moveq #1,%d0
     bsr.w .page_accum_setting
-    cmpi.l #21,%d0
-    ble.s .page_high_dial_range
-    moveq #21,%d0
-.page_high_dial_range:
     moveq #127,%d1
     mulu.l %d1,%d0
     moveq #21,%d1
