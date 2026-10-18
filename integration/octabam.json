@@ -1,6 +1,6 @@
 {
   "repository": "https://github.com/radiohagen/octabam.git",
-  "commit": "60952e7d60cdfa36601c19802bdab9dc0f74ef75",
+  "commit": "3ded96f3dae179aaf6c89b5de1fd97752645f2d3",
   "recorded_on": "2026-10-18",
   "status": "reference-only",
   "note": "Current-upstream N1 integration baseline with audited Scenes handoff and resident callback linking. Source includes module-main release 4744643: corrected ACCUM native menu/layout, pixel negative controls and three-octave bounds. This new image requires fresh qualification. Stage source before testing."

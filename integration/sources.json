@@ -3,7 +3,7 @@
   "source_commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
   "source_commit_availability": "preserved original local repository; selected content is published here with file hashes",
   "previous_author_snapshot": "e789014597e80114e971d16374e20f105594ab37",
-  "integration_commit": "60952e7d60cdfa36601c19802bdab9dc0f74ef75",
+  "integration_commit": "3ded96f3dae179aaf6c89b5de1fd97752645f2d3",
   "modules": [
     {
       "slug": "midi-scales",
@@ -1003,7 +1003,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "tools/verify/verify_harmony_track_port.py",
       "sha256": "7701263fa11fd88514c037876eba18c7e0f0bcb920b89db42c2f427c75bc6d8f",
-      "published_sha256": "fba8eedf5697160ce2be1cd56ff7f17b921469995c88a5eb8b65c02a4e289bb2",
+      "published_sha256": "54a961ce8c64fe3fc6b5433d8dffb0465c54e1b298bba731a899b443c2cdeca8",
       "source_mode": "100644",
       "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
     },
