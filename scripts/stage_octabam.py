@@ -59,6 +59,8 @@ def retired_paths(target: Path, receipt: dict) -> list[Path]:
     retired = []
     originals = set(receipt.get('retired_files', {}))
     for name, record in receipt['files'].items():
+        if record.get('stage') is False:
+            continue
         old = record['path']
         if old == name or not name.startswith(('modules/', 'tools/verify/', 'remixes/')):
             continue

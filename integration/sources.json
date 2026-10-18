@@ -1855,14 +1855,16 @@
       "path": "modules/quantizer-midi-drawer/README.md",
       "sha256": "5f4e48b619ccd2c1a5528eeac06f945fbf3fad4528bf09da937691a09dd09140",
       "published_sha256": "b09d986f7d19d8b4ec62312a2885a8045300f21c08a340754e444e9a5afac6d4",
-      "source_mode": "100644"
+      "source_mode": "100644",
+      "stage": false
     },
     "modules/_legacy_quantizer-midi-drawer/drawer.s": {
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/quantizer-midi-drawer/drawer.s",
       "sha256": "e2397f5b1d5fdcfa8641f0ac85abee0c6f8d61417f0d09da774caed8c56e16e5",
       "published_sha256": "e2397f5b1d5fdcfa8641f0ac85abee0c6f8d61417f0d09da774caed8c56e16e5",
-      "source_mode": "100644"
+      "source_mode": "100644",
+      "stage": false
     },
     "modules/_legacy_quantizer-midi-drawer/manifest.py": {
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
@@ -1870,14 +1872,44 @@
       "sha256": "9faea6938bf4fb504ce6c94cdb9e9a47d31014aeef282f227fd942be833b5827",
       "published_sha256": "81556e62a28b79a6a1b2e09d34e21c273ac91428287c086044df0b8ca794b050",
       "source_mode": "100644",
-      "migration_note": "Operational author URL updated; original author name/credit preserved."
+      "migration_note": "Operational author URL updated; original author name/credit preserved.",
+      "stage": false
     },
     "modules/_legacy_quantizer-midi-drawer/DEVELOPMENT.md": {
       "path": "modules/quantizer-midi-drawer/DEVELOPMENT.md",
       "sha256": "5f4e48b619ccd2c1a5528eeac06f945fbf3fad4528bf09da937691a09dd09140",
       "published_sha256": "5f4e48b619ccd2c1a5528eeac06f945fbf3fad4528bf09da937691a09dd09140",
       "source_mode": "100644",
-      "origin": "Split from adjacent README in this repository; historical evidence is retained in the text."
+      "origin": "Split from adjacent README in this repository; historical evidence is retained in the text.",
+      "stage": false
+    },
+    "modules/quantizer-midi-drawer/manifest.py": {
+      "origin": "authored",
+      "repository": "https://github.com/radiohagen/octatrack-modules",
+      "path": "modules/quantizer-midi-drawer/manifest.py",
+      "sha256": "8e932c2e3d0946db2881eb9aa00b29ef15467ac1bca22f4efe3e42855593f439",
+      "source_mode": "100644"
+    },
+    "modules/quantizer-midi-drawer/README.md": {
+      "origin": "authored",
+      "repository": "https://github.com/radiohagen/octatrack-modules",
+      "path": "modules/quantizer-midi-drawer/README.md",
+      "sha256": "2f81b8843b1a89a5f4640b01e91426defba42ac79affe4a749953d29858f7e93",
+      "source_mode": "100644"
+    },
+    "remixes/test/quantizer-midi-drawer/remix.py": {
+      "origin": "authored",
+      "repository": "https://github.com/radiohagen/octatrack-modules",
+      "path": "remixes/test/quantizer-midi-drawer/remix.py",
+      "sha256": "eda640b79f469775ce1b9c732ca70b6dc1edbb8d639391f949a035bd30f535f5",
+      "source_mode": "100644"
+    },
+    "remixes/test/quantizer-midi-drawer/README.md": {
+      "origin": "authored",
+      "repository": "https://github.com/radiohagen/octatrack-modules",
+      "path": "remixes/test/quantizer-midi-drawer/README.md",
+      "sha256": "7d857380018adadbaeebbf714e387d6c9a8b9394baf36f3f2cefdf6412e2fe32",
+      "source_mode": "100644"
     }
   },
   "submodules": {},
