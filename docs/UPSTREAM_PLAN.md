@@ -6,8 +6,10 @@ Excluded: MIDI Arp Presets/ARP templates, Sophie, Supersaw, new synth work,
 POST FADER and unrelated effects. Stock upstream modules stay intact.
 
 This is a preparation plan, not submitted PRs or a promise of upstream acceptance.
-`codex/integrate/midi` is the complete verification branch, never the aggregate
-PR. `main` follows upstream without local features. Each review branch starts
+The current combined verification branch is `codex/package-current-20261018`;
+`codex/integrate/midi` preserves the earlier integration. Neither is an
+aggregate upstream PR. Octabam's `main` follows upstream without local features.
+Each review branch starts
 from current upstream main after its prerequisites merge. If a stack is needed
 for review, label its base explicitly and retest after each rebase.
 
