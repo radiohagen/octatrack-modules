@@ -12,11 +12,14 @@ MODULE = Module(
     proof=Proof.HARDWARE, proof_note="radiohagen Octatrack MKII: routing, controls and Part/project persistence; see developer notes",
     requires=("MIDI PART STATE",),
     conflicts=(("MIDI SCENES", "requires the separate Loopback/Scenes producer bridge"),),
-    linked=(Linked("loopback", str(ROOT / 'loopback.s'), cpu="54455", dram=True),
+    linked=(Linked("loopback", str(ROOT / 'loopback.s'), cpu="54455", dram=True,
+                   include=lambda modules: '.set HAVE_TRANSLATION,1\n' if 'MIDI LOOPBACK TRANSLATION' in modules else ''),
             Linked("loopbackproducers", str(ROOT / 'producers.s'), dram=True,
-                   include=lambda modules: '.set HAVE_SCENES_BRIDGE,1\n' if 'MIDI LOOPBACK SCENES' in modules else ''),
+                   include=lambda modules: ('.set HAVE_SCENES_BRIDGE,1\n' if 'MIDI LOOPBACK SCENES' in modules else '') +
+                   ('.set HAVE_TRANSLATION,1\n' if 'MIDI LOOPBACK TRANSLATION' in modules else '')),
             Linked("loopbacksettings", str(ROOT / 'settings.s'), dram=True),
-            Linked("loopbackpage", str(ROOT / 'page.s'), dram=True)),
+            Linked("loopbackpage", str(ROOT / 'page.s'), dram=True,
+                   include=lambda modules: '.set HAVE_TRANSLATION,1\n' if 'MIDI LOOPBACK TRANSLATION' in modules else '')),
     detours=(
         *(Detour(site, bytes.fromhex("41f946c7febe"), "loopbackproducers", "lb_rx_map",
                  "internal receive map excludes MIDI-track forwarding", kind="jsr")

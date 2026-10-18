@@ -2,6 +2,7 @@
  * lb_routes[8]: 0 EXT (default), 1 INT, 2 BOTH. Applied cache of native Part DEST settings.
  * Route before midi_send so INT reaches neither DIN nor USB's entry mirror.
  */
+    .include "remix.inc"
     .text
     .global lb_send, lb_receive, lb_capture, lb_next, lb_tick, lb_sync
     .global lb_routes, lb_set_route, lb_flush, lb_channels, lb_applied
@@ -26,6 +27,14 @@ lb_send:
     bsr lb_capture
     tstl %d0
     beq.s .send_internal
+    .ifdef HAVE_TRANSLATION
+    btst #8,%d0
+    beq.s .send_raw
+    moveal %sp@(48),%a0
+    jsr lt_emit
+    bra.s .send_internal
+.send_raw:
+    .endif
     moveml %sp@,%d0-%d6/%a0-%a2
     lea %sp@(40),%sp
     jmp SEND
@@ -41,8 +50,17 @@ lb_send:
  * At most 128 internal held pitches across all channels reserve 128 releases.
  */
 lb_capture:
+    .ifdef HAVE_TRANSLATION
+    lea %sp@(-24),%sp
+    moveml %d7/%a3-%a4,%sp@
+    moveq #-1,%d4
+    movel %d4,%sp@(12) /* no note descriptor for control/unowned traffic */
+    clrl %sp@(16)      /* explicit live UI context, otherwise playback */
+    clrl %sp@(20)      /* immutable raw pitch for external fast path */
+    .else
     lea %sp@(-12),%sp
     moveml %d7/%a3-%a4,%sp@
+    .endif
     moveq #2,%d4
     cmpil #3,%d2
     bne.w .capture_done
@@ -70,6 +88,14 @@ lb_capture:
     cmpil #0x4009fcfa,%d0
     bne.w .capture_done
 .routed_source:
+    .ifdef HAVE_TRANSLATION
+    cmpil #2,%d5
+    bhi.s .translation_play_context
+    moveq #1,%d4
+    movel %d4,%sp@(16)
+    moveq #2,%d4
+.translation_play_context:
+    .endif
     cmpil #0x80,%d3
     beq.w .routed_release
     cmpil #0x90,%d3
@@ -139,6 +165,9 @@ lb_capture:
     moveq #-1,%d7
 .admit:
     mvzb %a0@(1),%d3
+    .ifdef HAVE_TRANSLATION
+    movel %d3,%sp@(20)
+    .endif
     cmpil #127,%d3
     bhi.w .capture_done
     mvzb %a0@(2),%d1
@@ -157,10 +186,34 @@ lb_capture:
     movel %d2,%d0
     andil #0xf0,%d0
     cmpil #0x90,%d0
+    .ifdef HAVE_TRANSLATION
+    bne.w .cc
+    .else
     bne.s .cc
+    .endif
     mvzb %a1@,%d0
     andil #3,%d0
     bne.w .duplicate
+    .ifdef HAVE_TRANSLATION
+    /* Prepare from the final producer pitch, before capacity admission.
+     * C preserves d2-d7/a2-a6; retain velocity and source pointers too. */
+    lea %sp@(-12),%sp
+    moveml %d1/%a0-%a1,%sp@
+    movel %sp@(28),%sp@-
+    movel %d4,%sp@-
+    movel %d7,%d0
+    lsrl #4,%d0
+    subql #1,%d0
+    movel %d0,%sp@-
+    movel %d3,%sp@-
+    jsr lt_prepare
+    lea %sp@(16),%sp
+    moveml %sp@,%d1/%a0-%a1
+    lea %sp@(12),%sp
+    movel %d0,%sp@(12)
+    movel %d0,%d4
+    andil #3,%d4
+    .endif
     btst #0,%d4
     beq.s .save_note
     movel lb_internal_held,%d0
@@ -173,6 +226,17 @@ lb_capture:
     bcc.s .drop_note
     addql #1,lb_internal_held
 .save_note:
+    .ifdef HAVE_TRANSLATION
+    lea %sp@(-12),%sp
+    moveml %d1/%a0-%a1,%sp@
+    movel %d4,%sp@-
+    movel %d3,%sp@-
+    jsr lt_commit
+    addql #8,%sp
+    moveml %sp@,%d1/%a0-%a1
+    lea %sp@(12),%sp
+    movel %d0,%sp@(12)
+    .endif
     /* Count live destinations, including EXT, never drop tombstones.
      * d7 is (track+1)<<4; divide by eight for a word-table offset. */
     tstl %d4
@@ -188,6 +252,11 @@ lb_capture:
     movel %d7,%d0
     orl %d4,%d0
     moveb %d0,%a1@
+    .ifdef HAVE_TRANSLATION
+    movel %sp@(12),%d0
+    btst #0,%d0
+    beq.w .unlock
+    .endif
     btst #0,%d4
     bne.w .append
     bra.w .unlock
@@ -202,13 +271,28 @@ lb_capture:
     subl lb_tail,%d5
     andil #255,%d5
     cmpil #127,%d5
+    .ifdef HAVE_TRANSLATION
+    bcs.w .append
+    .else
     bcs.s .append
+    .endif
     addql #1,lb_dropped
     bra.w .unlock
 .duplicate:
     /* Stock coalesces same-channel/pitch sources before this point. Avoid
      * a second receiver held-count if a duplicate nevertheless reaches us. */
     andil #2,%d4
+    .ifdef HAVE_TRANSLATION
+    lea %sp@(-12),%sp
+    moveml %d1/%a0-%a1,%sp@
+    movel %d4,%sp@-
+    movel %d3,%sp@-
+    jsr lt_duplicate
+    addql #8,%sp
+    moveml %sp@,%d1/%a0-%a1
+    lea %sp@(12),%sp
+    movel %d0,%sp@(12)
+    .endif
     bra.w .unlock
 .owned_release:
     mvzb %a1@,%d0
@@ -218,6 +302,17 @@ lb_capture:
     clrb %a1@
     tstl %d4
     beq.w .unlock              /* late/drop tombstone has no live count */
+    .ifdef HAVE_TRANSLATION
+    lea %sp@(-16),%sp
+    moveml %d0-%d1/%a0-%a1,%sp@
+    movel %d4,%sp@-
+    movel %d3,%sp@-
+    jsr lt_release
+    addql #8,%sp
+    movel %d0,%sp@(28)
+    moveml %sp@,%d0-%d1/%a0-%a1
+    lea %sp@(16),%sp
+    .endif
     lsrl #3,%d0               /* original owner, not the releasing track */
     lea lb_owned_counts-2,%a4
     addal %d0,%a4
@@ -227,6 +322,11 @@ lb_capture:
     btst #0,%d4
     beq.w .unlock
     subql #1,lb_internal_held
+    .ifdef HAVE_TRANSLATION
+    movel %sp@(12),%d0
+    btst #0,%d0
+    beq.w .unlock
+    .endif
     movel lb_head,%d5
     subl lb_tail,%d5
     andil #255,%d5
@@ -236,6 +336,16 @@ lb_capture:
     lea %a2@(0,%d0:l:4),%a2
     moveb %d2,%a2@
     mvzb %a0@(1),%d3
+    .ifdef HAVE_TRANSLATION
+    movel %sp@(12),%d3
+    cmpil #-1,%d3
+    beq.s .append_raw
+    lsrl #8,%d3
+    bra.s .append_pitch
+.append_raw:
+    mvzb %a0@(1),%d3
+.append_pitch:
+    .endif
     moveb %d3,%a2@(1)
     moveb %d1,%a2@(2)
     clrb %a2@(3)
@@ -264,8 +374,27 @@ lb_capture:
 .capture_done:
     movel %d4,%d0
     andil #2,%d0
+    .ifdef HAVE_TRANSLATION
+    movel %sp@(12),%d3
+    cmpil #-1,%d3
+    beq.s .translation_return
+    moveq #0,%d0
+    btst #1,%d3
+    beq.s .translation_return
+    swap %d3
+    andil #127,%d3
+    moveq #2,%d0
+    cmpl %sp@(20),%d3
+    beq.s .translation_return
+    movel %d3,%d0
+    oril #256,%d0
+.translation_return:
+    moveml %sp@,%d7/%a3-%a4
+    lea %sp@(24),%sp
+    .else
     moveml %sp@,%d7/%a3-%a4
     lea %sp@(12),%sp
+    .endif
     rts
 
 /* C ABI lb_flush(track): release only that producer's owned destinations.
@@ -307,6 +436,14 @@ lb_flush:
     bsr lb_capture
     tstl %d0
     beq.s .flush_mark
+    .ifdef HAVE_TRANSLATION
+    btst #8,%d0
+    beq.s .flush_raw
+    lea %sp@(36),%a0
+    jsr lt_emit
+    bra.s .flush_mark
+.flush_raw:
+    .endif
     pea %sp@(36)
     pea 3
     jsr SEND

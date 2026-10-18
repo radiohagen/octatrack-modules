@@ -101,7 +101,11 @@ lb_packet:
     move.l %d6,%a5
 .packet_next:
     cmpa.l %a4,%a3
+    .ifdef HAVE_TRANSLATION
+    bcc.w .packet_done
+    .else
     bcc.s .packet_done
+    .endif
     moveq #3,%d2
     moveq #0,%d0
     move.b (%a3),%d0
@@ -132,13 +136,25 @@ lb_packet:
     jsr lb_capture
     tst.l %d0
     beq.s .packet_advance
+    .ifdef HAVE_TRANSLATION
+    btst #8,%d0
+    beq.s .packet_raw
+    move.l %a3,%a0
+    jsr lt_emit
+    bra.s .packet_advance
+.packet_raw:
+    .endif
     move.l %a3,-(%sp)
     move.l 4(%sp),-(%sp)
     jsr 0x40010bc8
     addq.l #8,%sp
 .packet_advance:
     adda.l (%sp),%a3
+    .ifdef HAVE_TRANSLATION
+    bra.w .packet_next
+    .else
     bra.s .packet_next
+    .endif
 .packet_done:
     movem.l (%sp),%d2/%d6-%d7/%a3-%a5
     lea 28(%sp),%sp

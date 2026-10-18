@@ -32,6 +32,20 @@ mp_native_copy:
     move.l 36(%sp),-(%sp)
     bsr.w .copy_stock
     lea 12(%sp),%sp
+    .ifdef HAVE_TRANSLATION
+    /* Publish companion changes together with the native replacement epoch.
+     * No I/O here. Only complete recognized Parts/clipboards are handled. */
+    movem.l %d0-%d1/%a0-%a1,(%sp)
+    move.w %sr,%d0
+    move.w %d0,20(%sp)
+    move.w #0x2700,%sr
+    move.l 36(%sp),-(%sp)
+    move.l 36(%sp),-(%sp)
+    move.l 36(%sp),-(%sp)
+    jsr lt_part_copy
+    lea 12(%sp),%sp
+    movem.l (%sp),%d0-%d1/%a0-%a1
+    .endif
     bra.s .finish
 mp_native_init:
     lea -24(%sp),%sp
@@ -44,6 +58,16 @@ mp_native_init:
     move.l 28(%sp),-(%sp)
     bsr.w .init_stock
     addq.l #4,%sp
+    .ifdef HAVE_TRANSLATION
+    movem.l %d0-%d1/%a0-%a1,(%sp)
+    move.w %sr,%d0
+    move.w %d0,20(%sp)
+    move.w #0x2700,%sr
+    move.l 28(%sp),-(%sp)
+    jsr lt_part_init
+    addq.l #4,%sp
+    movem.l (%sp),%d0-%d1/%a0-%a1
+    .endif
 .finish:
     tst.l 16(%sp)
     beq.s .finished
@@ -77,6 +101,12 @@ mp_native_init:
     movem.l (%sp),%d0-%d3/%a0
     lea 20(%sp),%sp
 .finished:
+    .ifdef HAVE_TRANSLATION
+    move.l %d1,-(%sp)
+    move.w 24(%sp),%d1
+    move.w %d1,%sr
+    move.l (%sp)+,%d1
+    .endif
     lea 24(%sp),%sp
     rts
 .copy_stock:

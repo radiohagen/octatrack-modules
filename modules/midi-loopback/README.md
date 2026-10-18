@@ -81,3 +81,30 @@ or saves will preserve their flags.
 Keep a separate project backup before returning to stock.
 
 [Implementation, provenance and verification](DEVELOPMENT.md).
+
+## Optional note translation
+
+The separate MIDI LOOPBACK TRANSLATION selection adds RE-MAP (OFF/INT/EXT/BOTH),
+SRC REF, TGT REF and RANGE to ROUTING. DEST remains independent. OFF is the
+default and leaves note bytes unchanged. The initial mapping is C4 (MIDI 60)
+to 84, with RANGE ±12: source C3–C5 maps to 72–96. RANGE allows ±0 through
+±63 (up to 127 notes including the centre). Out-of-range notes are
+dropped, including results outside MIDI 0–127. References are manual; no
+validated native sample-reference value is available. Only final generated
+note events are mapped, with their original velocity and matching releases.
+
+This selection requires STORE and uses dedicated `lbnt01..16.work`/`.strd`
+companions. Save the project before power-off and keep these files with project
+backups. It does not allocate native Part fields or retained SRAM. Missing files
+mean OFF; refused files remain protected until explicit STORE recovery.
+
+The v1 companion is a 16-byte big-endian header (LBNT, version 1, payload length
+320, CRC32) followed by four working and four saved Parts, eight tracks each.
+Each five-byte record is RE-MAP, SOURCE REF, TARGET REF, symmetric radius,
+initialized=1; an all-zero record means the OFF preset. Native full-Part
+copy/clear callbacks maintain parallel working/saved/clipboard records.
+All file I/O stays on STORE lifecycle paths, never the note-emission path.
+The build defines HAVE_TRANSLATION and links translation.s, translation-files.s
+and translation-abi.s; otherwise the original Loopback byte reference is unchanged.
+
+Software/emulator validation does not constitute hardware acceptance.

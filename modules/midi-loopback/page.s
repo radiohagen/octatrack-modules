@@ -2,6 +2,7 @@
  * A edits DEST. Transport/chromatic input passes through the native modal.
  * Other encoders/pushes cannot accidentally edit staged NOTE SETUP fields.
  */
+    .include "remix.inc"
     .text
     .global lb_channel_press,lb_channel_format,lb_page_open,lb_page_close
     .global lb_page_noop,lb_page_encoder,lb_page_draw,lb_page_win,lb_page_track
@@ -53,6 +54,14 @@ lb_page_close:
     jmp 0x40036548 /* redraw NOTE SETUP from current module values */
 
 lb_page_encoder:
+    .ifdef HAVE_TRANSLATION
+    move.l 4(%sp),%d0
+    beq.s .route_encoder
+    cmpi.l #4,%d0
+    bhi.w lb_page_noop
+    jmp lt_page_encoder
+.route_encoder:
+    .endif
     tst.l 4(%sp)
     bne.s lb_page_noop
     move.l %d2,-(%sp)
@@ -108,7 +117,57 @@ lb_page_draw:
     lea lb_dest_format,%a0
     lea 0x40046d9c,%a1
     bsr.w .page_selector
+    .ifdef HAVE_TRANSLATION
+    moveq #0,%d3
+.translation_cell:
+    move.l %d3,-(%sp)
+    move.l lb_page_track,-(%sp)
+    jsr lt_ui_get
+    addq.l #8,%sp
+    move.l %d0,%d1
+    lea .translation_cells,%a0
+    move.l %d3,%d0
+    lsl.l #4,%d0
+    adda.l %d0,%a0
+    move.l (%a0),%d0
+    move.l 8(%a0),%a0
+    lea 0x400467a4,%a1 /* stock NOTE-style text for references and range */
+    tst.l %d3
+    bne.s .translation_widget
+    lea 0x40046c28,%a1 /* native four-position selector, including BOTH */
+.translation_widget:
+    cmpi.l #2,%d3
+    bcc.s .translation_bottom
+    bsr.w .page_selector
+    bra.s .translation_label
+.translation_bottom:
+    cmpi.l #3,%d3
+    bne.s .translation_rotary
+    lsl.l #1,%d1 /* radius 0..63 uses the native dial's full travel */
+.translation_rotary:
+    lea 0x400479b4,%a1 /* complete stock rotary control, value below */
+    bsr.w .page_selector_bottom
+.translation_label:
+    lea .translation_cells,%a0
+    move.l %d3,%d0
+    lsl.l #4,%d0
+    adda.l %d0,%a0
+    move.l (%a0),%d0
+    addi.l #9,%d0
+    add.l 4(%a0),%d0 /* fixed-label optical inset, measured on composed pixels */
+    move.l 12(%a0),%a0
+    moveq #52,%d1
+    cmpi.l #2,%d3
+    bcs.s .translation_text
+    moveq #23,%d1
+.translation_text:
+    bsr.w .page_center_text
+    addq.l #1,%d3
+    cmpi.l #4,%d3
+    bne.w .translation_cell
+    .endif
     bsr.w .page_grid
+    .ifndef HAVE_TRANSLATION
     move.l lb_page_track,%d0
     addq.l #1,%d0
     move.l %d0,-(%sp)
@@ -120,24 +179,31 @@ lb_page_draw:
     moveq #4,%d1
     move.l %a2,%a0
     bsr.w .page_text
+    .endif
     moveq #12,%d0
     moveq #52,%d1
     lea .page_dest_label,%a0
     bsr.w .page_text
+    .ifndef HAVE_TRANSLATION
     moveq #85,%d0
     moveq #4,%d1
     lea .page_back,%a0
     bsr.w .page_text
+    .endif
     moveq #1,%d0
     move.l %d0,0x46c7c72c
 .page_draw_done:
     movem.l (%sp),%d2-%d3/%a2/%a5
     lea 44(%sp),%sp
     rts
-.page_grid: /* Stock line/box primitive; six cells above a shared footer. */
+.page_grid: /* Stock line/box primitive; translation uses two full-height rows. */
     lea -8(%sp),%sp
     movem.l %d2/%a2,(%sp)
+    .ifdef HAVE_TRANSLATION
+    moveq #3,%d2
+    .else
     moveq #4,%d2
+    .endif
     lea .page_grid_lines,%a2
 .page_grid_line:
     pea 1
@@ -155,14 +221,26 @@ lb_page_draw:
     lea 8(%sp),%sp
     rts
 .page_selector_bottom:
+    .ifdef HAVE_TRANSLATION
+    moveq #4,%d2
+    .else
     moveq #13,%d2
+    .endif
     bra.s .page_selector_y
 .page_selector: /* d0=x,d1=value,a0=formatter,a1=stock widget,a5=surface */
     moveq #36,%d2
 .page_selector_y:
     move.l %a5,-(%sp)
     move.l %a0,-(%sp)
+    .ifdef HAVE_TRANSLATION
+    cmpa.l #0x400479b4,%a1
+    bne.s .page_plain_flags
+    pea 8 /* native fixed rotary layout, no lock highlight */
+    bra.s .page_widget_args
+.page_plain_flags:
+    .endif
     clr.l -(%sp) /* flags: full widget, no highlight */
+.page_widget_args:
     move.l %d1,-(%sp)
     clr.l -(%sp) /* slot is unused by these stock widgets */
     move.l %d2,-(%sp)
@@ -170,6 +248,23 @@ lb_page_draw:
     jsr (%a1)
     lea 28(%sp),%sp
     rts
+    .ifdef HAVE_TRANSLATION
+.page_center_text: /* centered labels use the same native width as values */
+    move.l %d0,-(%sp)
+    move.l %d1,-(%sp)
+    move.l %a0,-(%sp)
+    move.l %a0,-(%sp)
+    pea -1
+    pea 0x400ba876
+    jsr 0x40012f30
+    lea 12(%sp),%sp
+    move.l (%sp)+,%a0
+    move.l (%sp)+,%d1
+    move.l (%sp)+,%d2
+    lsr.l #1,%d0
+    sub.l %d0,%d2
+    move.l %d2,%d0
+    .endif
 .page_text: /* d0=x,d1=y,a0=string,a5=surface; native C ABI */
     move.l %a0,-(%sp)
     pea -1
@@ -224,6 +319,18 @@ lb_channel_format:
     move.l (%sp)+,%a2
     rts
 .page_dest_label: .asciz "DEST"
+    .ifdef HAVE_TRANSLATION
+.label_apply: .asciz "RE-MAP"
+.label_source: .asciz "SRC REF"
+.label_target: .asciz "TGT REF"
+.label_range: .asciz "RANGE"
+    .balign 4
+.translation_cells:
+    .long 49,0,lt_apply_format,.label_apply
+    .long 88,0,lt_note_format,.label_source
+    .long 10,1,lt_number_format,.label_target
+    .long 49,0,lt_range_format,.label_range
+    .endif
 .page_title: .asciz "ROUTING M%d"
 .page_back: .asciz "NO:BACK"
 .ext: .asciz "EXT"
@@ -231,10 +338,16 @@ lb_channel_format:
 .both: .asciz "BOTH"
     .balign 4
 .page_grid_lines:
+    .ifdef HAVE_TRANSLATION
+    .long 38,1,38,58
+    .long 77,1,77,58
+    .long 1,29,117,29
+    .else
     .long 38,12,38,58
     .long 77,12,77,58
     .long 1,35,117,35
     .long 1,12,117,12
+    .endif
 lb_page_layer:
     .long 0,lb_page_keys,lb_page_encs,0,0,-1,-1
 lb_page_keys:

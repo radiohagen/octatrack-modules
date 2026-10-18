@@ -20,7 +20,8 @@ MODULE = Module(
                    include=lambda modules: '.set MP_DEFINE,1\n'),
             Linked('midipartcopy', str(ROOT / 'part-copy.s'), dram=True,
                    defsyms=(('mp_copy_target',0),('mp_init_target',0)),
-                   include=lambda modules: '.set MP_DEFINE,1\n' + ('.set HAVE_HARMONY,1\n' if 'MIDI HARMONY' in modules else '') + ('.set HAVE_MIDI_SRAM,1\n' if 'MIDI SRAM' in modules else ''))),
+                   include=lambda modules: '.set MP_DEFINE,1\n' + ('.set HAVE_HARMONY,1\n' if 'MIDI HARMONY' in modules else '') + ('.set HAVE_MIDI_SRAM,1\n' if 'MIDI SRAM' in modules else '') +
+                   ('.set HAVE_TRANSLATION,1\n' if 'MIDI LOOPBACK TRANSLATION' in modules else ''))),
     detours=(Detour(0x40000512, bytes.fromhex('4eb94000f938'),
                     'midipartentry', 'mp_resident_activate', 'enable Part boundaries after native platform load', kind='jsr'),
              Detour(0x40020898, bytes.fromhex('2f02226f0008'),
