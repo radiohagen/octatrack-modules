@@ -10,7 +10,8 @@ does not require KITS.
 - Loopback stores DEST in a shared flags byte. Fresh Parts use EXT; other
   consumers retain ownership of their own bits and fields.
 
-Stock 1.40C resets the shared flags byte to zero on load. Saving the current
+Stock 1.40C resets the shared flags byte to zero in both working and saved
+Parts on load. Saving the current
 bank on stock persists that reset, including Loopback's return to EXT. Other
 bank files are not rewritten merely by loading. Keep a separate project copy
 when preserving module settings matters.

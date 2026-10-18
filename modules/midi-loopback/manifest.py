@@ -9,7 +9,7 @@ MODULE = Module(
     category=Category.MIDI_USB, author="radiohagen",
     author_url="https://github.com/radiohagen/octatrack-modules",
     doc="Press CHAN for per-Part EXT/INT/BOTH routing of MIDI-track notes and controls.",
-    proof=Proof.PORT, proof_note="Panel, native Part persistence and routing under emulator; no hardware",
+    proof=Proof.HARDWARE, proof_note="radiohagen Octatrack MKII: routing, controls and Part/project persistence; see developer notes",
     requires=("MIDI PART STATE",),
     conflicts=(("MIDI SCENES", "requires the separate Loopback/Scenes producer bridge"),),
     linked=(Linked("loopback", str(ROOT / 'loopback.s'), cpu="54455", dram=True),

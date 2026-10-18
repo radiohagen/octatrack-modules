@@ -157,5 +157,9 @@ radiohagen/octabam. They are not current qualification for this branch.
 The Scenes bridge, Follow and Harmony are separate contributions. MIDI Scenes
 is explicitly incompatible until its producers are routed through the bridge.
 Stock DIN behavior is covered; USB-host and combined-module acceptance remain
-separate qualification. No hardware flash, MIDI timing or worst-case interrupt
-latency has been measured for this contribution.
+separate qualification. Worst-case interrupt latency and physical receiver
+backpressure have not been measured.
+
+Current adapter verification and hardware measurements are documented in
+[Octabam PR #755](https://github.com/sambanks/octabam/pull/755).
+The module README describes current controls, storage and routing boundaries.

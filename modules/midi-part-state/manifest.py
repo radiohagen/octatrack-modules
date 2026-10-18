@@ -7,8 +7,8 @@ from remix.schema import Category, Claims, Detour, Gate, Kind, Linked, Module, P
 MODULE = Module(
     name='midi-part-state', key='MIDI PART STATE', kind=Kind.CF_PATCH,
     category=Category.PARTS, author='radiohagen',
-    author_url='https://github.com/radiohagen/octatrack-modules', proof=Proof.PORT,
-    proof_note='verify_midi_part and verify_midi_part_copy: linked native boundaries; hardware untested',
+    author_url='https://github.com/radiohagen/octatrack-modules', proof=Proof.HARDWARE,
+    proof_note='radiohagen Octatrack MKII: Part/project persistence through MIDI Loopback; other consumers unqualified',
     doc='Shared native Part settings and coherent copy/clear publication; no KITS dependency.',
     linked=(Linked('midipartentry', str(ROOT / 'entry.s'),
                    # Canonical author-reference addresses only; every final
