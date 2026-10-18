@@ -45,7 +45,7 @@
     {
       "slug": "quantizer-midi-drawer",
       "source_commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
-      "status": "archived-upstream-superseded"
+      "status": "compatibility-upstream-owned"
     }
   ],
   "files": {

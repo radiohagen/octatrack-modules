@@ -15,7 +15,8 @@ must be checked against its C sources and generators. Original credits remain.
 | [midi-harmony](../modules/midi-harmony/README.md) | 63 | MIDI Part State + STORE + MIDI SRAM |
 | [harmony-plocks](../modules/harmony-plocks/README.md) | 3 | MIDI Harmony + upstream PLOCKS P2 |
 | [pio-write-fix](../modules/pio-write-fix/README.md) | 3 | upstream MEMORY; conflicts with STEM REC owning same fix |
-| [archived quantizer MIDI drawer](../modules/_legacy_quantizer-midi-drawer/README.md) | 3 | superseded by upstream #741; inactive |
+| [quantizer-midi-drawer compatibility name](../modules/quantizer-midi-drawer/README.md) | upstream-owned | no additional hooks after #741 |
+| [original drawer implementation](../modules/_legacy_quantizer-midi-drawer/README.md) | 3 | superseded by upstream #741; inactive |
 
 Shared platform work remains in the Octabam fork: STORE callback guards,
 KITS header initialization, PLOCKS edit/release, sparse SRAM claim checking,
