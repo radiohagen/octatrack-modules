@@ -33,8 +33,9 @@ for review, label its base explicitly and retest after each rebase.
 The standalone PIO first-sector write fix is required for dependable card-write
 validation without STEM REC. Propose it separately with original author credit,
 or use an equivalent fix already accepted upstream; do not bundle recording
-features. The Quantizer/MIDI drawer fix is a separate compatibility candidate,
-not a change to the independent KEY/Scale Quantizer semantics.
+features. Current upstream #741 supersedes the old Quantizer/MIDI drawer
+hook. Its selection key remains a code-free compatibility declaration with
+its own panel gate, not a change to KEY/Scale Quantizer semantics.
 
 Harmony is the largest review item. Before submission, inspect whether its engine,
 UI and degree extensions can form independently usable increments. If they

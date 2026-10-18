@@ -1,7 +1,7 @@
 {
   "repository": "https://github.com/radiohagen/octabam.git",
-  "commit": "cb80d067b43c462332c9146a52f55c4104e3ec30",
+  "commit": "acd388f63d1191f4b57adcdefc4f5405e0f95bcd",
   "recorded_on": "2026-10-18",
   "status": "reference-only",
-  "note": "Package integration baseline at current upstream c3f37e5, with resident callback linking and declared boot-state verification. Source qualification pending on the composed image."
+  "note": "Named N1 candidate at current upstream c3f37e5, including audited Scenes handoff and resident callback linking. Complete composed-image qualification is still running; stage the current source before testing."
 }

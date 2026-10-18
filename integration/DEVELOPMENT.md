@@ -1,7 +1,7 @@
 # Reproduce the MIDI integration
 
 The public [Octabam fork](https://github.com/radiohagen/octabam) contains the
-`codex/integrate/midi` branch. `octabam.json` pins a concrete commit containing
+`codex/package-current-20261018` branch. `octabam.json` pins a concrete commit containing
 shared fixes, module source and verification support. Unlike the earlier private
 import baseline, this commit is published for a fresh public clone.
 
@@ -11,7 +11,7 @@ import baseline, this commit is published for a fresh public clone.
    The inspection reports differences; `--apply` copies only after all guards
    pass. It refuses primary checkouts, dirty trees and a different baseline.
 4. Follow that worktree's BUILDING.md with your own OS 1.40C. Build using
-   `make bus REMIX=harmony-track-bus BUILD=79 OCTABAM_PGO=0`.
+   `RMXNAME='MATT MIDI N1' make bus REMIX=harmony-track-bus BUILD=N1 OCTABAM_PGO=0`.
 5. Run applicable CONTRIBUTING.md checks and project-backed tests on disposable
    fixtures. See the remix README and the published validation record.
 
