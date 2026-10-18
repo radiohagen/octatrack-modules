@@ -1,7 +1,7 @@
 /* Harmony window: native window/input-layer pattern from the Tuner module.
  * NOTE SETUP F press opens it. CHORD A-D=VOIC/SPRD/ROOT/SIZE,
- * ACCUM A/B=LOW/HIGH full dials, C/D=BOUND/RESET four-way switches; HARM stays on
- * the parent NOTE SETUP page.
+ * ACCUM A/B=LOW/HIGH dials, C/D=BOUND/RESET four-way switches
+ * on an A--F grid beside the section menu; HARM stays on the parent NOTE SETUP page.
  * Track is fixed while open. Track/page keys close the window; a subsequent
  * press selects the track/page. Transport and chromatic keys pass through.
  * Grid: VOIC/SPRD/ROOT above SIZE; track in footer.
@@ -305,11 +305,9 @@ mh_page_draw:
     bsr.w .page_label
     bra.w .page_draw_footer
 .page_draw_accum:
-    /* LOW and HIGH are continuous limits, so show their native dial travel
-     * instead of four text-only selectors.  The stored limits remain signed
-     * -63..0 and unsigned 0..63; only the dial's 0..127 input is scaled.
-     * BOUND and RESET use stock four-way switch widgets, so their current
-     * positions are visible as controls rather than just abbreviated text.
+    /* Six encoder positions beside the native section menu. Dropping only
+     * the footer gives each title, widget and value a separate pixel band.
+     * Native y coordinates grow upwards; the composed LCD grows downwards.
      */
     moveq #0,%d0
     bsr.w .page_accum_setting
@@ -319,7 +317,7 @@ mh_page_draw:
     moveq #63,%d1
     divu.l %d1,%d0
     move.l %d0,%d1
-    moveq #10,%d0
+    moveq #PAGE_A,%d0
     lea .page_dial_low_format,%a0
     bsr.w .page_dial
     moveq #1,%d0
@@ -329,54 +327,49 @@ mh_page_draw:
     moveq #63,%d1
     divu.l %d1,%d0
     move.l %d0,%d1
-    moveq #49,%d0
+    moveq #PAGE_B,%d0
     lea .page_dial_high_format,%a0
     bsr.w .page_dial
     moveq #2,%d0
     bsr.w .page_accum_setting
     move.l %d0,%d1
-    moveq #88,%d0
+    moveq #PAGE_C,%d0
     lea .page_boundary_format,%a0
-    lea 0x40046c28,%a1 /* native four-way switch */
-    moveq #48,%d2 /* top-row baseline: keep switch glyph inside C */
+    lea 0x40046c28,%a1
+    moveq #34,%d2
     bsr.w .page_selector_y
     moveq #3,%d0
     bsr.w .page_accum_setting
     move.l %d0,%d1
-    moveq #10,%d0
+    moveq #PAGE_A,%d0
     lea .page_reset_format,%a0
-    lea 0x40046c28,%a1 /* native four-way switch */
-    bsr.w .page_selector_bottom
-    moveq #19,%d0
-    moveq #50,%d1
+    lea 0x40046c28,%a1
+    moveq #6,%d2
+    bsr.w .page_selector_y
+    moveq #PAGE_A+9,%d0
+    moveq #52,%d1
     lea .page_lower,%a0
     bsr.w .page_label
-    moveq #58,%d0
-    moveq #50,%d1
+    moveq #PAGE_B+9,%d0
+    moveq #52,%d1
     lea .page_upper,%a0
     bsr.w .page_label
-    moveq #97,%d0
-    moveq #50,%d1
+    moveq #PAGE_C+9,%d0
+    moveq #52,%d1
     lea .page_boundary,%a0
     bsr.w .page_label
-    moveq #19,%d0
-    moveq #19,%d1
+    moveq #PAGE_A+9,%d0
+    moveq #24,%d1
     lea .page_reset,%a0
     bsr.w .page_label
 .page_draw_footer:
     tst.l mh_page_tab
     bne.w .page_draw_accum_grid
-.page_grid_harmony:
     bsr.w .page_grid
     bra.s .page_grid_done
 .page_draw_accum_grid:
-    /* ACCUM owns the complete six-cell A--F field.  There is no spare
-     * footer or tab rail to steal space from the native control art.
-     * A-D remain the four persisted ACCUM settings; E/F deliberately stay
-     * blank until the module gains real settings for those encoder slots.
-     */
     bsr.w .page_grid_accum
-    bra.w .page_draw_finish
+    bra.w .page_draw_menu
 .page_grid_done:
     move.l mh_page_track,%d0
     addq.l #1,%d0
@@ -389,6 +382,7 @@ mh_page_draw:
     moveq #4,%d1
     move.l %a2,%a0
     bsr.w .page_text
+.page_draw_menu:
     moveq #5,%d0
     moveq #49,%d1
     lea .page_tab_harm,%a0
@@ -413,6 +407,8 @@ mh_page_draw:
     move.l %a5,-(%sp)
     jsr 0x40012254
     lea 24(%sp),%sp
+    tst.l mh_page_tab
+    bne.s .page_draw_finish
     moveq #85,%d0
     moveq #4,%d1
     lea .page_back,%a0
@@ -451,10 +447,10 @@ mh_page_draw:
     movem.l (%sp),%d2/%a2
     lea 8(%sp),%sp
     rts
-.page_grid_accum: /* Full native A--F grid; ACCUM does not draw a footer. */
+.page_grid_accum: /* Six cells beside the left menu, without a footer. */
     lea -8(%sp),%sp
     movem.l %d2/%a2,(%sp)
-    moveq #3,%d2
+    moveq #4,%d2
     lea .page_accum_grid_lines,%a2
 .page_accum_grid_line:
     pea 1
@@ -463,7 +459,13 @@ mh_page_draw:
     move.l 4(%a2),-(%sp)
     move.l (%a2),-(%sp)
     move.l %a5,-(%sp)
-    jsr 0x40012004 /* stock alternating-pixel line */
+    cmpi.l #1,%d2
+    beq.s .page_accum_grid_solid
+    jsr 0x40012004
+    bra.s .page_accum_grid_next
+.page_accum_grid_solid:
+    jsr 0x40012254
+.page_accum_grid_next:
     lea 24(%sp),%sp
     lea 16(%a2),%a2
     subq.l #1,%d2
@@ -487,16 +489,30 @@ mh_page_draw:
     jsr (%a1)
     lea 28(%sp),%sp
     rts
-.page_dial: /* Stock full dial, as used by MIDI Follow's continuous controls. */
+.page_dial:
     move.l %a5,-(%sp)
     move.l %a0,-(%sp)
     pea 8
     move.l %d1,-(%sp)
     clr.l -(%sp)
-    pea 31
+    pea 33
     move.l %d0,-(%sp)
     jsr 0x400479b4
     lea 28(%sp),%sp
+    rts
+.page_dial_low_format:
+    moveq #0,%d0
+    bsr.w .page_accum_setting
+    bra.s .page_dial_limit_text
+.page_dial_high_format:
+    moveq #1,%d0
+    bsr.w .page_accum_setting
+.page_dial_limit_text:
+    move.l %d0,-(%sp)
+    pea .page_integer
+    move.l 12(%sp),-(%sp)
+    jsr 0x40013a08
+    lea 12(%sp),%sp
     rts
 .page_accum_setting: /* d0=setting 0..3, returns current value in d0. */
     clr.l -(%sp) /* read-only delta */
@@ -652,20 +668,6 @@ mh_page_down:
     jsr 0x40013a08
     lea 12(%sp),%sp
     rts
-.page_dial_low_format:
-    moveq #0,%d0
-    bsr.w .page_accum_setting
-    bra.s .page_dial_limit_text
-.page_dial_high_format:
-    moveq #1,%d0
-    bsr.w .page_accum_setting
-.page_dial_limit_text:
-    move.l %d0,-(%sp)
-    pea .page_integer
-    move.l 12(%sp),-(%sp)
-    jsr 0x40013a08
-    lea 12(%sp),%sp
-    rts
 .page_tab_harm: .asciz "CHORD"
 .page_tab_accum: .asciz "ACCUM"
 .page_integer: .asciz "%d"
@@ -685,6 +687,7 @@ mh_page_down:
 .page_boundaries: .long .page_wrap,.page_bounce,.page_hold,.page_zero
 .page_resets: .long .page_none,.page_start,.page_pattern,.page_both
 .page_accum_grid_lines:
-    .long 39,0,39,59
-    .long 78,0,78,59
-    .long 0,30,117,30
+    .long 60,2,60,58
+    .long 88,2,88,58
+    .long 32,30,117,30
+    .long 32,2,32,58

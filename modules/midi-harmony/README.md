@@ -53,6 +53,12 @@ Live keyboard notes do not accumulate.
 
 Select ACCUM in the Harmony window:
 
+The left CHORD/ACCUM menu remains visible. Controls use the native six-position
+encoder grid: A/B/C across the top and D/E/F below, with E/F empty and inactive.
+Each title sits above its native dial (LOW/HIGH) or four-way switch
+(BOUND/RESET), followed by the value. ACCUM omits the footer to keep those
+three bands separate; CHORD retains its existing footer.
+
 | Encoder | Setting | Values; default |
 | --- | --- | --- |
 | A | LOW | −63…0 degrees; 0 |

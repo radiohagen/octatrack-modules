@@ -124,7 +124,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-harmony/README.md",
       "sha256": "2503b41cfcdfaae42effb0ec2c17a9c6a3f0ffd11f74e623d3f78d94c7d4704e",
-      "published_sha256": "6d076032989a0481e9219d5f5caf625965af8cf7ee0ca0e42430a7f9043a1a7f",
+      "published_sha256": "c321ced34585668b5767755be438bcc39221767871b215074639b58899c382ae",
       "source_mode": "100644"
     },
     "modules/midi-harmony/VOICING.md": {
@@ -249,7 +249,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-harmony/page.s",
       "sha256": "d5db930104a9b1a30bc0626d9a68a850b1833448ac9ccb4e0f6fe9c97bb9c20e",
-      "published_sha256": "3e646e75ec72243b36c51defe5cff446dfdf0c3fa029af70cf238deb65adb4c4",
+      "published_sha256": "6a6c1e4d02db836c6c576db02103cd9f2b61042245843650b65f75c3472d5ccc",
       "source_mode": "100644",
       "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
     },
@@ -1440,7 +1440,7 @@
       "path": "tools/verify/verify_harmony_accumulator_port.py",
       "sha256": "101383f02df13bb1e91b60d0e963d21e6787e6f05c5bde1d575debe0cf65d497",
       "source_mode": "100644",
-      "published_sha256": "f2bf3f95058e086da274046e166d2a3f4ed75574a16198654f8a212352d7427d",
+      "published_sha256": "21eaa8175d0b40d57ab881ab541b0170779cf3ffc70996f8b867645cde084948",
       "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
     },
     "tools/verify/verify_harmony_accumulator_ui.py": {
@@ -1448,7 +1448,7 @@
       "path": "tools/verify/verify_harmony_accumulator_ui.py",
       "sha256": "225c85ec4a8bbb2a2c7d80ca975504885800b8aefbdad897b17e5b3d825cd82d",
       "source_mode": "100644",
-      "published_sha256": "589c72b6a4e28f08b8661c2bb27bb98cb492a66c93c7f1f4efc19a5a8f2dcd26",
+      "published_sha256": "1a7c574d18c81bbc956120552869af8ce7de1ab0c0fcb8d770fcbb71b1e90e3c",
       "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
     },
     "modules/midi-harmony/ACCEPTANCE.md": {
