@@ -10,8 +10,8 @@
     },
     "runtime": {
       "bytes": 9444,
-      "sha256": "d559203ffd0061e9f561082d0c9677e304d45d01728d984b0e7385ece8671a5a"
+      "sha256": "3df6d6f36edfd98f002980cc627272d8207ea512fde2aa0080639772ee00a464"
     }
   },
-  "revision_note": "Extend routing window dividers to the native inner frame edge. Runtime size, startup entry and MIDI routing logic unchanged."
+  "revision_note": "Keep both routing dividers inside the native inner frame, preserving the gap to the underlying track icons. Runtime size, startup entry and routing logic unchanged."
 }

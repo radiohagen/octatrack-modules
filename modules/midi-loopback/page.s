@@ -233,8 +233,8 @@ lb_channel_format:
 .page_grid_lines:
     .long 38,12,38,58
     .long 77,12,77,58
-    .long 0,35,117,35
-    .long 0,12,117,12
+    .long 1,35,117,35
+    .long 1,12,117,12
 lb_page_layer:
     .long 0,lb_page_keys,lb_page_encs,0,0,-1,-1
 lb_page_keys:
