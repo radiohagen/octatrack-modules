@@ -44,7 +44,8 @@
     },
     {
       "slug": "quantizer-midi-drawer",
-      "source_commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d"
+      "source_commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
+      "status": "archived-upstream-superseded"
     }
   ],
   "files": {
@@ -517,28 +518,6 @@
       "sha256": "354312abf6302520438c92aea3a905fd83bbd1ee4ee14e36e926d32d9037ce79",
       "published_sha256": "beb5b645ad4cb5a09be58f69aa0a57db142efd46724ccd9112b603e2aa95cac2",
       "source_mode": "100644"
-    },
-    "modules/quantizer-midi-drawer/README.md": {
-      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
-      "path": "modules/quantizer-midi-drawer/README.md",
-      "sha256": "5f4e48b619ccd2c1a5528eeac06f945fbf3fad4528bf09da937691a09dd09140",
-      "published_sha256": "b09d986f7d19d8b4ec62312a2885a8045300f21c08a340754e444e9a5afac6d4",
-      "source_mode": "100644"
-    },
-    "modules/quantizer-midi-drawer/drawer.s": {
-      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
-      "path": "modules/quantizer-midi-drawer/drawer.s",
-      "sha256": "e2397f5b1d5fdcfa8641f0ac85abee0c6f8d61417f0d09da774caed8c56e16e5",
-      "published_sha256": "e2397f5b1d5fdcfa8641f0ac85abee0c6f8d61417f0d09da774caed8c56e16e5",
-      "source_mode": "100644"
-    },
-    "modules/quantizer-midi-drawer/manifest.py": {
-      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
-      "path": "modules/quantizer-midi-drawer/manifest.py",
-      "sha256": "9faea6938bf4fb504ce6c94cdb9e9a47d31014aeef282f227fd942be833b5827",
-      "published_sha256": "81556e62a28b79a6a1b2e09d34e21c273ac91428287c086044df0b8ca794b050",
-      "source_mode": "100644",
-      "migration_note": "Operational author URL updated; original author name/credit preserved."
     },
     "remixes/harmony-track-bus/README.md": {
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
@@ -1332,13 +1311,6 @@
       "source_mode": "100644",
       "origin": "Split from adjacent README in this repository; historical evidence is retained in the text."
     },
-    "modules/quantizer-midi-drawer/DEVELOPMENT.md": {
-      "path": "modules/quantizer-midi-drawer/DEVELOPMENT.md",
-      "sha256": "5f4e48b619ccd2c1a5528eeac06f945fbf3fad4528bf09da937691a09dd09140",
-      "published_sha256": "5f4e48b619ccd2c1a5528eeac06f945fbf3fad4528bf09da937691a09dd09140",
-      "source_mode": "100644",
-      "origin": "Split from adjacent README in this repository; historical evidence is retained in the text."
-    },
     "modules/midi-harmony/DEVELOPMENT.md": {
       "path": "modules/midi-harmony/DEVELOPMENT.md",
       "sha256": "2503b41cfcdfaae42effb0ec2c17a9c6a3f0ffd11f74e623d3f78d94c7d4704e",
@@ -1877,6 +1849,35 @@
       "path": "tools/verify/verify_midi_loopback_context.py",
       "sha256": "27cc8dd232069138d412bc435e584ed7be29aacf6dea86a1d6b209b9ec1bf96c",
       "source_mode": "100644"
+    },
+    "modules/_legacy_quantizer-midi-drawer/README.md": {
+      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
+      "path": "modules/quantizer-midi-drawer/README.md",
+      "sha256": "5f4e48b619ccd2c1a5528eeac06f945fbf3fad4528bf09da937691a09dd09140",
+      "published_sha256": "b09d986f7d19d8b4ec62312a2885a8045300f21c08a340754e444e9a5afac6d4",
+      "source_mode": "100644"
+    },
+    "modules/_legacy_quantizer-midi-drawer/drawer.s": {
+      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
+      "path": "modules/quantizer-midi-drawer/drawer.s",
+      "sha256": "e2397f5b1d5fdcfa8641f0ac85abee0c6f8d61417f0d09da774caed8c56e16e5",
+      "published_sha256": "e2397f5b1d5fdcfa8641f0ac85abee0c6f8d61417f0d09da774caed8c56e16e5",
+      "source_mode": "100644"
+    },
+    "modules/_legacy_quantizer-midi-drawer/manifest.py": {
+      "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
+      "path": "modules/quantizer-midi-drawer/manifest.py",
+      "sha256": "9faea6938bf4fb504ce6c94cdb9e9a47d31014aeef282f227fd942be833b5827",
+      "published_sha256": "81556e62a28b79a6a1b2e09d34e21c273ac91428287c086044df0b8ca794b050",
+      "source_mode": "100644",
+      "migration_note": "Operational author URL updated; original author name/credit preserved."
+    },
+    "modules/_legacy_quantizer-midi-drawer/DEVELOPMENT.md": {
+      "path": "modules/quantizer-midi-drawer/DEVELOPMENT.md",
+      "sha256": "5f4e48b619ccd2c1a5528eeac06f945fbf3fad4528bf09da937691a09dd09140",
+      "published_sha256": "5f4e48b619ccd2c1a5528eeac06f945fbf3fad4528bf09da937691a09dd09140",
+      "source_mode": "100644",
+      "origin": "Split from adjacent README in this repository; historical evidence is retained in the text."
     }
   },
   "submodules": {},
