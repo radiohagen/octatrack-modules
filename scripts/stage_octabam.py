@@ -32,6 +32,8 @@ def plan(source: Path, target: Path, receipt: dict) -> list[tuple[Path, Path]]:
     source, target = source.resolve(), target.resolve()
     pairs = []
     for name, record in receipt['files'].items():
+        if record.get('stage') is False:
+            continue  # historical shared helpers are owned by the builder
         if not name.startswith(('modules/', 'tools/verify/', 'remixes/')):
             continue  # licence copies and provenance stay in the author repository
         src, dst = source / name, target / name

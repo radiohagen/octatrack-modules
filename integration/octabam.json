@@ -1,7 +1,7 @@
 {
   "repository": "https://github.com/radiohagen/octabam.git",
-  "commit": "832a9666684a959a7417955016d49d398248008e",
+  "commit": "cb80d067b43c462332c9146a52f55c4104e3ec30",
   "recorded_on": "2026-10-18",
-  "status": "integration-verified",
-  "note": "Baseline for staging this repository's native-path source. Follow FIXED/GRAV/SOURCE is verified on BUILD 79/PGO-off harmony-track-bus: six-cell stock UI, independent register settings, TRIG/LIVE playback, ACC plus TRAN, native Part save/reload/clear/paste, disk reload, retained-memory restart and fresh defaults. Copied disposable projects only; hardware and physical power-off acceptance remain untested. The Follow packed settings are greenfield, with no legacy migration."
+  "status": "reference-only",
+  "note": "Package integration baseline at current upstream c3f37e5, with resident callback linking and declared boot-state verification. Source qualification pending on the composed image."
 }

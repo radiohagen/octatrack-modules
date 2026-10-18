@@ -48,6 +48,22 @@ class StageGuards(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'escapes'):
             plan(source, self.work, receipt)
 
+    def test_historical_shared_helpers_do_not_overwrite_builder_source(self):
+        source = self.root / 'source'
+        name = 'modules/example/code.s'
+        src = source / name
+        src.parent.mkdir(parents=True)
+        src.write_text('; current author source')
+        shared = 'tools/verify/verify_dram_boot.py'
+        destination = self.work / shared
+        destination.parent.mkdir(parents=True)
+        destination.write_text('# current builder gate')
+        receipt = {'files': {name: {'path': name},
+                             shared: {'path': shared, 'stage': False}}, 'submodules': {}}
+        self.assertEqual(plan(source, self.work, receipt),
+                         [(src.resolve(), self.work.resolve() / name)])
+        self.assertEqual(destination.read_text(), '# current builder gate')
+
     def test_rename_preserves_origin_and_retires_only_tracked_files(self):
         source = self.root / 'source'
         old, new = 'modules/old/manifest.py', 'modules/new/manifest.py'
