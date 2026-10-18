@@ -1372,7 +1372,8 @@
       "sha256": "6d107a6c4825573feda974cca9cab61c25d90d42276aeeece2fe0757fc9f27e3",
       "published_sha256": "b43896271ac22a473fa0a267e2be06fa6ea1e42cebca044183d845a8eece7432",
       "source_mode": "100644",
-      "origin": "Split from adjacent README in this repository; historical evidence is retained in the text."
+      "origin": "Split from adjacent README in this repository; historical evidence is retained in the text.",
+      "stage": false
     },
     "remixes/test/midi-part-state/DEVELOPMENT.md": {
       "path": "remixes/test/midi-part-state/DEVELOPMENT.md",
