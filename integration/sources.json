@@ -3,7 +3,7 @@
   "source_commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
   "source_commit_availability": "preserved original local repository; selected content is published here with file hashes",
   "previous_author_snapshot": "e789014597e80114e971d16374e20f105594ab37",
-  "integration_commit": "3ded96f3dae179aaf6c89b5de1fd97752645f2d3",
+  "integration_commit": "a668063f953da59ca50026e2e525f3377ede447e",
   "modules": [
     {
       "slug": "midi-scales",
