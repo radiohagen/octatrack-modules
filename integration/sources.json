@@ -384,7 +384,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-loopback-scenes/manifest.py",
       "sha256": "adb01c874784544e0c1379e7d17c5d9b31805a34eec69a0db99b2883483dc407",
-      "published_sha256": "bee93063ad1719c70e1354afbfa817e1dd85d5d9c2723b9c9f10ee6f35e8a261",
+      "published_sha256": "70bfc3c07310d7f1d5e985d032d0602d16c84a1c48bdcd9ebc4c44ba9b37201e",
       "source_mode": "100644",
       "migration_note": "Operational author URL updated; original author name/credit preserved."
     },
@@ -1169,7 +1169,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "tools/verify/verify_midi_loopback_ui_port.py",
       "sha256": "b5f637b88ad8cb9e7f4ab7587084fedd8fd557d6977ee99bbe821321da3648bc",
-      "published_sha256": "b5f637b88ad8cb9e7f4ab7587084fedd8fd557d6977ee99bbe821321da3648bc",
+      "published_sha256": "0c856568252ba991e7bf272f3e1e6b7a6d89194bb4186504e4ebe75f6295ab80",
       "source_mode": "100644"
     },
     "tools/verify/verify_midi_part.py": {
