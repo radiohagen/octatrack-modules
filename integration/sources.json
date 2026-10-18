@@ -522,7 +522,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/quantizer-midi-drawer/README.md",
       "sha256": "5f4e48b619ccd2c1a5528eeac06f945fbf3fad4528bf09da937691a09dd09140",
-      "published_sha256": "5800a46ffad974ad439301a8d088ebe1bec55b76e650e57d2a10abb8d9cb8d8c",
+      "published_sha256": "b09d986f7d19d8b4ec62312a2885a8045300f21c08a340754e444e9a5afac6d4",
       "source_mode": "100644"
     },
     "modules/quantizer-midi-drawer/drawer.s": {
@@ -552,7 +552,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "remixes/harmony-track-bus/remix.py",
       "sha256": "932901d41ef11553d4828a3ff7b3baa25a3fc3ca11983c52e531df019649e039",
-      "published_sha256": "7ace5d325014b72f64f452027d0fabf3517f9bf7a36686d572f1cf0fb0c7469f",
+      "published_sha256": "a2dc53c2244eb34d1c3755b649c735adee30632095c9c5eda937a4843a6c2352",
       "source_mode": "100644"
     },
     "remixes/test/harmony-degrees/README.md": {
@@ -1176,7 +1176,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "tools/verify/verify_midi_loopback_settings.py",
       "sha256": "1414d11e91e92f8c1171d5478c3801d1caec28e091774ba59949fb9656677d80",
-      "published_sha256": "e17377cba2332a48525575674fced2d4455ae5eb5ba48430b24307033cc3a91a",
+      "published_sha256": "aded268f85552a1968c53ef54d93879a7fc7087507fa7f07e5bcfb165a0b6e45",
       "source_mode": "100644"
     },
     "tools/verify/verify_midi_loopback_stress.py": {
