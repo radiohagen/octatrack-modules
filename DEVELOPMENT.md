@@ -47,3 +47,21 @@ This matches the stock 1.40C TEMPO popup over MIDI NOTE SETUP, measured with
 physical panel reports under the full firmware emulator. It is not hardware
 acceptance. Reproduce the ownership and playback regression with Octabam's
 `tools/verify/verify_midi_detail_tracks_port.py` and a disposable local fixture.
+
+## MIDI playback context
+
+Sequenced routing reads each MIDI track's applied bank and Part
+(`0x8000666e + track` and `0x80006676 + track`). Stock publishes these when
+it applies that track's setup. Unlatched tracks use the applied engine Part,
+as stock does. Global setup-message latches can lag the first notes after PLAY. Audio voices can
+retain a previous Part, and the UI can select a Part before playback changes;
+neither is an authority for sequenced MIDI. Live keys keep their UI context,
+and the native bank/program sender keeps its explicit bank/Part arguments.
+
+`verify_midi_loopback_context.py` exercises all eight tracks, EXT/INT/BOTH,
+conflicting retained audio Parts and future UI selections, first/last banks,
+invalid contexts, and original-note release on actual MIDI context changes.
+The native companion `verify_midi_loopback_transitions.py` replays A03 EXT to
+A02 INT with and without an audio T1 trig, stopped and running, using a local
+v23 LB-CHECK/LB-FRESH fixture. It checks actual external note messages and
+internal delivery, rather than accepting the UI label as routing proof.
