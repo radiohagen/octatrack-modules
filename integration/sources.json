@@ -3,7 +3,7 @@
   "source_commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
   "source_commit_availability": "preserved original local repository; selected content is published here with file hashes",
   "previous_author_snapshot": "e789014597e80114e971d16374e20f105594ab37",
-  "integration_commit": "cb80d067b43c462332c9146a52f55c4104e3ec30",
+  "integration_commit": "acd388f63d1191f4b57adcdefc4f5405e0f95bcd",
   "modules": [
     {
       "slug": "midi-scales",
@@ -1169,7 +1169,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "tools/verify/verify_midi_loopback_ui_port.py",
       "sha256": "b5f637b88ad8cb9e7f4ab7587084fedd8fd557d6977ee99bbe821321da3648bc",
-      "published_sha256": "0c856568252ba991e7bf272f3e1e6b7a6d89194bb4186504e4ebe75f6295ab80",
+      "published_sha256": "960b5da2b3bcd833bd494be958f7019332d4f86061344226af39630466c27d0c",
       "source_mode": "100644"
     },
     "tools/verify/verify_midi_part.py": {
