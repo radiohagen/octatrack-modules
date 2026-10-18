@@ -13,6 +13,8 @@ builder and emulator are maintained in Octabam.
 
 `sources.json` records imported source provenance and current file hashes.
 The staging tool copies only its declared module, remix and verification files.
+Records marked `stage: false` retain provenance for historical shared helpers
+without overwriting Octabam's current BRAIN, KITS, PLOCKS or boot verifiers.
 Recorded renames and `retired_files` remove obsolete tracked paths from the
 isolated target; unrelated or untracked content is never retired.
 
