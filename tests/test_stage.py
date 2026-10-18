@@ -63,6 +63,9 @@ class StageGuards(unittest.TestCase):
         self.assertEqual(plan(source, self.work, receipt),
                          [(src.resolve(), self.work.resolve() / name)])
         self.assertEqual(destination.read_text(), '# current builder gate')
+        receipt['files']['modules/_legacy_example/code.s'] = {
+            'path': name, 'stage': False}
+        self.assertEqual(retired_paths(self.work, receipt), [])
 
     def test_rename_preserves_origin_and_retires_only_tracked_files(self):
         source = self.root / 'source'
