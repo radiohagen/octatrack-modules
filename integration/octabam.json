@@ -1,7 +1,7 @@
 {
   "repository": "https://github.com/radiohagen/octabam.git",
-  "commit": "8f8e00d061d17a890a3b01d5f340492f912712e2",
-  "recorded_on": "2026-10-15",
+  "commit": "832a9666684a959a7417955016d49d398248008e",
+  "recorded_on": "2026-10-18",
   "status": "integration-verified",
-  "note": "MIDI-only integration: general check passes (46 image gates), with explicit project skips; final BUILD 79/PGO-off image is identical to the completed source image. Historical dedicated project suites are separate evidence. Hardware untested. Full source is staged natively; Scales has a separately verified author adapter review branch."
+  "note": "Baseline for staging this repository's native-path source. Follow FIXED/GRAV/SOURCE is verified on BUILD 79/PGO-off harmony-track-bus: six-cell stock UI, independent register settings, TRIG/LIVE playback, ACC plus TRAN, native Part save/reload/clear/paste, disk reload, retained-memory restart and fresh defaults. Copied disposable projects only; hardware and physical power-off acceptance remain untested. The Follow packed settings are greenfield, with no legacy migration."
 }
