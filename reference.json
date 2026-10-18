@@ -10,8 +10,8 @@
     },
     "runtime": {
       "bytes": 9444,
-      "sha256": "7f91496db4c77179d3544a9dfbcaf9d4500e085f8eda15f18eb75a9c61bed5d0"
+      "sha256": "d559203ffd0061e9f561082d0c9677e304d45d01728d984b0e7385ece8671a5a"
     }
   },
-  "revision_note": "Resident startup entry unchanged. Sequenced Loopback routing uses each native MIDI track applied bank/Part, with native applied-engine fallback before the first trig. Hardware qualification pending."
+  "revision_note": "Extend routing window dividers to the native inner frame edge. Runtime size, startup entry and MIDI routing logic unchanged."
 }
