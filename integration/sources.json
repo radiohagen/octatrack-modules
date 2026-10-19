@@ -1056,7 +1056,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "tools/verify/verify_midi_follow.py",
       "sha256": "8466618074bb75ecb9f6781620600e483a7d677f828a29cb058e38d3c47b93eb",
-      "published_sha256": "d23aa3c5684734cda41181d84911813af4f7bdbf11d9f1f5a237f8fc7b6b798c",
+      "published_sha256": "f0d718b83bcde05327f8c79dfdfb97d8470a089b6df96fb1b0f650de76ac6a4a",
       "source_mode": "100644"
     },
     "tools/verify/verify_midi_follow_mute.py": {
