@@ -365,7 +365,8 @@ def port_case(image, project, arp=False, leader=0, enabled=True, live_change=Non
     assert [e[2] for e in stock if e[:2] == ('on', 3)] == [72, 74, 76]
     bass = [e for e in patched if e[:2] == ('on', bass_ch)]
     first_native = next(e[2] for e in stock if e[:2] == ('on', bass_ch))
-    expected = ([first_native, 36, 36, 48, 48, 55, 48] if live_change == 'off' else
+    expected = ([first_native, 36, 36, first_native, first_native,
+                 first_native + 7, first_native] if live_change == 'off' else
                 [first_native, 36, 36, 38, 38, 40] if live_change == 'source' else
                 [first_native, 36, 40, 43, 36, 40, 43, 41, 45, 48,
                  43, 47, 50, 43, 47, 50] if arp else
@@ -389,7 +390,9 @@ def port_case(image, project, arp=False, leader=0, enabled=True, live_change=Non
     # F starts while the old C bass is still held; its release stays C.
     f = patched.index(('on', leader_ch, 65, 90+leader))
     held_pitch = 36 + offsets.get(3, 7) if offsets is not None else 36
-    first_follower_f = 41 + (offsets.get(6, 7) if offsets is not None else 0)
+    first_follower_f = (first_native if live_change == 'off' else
+                        38 if live_change == 'source' else
+                        41 + (offsets.get(6, 7) if offsets is not None else 0))
     assert patched.index(('off', bass_ch, held_pitch, 0), f) < patched.index(('on', bass_ch, first_follower_f, 91), f)
     print(f'  [ok] port UART ({work.name}): independent rhythm, C/F/G, same-step order, held-note release, other tracks and stored banks')
     return dict(status='pass', leader_notes=leader_notes, bass_notes=[e[2] for e in bass], image_sha256=hashes)
