@@ -14,7 +14,7 @@ from hw import ot_project as otp
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('remix', nargs='?')
-    parser.add_argument('--project', type=Path, default=os.environ.get('OT_PROJECT'))
+    parser.add_argument('--project', type=Path, default=os.environ.get('OT_PROJECT') or None)
     args = parser.parse_args()
     if args.project is None:
         print('[SKIP] Harmony/Follow UART matrix: supply --project DIR or OT_PROJECT')
