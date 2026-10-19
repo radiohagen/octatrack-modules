@@ -110,12 +110,12 @@ The approved Follow source is published on `codex/midi-follow-voices` at
 source HARM NOTE/CHORD supplies only its resolved degree:oct root. Follower
 HARM NOTE/CHORD generates its own voices. Harmony absent behaves as OFF.
 
-The Octabam candidate is prepared locally at `a1bf33ba24eafc0e6db93b7e6ef2cf417e67dce7`,
-on upstream `bf3e265704ea0068a1cb6dbed2b67157deb8b64e`, with the separate
-include-callback compatibility prerequisite `e2f82db5`. Its intended remote
-branch is `codex/pr/midi-follow-voices`; publication currently requires the
-radiohagen login's workflow scope because upstream changed CI. No upstream
-PR is submitted. Exact checks and their snapshot are in
+The Octabam candidate is published at `a1bf33ba24eafc0e6db93b7e6ef2cf417e67dce7`
+on [codex/pr/midi-follow-voices](https://github.com/radiohagen/octabam/tree/codex/pr/midi-follow-voices),
+based on upstream `bf3e265704ea0068a1cb6dbed2b67157deb8b64e`. The separate
+include-callback compatibility prerequisite `e2f82db5` is published on
+[codex/pr/midi-include-abi](https://github.com/radiohagen/octabam/tree/codex/pr/midi-include-abi).
+Remote commit IDs were verified after publication. No upstream PR is submitted. Exact checks and their snapshot are in
 [`integration/review-branches.json`](../integration/review-branches.json).
 
 Other-module work is explicit: Part State is required; Scales needs the

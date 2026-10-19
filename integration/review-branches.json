@@ -234,7 +234,7 @@
       "base": "bf3e265704ea0068a1cb6dbed2b67157deb8b64e",
       "prerequisite": "e2f82db56b3a8c6ef632b3a11913485d6c0ce2e6",
       "author_commit": "93a420d3255db80745ea56847071ff5db6d258dc",
-      "publication_status": "Local branch prepared; GitHub rejected publication because the radiohagen token lacks workflow scope for incoming upstream workflow commits. No upstream PR submitted.",
+      "publication_status": "Published and remote commit verified on radiohagen/octabam. No upstream PR submitted; review the prepared series before submission.",
       "image_sha256": "b6a20d82979a14d11d7b87b3d91fae55257cd1d8adcfa1b2cf8ff0cdb89da662",
       "full_checks_commit": "82b15a75cb3867c24c9b9bd110a358026b9711e3",
       "checks": [
@@ -251,7 +251,9 @@
         "EUCLID is refused pending a separate transport hook bridge"
       ],
       "hardware_tested": false,
-      "submission_qualification": "Review the prepared series; recheck upstream and rerun required reach gates after any new rebase before submission."
+      "submission_qualification": "Review the prepared series; recheck upstream and rerun required reach gates after any new rebase before submission.",
+      "branch_url": "https://github.com/radiohagen/octabam/tree/codex/pr/midi-follow-voices",
+      "prerequisite_branch_url": "https://github.com/radiohagen/octabam/tree/codex/pr/midi-include-abi"
     }
   ],
   "limits": "These are prepared candidates. Each needs current make reach qualification before submission. KITS has inherited broad-suite failures and is held. Later feature boundaries are documented but not yet submitted or qualified branches."
