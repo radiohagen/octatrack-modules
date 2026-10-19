@@ -224,6 +224,34 @@
       "passed": true,
       "hardware_tested": false,
       "submission_qualification": "Rebase and make reach RUN=1 KEEP=1 before submission."
+    },
+    {
+      "branch": "codex/pr/midi-follow-voices",
+      "local_branch": "codex/pr/midi-follow",
+      "title": "Add MIDI Follow with logical source note sets",
+      "repository": "https://github.com/radiohagen/octabam",
+      "commit": "a1bf33ba24eafc0e6db93b7e6ef2cf417e67dce7",
+      "base": "bf3e265704ea0068a1cb6dbed2b67157deb8b64e",
+      "prerequisite": "e2f82db56b3a8c6ef632b3a11913485d6c0ce2e6",
+      "author_commit": "93a420d3255db80745ea56847071ff5db6d258dc",
+      "publication_status": "Local branch prepared; GitHub rejected publication because the radiohagen token lacks workflow scope for incoming upstream workflow commits. No upstream PR submitted.",
+      "image_sha256": "b6a20d82979a14d11d7b87b3d91fae55257cd1d8adcfa1b2cf8ff0cdb89da662",
+      "full_checks_commit": "82b15a75cb3867c24c9b9bd110a358026b9711e3",
+      "checks": [
+        "make check REMIX=midi-follow: ten image gates and shared checks passed",
+        "REFHASH_BASE=upstream/main make reach BASE=upstream/main TESTS=1 RUN=1 KEEP=1: all six reached groups passed; 272 acceptance tests, five skips; 24 reference builds and 34 bus cases bit identical; three shards reused matching image/input cache entries",
+        "Final pin/verifier update rebuilt the identical image; corrected machine gate passed with bounded 5000-instruction pre-capture allowance",
+        "Same-image direct UART suite: 12 groups passed; native four-voice output with absent follower N2-4 passed with balanced releases"
+      ],
+      "dependencies": [
+        "Two-argument include callback adapters for Part State, Scales and Loopback are a separate prerequisite",
+        "Follow needs MIDI Part State; Harmony is optional",
+        "Scales retains its isolated author oracle for standalone builds; composed Follow/Harmony symbol variants use image gates",
+        "Harmony companion branch codex/harmony-follow-integration moves old Part event hooks to Harmony and adds the explicit HARMONY FOLLOW bridge; includes SRAM long-branch fix for the large image",
+        "EUCLID is refused pending a separate transport hook bridge"
+      ],
+      "hardware_tested": false,
+      "submission_qualification": "Review the prepared series; recheck upstream and rerun required reach gates after any new rebase before submission."
     }
   ],
   "limits": "These are prepared candidates. Each needs current make reach qualification before submission. KITS has inherited broad-suite failures and is held. Later feature boundaries are documented but not yet submitted or qualified branches."
