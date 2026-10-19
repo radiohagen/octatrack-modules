@@ -1941,7 +1941,8 @@
       "path": "modules/README.md",
       "sha256": "ac24d8383fa03e2836422ce90ef88c6608164c0d64c7a1ac60e00f15b0a9a3fa",
       "published_sha256": "ac24d8383fa03e2836422ce90ef88c6608164c0d64c7a1ac60e00f15b0a9a3fa",
-      "source_mode": "100644"
+      "source_mode": "100644",
+      "stage": false
     },
     "modules/harmony-follow/README.md": {
       "origin": "authored",
@@ -1972,7 +1973,7 @@
       "repository": "https://github.com/radiohagen/octatrack-modules",
       "path": "tools/verify/verify_harmony_follow_port.py",
       "sha256": "76c90bf36cc9ca3876b93ee3e43c590d4203974664a69794f8e71c1bb07e7035",
-      "published_sha256": "76c90bf36cc9ca3876b93ee3e43c590d4203974664a69794f8e71c1bb07e7035",
+      "published_sha256": "d64da4c8a527bbf83adbe46ba3ecc3d72e26da51ffebecd698e3315722ea0ca6",
       "source_mode": "100644"
     }
   },

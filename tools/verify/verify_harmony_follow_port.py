@@ -19,12 +19,12 @@ def main():
     if args.project is None:
         print('[SKIP] Harmony/Follow UART matrix: supply --project DIR or OT_PROJECT')
         return
-    port.OUT = port.ROOT / 'out/harmony-follow-port'
-    port.OUT.mkdir(parents=True, exist_ok=True)
-    image = port.freeze_candidate(port.OUT)
     symbols = port.harmony.symbols()
     assert 'bf_encoder' in symbols, 'select MIDI FOLLOW'
     has_harmony = 'mh_generate' in symbols
+    port.OUT = port.ROOT / 'out' / ('harmony-follow-port' if has_harmony else 'follow-no-harmony-port')
+    port.OUT.mkdir(parents=True, exist_ok=True)
+    image = port.freeze_candidate(port.OUT)
     modes = (0, 1, 2) if has_harmony else (0,)
     results = {}
     for reverse in (False, True):
