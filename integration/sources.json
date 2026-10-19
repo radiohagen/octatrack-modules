@@ -422,7 +422,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-part-state/part-copy.s",
       "sha256": "e1ea84ef32bcb7887cf40b827e5ad598b423a3f14799b8e64bc0b3ca8fc488a0",
-      "published_sha256": "4fa1440a6152bb4299ae0dcadbe56136fc4a19547a247127cc199d8810a30291",
+      "published_sha256": "4278a57d4d1bb4d15c6076be944fc9f5dd3534f6488832c0ec1bde567ae2e4ed",
       "source_mode": "100644"
     },
     "modules/midi-part-state/part.s": {
