@@ -1,7 +1,7 @@
 {
   "repository": "https://github.com/radiohagen/octabam.git",
-  "commit": "a668063f953da59ca50026e2e525f3377ede447e",
-  "recorded_on": "2026-10-18",
+  "commit": "385f9d20baf0ea5bd456eb4f5f232b635914a994",
+  "recorded_on": "2026-10-19",
   "status": "integration-verified",
-  "note": "N1 software/emulator qualification completed on a668063 and image SHA-256 c46b450892d52aa8e6d5260de0ee854928ff8c5db8d90684d891c9eb43deff41. Includes canonical ACCUM release 4744643, corrected native menu/layout and three-octave bounds. The complete selected-remix run retained two disk-affected failures; exact unchanged Follow and Harmony-stress reruns both exited zero. All other gates and separate full-project/visual/lifecycle workers passed. Source staging matches 241 files byte-for-byte. Hardware, flash and recovery remain unverified."
+  "note": "Scoped Follow/Harmony software and emulator qualification; see harmony-follow-validation.json. Includes native N1-4 Follow, logical Harmony root handoff, explicit event bridge, and optional SRAM branch fix. The frozen N1 hardware package receipt is unchanged. No hardware, flash, or recovery acceptance."
 }

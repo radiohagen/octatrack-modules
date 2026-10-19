@@ -19,3 +19,8 @@ Recorded renames and `retired_files` remove obsolete tracked paths from the
 isolated target; unrelated or untracked content is never retired.
 
 [Developer notes and verification](DEVELOPMENT.md).
+
+The Follow/Harmony composition at `385f9d20` is qualified separately from the
+frozen N1 package. See [its scoped validation receipt](harmony-follow-validation.json)
+for all mode combinations, optional-module builds, image hashes and the original
+failed-wrapper history with corrected gate reruns. Hardware remains untested.

@@ -102,3 +102,29 @@ submodule pattern without including Harmony or the other modules in that
 author history. The remaining feature stages above are planned boundaries,
 not yet submission-ready branches. Prepare them sequentially after predecessor
 review; validate their adapters and exact combinations before opening PRs.
+
+## MIDI Follow preparation, 19 October 2026
+
+The approved Follow source is published on `codex/midi-follow-voices` at
+`93a420d3255db80745ea56847071ff5db6d258dc`. Source HARM OFF supplies N1–4;
+source HARM NOTE/CHORD supplies only its resolved degree:oct root. Follower
+HARM NOTE/CHORD generates its own voices. Harmony absent behaves as OFF.
+
+The Octabam candidate is prepared locally at `a1bf33ba24eafc0e6db93b7e6ef2cf417e67dce7`,
+on upstream `bf3e265704ea0068a1cb6dbed2b67157deb8b64e`, with the separate
+include-callback compatibility prerequisite `e2f82db5`. Its intended remote
+branch is `codex/pr/midi-follow-voices`; publication currently requires the
+radiohagen login's workflow scope because upstream changed CI. No upstream
+PR is submitted. Exact checks and their snapshot are in
+[`integration/review-branches.json`](../integration/review-branches.json).
+
+Other-module work is explicit: Part State is required; Scales needs the
+composed-reference adapter in the candidate. Harmony's companion branch
+`codex/harmony-follow-integration` supplies its event ownership changes,
+HARMONY FOLLOW bridge and the SRAM branch-range fix for the larger image.
+EUCLID remains refused until a separate transport bridge is implemented.
+
+The Harmony companion and full-bus interaction checks are recorded in
+[the scoped validation receipt](../integration/harmony-follow-validation.json).
+The tested Octabam composition is published at `385f9d20`. Its larger package
+base is separate from the current-upstream standalone Follow PR stack.

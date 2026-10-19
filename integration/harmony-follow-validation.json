@@ -1,0 +1,178 @@
+{
+  "recorded_on": "2026-10-19",
+  "author_repository": "https://github.com/radiohagen/octatrack-modules",
+  "author_code_commit": "ce8f7a1afdc6f9c7c7d62d79762db3457ddf1d35",
+  "integration_repository": "https://github.com/radiohagen/octabam",
+  "integration_commit": "385f9d20baf0ea5bd456eb4f5f232b635914a994",
+  "integration_branch": "codex/validate-midi-follow-harmony-20261019",
+  "integration_base": "af07e7ef5c26a6507af2f0205494fb74fc42a247",
+  "build": "79",
+  "staging": {
+    "files": 248,
+    "differences": 0,
+    "retired_paths": 0
+  },
+  "source_checks": {
+    "command": "make check",
+    "tests_passed": 22
+  },
+  "combined_check": {
+    "command": "make check REMIX=midi-harmony-follow",
+    "exit_code": 2,
+    "image_sha256": "0a68fc2c38d933dcbd395d1edb5a355eee7df3188da0c23f8a127f3c2d15f3b9",
+    "image_gates": 36,
+    "initial_passes": 34,
+    "initial_failures": [
+      "verify_harmony_follow_port: empty OT_PROJECT was interpreted as current directory; fixed to skip without a project and separately rerun all 18 explicit-project UART cases",
+      "verify_midi_follow: 4000-instruction pre-capture allowance exhausted; measured maximum 4350 with existing register/write/return assertions passing; allowance changed to 5000 and machine gate rerun successfully"
+    ],
+    "other_shared_and_remix_checks": "passed; project-dependent checks without a project were skipped",
+    "qualification": "Original wrapper exit remains failed. Both affected gates passed after verifier-only fixes on the same image. No full-wrapper rerun claimed.",
+    "log": "artifacts/harmony-follow-combined-check.log"
+  },
+  "uart_matrix": {
+    "harmony_selected_cases": 18,
+    "harmony_absent_cases": 2,
+    "source_modes": [
+      "OFF",
+      "NOTE",
+      "CHORD"
+    ],
+    "follower_modes": [
+      "OFF",
+      "NOTE",
+      "CHORD"
+    ],
+    "source_tracks": [
+      1,
+      8
+    ],
+    "checks": [
+      "Complete source and follower pitch sequences",
+      "Balanced note releases",
+      "Native N1-4 with blank follower N2-4",
+      "Inverted Harmony source chord follows logical root, not first generated note"
+    ],
+    "harmony_selected_image_sha256": "0a68fc2c38d933dcbd395d1edb5a355eee7df3188da0c23f8a127f3c2d15f3b9",
+    "harmony_absent_image_sha256": "f830726232e007f652771c2e1b8d776dc95474ee8823317d54ea947aff295305"
+  },
+  "standalone_harmony_uart": {
+    "chords": true,
+    "arp": true,
+    "off_equals_stock_playback_uart": true,
+    "bank_files_unchanged": true
+  },
+  "stages": {
+    "midi-harmony": {
+      "image_sha256": "0058c8018516cceed897f538af03364320fcc5ef1c35dec3c5b3dfd124926a57",
+      "runtime_sha256": "5ea43491c92143bc8d779ffa75e497bf7118b2ab82d52b0882bad107d6058606",
+      "gates": [
+        {
+          "gate": "verify_dram_boot",
+          "log": "out/harmony-follow-variants/midi-harmony-verify_dram_boot.log"
+        },
+        {
+          "gate": "verify_harmony_accumulator",
+          "log": "out/harmony-follow-variants/midi-harmony-verify_harmony_accumulator.log"
+        },
+        {
+          "gate": "verify_midi_part_copy",
+          "log": "out/harmony-follow-variants/midi-harmony-verify_midi_part_copy.log"
+        }
+      ],
+      "sequence_port": "out/harmony-alone-port/result.json"
+    },
+    "midi-follow": {
+      "image_sha256": "f830726232e007f652771c2e1b8d776dc95474ee8823317d54ea947aff295305",
+      "runtime_sha256": "73f2759502b7595bf52a980219597c5a67e121bd88919a0bc9edea91489d7e81",
+      "gates": [
+        {
+          "gate": "verify_dram_boot",
+          "log": "out/harmony-follow-variants/midi-follow-verify_dram_boot.log"
+        },
+        {
+          "gate": "verify_midi_follow_notes",
+          "log": "out/harmony-follow-variants/midi-follow-verify_midi_follow_notes.log"
+        },
+        {
+          "gate": "verify_midi_follow_gravity",
+          "log": "out/harmony-follow-variants/midi-follow-verify_midi_follow_gravity.log"
+        },
+        {
+          "gate": "verify_midi_follow_response",
+          "log": "out/harmony-follow-variants/midi-follow-verify_midi_follow_response.log"
+        },
+        {
+          "gate": "verify_midi_follow",
+          "log": "out/harmony-follow-variants/midi-follow-verify_midi_follow.log"
+        },
+        {
+          "gate": "verify_midi_part_copy",
+          "log": "out/harmony-follow-variants/midi-follow-verify_midi_part_copy.log"
+        },
+        {
+          "gate": "verify_harmony_follow_port",
+          "log": "out/harmony-follow-variants/midi-follow-verify_harmony_follow_port.log"
+        }
+      ]
+    },
+    "harmony-track-bus": {
+      "image_sha256": "e0311fc83dc65b301a39f3b8d326e791be36d9814d9b49f8c8854dd60c8f9694",
+      "runtime_sha256": "36dfb69b3a1cf32e529b87fbae185a3f1b912ab98274890cf5fd5cfb46664a96",
+      "gates": [
+        {
+          "gate": "verify_dram_boot",
+          "log": "out/harmony-follow-variants/harmony-track-bus-verify_dram_boot.log"
+        },
+        {
+          "gate": "verify_midi_follow_notes",
+          "log": "out/harmony-follow-variants/harmony-track-bus-verify_midi_follow_notes.log"
+        },
+        {
+          "gate": "verify_midi_follow_gravity",
+          "log": "out/harmony-follow-variants/harmony-track-bus-verify_midi_follow_gravity.log"
+        },
+        {
+          "gate": "verify_harmony_accumulator",
+          "log": "out/harmony-follow-variants/harmony-track-bus-verify_harmony_accumulator.log"
+        },
+        {
+          "gate": "verify_midi_loopback_producers",
+          "log": "out/harmony-follow-variants/harmony-track-bus-verify_midi_loopback_producers.log"
+        },
+        {
+          "gate": "verify_midi_loopback_context",
+          "log": "out/harmony-follow-variants/harmony-track-bus-verify_midi_loopback_context.log"
+        }
+      ],
+      "docs_passed": true
+    }
+  },
+  "final_image_identity": {
+    "midi-harmony-follow": {
+      "image_sha256": "0a68fc2c38d933dcbd395d1edb5a355eee7df3188da0c23f8a127f3c2d15f3b9",
+      "unchanged": true
+    },
+    "midi-harmony": {
+      "image_sha256": "0058c8018516cceed897f538af03364320fcc5ef1c35dec3c5b3dfd124926a57",
+      "unchanged": true
+    },
+    "harmony-track-bus": {
+      "image_sha256": "e0311fc83dc65b301a39f3b8d326e791be36d9814d9b49f8c8854dd60c8f9694",
+      "unchanged": true
+    }
+  },
+  "optional_sram_fix": {
+    "initial_standalone_build": "failed to link rp_native_copy because trampoline was outside feature guard",
+    "fix": "emit trampoline only with HAVE_MIDI_SRAM",
+    "regression": "standalone build, boot, Part-copy regression and native UART matrix passed; Harmony image hashes unchanged"
+  },
+  "limits": [
+    "Software and emulator qualification only",
+    "No device flash, physical MIDI, recovery or hardware timing acceptance",
+    "The frozen N1 package receipt is unchanged",
+    "Full bus selection received targeted interaction gates, not a new complete hardware-package acceptance run",
+    "EUCLID still requires a separate transport bridge"
+  ],
+  "hardware_tested": false
+}
