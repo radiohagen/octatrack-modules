@@ -75,14 +75,14 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-follow/README.md",
       "sha256": "b984d044ef4eb3bec749dd2752d07d004c137dc95d51cab13aca4bf8aa5e4b2c",
-      "published_sha256": "ed6f1c69e31efb04a4451d153139dfa3affd225c45bbc0d7eb3360b4317bfa6a",
+      "published_sha256": "f953286802979a425041195130fcdc9d843475fe83d5c89a30a5abf02c052e4f",
       "source_mode": "100644"
     },
     "modules/midi-follow/manifest.py": {
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-follow/manifest.py",
       "sha256": "808bfa85b9c5a366c455bff56f5e38d6e625243348a260b3fc8211c5f8ac24d6",
-      "published_sha256": "2b711dc2f09907c33f9bc2bcf07c1c05fbbb387e8e0a3e06ec04331c7135fc00",
+      "published_sha256": "93212bc87e77af4d228caeeb36ca7d7c3b10e11c5bffbcd5723f886533ce6272",
       "source_mode": "100644",
       "migration_note": "Operational author URL updated; original author name/credit preserved."
     },
@@ -1282,7 +1282,7 @@
     "modules/midi-follow/DEVELOPMENT.md": {
       "path": "modules/midi-follow/DEVELOPMENT.md",
       "sha256": "b984d044ef4eb3bec749dd2752d07d004c137dc95d51cab13aca4bf8aa5e4b2c",
-      "published_sha256": "751e388df8f85f36af4b1f65d46f968f07a7263dea0212bdbe97794e80fef71d",
+      "published_sha256": "f09f1ad5ff3f74427d02fc803ee659ffe6edb0d1041b5975083d2564a99aac41",
       "source_mode": "100644",
       "origin": "Split from adjacent README in this repository; historical evidence is retained in the text."
     },
@@ -1790,7 +1790,7 @@
       "repository": "https://github.com/radiohagen/octatrack-modules",
       "path": "tools/verify/verify_midi_follow_gravity.py",
       "sha256": "197fd0c3d8464a6377347dd477379dae135b2d3711aac72918ecc002e4700f36",
-      "published_sha256": "b51f064194adefb709f24fb7d4deffb0c63351f609c0e85a7aba1df096fd6fc9",
+      "published_sha256": "ab22db7b4ce5824be302c3007e0aa76e1905378577efd27455ee94cb7072dfe8",
       "source_mode": "100644"
     },
     "tools/verify/verify_midi_follow_gravity_port.py": {
@@ -1925,6 +1925,14 @@
       "path": "tools/verify/verify_midi_follow_voices_port.py",
       "sha256": "a416b613fc15ed5b15d709a53facc55a68d38b1bf89df30488d212eaa117cdfc",
       "published_sha256": "a416b613fc15ed5b15d709a53facc55a68d38b1bf89df30488d212eaa117cdfc",
+      "source_mode": "100644"
+    },
+    "modules/midi-follow/events.s": {
+      "origin": "authored",
+      "repository": "https://github.com/radiohagen/octatrack-modules",
+      "path": "modules/midi-follow/events.s",
+      "sha256": "227bcc18a819e8934e1f2aacb74a0685a55290464858cab43ff87e4dd35f2ce8",
+      "published_sha256": "227bcc18a819e8934e1f2aacb74a0685a55290464858cab43ff87e4dd35f2ce8",
       "source_mode": "100644"
     }
   },

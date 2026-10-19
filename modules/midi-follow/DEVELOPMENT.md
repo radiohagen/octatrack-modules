@@ -131,6 +131,11 @@ stock NOTE descriptor, drawer and encoder dispatch. No DSP code is added.
   effective interval or its Harmony root before
   stock note ownership and release bookkeeping (`0x4009fbbc` / `0x4009fd04`).
   Chained resolution has a defensive eight-hop bound.
+- `0x4009c3d4` / `0x4009c4d4`: reset the GRAV register on transport
+  start/resume. EUCLID uses these spans too, so both modules need a
+  shared-hook bridge for one remix.
+- `0x4009fbb2` / `0x4009fcfa`: commit GRAV after a successful sequenced
+  note-on while stock retains release bookkeeping.
 - NOTE SETUP's unused D slot is labelled RFOL and enabled. Its encoder callback
   at `0x400bc64e` points to the module; its formatter prints OFF/T1–T8.
   The drawer detour at `0x40036674` reads RFOL from the selected native Part.
