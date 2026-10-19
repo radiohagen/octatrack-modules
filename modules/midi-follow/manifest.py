@@ -4,7 +4,7 @@ from remix.schema import Category, Claims, Detour, Gate, Kind, Linked, Module, P
 
 ROOT = Path(__file__).resolve().parent
 
-def harmony_inc(modules):
+def harmony_inc(modules, remix=None):
     return ('.set HAVE_HARMONY,1\n' if 'MIDI HARMONY' in modules else '') + ('.set HAVE_SCALES,1\n' if 'MIDI SCALES' in modules else '') + ('.set HAVE_LOOPBACK,1\n' if 'MIDI LOOPBACK' in modules else '')
 
 

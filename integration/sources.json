@@ -82,7 +82,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-follow/manifest.py",
       "sha256": "808bfa85b9c5a366c455bff56f5e38d6e625243348a260b3fc8211c5f8ac24d6",
-      "published_sha256": "5d861b7c8122f3245aaceb050c627270d215e4dbdbaa79f008eb3d295ed19b26",
+      "published_sha256": "2b711dc2f09907c33f9bc2bcf07c1c05fbbb387e8e0a3e06ec04331c7135fc00",
       "source_mode": "100644",
       "migration_note": "Operational author URL updated; original author name/credit preserved."
     },
