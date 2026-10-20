@@ -234,7 +234,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-harmony/manifest.py",
       "sha256": "8691286ad370961aafba521e00a070797d2b70f257dddea18eb4874f70893097",
-      "published_sha256": "8c0df86b20cc470d70991a8623b7ffebc686b7e2c11428404a77392ac1894cb0",
+      "published_sha256": "75860888f3334a786f7a925b64b88b570a64c4a9a588890a5fc96c2d887df621",
       "source_mode": "100644",
       "migration_note": "Operational author URL updated; original author name/credit preserved.",
       "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"

@@ -2,7 +2,7 @@
 from remix.schema import Store, Category, Claims, Detour, Gate, Kind, Linked, Module, Proof, Poke, SymbolRef
 
 
-def follow_inc(modules):
+def follow_inc(modules, remix=None):
     return (('.set HAVE_FOLLOW,1\n' if 'MIDI FOLLOW' in modules else '') +
             ('.set HAVE_SCALES,1\n' if 'MIDI SCALES' in modules else '') +
             ('.set HAVE_PLOCKS_BRIDGE,1\n' if 'HARMONY PLOCKS' in modules else ''))
@@ -14,6 +14,7 @@ MODULE = Module(
     author_url='https://github.com/radiohagen/octatrack-modules', proof=Proof.PORT,
     proof_note='',
     doc='Scale-degree roots, generated chords and CHORD PLAY using native ARP KEY; optional MIDI Follow.',
+    conflicts=(("EUCLID", "shared transport start/resume hooks need a composition bridge"),),
     requires=('MIDI PART STATE','STORE','MIDI SRAM'),
     linked=(Linked('chordpart', 'modules/midi-harmony/chord-part.s', dram=True),
             Linked('harmonytransport', 'modules/midi-harmony/transport.s', dram=True),
@@ -38,12 +39,12 @@ MODULE = Module(
             Linked('degreecodec', 'modules/midi-harmony/codec.s', dram=True),
             Linked('degreeroots', 'modules/midi-harmony/roots.s', dram=True),
             Linked('degreeaccess', 'modules/midi-harmony/part-access.s', dram=True,
-                   include=lambda modules: '.set HD_FOLLOW,' + str(int('MIDI FOLLOW' in modules)) +
+                   include=lambda modules, remix=None: '.set HD_FOLLOW,' + str(int('MIDI FOLLOW' in modules)) +
                    '\n.set HD_SCALES,' + str(int('MIDI SCALES' in modules)) +
                    '\n.set HD_SCENES,' + str(int('MIDI SCENES' in modules)) + '\n'),
             Linked('degreescenes', 'modules/midi-harmony/scenes.s', dram=True),
             Linked('degreesceneaccess', 'modules/midi-harmony/scene-access.s', dram=True,
-                   include=lambda modules: '.set HD_SCENES,' + str(int('MIDI SCENES' in modules)) + '\n'),
+                   include=lambda modules, remix=None: '.set HD_SCENES,' + str(int('MIDI SCENES' in modules)) + '\n'),
             Linked('degreecore', 'modules/midi-harmony/core.s', dram=True),
             Linked('degreepacked', 'modules/midi-harmony/packed.s', dram=True),
             Linked('degreestorage', 'modules/midi-harmony/storage.s', dram=True),
