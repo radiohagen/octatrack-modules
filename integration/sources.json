@@ -75,7 +75,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-follow/README.md",
       "sha256": "b984d044ef4eb3bec749dd2752d07d004c137dc95d51cab13aca4bf8aa5e4b2c",
-      "published_sha256": "ae5f4cec4ad9ea89794efef062a70b3437a86d9ecb1edea1715da863d2d9605e",
+      "published_sha256": "841196aefa1bc99aeacbbf7ff33e1f11c1ba338a19924a84a6c19bdc8b02de75",
       "source_mode": "100644"
     },
     "modules/midi-follow/manifest.py": {
@@ -580,7 +580,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "remixes/test/midi-follow/README.md",
       "sha256": "89656abfdb4588fc8000b9965d84f19e0b5b57ee1dd105a5d67fbe42c8fb286d",
-      "published_sha256": "23b690cce03f22080ca8af0592d5da1917371ac27d12976452a6018fac42e960",
+      "published_sha256": "ad0b3be5e7a09f174d0257d67f0cbfc921e43136b0380c9b31c9573c01c20ce2",
       "source_mode": "100644"
     },
     "remixes/test/midi-follow/remix.py": {
