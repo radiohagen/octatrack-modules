@@ -60,16 +60,33 @@ int ss_fill(uint32_t track, uint8_t *state, const uint16_t *fp,
     };
     int16_t audio[32];
     ss_render(&ss_voices[track], &params, audio, n);
-    int32_t gain = *(uint16_t *)(state+38)*32768;
-    int32_t step = ((int32_t)*(uint32_t *)(state+24)*32768-gain)/16;
+    /* A held AMP level needs no per-sample ramp arithmetic. */
+    uint32_t previous = *(uint16_t *)(state+38);
+    if (*(uint32_t *)(state+24) == previous) {
+        int32_t g = previous > 32768 ? 32768 : previous;
+        if (g == 32768) {
+            for (uint32_t i = 0; i < n; ++i)
+                out[2*i] = out[2*i+1] = audio[i]*65536;
+        } else {
+            for (uint32_t i = 0; i < n; ++i)
+                out[2*i] = out[2*i+1] = ((audio[i]*g) >> 15)*65536;
+        }
+        ss_samples[track] += n;
+        return 1;
+    }
+    /* Four fractional bits represent every step of the native 16-sample
+     * ramp exactly. Q15 had redundant precision and could overflow on a
+     * 32-sample maximum attack; Q4 also removes two control multiplies. */
+    int32_t gain = *(uint16_t *)(state+38)*16;
+    int32_t step = (int32_t)*(uint32_t *)(state+24) - *(uint16_t *)(state+38);
     for (uint32_t i = 0; i < n; ++i) {
         gain += step;
-        int32_t g = gain > 0 ? gain/32768 : 0;
+        int32_t g = gain > 0 ? gain/16 : 0;
         if (g > 32768) g = 32768;
         int32_t value = ((audio[i]*g) >> 15)*65536;
         out[2*i] = out[2*i+1] = value;
     }
-    *(uint16_t *)(state+38) = (uint16_t)(gain > 0 ? gain/32768 : 0);
+    *(uint16_t *)(state+38) = (uint16_t)(gain > 0 ? gain/16 : 0);
     ss_samples[track] += n;
     return 1;
 }

@@ -21,6 +21,57 @@ COUNTS = (0, 1, 3, 16, 32, 65)
 PHASES = (0xfffffff0,0x12345678,0x87654321,0x7fffffff,0x80000000,0xabcdef01,0x3210fedc,0x11223344)
 
 
+
+def verify_adapter(uc, call, sym):
+    """Check native stereo output, AMP ramp, counters and buffer bounds."""
+    levels = ((0,0),(32768,32768),(12345,12345),(0,32768),
+              (32768,0),(12345,23456),(65535,0),(40000,40000))
+    counts = (0,1,3,16,32)
+    source = '#include <stdio.h>\n#include "modules/supersaw/adapter.c"\nint main(void) {\n'
+    source += 'uint32_t state[32]; int32_t out[64]; uint16_t fp[6]={16384,24576,28160,16384,10240,7680};\n'
+    for previous,target in levels:
+        for n in counts:
+            source += 'ss_init(&ss_voices[0]);ss_active[0]=1;ss_samples[0]=0;\n'
+            for _ in range(2):
+                source += 'for(unsigned i=0;i<32;++i)state[i]=0;state[3]=21426141;'
+                source += f'state[6]={target};*(uint16_t *)((uint8_t *)state+38)={previous};'
+                source += f'ss_fill(0,(uint8_t *)state,fp,out,{n});fwrite(out,4,{2*n},stdout);'
+                source += '{uint32_t tail[2]={*(uint16_t *)((uint8_t *)state+38),ss_samples[0]};fwrite(tail,4,2,stdout);}'
+    source += 'return 0;}\n'
+    with tempfile.TemporaryDirectory() as tmp:
+        c,exe=Path(tmp)/'adapter.c',Path(tmp)/'adapter'
+        c.write_text(source)
+        subprocess.run(['cc','-O2','-fsanitize=address,undefined','-I',str(ROOT),str(c),'-o',str(exe)],check=True)
+        raw=subprocess.check_output([str(exe)])
+        expected=struct.unpack(f'={len(raw)//4}I',raw)
+    actual=[]; costs=[]
+    for previous,target in levels:
+        for n in counts:
+            call('ss_init',sym['ss_voices'])
+            uc.mem_write(sym['ss_active'],b'\x01'+bytes(7))
+            uc.mem_write(sym['ss_samples'],bytes(32))
+            iterations=[]
+            for _ in range(2):
+                state=bytearray(128)
+                struct.pack_into('>I',state,12,21426141)
+                struct.pack_into('>I',state,24,target)
+                struct.pack_into('>H',state,38,previous)
+                uc.mem_write(0x24000,bytes(state))
+                uc.mem_write(0x25000,struct.pack('>6H',16384,24576,28160,16384,10240,7680))
+                uc.mem_write(0x26000,bytes([0xa5])*272)
+                iterations.append(call('ss_fill',0,0x24000,0x25000,0x26000,n))
+                actual.extend(struct.unpack(f'>{2*n}I',bytes(uc.mem_read(0x26000,n*8))))
+                actual.append(int.from_bytes(uc.mem_read(0x24000+38,2),'big'))
+                actual.append(int.from_bytes(uc.mem_read(sym['ss_samples'],4),'big'))
+                assert bytes(uc.mem_read(0x26000+n*8,272-n*8))==bytes([0xa5])*(272-n*8), 'output overrun'
+            if n==16:
+                limit=1350 if previous==target else 1530
+                assert iterations[1]<=limit, ('adapter instruction regression',previous,target,iterations,limit)
+            costs.append(dict(previous=previous,target=target,samples=n,cold_instructions=iterations[0],warm_instructions=iterations[1]))
+    assert tuple(actual)==expected, 'adapter output or envelope differs from host'
+    return dict(exact_output_values=2*sum(counts)*len(levels)*2,costs=costs)
+
+
 def main():
     runtime = ROOT/'out/platform/runtime'
     out = ROOT/'out/supersaw-cf'
@@ -84,8 +135,9 @@ def main():
                 assert warm <= limit, ('render instruction regression',case,warm,limit)
             costs.append(dict(params=case,samples=n,cold_instructions=cold,warm_instructions=warm))
     assert tuple(actual)==expected, [(i,a,b) for i,(a,b) in enumerate(zip(actual,expected)) if a!=b][:10]
+    adapter=verify_adapter(uc,call,sym)
     (out/'receipt.json').write_text(json.dumps(dict(image_sha256=hashlib.sha256((ROOT/'out/mainos_bus.bin').read_bytes()).hexdigest(),
-        exact_samples=len(actual),initialized_bytes=8+32+32+size+402,costs=costs,hardware_tested=False),indent=2)+'\n')
-    print(f'[ok] linked ColdFire: initialized state, {len(actual)} exact host samples, split-call sizes, instruction budgets, phase wrap and extreme pitches')
+        exact_samples=len(actual),initialized_bytes=8+32+32+size+402,costs=costs,adapter=adapter,hardware_tested=False),indent=2)+'\n')
+    print(f'[ok] linked ColdFire: initialized state, {len(actual)} exact host samples, split-call sizes, native AMP/stereo adapter, instruction budgets, phase wrap and extreme pitches')
 
 if __name__=='__main__': main()

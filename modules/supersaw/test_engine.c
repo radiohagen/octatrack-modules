@@ -41,6 +41,46 @@ static void reference(struct ss_voice *v, const struct ss_params *p,
     }
 }
 
+/* The old Q15 envelope is an independent, wide-arithmetic oracle. In
+ * particular, a 32-sample 0 -> full attack must not overflow its accumulator.
+ * Native frames use at most 16; the adapter also accepts a 32-sample buffer. */
+static void check_gain(void) {
+    const uint16_t levels[][2] = {{0,0},{32768,32768},{12345,12345},
+        {0,32768},{32768,0},{12345,23456},{65535,0},{40000,40000}};
+    for (unsigned k=0; k<sizeof(levels)/sizeof(levels[0]); ++k) {
+        for (unsigned n=0; n<=32; ++n) {
+            struct ss_voice oracle;
+            ss_init(&oracle); ss_init(&ss_voices[7]);
+            ss_active[7]=1; ss_samples[7]=0;
+            struct ss_params p={21426141,96,110,40,30};
+            uint16_t fp[6]={0x4000,96<<8,110<<8,0x4000,40<<8,30<<8};
+            for (unsigned repeat=0; repeat<3; ++repeat) {
+                uint32_t state[32]={0};
+                state[3]=p.increment; state[6]=levels[k][1];
+                *(uint16_t *)((uint8_t *)state+38)=levels[k][0];
+                int16_t source[32]; int32_t output[68];
+                for (unsigned i=0;i<68;++i) output[i]=123456;
+                reference(&oracle,&p,source,n);
+                assert(ss_fill(7,(uint8_t *)state,fp,output,n));
+                int64_t gain=(int64_t)levels[k][0]*32768;
+                int64_t step=((int64_t)levels[k][1]*32768-gain)/16;
+                for (unsigned i=0;i<n;++i) {
+                    gain+=step;
+                    int64_t g=gain>0 ? gain/32768 : 0;
+                    if (g>32768) g=32768;
+                    int32_t expected=(int32_t)(((source[i]*g)>>15)*65536);
+                    assert(output[2*i]==expected && output[2*i+1]==expected);
+                }
+                for (unsigned i=2*n;i<68;++i) assert(output[i]==123456);
+                assert(*(uint16_t *)((uint8_t *)state+38)==
+                       (uint16_t)(gain>0 ? gain/32768 : 0));
+                assert(!memcmp(&oracle,&ss_voices[7],sizeof(oracle)));
+                assert(ss_samples[7]==n*(repeat+1));
+            }
+        }
+    }
+}
+
 int main(int argc, char **argv) {
     assert(ss_marker("../AUDIO/FMSYNTH-SUPERSAW.wav"));
     assert(ss_marker("FMSYNTH-SUPERSAW-pad.wav"));
@@ -126,6 +166,7 @@ int main(int argc, char **argv) {
         assert(!memcmp(whole, split, n*sizeof(*whole)));
         assert(!memcmp(&a, &b, sizeof(a)));
     }
+    check_gain();
     if (argc == 2) {
         FILE *f = fopen(argv[1], "wb"); assert(f);
         p = (struct ss_params){21426141,0,0,0,0};

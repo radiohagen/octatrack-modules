@@ -51,8 +51,13 @@ emulator checks cover dual Supersaw and Supersaw/FM, source release, sequencer
 playback, both DSP output paths, and two occupied stock effect slots. Four- and
 eight-track stress probes starved the emulator main task at the frame-500 UI
 call; their failing evidence is retained. There is no automatic voice stealing
-or imposed track cap. S2 full-firmware qualification is pending; its linked
-arithmetic and source gates pass. Physical CPU headroom, audio and controls
+or imposed track cap. S2 was superseded before its queued audio tests started. S3 adds an exact
+Q4 AMP ramp (the former Q15 accumulator overflowed on a 32-sample full attack)
+and a held-level fast path. At steady full gain, the complete rich-patch adapter
+uses 1,289 warm instructions instead of S2's 1,485; a ramp uses 1,467 instead
+of 1,485. A wide-arithmetic envelope oracle covers every call length 0–32,
+attack, release, held/intermediate/clamped levels and output bounds.
+S3 full-firmware qualification is pending; source and linked ColdFire checks pass. Physical CPU headroom, audio and controls
 remain unverified.
 
 ## Verification
