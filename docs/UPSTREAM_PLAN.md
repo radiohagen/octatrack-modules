@@ -103,17 +103,17 @@ author history. The remaining feature stages above are planned boundaries,
 not yet submission-ready branches. Prepare them sequentially after predecessor
 review; validate their adapters and exact combinations before opening PRs.
 
-## MIDI Follow preparation, 19 October 2026
+## MIDI Follow preparation, 20 October 2026
 
 The approved Follow source is published on `codex/midi-follow-voices` at
-`93a420d3255db80745ea56847071ff5db6d258dc`. Source HARM OFF supplies N1–4;
+`e151238a6aef385c81083440afa1ffb255615b8d`. Source HARM OFF supplies N1–4;
 source HARM NOTE/CHORD supplies only its resolved degree:oct root. Follower
 HARM NOTE/CHORD generates its own voices. Harmony absent behaves as OFF.
 
-The Octabam candidate is published at `a1bf33ba24eafc0e6db93b7e6ef2cf417e67dce7`
+The Octabam candidate is published at `63caee8445f1bede786ef1666d109b9eebea578a`
 on [codex/pr/midi-follow-voices](https://github.com/radiohagen/octabam/tree/codex/pr/midi-follow-voices),
-based on upstream `bf3e265704ea0068a1cb6dbed2b67157deb8b64e`. The separate
-include-callback compatibility prerequisite `e2f82db5` is published on
+based on upstream `8250be0c23ca0a0a953cb7e5721e3bdb98dadfe5`. The separate
+include-callback compatibility prerequisite `f4f208cd` is published on
 [codex/pr/midi-include-abi](https://github.com/radiohagen/octabam/tree/codex/pr/midi-include-abi).
 Remote commit IDs were verified after publication. No upstream PR is submitted. Exact checks and their snapshot are in
 [`integration/review-branches.json`](../integration/review-branches.json).
@@ -128,3 +128,13 @@ The Harmony companion and full-bus interaction checks are recorded in
 [the scoped validation receipt](../integration/harmony-follow-validation.json).
 The tested Octabam composition is published at `385f9d20`. Its larger package
 base is separate from the current-upstream standalone Follow PR stack.
+
+The 20 October rebase retains the identical standalone Follow firmware image.
+No new Follow engine or verifier changes were missing from the earlier pin.
+The source update states measured emulator behavior and unverified device
+behavior in Follow's README. Harmony bridge implementation documentation stays
+with Harmony and its bridge; Follow describes its own source-note behavior.
+The upstream PR descriptions now follow every section of the current template.
+Local reach, documentation and strict site checks passed; a hosted CI run link
+can only be added after PR creation. The callback prerequisite also passed its
+own independent reach run. No upstream PR has been opened.
