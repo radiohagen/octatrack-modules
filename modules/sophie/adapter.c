@@ -13,7 +13,7 @@ struct sf_voice {
     struct ds_params params;
     int32_t block[32];
     int32_t left, right;
-    uint32_t pos, fraction;
+    uint32_t pos, fraction, pitch_inc, resample_step;
     uint8_t primed, trigger;
 };
 static struct sf_voice sf_voices[8];
@@ -50,6 +50,7 @@ void sf_begin(uint32_t track) {
     v->primed = 0;
     v->pos = 32;
     v->fraction = 0;
+    v->pitch_inc = 0;
 }
 
 static int32_t sf_next(struct sf_voice *v) {
@@ -76,10 +77,25 @@ int sf_fill(uint32_t track, uint8_t *state, const uint16_t *fp,
     }
     struct sf_voice *v = &sf_voices[track];
     uint32_t inc = *(uint32_t *)(state+12);
-    uint32_t phase = (inc >> 8)*147u/40960u;
+    uint32_t raw_phase = (inc >> 8)*147u/40960u;
+    uint32_t phase = raw_phase;
     if (phase < 8) phase = 8;
     if (phase > 24576) phase = 24576;
     v->params.phase_inc = (uint16_t)phase;
+    /* The upstream oscillator accepts only an integer phase increment.
+     * At low notes that rounds many adjacent FINE values to the same pitch.
+     * Keep that oscillator unchanged and carry the lost fraction in the
+     * 48 kHz -> 44.1 kHz source step. 147 * 65536 is one source frame. */
+    if (inc != v->pitch_inc) {
+        v->pitch_inc = inc;
+        if (raw_phase < 8 || raw_phase > 24576) {
+            v->resample_step = 160u * 65536u;
+        } else {
+            /* Split the quotient so ColdFire needs no 64-bit divide. */
+            uint32_t whole = inc / phase, rem = inc % phase;
+            v->resample_step = whole * 147u + (rem * 147u + phase / 2u) / phase;
+        }
+    }
     v->params.model = 0;  /* FUSE: the first proof-of-concept model. */
     v->params.color = (uint8_t)(fp[1] >> 8) & 127;
     v->params.metal = (uint8_t)(fp[2] >> 8) & 127;
@@ -93,15 +109,20 @@ int sf_fill(uint32_t track, uint8_t *state, const uint16_t *fp,
         v->left = sf_next(v); v->right = sf_next(v); v->primed = 1;
     }
     for (uint32_t i=0; i<n; ++i) {
-        int32_t sample = v->left+(v->right-v->left)*(int32_t)v->fraction/147;
+        int32_t sample = v->left+(v->right-v->left)*(int32_t)(v->fraction >> 16)/147;
         gain += step;
         int32_t g = gain > 0 ? gain/32768 : 0;
         if (g > 32768) g=32768;
-        int32_t value = (sample*g/32768)*65536;
+        /* Upstream's fixed conditioning peaks at about -12 dBFS for FUSE.
+         * Restore 6 dB before the normal Octatrack AMP/mixer path. */
+        int32_t value = (sample*g/32768)*2;
+        if (value > 32767) value = 32767;
+        if (value < -32768) value = -32768;
+        value *= 65536;
         out[2*i] = out[2*i+1] = value;
-        v->fraction += 160;
-        while (v->fraction >= 147) {
-            v->fraction -= 147;
+        v->fraction += v->resample_step;
+        while (v->fraction >= 147u * 65536u) {
+            v->fraction -= 147u * 65536u;
             v->left = v->right; v->right = sf_next(v);
         }
     }

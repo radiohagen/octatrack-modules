@@ -7,6 +7,7 @@ one marker track to Sophie. Original projects/cards are never written.
 import argparse
 import hashlib
 import json
+import math
 from pathlib import Path
 import re
 import struct
@@ -17,10 +18,11 @@ ROOT=fm.ROOT
 ORIGINAL_FIXTURE=fm.fixture
 SOPHIE_TRACK=1
 METAL=0
+FINE=0
 
 
-def fixture(source, work, sequenced, voices, loopback=False):
-    ORIGINAL_FIXTURE(source,work,sequenced,voices,loopback)
+def fixture(source, work, sequenced, voices, loopback=False, harmony=True):
+    ORIGINAL_FIXTURE(source,work,sequenced,voices,loopback,harmony)
     project=work/'project'
     for path in project.glob('project.*'):
         raw=path.read_bytes()
@@ -39,7 +41,7 @@ def fixture(source, work, sequenced, voices, loopback=False):
                 base=fm.otp.PART_BASE+part*fm.otp.PART_STRIDE+9
                 data[base+0x2ca+5*SOPHIE_TRACK+1]=1
                 at=base+0x2a+30*SOPHIE_TRACK+6
-                data[at:at+6]=bytes((64,50,METAL,64,0,64))
+                data[at:at+6]=bytes((64,50,METAL,64+FINE,0,64))
         fm.otp._bank_write(project,int(bank.stem[4:]),edit,guard=False)
     card,_=fm.emu_card.stage_project(project,'OCTABAM','SYNTH',tree=work/'tree-sophie',audio=[
         f'{fm.OUT}/FMSYNTH.wav:AUDIO/FMSYNTH.wav',
@@ -48,14 +50,17 @@ def fixture(source, work, sequenced, voices, loopback=False):
 
 
 def main():
-    global SOPHIE_TRACK,METAL
+    global SOPHIE_TRACK,METAL,FINE
     ap=argparse.ArgumentParser(description=__doc__)
     ap.add_argument('--project',required=True,type=Path)
     ap.add_argument('--track',type=int,choices=(2,6),default=2)
     ap.add_argument('--metal',type=int,default=0)
+    ap.add_argument('--fine',type=int,default=0,choices=range(-64,64),metavar='CENTS')
     ap.add_argument('--case',choices=('sequence','midi-mono','loopback'),default='midi-mono')
-    args=ap.parse_args();SOPHIE_TRACK=args.track-1;METAL=args.metal
-    fm.OUT=ROOT/f'out/sophie-port/t{args.track}-{args.case}-metal{METAL}'
+    ap.add_argument('--no-harmony',action='store_true')
+    args=ap.parse_args();SOPHIE_TRACK=args.track-1;METAL=args.metal;FINE=args.fine
+    fine_suffix=f'-fine{FINE}' if FINE else ''
+    fm.OUT=ROOT/f'out/sophie-port/t{args.track}-{args.case}-metal{METAL}{fine_suffix}'
     fm.OUT.mkdir(parents=True,exist_ok=True);fm.fixture=fixture
     (fm.OUT/'candidate.bin').write_bytes((ROOT/'out/mainos_bus.bin').read_bytes())
     raw=subprocess.check_output(['m68k-elf-nm',str(ROOT/'out/platform/runtime/runtime.elf')],text=True)
@@ -66,15 +71,20 @@ def main():
     # release, both bus hosts, routing IDs and concurrent Harmony.
     case_dir=fm.OUT/args.case
     result=fm.run_case(args.project,args.case,sym,sequenced=args.case=='sequence',
-                       check_pitch=not METAL,extra_dumps=(
+                       harmony=not args.no_harmony,
+                       check_pitch=not METAL and not FINE,extra_dumps=(
                          f'{sym["sf_samples"]:#x},32={case_dir}/sophie-samples.bin',
                          f'{sym["sf_unsupported"]:#x},32={case_dir}/sophie-unsupported.bin'))
     counts=struct.unpack('>8I',(case_dir/'sophie-samples.bin').read_bytes())
     assert counts[SOPHIE_TRACK]>16000, ('Sophie renderer not exercised',counts)
     assert all(n==0 for t,n in enumerate(counts) if t!=SOPHIE_TRACK), ('Sophie leaked onto ordinary tracks',counts)
     assert (case_dir/'sophie-unsupported.bin').read_bytes()==bytes(32)
+    if not METAL and FINE and args.case=='midi-mono':
+        measured=result['audio'][f'T{args.track}']['pitch_hz']
+        expected=261.6256*math.pow(2,FINE/1200)
+        assert abs(measured-expected)<2, ('Sophie FINE pitch',FINE,measured,expected)
     result['sophie_samples_per_track']=counts
-    result.update(sophie_track=args.track,metal=METAL,hardware_tested=False,
+    result.update(sophie_track=args.track,metal=METAL,fine_cents=FINE,hardware_tested=False,
                   image_sha256=hashlib.sha256((fm.OUT/'candidate.bin').read_bytes()).hexdigest())
     (fm.OUT/'receipt.json').write_text(json.dumps(result,indent=2)+'\n')
     print('[ok] Sophie alongside FM and full standard remix',args.track,args.case)

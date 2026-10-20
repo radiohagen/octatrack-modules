@@ -16,7 +16,9 @@ def main():
                     ('out/platform/layout.json','layout.json')):
         shutil.copy2(ROOT/src,frozen/dst)
     for args in (('--track','2'),('--track','6','--case','sequence'),
-                 ('--track','2','--case','loopback','--metal','96')):
+                 ('--track','2','--case','loopback','--metal','96'),
+                 ('--track','2','--fine','-32','--no-harmony'),
+                 ('--track','2','--fine','32','--no-harmony')):
         subprocess.run([sys.executable,'tools/verify/verify_sophie_port.py','--project',project,*args],cwd=ROOT,check=True)
     subprocess.run([sys.executable,'tools/verify/verify_sophie_page.py'],cwd=ROOT,check=True)
 if __name__=='__main__':main()
