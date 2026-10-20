@@ -75,7 +75,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-follow/README.md",
       "sha256": "b984d044ef4eb3bec749dd2752d07d004c137dc95d51cab13aca4bf8aa5e4b2c",
-      "published_sha256": "79a5e5214c73e70799dfc1849d2e1ce6809108fb8a3da68ea2295c02e604cb94",
+      "published_sha256": "ae5f4cec4ad9ea89794efef062a70b3437a86d9ecb1edea1715da863d2d9605e",
       "source_mode": "100644"
     },
     "modules/midi-follow/manifest.py": {
@@ -1282,7 +1282,7 @@
     "modules/midi-follow/DEVELOPMENT.md": {
       "path": "modules/midi-follow/DEVELOPMENT.md",
       "sha256": "b984d044ef4eb3bec749dd2752d07d004c137dc95d51cab13aca4bf8aa5e4b2c",
-      "published_sha256": "f09f1ad5ff3f74427d02fc803ee659ffe6edb0d1041b5975083d2564a99aac41",
+      "published_sha256": "123d3a0d3ffc6b40d9411509facf34d19856c8540c5215533d7a7eab5b8a6ee0",
       "source_mode": "100644",
       "origin": "Split from adjacent README in this repository; historical evidence is retained in the text."
     },
@@ -1357,7 +1357,7 @@
     "remixes/test/midi-follow/DEVELOPMENT.md": {
       "path": "remixes/test/midi-follow/DEVELOPMENT.md",
       "sha256": "89656abfdb4588fc8000b9965d84f19e0b5b57ee1dd105a5d67fbe42c8fb286d",
-      "published_sha256": "4155c65a25e83c6fdf66acb82aa2f67fe2f92e0c0249286e090f133e6d264928",
+      "published_sha256": "c0bed2b9a8d9b3d2eb2707c0cdfd63795467f47fb8171275b72d206c63836fc3",
       "source_mode": "100644",
       "origin": "Split from adjacent README in this repository; historical evidence is retained in the text."
     },
