@@ -13,12 +13,15 @@ from remix import registry
 
 
 def main():
+    # Earlier image-stage gates may build their own reference remix. Restore
+    # this carrier before reading its image and linked symbols.
+    remix = registry.remix(os.environ.get('REMIX','supersaw'))
+    subprocess.run(['make','bus',f'REMIX={remix.name}'],cwd=ROOT,check=True)
     subprocess.run([sys.executable,'tools/verify/verify_supersaw_cf.py'],cwd=ROOT,check=True)
     project = os.environ.get('OT_PROJECT')
     if not project:
         print('[SKIP] Supersaw full firmware: set OT_PROJECT to a local fixture')
         return
-    remix = registry.remix(os.environ.get('REMIX','supersaw'))
     modules = set(remix.modules)
     pair = 'SPECTRUM,CHARACTER' if {'SPECTRUM','CHARACTER'} <= modules else 'FILTER,DELAY'
     assert set(pair.split(',')) <= modules, 'qualify a fixture using the selected effects'
