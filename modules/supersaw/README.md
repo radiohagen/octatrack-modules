@@ -39,22 +39,29 @@ all 1,210 initialized bytes. The imported version left those objects uninitializ
 Equal-weight side oscillators are summed before multiplication, preserving every
 sample and phase bit. Keeping preparation out of line prevents GCC from moving
 cached control products ahead of their cache guard. Isolated ColdFire counts for
-16 rich-patch samples improve from 1,378 to 1,282 warm instructions; the neutral
-patch changes from 599 to 623. These are instruction counts, not hardware cycles.
+16 rich-patch samples improved from 1,378 in the import to 1,282 in S1. The
+S2 loop seeds the side sum from its first lane, unrolls accumulation four samples
+at a time, and interpolates directly into the destination. It preserves output
+and voice-state bits, including odd call boundaries. Warm counts are now 1,089
+for the rich patch and 473 for neutral (S1: 623). These are instruction counts,
+not hardware cycles. The linked gate guards against instruction regressions.
 
-**Qualification is limited to two simultaneous synth tracks.** Current full-firmware
+**S1 qualification is limited to two simultaneous synth tracks.** Its full-firmware
 emulator checks cover dual Supersaw and Supersaw/FM, source release, sequencer
 playback, both DSP output paths, and two occupied stock effect slots. Four- and
 eight-track stress probes starved the emulator main task at the frame-500 UI
 call; their failing evidence is retained. There is no automatic voice stealing
-or imposed track cap. Physical CPU headroom, audio and controls remain unverified.
+or imposed track cap. S2 full-firmware qualification is pending; its linked
+arithmetic and source gates pass. Physical CPU headroom, audio and controls
+remain unverified.
 
 ## Verification
 
 `python3 modules/supersaw/generate.py --check` reproduces tables and assembly.
 The host gate uses ASan/UBSan, an independent Fourier reference and 10,000 changing
 control blocks against a scalar arithmetic oracle. The linked ColdFire gate
-checks boot initialization and exact samples at extreme pitches and phase wraps.
+checks boot initialization, 702 exact samples, empty/odd/chunked calls, extreme
+pitches, phase wraps and bounded warm instruction counts.
 The image gate runs disposable project copies and checks note-off at the source,
 separately from effect tails. It also resolves native Supersaw/FM descriptors.
 

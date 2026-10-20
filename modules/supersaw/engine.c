@@ -57,7 +57,10 @@ static __attribute__((noinline)) void ss_prepare(struct ss_voice *voice, const s
     voice->sub_gain = sub_gain;
 }
 static void ss_core_render(struct ss_voice *voice, const struct ss_params *params,
-               int16_t *output, uint32_t count) {
+               int16_t *output, uint32_t output_count) {
+    /* ss_render bounds each chunk to 32 output / 16 source samples. */
+    uint32_t count = (output_count + 1) / 2;
+    uint32_t pairs = output_count / 2;
     ss_prepare(voice, params);
     uint32_t base = voice->base;
     const int16_t *table = ss_saws[voice->bank];
@@ -67,51 +70,67 @@ static void ss_core_render(struct ss_voice *voice, const struct ss_params *param
     /* Keep one oscillator's phase, increment and weight in registers. The
      * bounded accumulator avoids spilling eight live oscillator lanes on
      * every sample. Phase continuity is independent of external call splitting. */
-    while (count) {
-        uint32_t block = count > 32 ? 32 : count;
-        int32_t sum[32];
-        for (uint32_t n = 0; n < block; ++n) sum[n] = 0;
-        /* All six side oscillators have the same weight. Sum their raw
-         * samples first and multiply once: integer distributivity preserves
-         * every output bit. Six table values fit in signed 32 bits. */
-        for (unsigned lane = 0; lane < 7; ++lane) {
+    int32_t sum[16];
+    if (side_weight) {
+        /* Seed from the first side oscillator instead of clearing a scratch
+         * buffer and then adding that same oscillator. */
+        uint32_t phase = voice->phase[0], step = voice->increments[0];
+        for (uint32_t n = 0; n < count; ++n) {
+            sum[n] = lookup(table, phase);
+            phase += step;
+        }
+        voice->phase[0] = phase;
+        for (unsigned lane = 1; lane < 7; ++lane) {
             if (lane == 3) continue;
-            uint32_t phase = voice->phase[lane];
-            uint32_t step = voice->increments[lane];
-            if (side_weight) {
-                for (uint32_t n = 0; n < block; ++n) {
-                    sum[n] += lookup(table, phase);
-                    phase += step;
-                }
-            } else {
-                phase += step * block;
+            phase = voice->phase[lane];
+            step = voice->increments[lane];
+            uint32_t n = 0;
+            /* Four at a time reduces the ColdFire loop overhead. The tail
+             * keeps odd and short calls bit-identical to the scalar path. */
+            for (; n + 4 <= count; n += 4) {
+                sum[n+0] += lookup(table, phase); phase += step;
+                sum[n+1] += lookup(table, phase); phase += step;
+                sum[n+2] += lookup(table, phase); phase += step;
+                sum[n+3] += lookup(table, phase); phase += step;
+            }
+            for (; n < count; ++n) {
+                sum[n] += lookup(table, phase); phase += step;
             }
             voice->phase[lane] = phase;
         }
-        uint32_t centre_phase = voice->phase[3], sub_phase = voice->sub_phase;
-        for (uint32_t n = 0; n < block; ++n) {
-            int32_t value = sum[n] * side_weight;
-            value += lookup(table, centre_phase) * centre_weight;
-            centre_phase += voice->increments[3];
-            if (sub_gain) value += lookup(ss_sine, sub_phase) * sub_gain;
-            sub_phase += base / 2;
-            int32_t sample = value >> 15;
-            /* Symmetric bounded cubic drive. Zero bypasses it exactly. */
-            if (drive) {
-                int32_t x = (sample * drive_gain) >> 8;
-                if (x > 32767) x = 32767;
-                if (x < -32767) x = -32767;
-                int32_t square = (x * x) >> 15;
-                int32_t cube = (square * x) >> 15;
-                sample = x - ((cube * 10923) >> 15);
-            }
-            output[n] = (int16_t)sample;
-        }
-        voice->phase[3] = centre_phase;
-        voice->sub_phase = sub_phase;
-        output += block;
-        count -= block;
+    } else {
+        for (unsigned lane = 0; lane < 7; ++lane)
+            if (lane != 3) voice->phase[lane] += voice->increments[lane] * count;
     }
+    uint32_t centre_phase = voice->phase[3], sub_phase = voice->sub_phase;
+    int32_t previous = voice->last;
+    for (uint32_t n = 0; n < count; ++n) {
+        int32_t value = side_weight ? sum[n] * side_weight : 0;
+        value += lookup(table, centre_phase) * centre_weight;
+        centre_phase += voice->increments[3];
+        if (sub_gain) value += lookup(ss_sine, sub_phase) * sub_gain;
+        sub_phase += base / 2;
+        int32_t sample = value >> 15;
+        /* Symmetric bounded cubic drive. Zero bypasses it exactly. */
+        if (drive) {
+            int32_t x = (sample * drive_gain) >> 8;
+            if (x > 32767) x = 32767;
+            if (x < -32767) x = -32767;
+            int32_t square = (x * x) >> 15;
+            int32_t cube = (square * x) >> 15;
+            sample = x - ((cube * 10923) >> 15);
+        }
+        int32_t current = (int16_t)sample;
+        /* Interpolate directly into the destination: no temporary source
+         * array or second pass. An odd last sample leaves its pair pending. */
+        *output++ = (int16_t)((previous + current) >> 1);
+        if (n < pairs) *output++ = (int16_t)current;
+        else voice->pending = 1;
+        previous = current;
+    }
+    voice->last = (int16_t)previous;
+    voice->phase[3] = centre_phase;
+    voice->sub_phase = sub_phase;
 }
 
 /* Half-rate synthesis leaves headroom for the standard remix. Linear
@@ -128,14 +147,9 @@ void ss_render(struct ss_voice *voice, const struct ss_params *params,
         voice->pending = 0; --count;
     }
     while (count) {
-        uint32_t block = count > 32 ? 16 : (count + 1) / 2;
-        int16_t audio[16];
-        ss_core_render(voice, &core, audio, block);
-        for (uint32_t i = 0; i < block; ++i) {
-            *output++ = (int16_t)(((int32_t)voice->last + audio[i]) >> 1);
-            voice->last = audio[i]; --count;
-            if (count) { *output++ = audio[i]; --count; }
-            else voice->pending = 1;
-        }
+        uint32_t chunk = count > 32 ? 32 : count;
+        ss_core_render(voice, &core, output, chunk);
+        output += chunk;
+        count -= chunk;
     }
 }
