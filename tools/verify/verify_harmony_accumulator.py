@@ -35,6 +35,72 @@ def machine():
     return m
 
 
+def c_minor_follow(m):
+    """Check the generated pool, including Follow's effective KEY and CHRD."""
+    u,s=m.uc,m.sym
+    if 'bf_pitches' not in s:
+        print('[N/A] C minor Follow examples require the combined image',flush=True)
+        return
+    part=BANK+0x8ed80+0x4e2
+    u.mem_write(part+17,b'\x02')       # Source T1 KEY C minor.
+    u.mem_write(part+36+3,b'\x01')    # Follower T2 RFOL T1.
+    u.mem_write(part+36+5,b'\x01')    # Follower HARM NOTE.
+    u.mem_write(part+36+17,b'\x01')   # Its own KEY is C major.
+    assert m.c('hd_scale_c',0,0,1)==320
+    minor={0,2,3,5,7,8,10}
+
+    def generate():
+        m.c('ha_fire_c',0,0,1,0)
+        u.mem_write(m.scratch,b'\x24'*4)
+        assert m.call('mh_generate',1,0,a0=m.scratch)==1
+        notes=tuple(u.mem_read(m.scratch,4))
+        m.c('ha_sounded_c',1)
+        return notes
+
+    count=0
+    for mode in range(3):                 # FIXED, GRAV, SOURCE.
+        u.mem_write(part+36+15,bytes(((mode<<4)|3,)))
+        for amount in (1,2,-1):
+            m.c('ha_bank_reset_c',0)
+            m.c('ha_set_c',0,0,1,0,amount+9 if amount<0 else amount+8)
+            for root in (48,51,55,56,58,52):  # Last root is chromatic E.
+                m.c('ha_runtime_reset_c')
+                m.c('bf_reset_c')
+                u.mem_write(s['bf_pitches'],bytes((root,)))
+                u.mem_write(s['bf_roots'],bytes((root,)))
+                for _ in range(5):
+                    note=generate()[0]
+                    assert note%12 in minor,(mode,amount,root,note)
+                    count+=1
+
+    # The follower uses the source KEY. A C-major or KEY OFF source yields
+    # E natural even when the follower's own KEY says C minor.
+    u.mem_write(part+36+15,b'\x03')
+    u.mem_write(part+36+17,b'\x02')
+    u.mem_write(s['bf_pitches'],b'\x30')
+    u.mem_write(s['bf_roots'],b'\x30')
+    m.c('ha_bank_reset_c',0)
+    m.c('ha_set_c',0,0,1,0,9)
+    for source_key,expected in ((2,(48,50,51,53,55)),
+                                (1,(48,50,52,53,55)),
+                                (0,(48,50,52,53,55))):
+        u.mem_write(part+17,bytes((source_key,)))
+        m.c('ha_runtime_reset_c')
+        assert tuple(generate()[0] for _ in range(5))==expected,source_key
+
+    # Scale-relative TRI stays in C minor. Explicit MAJ intervals retain
+    # their chromatic notes on C and D, while E-flat major fits the scale.
+    u.mem_write(part+17,b'\x02')
+    u.mem_write(part+36+5,b'\x02')
+    for quality,expected in (
+            (0,((48,51,55,48),(50,53,56,50),(51,55,58,51))),
+            (5,((48,52,55,48),(50,54,57,50),(51,55,58,51)))):
+        u.mem_write(s['ch_current']+1,bytes((quality,)))
+        m.c('ha_runtime_reset_c')
+        assert tuple(generate() for _ in range(3))==expected,quality
+    print(f'[ok] C minor Follow: {count} NOTE outputs in scale; source KEY and explicit CHRD behavior',flush=True)
+
+
 def main():
     m=machine();u=m.uc;s=m.sym
     if '--negative-control' in sys.argv:
@@ -247,6 +313,7 @@ def main():
     cleared=bytearray(before);cleared[1]&=0xf0
     assert bytes(u.mem_read(s['ha_lanes'],4736))==cleared
     print('[ok] native track/pattern clipboard bridge carries ACC; step clear is scoped',flush=True)
+    c_minor_follow(m)
     result=dict(boundary_outputs=counts,dense_steps=8192,obsolete_formats_rejected=True,hardware_tested=False)
     out=__import__('pathlib').Path(__file__).resolve().parents[2]/'out/harmony-accumulator'
     out.mkdir(parents=True,exist_ok=True);(out/'linked.json').write_text(json.dumps(result,indent=2)+'\n')

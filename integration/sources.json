@@ -1410,7 +1410,7 @@
       "path": "tools/verify/verify_harmony_accumulator.py",
       "sha256": "9455c182737524a64e52a7210f0bb726e15fe78e58b9ae432a502b2e9413a987",
       "source_mode": "100644",
-      "published_sha256": "2da32ad56dd74aa8454390aff6c9e93217234079cac9f47b351c3160e7982e27",
+      "published_sha256": "b0bd501776dca94c8ce6aea57b83def693a9c6970a1e46f40e63c4d6fffddbf0",
       "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
     },
     "tools/verify/verify_harmony_accumulator_port.py": {
