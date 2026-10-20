@@ -1282,7 +1282,7 @@
     "modules/midi-follow/DEVELOPMENT.md": {
       "path": "modules/midi-follow/DEVELOPMENT.md",
       "sha256": "b984d044ef4eb3bec749dd2752d07d004c137dc95d51cab13aca4bf8aa5e4b2c",
-      "published_sha256": "f09f1ad5ff3f74427d02fc803ee659ffe6edb0d1041b5975083d2564a99aac41",
+      "published_sha256": "d4ab91295ccaaa73ce092188c160cf2fb91e41742df9592eaa8051b5145dc881",
       "source_mode": "100644",
       "origin": "Split from adjacent README in this repository; historical evidence is retained in the text."
     },
