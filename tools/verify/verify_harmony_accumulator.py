@@ -12,7 +12,7 @@ from verify_harmony_degree_files import Files
 from verify_harmony_track_retention import encode, header
 from verify_harmony_degree_packed import oracle
 from verify_harmony_degree_files import fnv
-from unicorn.m68k_const import UC_M68K_REG_D7, UC_M68K_REG_A7, UC_M68K_REG_PC, UC_M68K_REG_D1, UC_M68K_REG_A0, UC_M68K_REG_A1
+from unicorn.m68k_const import UC_M68K_REG_D7, UC_M68K_REG_A7, UC_M68K_REG_PC, UC_M68K_REG_D1, UC_M68K_REG_A0, UC_M68K_REG_A1, UC_M68K_REG_A5
 import harmony_retained as retained
 from verify_harmony_degree_integration import symbols
 
@@ -99,6 +99,41 @@ def c_minor_follow(m):
         m.c('ha_runtime_reset_c')
         assert tuple(generate() for _ in range(3))==expected,quality
     print(f'[ok] C minor Follow: {count} NOTE outputs in scale; source KEY and explicit CHRD behavior',flush=True)
+
+    # A CHORD source may sound a ninth or an explicit chromatic dominant
+    # third. Follow publishes only its logical degree:oct root, so neither
+    # generated voice nor dormant native NOT2-4 may seed a follower slot.
+    if 'bf_latch_extra' not in s:
+        print('[N/A] CHORD-source extension handoff requires the combined image',flush=True)
+        return
+    u.mem_write(part+5,b'\x02')
+    u.mem_write(part+36+17,b'\x01')
+    source_lane=0x47002000
+    u.mem_write(source_lane+0x220,bytes((48,90,6,68,71,76)))
+    u.mem_write(source_lane+0x22c,b'\x40')
+    source_chords={0:(48,51,55,48),2:(48,51,55,62),7:(48,52,55,58)}
+    follower_chords={1:((48,)*4,(50,)*4),
+                     2:((48,51,55,48),(50,53,56,50))}
+    for follower_mode,expected in follower_chords.items():
+        u.mem_write(part+36+5,bytes((follower_mode,)))
+        u.mem_write(s['ch_current']+1,b'\0') # Follower chooses its own TRI.
+        for quality,source_expected in source_chords.items():
+            m.c('ha_bank_reset_c',0)
+            m.c('ha_set_c',0,0,1,0,9) # Follower ACC +1 scale degree.
+            m.c('ha_runtime_reset_c')
+            m.c('bf_reset_c')
+            u.mem_write(s['bf_pitches'],b'\x30')
+            u.mem_write(s['bf_roots'],b'\x30')
+            u.mem_write(s['ch_current'],bytes((quality,)))
+            u.mem_write(m.scratch,b'\x30'*4)
+            assert m.call('mh_generate',0,0,a0=m.scratch)==1
+            assert tuple(u.mem_read(m.scratch,4))==source_expected,quality
+            u.mem_write(s['bf_intervals'],bytes((4,7,12)))
+            m.call('bf_latch_extra',regs={UC_M68K_REG_D7:0,UC_M68K_REG_A5:source_lane})
+            assert bytes(u.mem_read(s['bf_intervals'],3))==b'\x80'*3,quality
+            actual=tuple(generate() for _ in range(2))
+            assert actual==expected,(follower_mode,quality,actual)
+    print('[ok] C minor CHORD source: TRI/ADD9/DOM7 voices stay local; NOTE/CHORD followers use root and own ACC +1',flush=True)
 
 
 def main():
