@@ -75,7 +75,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-follow/README.md",
       "sha256": "b984d044ef4eb3bec749dd2752d07d004c137dc95d51cab13aca4bf8aa5e4b2c",
-      "published_sha256": "f953286802979a425041195130fcdc9d843475fe83d5c89a30a5abf02c052e4f",
+      "published_sha256": "79a5e5214c73e70799dfc1849d2e1ce6809108fb8a3da68ea2295c02e604cb94",
       "source_mode": "100644"
     },
     "modules/midi-follow/manifest.py": {
