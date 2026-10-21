@@ -15,10 +15,11 @@ from remix import registry
 def main():
     # Earlier image-stage gates may build their own reference remix. Restore
     # this carrier before reading its image and linked symbols.
+    # Spectrum's reference build also replaces the shared runtime symbols.
+    subprocess.run([sys.executable,'tools/verify/verify_supersaw_filter.py'],cwd=ROOT,check=True)
     remix = registry.remix(os.environ.get('REMIX','supersaw'))
     subprocess.run(['make','bus',f'REMIX={remix.name}'],cwd=ROOT,check=True)
     subprocess.run([sys.executable,'tools/verify/verify_supersaw_cf.py'],cwd=ROOT,check=True)
-    subprocess.run([sys.executable,'tools/verify/verify_supersaw_filter.py'],cwd=ROOT,check=True)
     project = os.environ.get('OT_PROJECT')
     if not project:
         print('[SKIP] Supersaw full firmware: set OT_PROJECT to a local fixture')

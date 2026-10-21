@@ -76,3 +76,15 @@ Spectrum response, linked arithmetic, real SETUP encoders and native project
 save/cold reload. Retain failed reference probes separately from corrected results.
 The new tagged setup row is not an older-firmware project compatibility promise;
 use disposable project copies for validation.
+
+
+S7 passes the standalone full check and the exact `SAW INSERTS S7` image cases:
+mono/sequencer regressions, mixed Supersaw/FM with both FX occupied, eight-track
+DETU/MORF panel edits, four-note MIDI with OFF and LP, filtered mono/poly
+transitions, SETUP/CUT encoders, native save/cold reload and page resolution.
+Four filtered notes on one track are qualified; no larger filtered-polyphony
+claim is made. Four smooth OFF/LP/BP/HP example renders have audible AMP release
+and silent endings. The first audio launch stopped before rendering because the
+Spectrum reference build replaced shared runtime symbols; the runner now restores
+the candidate afterward. Initial failure logs remain beside corrected passes.
+These are source/emulator results; physical hardware remains unverified.

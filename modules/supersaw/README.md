@@ -180,7 +180,7 @@ rerun passed. These are emulator results; hardware remains unverified.
 
 TYPE selects OFF, LP, BP or HP. CUT is the base cutoff (about 60 Hz–14.4 kHz);
 RES adds resonance. ENV opens the filter at each note-on, then DEC returns it
-toward CUT (roughly 20 ms–4 s to 1%). This is a separate note envelope, not
+toward CUT (roughly 20 ms–3.5 s to 1%). This is a separate note envelope, not
 Spectrum's audio envelope follower. Each voice retains its own filter history,
 filter decay and native AMP release. A carried mono note preserves its sweep;
 a newly allocated/retriggered note starts its own. Knob settings are shared by
@@ -216,3 +216,15 @@ S7's linked four-note rich held block measures 3,939 instructions with TYPE OFF
 not physical cycles or a measured hardware voice limit. Native SETUP encoder
 edits and CUT survive SAVE PROJECT and a cold disk reload in the emulator,
 including both work/strd files, with FLEX transport settings unchanged.
+
+
+S7 passes the standalone full check and the exact `SAW INSERTS S7` image cases:
+mono/sequencer regressions, mixed Supersaw/FM with both FX occupied, eight-track
+DETU/MORF panel edits, four-note MIDI with OFF and LP, filtered mono/poly
+transitions, SETUP/CUT encoders, native save/cold reload and page resolution.
+Four filtered notes on one track are qualified; no larger filtered-polyphony
+claim is made. Four smooth OFF/LP/BP/HP example renders have audible AMP release
+and silent endings. The first audio launch stopped before rendering because the
+Spectrum reference build replaced shared runtime symbols; the runner now restores
+the candidate afterward. Initial failure logs remain beside corrected passes.
+These are source/emulator results; physical hardware remains unverified.
