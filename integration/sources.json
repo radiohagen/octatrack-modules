@@ -497,7 +497,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "remixes/harmony-track-bus/README.md",
       "sha256": "52021999ce360179e508f20b8219c78f07dfb60ebec9ace277c1686ef3900b34",
-      "published_sha256": "925af0eaf029ef2a982f6a073c7763b5a4a3a64123cbf3f650a8ff1256b9b226",
+      "published_sha256": "aab58a21de06d8f761703c8f9efd1f55e49597b7bf95e2737c36839dee990cee",
       "source_mode": "100644",
       "migration_note": "Public branch instructions and links updated; original source validation explicitly marked historical."
     },
@@ -505,7 +505,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "remixes/harmony-track-bus/remix.py",
       "sha256": "932901d41ef11553d4828a3ff7b3baa25a3fc3ca11983c52e531df019649e039",
-      "published_sha256": "8b6ed7d459f5cdfb05b07d9feb450c65c6a3efc35b5f6d326d16a607ef33e8ae",
+      "published_sha256": "9ae44e2707853b919199a948dafcc10d2d51c939286d2582bc94b4286bd14530",
       "source_mode": "100644"
     },
     "remixes/test/harmony-degrees/README.md": {
@@ -526,7 +526,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "remixes/test/harmony-plocks/README.md",
       "sha256": "ecc64f90735db6f062dfb01c46bf49e714dfbf9787c47409f2271e6e56158509",
-      "published_sha256": "517481252de489b025baed00df9a2e1ab14f462f53666e1cbce0618c3eea9386",
+      "published_sha256": "4f351e049988e029b71e5876694713f4149e1f14aaa135c85133dab72fb7bca8",
       "source_mode": "100644"
     },
     "remixes/test/harmony-plocks/remix.py": {
@@ -540,7 +540,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "remixes/test/midi-ensemble/README.md",
       "sha256": "ced1ec5bf012b0bef8b754deb7427908d45a12344d2a18aa556ef2437758f3ac",
-      "published_sha256": "04c6d32c902956d2f783e5b6011c184bbefd3a5183fbd0979f601de9e0dd01ff",
+      "published_sha256": "7017c9e81ecb03bcee3f6147b0aaf01ecf79fd00dbb98c70a39f45cd4a17da73",
       "source_mode": "100644"
     },
     "remixes/test/midi-ensemble/remix.py": {

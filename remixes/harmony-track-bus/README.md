@@ -1,7 +1,8 @@
 # Harmony MIDI bus
 
 Combines the Octabam bus with MIDI Scales, Follow, Harmony and Loopback,
-plus Part State, STORE and the bridges for KITS, Scenes and PLOCKS.
+plus Part State, STORE, SEQUENCER EVENTS and EDIT EVENTS. The separate
+Loopback/Scenes routing adapter remains selected.
 
 Harmony uses **MIDI TRACK** retention: each MIDI step holds its own degree/chord
 token and accumulator amount. Track clear removes its locks; copy, paste and undo carry the musical
