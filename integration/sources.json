@@ -49,7 +49,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-follow/README.md",
       "sha256": "b984d044ef4eb3bec749dd2752d07d004c137dc95d51cab13aca4bf8aa5e4b2c",
-      "published_sha256": "79a5e5214c73e70799dfc1849d2e1ce6809108fb8a3da68ea2295c02e604cb94",
+      "published_sha256": "8896fa856eef9cb29fba5ec7fe2420f33eccbd946ea88cd9cb301d63832f59c3",
       "source_mode": "100644"
     },
     "modules/midi-follow/manifest.py": {
@@ -99,7 +99,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-harmony/README.md",
       "sha256": "2503b41cfcdfaae42effb0ec2c17a9c6a3f0ffd11f74e623d3f78d94c7d4704e",
-      "published_sha256": "d3bda8af4debc2e52f21a57913328156076aa501eaf4d9df03f7929acd39c246",
+      "published_sha256": "0664e4298279def3bf57ce0e8a8e0158326c3d1718ef0a82661e6d0979dfb282",
       "source_mode": "100644"
     },
     "modules/midi-harmony/VOICING.md": {
@@ -1256,7 +1256,7 @@
     "modules/midi-follow/DEVELOPMENT.md": {
       "path": "modules/midi-follow/DEVELOPMENT.md",
       "sha256": "b984d044ef4eb3bec749dd2752d07d004c137dc95d51cab13aca4bf8aa5e4b2c",
-      "published_sha256": "f09f1ad5ff3f74427d02fc803ee659ffe6edb0d1041b5975083d2564a99aac41",
+      "published_sha256": "b0bedb3d75c70b97b26389eeb39c0749471cdba73354e4596969c0584024401e",
       "source_mode": "100644",
       "origin": "Split from adjacent README in this repository; historical evidence is retained in the text."
     },
@@ -1281,7 +1281,7 @@
     "modules/midi-harmony/DEVELOPMENT.md": {
       "path": "modules/midi-harmony/DEVELOPMENT.md",
       "sha256": "2503b41cfcdfaae42effb0ec2c17a9c6a3f0ffd11f74e623d3f78d94c7d4704e",
-      "published_sha256": "0c4cb4293a1542aa6e3e06a78e16a91d65ed6c4acaf4c87edbd7c19b2096abe0",
+      "published_sha256": "76ec8b60cb83c8b4f2c37c344e44859269e2e20bd1c97229cb4676350904865a",
       "source_mode": "100644",
       "origin": "Split from adjacent README in this repository; historical evidence is retained in the text."
     },
