@@ -46,19 +46,28 @@ and voice-state bits, including odd call boundaries. Warm counts are now 1,089
 for the rich patch and 473 for neutral (S1: 623). These are instruction counts,
 not hardware cycles. The linked gate guards against instruction regressions.
 
-**S1 qualification is limited to two simultaneous synth tracks.** Its full-firmware
-emulator checks cover dual Supersaw and Supersaw/FM, source release, sequencer
-playback, both DSP output paths, and two occupied stock effect slots. Four- and
-eight-track stress probes starved the emulator main task at the frame-500 UI
-call; their failing evidence is retained. There is no automatic voice stealing
-or imposed track cap. S2 was superseded before its queued audio tests started. S3 adds an exact
-Q4 AMP ramp (the former Q15 accumulator overflowed on a 32-sample full attack)
-and a held-level fast path. At steady full gain, the complete rich-patch adapter
-uses 1,289 warm instructions instead of S2's 1,485; a ramp uses 1,467 instead
-of 1,485. A wide-arithmetic envelope oracle covers every call length 0–32,
-attack, release, held/intermediate/clamped levels and output bounds.
-S3 full-firmware qualification is pending; source and linked ColdFire checks pass. Physical CPU headroom, audio and controls
-remain unverified.
+**S3 runs eight simultaneous Supersaw tracks in the full-firmware emulator.**
+The real-panel gate sends MIDI notes, presses the track/SRC keys, turns DETU
+while all eight notes sound, and restores it. The live parameter and audio both
+change, note-offs reach silence, both DSP paths deliver every captured frame,
+and both FX slot assignments remain unchanged. Dual Supersaw, sequencer,
+Supersaw/FM with SPECTRUM + CHARACTER, and native page checks also pass.
+
+Earlier four/eight-track probes could not borrow main's priority-0 idle task
+for injected calls. Those failures remain recorded. A stock priority-1
+per-voice worker occupies that idle time; the actual priority-3 panel path
+still works. A failed idle-call probe does not establish a physical track limit
+or an unresponsive panel. Its purpose is not established as timestretch, and
+neither marker TSMODE=0 nor a shorter marker removed the idle-call failure.
+There is no automatic voice stealing or imposed track cap. Hardware CPU
+headroom, audio and controls remain unverified.
+
+S3 also uses an exact Q4 AMP ramp: the former Q15 accumulator overflowed on a
+32-sample full attack. A held-level fast path avoids redundant arithmetic.
+The complete rich-patch adapter uses 1,289 warm instructions at steady full
+gain (S2: 1,485), or 1,467 while ramping. A wide-arithmetic envelope oracle
+covers every call length 0–32, attack, release, held/intermediate/clamped
+levels and output bounds. S2 was superseded before its queued audio tests.
 
 ## Verification
 
@@ -68,7 +77,9 @@ control blocks against a scalar arithmetic oracle. The linked ColdFire gate
 checks boot initialization, 702 exact samples, empty/odd/chunked calls, extreme
 pitches, phase wraps and bounded warm instruction counts.
 The image gate runs disposable project copies and checks note-off at the source,
-separately from effect tails. It also resolves native Supersaw/FM descriptors.
+separately from effect tails. It also resolves native Supersaw/FM descriptors and exercises actual panel
+input while eight voices run. These results do not turn the broader combined
+remix suite, which has retained reference-fixture failures, into a clean pass.
 
 Run the gates inside the prepared Octabam worktree; see
 [CPU Supersaw integration](../../integration/SUPERSAW.md). Neither a build nor an

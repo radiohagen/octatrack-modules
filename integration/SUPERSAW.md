@@ -25,13 +25,16 @@ Sophie, Post Fader or other experimental engine is added.
 Commands, from Octabam:
 
 ```sh
-make check REMIX=supersaw BUILD=S1
+make check REMIX=supersaw BUILD=S3
 OT_PROJECT=/path/to/local/project REMIX=supersaw \
   .venv/bin/python tools/verify/verify_supersaw_image.py
-make check REMIX=supersaw-inserts BUILD=S1
+make check REMIX=supersaw-inserts BUILD=S3
 ```
 
 Firmware/card images and private project fixtures stay in ignored local output.
 Image-stage checks record the actual image SHA-256, commands and audio metrics.
-Do not treat a four/eight-track failing stress run as a passing two-track gate.
-The latter qualifies only its explicit workload. Hardware is not tested here.
+Keep borrowed-idle failures and real-panel success as separate results. The
+S3 eight-track gate injects actual keys and encoder input, verifies an audible
+parameter change and note-off, and checks uninterrupted DSP output on both cores.
+The earlier four/eight-track idle-call failures remain retained; they are not
+a physical track-limit measurement. Hardware is not tested here.

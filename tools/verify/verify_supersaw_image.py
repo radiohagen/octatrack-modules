@@ -36,8 +36,12 @@ def main():
         receipts.append(str(path/'receipt.json'))
     subprocess.run([sys.executable,'tools/verify/verify_supersaw_page.py',
         '--fixture',str(path)],cwd=ROOT,check=True)
+    name = prefix+'-panel-eight'
+    subprocess.run([sys.executable,'tools/verify/verify_supersaw_panel.py',
+        '--project',project,'--name',name],cwd=ROOT,check=True)
+    receipts.append(str(ROOT/'out/supersaw-port'/name/'audio-ui-receipt.json'))
     (ROOT/'out/supersaw-qualification.json').write_text(json.dumps(dict(
-        remix=remix.name,receipts=receipts,simultaneous_tracks=2,
+        remix=remix.name,receipts=receipts,simultaneous_tracks=8,
         hardware_tested=False),indent=2)+'\n')
 
 if __name__ == '__main__': main()
