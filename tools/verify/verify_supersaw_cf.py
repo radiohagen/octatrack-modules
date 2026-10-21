@@ -28,7 +28,7 @@ def verify_adapter(uc, call, sym):
     levels = ((0,0),(32768,32768),(12345,12345),(0,32768),
               (32768,0),(12345,23456),(65535,0),(40000,40000))
     counts = (0,1,3,16,32)
-    source = '#include <stdio.h>\n#include "modules/supersaw/adapter.c"\nint main(void) {\n'
+    source = '#include <stdio.h>\n#define SS_HOST_TEST\n#include "modules/supersaw/adapter.c"\nint main(void) {\n'
     source += 'uint32_t state[32]; int32_t out[64]; uint16_t fp[6]={16384,24576,28160,16384,10240,7680};\n'
     for previous,target in levels:
         for n in counts:
@@ -75,7 +75,7 @@ def verify_adapter(uc, call, sym):
 
 def verify_poly(uc,call,sym):
     """Cross-architecture native four-note adapter, including short calls."""
-    source='#include <stdio.h>\n#include "modules/supersaw/adapter.c"\nint main(void){\n'
+    source='#include <stdio.h>\n#define SS_HOST_TEST\n#include "modules/supersaw/adapter.c"\nint main(void){\n'
     source+='uint32_t state[32]={0},pool[4][16]={{0}};int32_t out[64];uint16_t fp[6]={16384,24576,28160,16384,10240,7680};ss_active[2]=1;((uint8_t *)state)[80]=1;\n'
     cases=[(n,g) for n in (0,1,3,16,32) for g in (16384,0,23170)]
     for n,g in cases:
@@ -106,7 +106,63 @@ def verify_poly(uc,call,sym):
     assert tuple(actual)==expected,'four-note native output differs from host'
     steady=call('ss_track_fill',2,0x24000,0x25000,0x26000,16,0x27000)
     assert steady<4100, ('four-note steady instruction budget',steady)
-    return dict(exact_values=len(actual),costs=costs,steady_16_instructions=steady)
+    uc.mem_write(sym['ss_setup']+12,bytes((64,64,80,64,1,83)))
+    for _ in range(10): enabled=call('ss_track_fill',2,0x24000,0x25000,0x26000,16,0x27000)
+    uc.mem_write(sym['ss_setup']+12,bytes(6))
+    return dict(exact_values=len(actual),costs=costs,steady_16_instructions=steady,filtered_steady_16_instructions=enabled)
+
+
+def verify_filter(uc,call,sym):
+    source='#include <stdio.h>\n#define SS_HOST_TEST\n#include "modules/supersaw/adapter.c"\nint main(void){struct ss_filter f={0};int16_t a[16];\n'
+    cases=[(typ,cut,res,env,dec) for typ in (0,1,2,3,0) for cut,res,env,dec in ((16,0,0,0),(64,64,80,64),(127,127,127,127))]
+    for j,(typ,cut,res,env,dec) in enumerate(cases):
+        source+='for(unsigned k=0;k<20;++k){for(unsigned i=0;i<16;++i)a[i]=(int16_t)(i*1793+k*313);'
+        source+=f'struct ss_filter_params p={{{cut},{res},{env},{dec},{typ}}};ss_filter_run(&f,&p,{j//3+1},a,16);fwrite(a,2,16,stdout);}}\n'
+    source+='}\n'
+    with tempfile.TemporaryDirectory() as tmp:
+        c,e=Path(tmp)/'filter.c',Path(tmp)/'filter';c.write_text(source)
+        subprocess.run(['cc','-O2','-fsanitize=address,undefined','-I',str(ROOT),str(c),'-o',str(e)],check=True)
+        raw=subprocess.check_output([str(e)]);expected=struct.unpack(f'={len(raw)//2}h',raw)
+    uc.mem_write(0x28000,bytes(36));actual=[];costs=[]
+    for j,(typ,cut,res,env,dec) in enumerate(cases):
+        uc.mem_write(0x28100,bytes((cut,res,env,dec,typ)))
+        for k in range(20):
+            a=[((i*1793+k*313+32768)%65536)-32768 for i in range(16)]
+            uc.mem_write(0x28200,struct.pack('>16h',*a))
+            n=call('ss_filter_run',0x28000,0x28100,j//3+1,0x28200,16)
+            actual.extend(struct.unpack('>16h',bytes(uc.mem_read(0x28200,32))))
+        costs.append(dict(type=typ,cutoff=cut,resonance=res,env=env,decay=dec,held_16_instructions=n))
+    assert tuple(actual)==expected,'SEM host/ColdFire mismatch'
+    return dict(exact_samples=len(actual),costs=costs)
+
+
+def verify_migration(uc,call,sym):
+    for address,size in ((0x42000000,0xa0000),(0x46c82000,4096),
+                         (0x100a0000,0x20000),(0x100f8000,4096),(0x80000000,0x10000)):
+        uc.mem_map(address,size)
+    uc.mem_write(0x46c82456,struct.pack('>I',0x42000000))
+    uc.mem_write(0x100b14cf,bytes((2,)))
+    part=0x42000000+0x8ed80+6322*2
+    track=3;row=0x1ec+30*track;fine=0x33+30*track
+    uc.mem_write(part+fine,bytes((76,)))
+    call('ss_config',track)
+    expected=bytes((76,0,0,64,0,83))
+    assert bytes(uc.mem_read(part+row,6))==expected
+    assert bytes(uc.mem_read(0x100a4ece+6322*2+row,6))==expected
+    assert bytes(uc.mem_read(part+fine,1))==b'\x7f'
+    assert bytes(uc.mem_read(0x80000813+72*track,1))==b'\x7f'
+    # Once tagged, CUT remains CUT and FINE is never imported a second time.
+    uc.mem_write(part+fine,bytes((31,)))
+    call('ss_config',track)
+    assert bytes(uc.mem_read(sym['ss_setup']+6*track,6))==expected
+    assert bytes(uc.mem_read(part+fine,1))==bytes((31,))
+    uc.mem_write(sym['ss_active']+track,b'\x01')
+    call('ss_fine',track,31<<8)
+    assert uc.reg_read(UC_M68K_REG_D0)==76<<8
+    uc.mem_write(sym['ss_active']+track,b'\x00')
+    call('ss_fine',track,31<<8)
+    assert uc.reg_read(UC_M68K_REG_D0)==31<<8
+    return dict(legacy_fine_preserved=True,default_off=True,one_time_migration=True,native_fine_fallback=True)
 
 
 def main():
@@ -127,7 +183,7 @@ def main():
     uc.mem_write(base,data)
     uc.mem_map(0x10000,0x20000)
     uc.reg_write(UC_M68K_REG_SR,0x2000)
-    for name,n in [('ss_active',8),('ss_samples',32),('ss_unsupported',32),('ss_voices',size),('ss_poly_voices',4*size),('ss_poly_samples',128),('ss_descriptor',402)]:
+    for name,n in [('ss_active',8),('ss_samples',32),('ss_unsupported',32),('ss_voices',size),('ss_poly_voices',4*size),('ss_poly_samples',128),('ss_descriptor',402),('ss_lfo_descriptor',402),('ss_filters',1440),('ss_setup',48),('ss_note_stamp',32),('ss_filter_samples',32)]:
         assert base <= sym[name] and sym[name]+n <= base+len(data), (name,'not initialized by loader')
         assert bytes(uc.mem_read(sym[name],n)) == bytes(n), (name,'not zero at boot')
     instructions = [0]
@@ -173,11 +229,15 @@ def main():
                 assert warm <= limit, ('render instruction regression',case,warm,limit)
             costs.append(dict(params=case,samples=n,cold_instructions=cold,warm_instructions=warm))
     assert tuple(actual)==expected, [(i,a,b) for i,(a,b) in enumerate(zip(actual,expected)) if a!=b][:10]
+    sem=verify_filter(uc,call,sym)
     adapter=verify_adapter(uc,call,sym)
     poly=verify_poly(uc,call,sym)
     # Exercise the actual assembly carry hook, not just the C copy helper.
     history=bytes((i*37+9)&255 for i in range(stride))
     uc.mem_write(sym['ss_voices']+2*stride,history)
+    uc.mem_write(sym['ss_native_voices']+2*256+64+48,struct.pack('>I',123))
+    filter_history=bytes(24)+struct.pack('>IIHBB',54321,456,128,1,1)
+    uc.mem_write(sym['ss_filters']+(2*5+4)*36,filter_history)
     saved={UC_M68K_REG_D0:0x12345678,UC_M68K_REG_D1:0x87654321,
            UC_M68K_REG_A0:0x25000,UC_M68K_REG_A1:sym['ss_native_voices']+2*256+64}
     for reg,value in saved.items(): uc.reg_write(reg,value)
@@ -185,9 +245,11 @@ def main():
     call('ss_carry_hook')
     assert bytes(uc.mem_read(sym['ss_poly_voices']+(2*4+1)*stride,stride))==history
     assert all(uc.reg_read(reg)==value for reg,value in saved.items()),'carry hook register corruption'
+    assert bytes(uc.mem_read(sym['ss_filters']+(2*5+1)*36,36))==filter_history[:28]+struct.pack('>I',123)+filter_history[32:]
     poly['carry_hook_registers_and_history']=True
+    migration=verify_migration(uc,call,sym)
     (out/'receipt.json').write_text(json.dumps(dict(image_sha256=hashlib.sha256((ROOT/'out/mainos_bus.bin').read_bytes()).hexdigest(),
-        exact_samples=len(actual),initialized_bytes=8+32+32+5*size+128+402,costs=costs,adapter=adapter,poly=poly,hardware_tested=False),indent=2)+'\n')
+        exact_samples=len(actual),initialized_bytes=8+32+32+5*size+128+402+402+1440+48+32+32,costs=costs,adapter=adapter,poly=poly,filter=sem,migration=migration,hardware_tested=False),indent=2)+'\n')
     print(f'[ok] linked ColdFire: initialized state, {len(actual)} exact host samples, split-call sizes, native AMP/stereo adapter, instruction budgets, phase wrap and extreme pitches')
 
 if __name__=='__main__': main()

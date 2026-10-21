@@ -25,7 +25,7 @@ from hw import ot_project as otp
 from remix import registry
 
 
-def fixture(source, work, tracks, rich, sequence=False, fx=False, mixed=False, fx_pair=('FILTER','DELAY'), voices=1, chord=0, hold=127):
+def fixture(source, work, tracks, rich, sequence=False, fx=False, mixed=False, fx_pair=('FILTER','DELAY'), voices=1, chord=0, hold=127, filter_type=0):
     base = ab_fixture.prepare(source, work/'base')
     sample.SAMPLE_REL = 'AUDIO/FMSYNTH-SUPERSAW.wav'
     sample.LOOP_FRAMES = 4*44100
@@ -54,10 +54,13 @@ def fixture(source, work, tracks, rich, sequence=False, fx=False, mixed=False, f
                     data[b+0x22+t] = 1
                     data[b+0x2ca+5*t+1] = int(mixed and t == tracks[-1])
                     at = b+0x2a+30*t+6
-                    params = (64,96,110,64,40,30) if rich else (64,0,0,64,0,0)
+                    params = (64,96,110,96 if filter_type else 127,40,30) if rich else (64,0,0,127,0,0)
                     if mixed and t == tracks[-1]:
                         params = (64,0,0,64,0,127)
                     data[at:at+6] = bytes(params)
+                    if not (mixed and t == tracks[-1]):
+                        setup=b+0x1da+18+30*t
+                        data[setup:setup+6]=bytes((64,40,0,64,filter_type,83))
                     data[b+0x1da+30*t+6:b+0x1da+30*t+12] = bytes((1,0,0,0,0,0))
                     at = b+0x11a+24*t
                     data[at:at+6] = bytes((0,0,voices,0,0,chord))

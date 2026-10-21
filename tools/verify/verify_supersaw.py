@@ -20,7 +20,7 @@ def main():
     for hook in ('begin','fill','page','carry'):
         assert src.count('jsr ss_'+hook+'_hook') == 1
     module = registry.modules()['SUPERSAW']
-    assert not (module.detours or module.pokes or module.symbol_refs or module.cf_patches)
+    assert len(module.detours)==4 and not (module.pokes or module.symbol_refs or module.cf_patches)
     with tempfile.TemporaryDirectory() as temp:
         exe, raw = Path(temp)/'test', Path(temp)/'neutral.pcm'
         obj = Path(temp)/'adapter.o'

@@ -25,11 +25,11 @@ Sophie, Post Fader or other experimental engine is added.
 Commands, from Octabam:
 
 ```sh
-make check REMIX=supersaw BUILD=S6
-make rmx REMIX=supersaw-inserts BUILD=S6 RMX='SAW INSERTS S6'
-OT_PROJECT=/path/to/local/project REMIX=supersaw-inserts BUILD=S6 \
-  RMXNAME='SAW INSERTS S6' .venv/bin/python tools/verify/verify_supersaw_image.py
-make check REMIX=supersaw-inserts BUILD=S6
+make check REMIX=supersaw BUILD=S7
+make rmx REMIX=supersaw-inserts BUILD=S7 RMX='SAW INSERTS S7'
+OT_PROJECT=/path/to/local/project REMIX=supersaw-inserts BUILD=S7 \
+  RMXNAME='SAW INSERTS S7' .venv/bin/python tools/verify/verify_supersaw_image.py
+make check REMIX=supersaw-inserts BUILD=S7
 ```
 
 Firmware/card images and private project fixtures stay in ignored local output.
@@ -67,3 +67,12 @@ zero crossings of the new paired waveform. A full-spectrum peak check confirms
 C4; reanalysis passes on the unchanged capture. The original failure remains
 retained. The first full check stopped on stale generated docs; the corrected
 rerun passed. These are emulator results; hardware remains unverified.
+
+
+S7 adds the optional CPU SEM filter per note. Main SRC is PTCH/DETU/MORF/CUT/SUB/DRIV;
+SETUP is FINE/RES/ENV/DEC/TYPE/blank. CHRD generation/recording is removed only
+on Supersaw. The native author submodule is unchanged. New gates compare actual
+Spectrum response, linked arithmetic, real SETUP encoders and native project
+save/cold reload. Retain failed reference probes separately from corrected results.
+The new tagged setup row is not an older-firmware project compatibility promise;
+use disposable project copies for validation.

@@ -9,11 +9,12 @@ Load `FMSYNTH-SUPERSAW.wav` into one FLEX sample slot and select it on the desir
 track. Multiple tracks can share that marker slot. Create the silent marker with
 `python3 modules/supersaw/marker.py out/AUDIO/FMSYNTH-SUPERSAW.wav`.
 Set LFO-page **VOIC to 1–4** for the maximum simultaneous notes on that track.
-Each note has two saw oscillators and its own sine sub. For keyboard/MIDI
-chords set **CHRD to ----**; a chord shape instead generates a chord from each
-trigger, including sequencer trigs. No extra track or FX slot is reserved.
+Each note has two saw oscillators and its own sine sub. Play chords with MIDI/keyboard notes. S7 removes CHRD shapes and native chord
+recording; single-note sequencer triggers remain available. No extra track or FX
+slot is reserved.
 
-PLAYBACK controls are PTCH, DETU, MORF, FINE, SUB and DRIV. DETU linearly spreads
+SRC controls are **PTCH, DETU, MORF, CUT, SUB, DRIV**.
+SRC SETUP holds **FINE, RES, ENV, DEC, TYPE**; the sixth knob is unused. DETU linearly spreads
 the pair to ±1.5625% in frequency (about 27 cents). MORF changes the second saw
 from added to subtracted; with zero detune its quarter-cycle offset produces a
 pulse at MORF 127. SUB adds a sine one octave below. DRIV adds bounded saturation; zero
@@ -22,7 +23,7 @@ MIDI, sequencer, pitch and voice lifecycle; ordinary FM remains selectable.
 
 ## Implementation and limits
 
-S6 follows the op1r Supersaw topology: a fixed pair plus sub per note, limited
+S6/S7 follow the op1r Supersaw topology: a fixed pair plus sub per note, limited
 here to four voices. It does not redistribute oscillators or stack voices in
 a separate unison mode. MORF replaces the earlier MIX control in the same knob
 position; existing experimental patches keep their numbers but sound different.
@@ -39,13 +40,13 @@ Sophie is optional legacy compatibility only and is not part of this qualificati
 Synthesis runs at 22.05 kHz with four-point interpolation to 44.1 kHz, three output
 samples of latency, and state preserved across split calls. Eight 2048-point
 harmonic banks (1–128 partials) limit aliasing; the fundamental is clamped below
-10.77 kHz. This is not alias-free, particularly after drive. Controls update per
-source call without smoothing. The Synth Machine's voice/machine-change behavior
+10.77 kHz. This is not alias-free, particularly after drive. Oscillator controls update per source call without smoothing. Filter coefficients
+ramp per source call; enabling/disabling the filter fades over 128 samples. The Synth Machine's voice/machine-change behavior
 is inherited, including its documented held REL INF machine-switch limitation.
 
 The loader does not clear `.bss`. Every mutable Supersaw object therefore has an
 explicit initializer and is emitted into `.data`; the linked-code gate verifies
-all 2,842 initialized bytes in S6 (4,442 in S5). The imported version left those objects uninitialized.
+all 4,796 initialized bytes in S7 (2,842 in S6; 4,442 in S5). The imported version left those objects uninitialized.
 
 ## Historical seven-saw measurements (S1–S5)
 
@@ -174,3 +175,44 @@ zero crossings of the new paired waveform. A full-spectrum peak check confirms
 C4; reanalysis passes on the unchanged capture. The original failure remains
 retained. The first full check stopped on stale generated docs; the corrected
 rerun passed. These are emulator results; hardware remains unverified.
+
+## Per-note SEM filter (S7)
+
+TYPE selects OFF, LP, BP or HP. CUT is the base cutoff (about 60 Hz–14.4 kHz);
+RES adds resonance. ENV opens the filter at each note-on, then DEC returns it
+toward CUT (roughly 20 ms–4 s to 1%). This is a separate note envelope, not
+Spectrum's audio envelope follower. Each voice retains its own filter history,
+filter decay and native AMP release. A carried mono note preserves its sweep;
+a newly allocated/retriggered note starts its own. Knob settings are shared by
+the track. LP/BP/HP selection changes taps immediately.
+
+The filter runs on the CPU at 44.1 kHz before each note's AMP and the voice sum.
+It adapts the TPT SEM equations and resonance law from sambanks' SPECTRUM filter
+(Zavalishin design; audiojs/filter MIT reference), using Q14 coefficients and
+bounded 24-bit states. Both FX slots stay available for processing the mixed
+track. TYPE OFF skips sample filtering after a 128-sample bypass fade (2.9 ms),
+and settles to the exact previous oscillator/AMP output. It retains a small
+branch/state overhead, not the enabled filter cost.
+
+FINE moves from SRC to SETUP. Old experimental Parts migrate FINE once, set CUT
+to 127 and leave TYPE OFF. Setup values use a tagged, otherwise unused NEIGHBOR
+setup row in a FLEX Part; the actual FLEX LOOP/SLIC/TSTR settings stay intact.
+The scoped native-validator wrapper preserves this row during loading. Work on
+a copy of an experimental project: stock/older firmware does not understand the
+new tagged settings, and old FINE parameter locks now address CUT. Setup filter
+controls are per-Part values; only CUT is in the main parameter-lock/LFO lane.
+
+Source sanitizers exercise 100,000 changing filter blocks. The linked ColdFire
+gate compares 4,800 exact filter samples with the host implementation, checks
+carry history/envelope identity and records enabled/bypassed instruction counts.
+The response gate compares the CPU filter with the actual SPECTRUM DSP build:
+27 low-level sine probes across cutoff/resonance and LP/BP/HP differ by at most
+0.033 dB. This is response agreement, not sample identity or proof of identical
+high-level saturation. Its initial low-cutoff precision failure remains recorded;
+the corrected 24-bit-state implementation passes.
+
+S7's linked four-note rich held block measures 3,939 instructions with TYPE OFF
+(S6: 3,900), and 11,859 with LP and an active filter decay. These are instructions,
+not physical cycles or a measured hardware voice limit. Native SETUP encoder
+edits and CUT survive SAVE PROJECT and a cold disk reload in the emulator,
+including both work/strd files, with FLEX transport settings unchanged.

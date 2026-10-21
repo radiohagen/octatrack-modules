@@ -30,7 +30,7 @@ def main():
     supersaw=(out/'supersaw.bin').read_bytes();fm=(out/'fm.bin').read_bytes()
     assert supersaw[9:18]==b'SUPERSAW\0'
     assert fm[9:18]==b'FM SYNTH\0'
-    for i,name in enumerate(('PTCH','DETU','MORF','FINE','SUB','DRIV')):
+    for i,name in enumerate(('PTCH','DETU','MORF','CUT','SUB','DRIV')):
         assert supersaw[0x16+6*i:0x1c+6*i]==name.encode().ljust(6,b'\0'),(i,supersaw.hex())
     for i,name in enumerate(('PTCH','RATO','INDX','FINE','FDBK','DEC')):
         assert fm[0x16+6*i:0x1c+6*i]==name.encode().ljust(6,b'\0'),(i,fm.hex())

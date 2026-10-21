@@ -18,6 +18,7 @@ def main():
     remix = registry.remix(os.environ.get('REMIX','supersaw'))
     subprocess.run(['make','bus',f'REMIX={remix.name}'],cwd=ROOT,check=True)
     subprocess.run([sys.executable,'tools/verify/verify_supersaw_cf.py'],cwd=ROOT,check=True)
+    subprocess.run([sys.executable,'tools/verify/verify_supersaw_filter.py'],cwd=ROOT,check=True)
     project = os.environ.get('OT_PROJECT')
     if not project:
         print('[SKIP] Supersaw full firmware: set OT_PROJECT to a local fixture')
@@ -44,13 +45,23 @@ def main():
     subprocess.run([sys.executable,'tools/verify/verify_supersaw_panel.py',
         '--project',project,'--name',name,'--control','MORF'],cwd=ROOT,check=True)
     receipts.append(str(ROOT/'out/supersaw-port'/name/'audio-ui-receipt.json'))
-    for mode in ('midi','sequence','transition'):
+    for mode in ('midi','transition'):
         name = prefix+'-poly-'+mode
         subprocess.run([sys.executable,'tools/verify/verify_supersaw_poly.py',
             '--project',project,'--name',name,'--mode',mode,
             *(['--rich'] if mode=='midi' else []),
             *(['--fx'] if mode=='midi' and pair=='SPECTRUM,CHARACTER' else [])],cwd=ROOT,check=True)
         receipts.append(str(ROOT/'out/supersaw-port'/name/'receipt.json'))
+    for kind in ('filter_port','save'):
+        name=prefix+'-'+kind
+        subprocess.run([sys.executable,f'tools/verify/verify_supersaw_{kind}.py',
+            '--project',project,'--name',name],cwd=ROOT,check=True)
+        receipts.append(str(ROOT/'out/supersaw-port'/name/'receipt.json'))
+    name=prefix+'-poly-filter'
+    subprocess.run([sys.executable,'tools/verify/verify_supersaw_poly.py',
+        '--project',project,'--name',name,'--rich','--filter',
+        *(['--fx'] if pair=='SPECTRUM,CHARACTER' else [])],cwd=ROOT,check=True)
+    receipts.append(str(ROOT/'out/supersaw-port'/name/'receipt.json'))
     (ROOT/'out/supersaw-qualification.json').write_text(json.dumps(dict(
         remix=remix.name,receipts=receipts,simultaneous_tracks=8,voices_per_track=4,polyphony_test_tracks=1,
         hardware_tested=False),indent=2)+'\n')

@@ -55,5 +55,10 @@ def assembly(modules, remix=None):
            '        bne ss_poly_amp\n')
     insert('        move.l  V_HOLD(%a6),%d0          | a gated sequencer note:',
            'ss_poly_amp:\n        move.l  V_HOLD(%a6),%d0          | a gated sequencer note:')
+    insert('        mvz.w   6(%a4),%d0\n        subi.l  #0x4000,%d0',
+           '        mvz.w   6(%a4),%d0\n        jsr ss_fine_hook\n        subi.l  #0x4000,%d0')
+    insert('po_lp_have:\n        move.l  %a1,%d0\n',
+           'po_lp_have:\n        move.l  %a1,%d0\n        jsr ss_lfo_page_hook\n')
+    insert('po_keyrec:\n', 'po_keyrec:\n        lea ss_active,%a0\n        tst.b (%a0,%d2.l)\n        beq ss_record_native\n        moveq #0,%d0\n        rts\nss_record_native:\n')
     source += '\n        .global ss_native_voices\n        .set ss_native_voices,po_voices\n'
     return source

@@ -77,20 +77,24 @@ def analyze(work,tracks,voices,rich,mode="midi"):
     records=(work/'dsp-records.bin').read_bytes();bank=(work/'project/bank01.work').read_bytes()
     for off,field in ((otp.FX1_OFF,54),(otp.FX2_OFF,56)):
         assert [int.from_bytes(records[t*64+field:t*64+field+2],'big') for t in range(8)]==list(bank[otp.PART_BASE+off:otp.PART_BASE+off+8])
-    result=dict(result='pass',image_sha256=hashlib.sha256((work/'candidate.bin').read_bytes()).hexdigest(),voices_per_track=voices,tracks=[t+1 for t in tracks],rich=rich,mode=mode,frames=n-1,audio=metrics,poly_samples=counts,hardware_tested=False)
+    filter_counts=struct.unpack('>8I',(work/'ss_filter_samples.bin').read_bytes())
+    filter_types=[bank[otp.PART_BASE+9+0x1ec+30*t+4] for t in tracks]
+    for t,typ in zip(tracks,filter_types):
+        assert (filter_counts[t]>0)==bool(typ),('filter bypass/activation',t,typ,filter_counts[t])
+    result=dict(filter_types=filter_types,filter_samples=filter_counts,result='pass',image_sha256=hashlib.sha256((work/'candidate.bin').read_bytes()).hexdigest(),voices_per_track=voices,tracks=[t+1 for t in tracks],rich=rich,mode=mode,frames=n-1,audio=metrics,poly_samples=counts,hardware_tested=False)
     (work/'receipt.json').write_text(json.dumps(result,indent=2)+'\n')
     print(f'[ok] {voices}-note Supersaw {mode} on {len(tracks)} tracks: audio/lifecycle assertions, DSP continuity and unchanged FX slots',flush=True)
 
 
 def main():
     p=argparse.ArgumentParser(description=__doc__);p.add_argument('--project',type=Path,required=True);p.add_argument('--name',required=True)
-    p.add_argument('--mode',choices=('midi','sequence','transition'),default='midi');p.add_argument('--tracks',default='1');p.add_argument('--voices',type=int,choices=(2,3,4),default=4);p.add_argument('--rich',action='store_true');p.add_argument('--fx',action='store_true')
+    p.add_argument('--mode',choices=('midi','transition'),default='midi');p.add_argument('--tracks',default='1');p.add_argument('--voices',type=int,choices=(2,3,4),default=4);p.add_argument('--rich',action='store_true');p.add_argument('--fx',action='store_true');p.add_argument('--filter',action='store_true')
     a=p.parse_args();tracks=tuple(int(t)-1 for t in a.tracks.split(','));assert len(set(tracks))==len(tracks) and all(0<=t<8 for t in tracks)
     work=ROOT/'out/supersaw-port'/a.name;work.mkdir(parents=True,exist_ok=False)
     assert a.mode=='midi' or (a.voices==4 and tracks==(0,))
     fixture(a.project,work,tracks,a.rich,sequence=a.mode=='sequence',fx=a.fx,fx_pair=('SPECTRUM','CHARACTER'),
             voices=1 if a.mode=='transition' else a.voices,chord=28 if a.mode=='sequence' else 0,
-            hold=32 if a.mode=='sequence' else 127)
+            hold=32 if a.mode=='sequence' else 127,filter_type=int(a.filter))
     shutil.copy2(ROOT/'out/mainos_bus.bin',work/'candidate.bin')
     raw=subprocess.check_output(['m68k-elf-nm',str(ROOT/'out/platform/runtime/runtime.elf')],text=True)
     sym={f[2]:int(f[0],16) for line in raw.splitlines() if len(f:=line.split())==3}
@@ -115,7 +119,7 @@ def main():
                 rows.append(f'{ms+offset} midi {(0x90 if on else 0x80)+t:02x} {key:02x} {"64" if on else "00"}')
                 offset+=5
     rows+=['5500 quit'];rows.sort(key=lambda row:int(row.split()[0]));(work/'panel.script').write_text('\n'.join(rows)+'\n')
-    dumps=f'{sym["ss_poly_samples"]:#x},128={work}/ss_poly_samples.bin;{sym["ss_unsupported"]:#x},32={work}/ss_unsupported.bin;0x80000110,512={work}/dsp-records.bin;{sym["ss_native_voices"]:#x},2048={work}/native-voices.bin'
+    dumps=f'{sym["ss_filter_samples"]:#x},32={work}/ss_filter_samples.bin;{sym["ss_poly_samples"]:#x},128={work}/ss_poly_samples.bin;{sym["ss_unsupported"]:#x},32={work}/ss_unsupported.bin;0x80000110,512={work}/dsp-records.bin;{sym["ss_native_voices"]:#x},2048={work}/native-voices.bin'
     cmd=[str(ROOT/'out/emu/ot_emu'),'--image',str(work/'candidate.bin'),'--card',str(work/'card.img'),'--set','OCTABAM','--project','SYNTH','--mkii','--load-ms','90000','--dsp','--internal-clock','--live-script',str(work/'panel.script'),'--audio-out',str(work/'audio'),'--block-dump',str(work/'blocks.bin'),'--mem-dump',dumps]
     (work/'command.json').write_text(json.dumps(cmd,indent=2)+'\n')
     with (work/'port.log').open('w') as log:r=subprocess.run(cmd,cwd=ROOT,stdout=log,stderr=subprocess.STDOUT,timeout=300)

@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#define SS_HOST_TEST
 #include "adapter.c"
 
 /* Scalar oracle for the chunked oscillator and resampler paths. */
@@ -135,7 +136,8 @@ static void check_poly(void) {
     /* Native mono -> poly carries every resampler/oscillator bit. */
     ss_init(&ss_voices[3]);struct ss_params p={21426141,96,110,40,30};
     int16_t scratch[3];ss_render(&ss_voices[3],&p,scratch,3);
-    ss_carry(3,2);assert(!memcmp(&ss_voices[3],&ss_poly_voices[3][2],sizeof(struct ss_voice)));
+    ss_filters[3][4].envelope=12345;
+    ss_carry(3,2,91);assert(ss_filters[3][2].envelope==12345 && ss_filters[3][2].stamp==91);assert(!memcmp(&ss_voices[3],&ss_poly_voices[3][2],sizeof(struct ss_voice)));
     /* Inactive native voices leave the existing mono render bit-identical. */
     memset(pool,0,sizeof(pool));memset(state,0,sizeof(state));state[3]=21426141;state[6]=32768;
     ss_init(&ss_voices[3]);ss_init(&ss_voices[4]);ss_active[4]=1;
@@ -144,12 +146,39 @@ static void check_poly(void) {
     ss_track_fill(3,(uint8_t *)state,fp,out,32,(uint8_t *)pool);
     assert(!memcmp(out,mono,sizeof(mono)));
     /* The poly -> mono tail is mixed, and releasing it leaves mono alone. */
-    ss_carry(3,0);pool[0][3]=21426141;pool[0][6]=0;
+    ss_carry(3,0,92);pool[0][3]=21426141;pool[0][6]=0;
     ((uint8_t *)pool)[36]=3;*(uint16_t *)((uint8_t *)pool+60)=16384;
     memcpy(copy,state,sizeof(state));ss_voices[4]=ss_voices[3];
     ss_fill(4,(uint8_t *)copy,fp,mono,16);
     ss_track_fill(3,(uint8_t *)state,fp,out,16,(uint8_t *)pool);
     assert(memcmp(out,mono,32*sizeof(*out)));assert(!*(uint16_t *)((uint8_t *)pool+60));
+}
+
+static void check_filter(void) {
+    struct ss_filter a={0},b={0};
+    struct ss_filter_params p={64,64,80,64,0};
+    int16_t audio[32],copy[32];
+    for(unsigned i=0;i<32;++i)audio[i]=(int16_t)(i*1713-23000);
+    memcpy(copy,audio,sizeof audio);ss_filter_run(&a,&p,1,audio,32);
+    assert(!memcmp(copy,audio,sizeof audio));assert(!a.wet);
+    p.type=1;
+    for(unsigned j=0;j<100;++j){memcpy(audio,copy,sizeof audio);ss_filter_run(&a,&p,1,audio,32);}
+    b=a;uint32_t before=a.envelope;
+    memcpy(audio,copy,sizeof audio);ss_filter_run(&a,&p,2,audio,32);
+    assert(a.envelope>before && b.envelope==before);
+    p.type=0;
+    for(unsigned j=0;j<5;++j){memcpy(audio,copy,sizeof audio);ss_filter_run(&a,&p,2,audio,32);}
+    assert(!memcmp(copy,audio,sizeof audio));assert(!a.wet);
+    unsigned random=123456;
+    for(unsigned j=0;j<100000;++j){
+        random=random*1664525u+1013904223u;
+        p=(struct ss_filter_params){random,random>>8,random>>16,random>>24,(random>>6)&3};
+        for(unsigned k=0;k<32;++k)audio[k]=(int16_t)(random+k*3331);
+        ss_filter_run(&a,&p,j/13,audio,j%33);
+        assert(a.s0>=-8388607 && a.s0<=8388607 && a.s1>=-8388607 && a.s1<=8388607);
+        assert(a.envelope<=(1u<<24));
+    }
+    puts("[ok] SEM bypass identity, independent retrigger/decay, bounded extreme modulation (100000 blocks)");
 }
 
 int main(int argc, char **argv) {
@@ -251,6 +280,7 @@ int main(int argc, char **argv) {
     assert(a.morph_weight==-a.saw_weight);
     assert(a.phase[0]==phases[0]+a.increments[0]);
     assert(a.phase[1]==phases[1]+a.increments[1]);
+    check_filter();
     check_gain();
     check_poly();
     if (argc == 2) {

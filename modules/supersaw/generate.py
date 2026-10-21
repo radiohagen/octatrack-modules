@@ -26,7 +26,9 @@ def table_source():
             + array('ss_saws[8][2048]', banks)
             + 'static const int16_t ss_sine[2048] = {' + ','.join(map(str,sine)) + '};\n'
             + 'static const uint32_t ss_ratios[128][2] = {\n'
-            + ',\n'.join(' {' + ','.join(map(str,row)) + '}' for row in ratios) + '\n};\n')
+            + ',\n'.join(' {' + ','.join(map(str,row)) + '}' for row in ratios) + '\n};\n'
+            + 'static const int32_t ss_filter_g[128] = {' + ','.join(str(round(math.tan(math.pi*60*250**(i/128)/44100)*16384)) for i in range(128)) + '};\n'
+            + 'static const uint16_t ss_filter_decay[128] = {' + ','.join(str(round((1-math.exp(-math.log(100)/(44100*.02*200**(i/127))))*65536)) for i in range(128)) + '};\n')
 
 def main():
     check = '--check' in sys.argv

@@ -66,7 +66,7 @@ def analyze(work, tracks, control="DETU"):
     before,after=delta(1.,1.3),delta(1.7,2.1)
     assert before < 1e-6 and after > .01, ('encoder audio response',before,after)
     lanes = (work/'lanes.bin').read_bytes()
-    assert list(lanes[72*tracks[0]:72*tracks[0]+6]) == [64,96,110,64,40,30]
+    assert list(lanes[72*tracks[0]:72*tracks[0]+6]) == [64,96,110,127,40,30]
     counts = struct.unpack('>8I',(work/'ss_samples.bin').read_bytes())
     assert all(n>60000 if t in tracks else n==0 for t,n in enumerate(counts)), counts
     assert (work/'ss_unsupported.bin').read_bytes() == bytes(32)

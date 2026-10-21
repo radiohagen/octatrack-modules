@@ -4,6 +4,7 @@
  */
 #include <stdint.h>
 #include "engine.c"
+#include "filter.h"
 
 /* The firmware loader copies .data but does not clear .bss. Explicit
  * initializers plus -fno-zero-initialized-in-bss put these in the image. */
@@ -12,7 +13,18 @@ uint32_t ss_samples[8] = {0}, ss_unsupported[8] = {0};
 static struct ss_voice ss_voices[8] = {0};
 static struct ss_voice ss_poly_voices[8][4] = {0};
 uint32_t ss_poly_samples[8][4] = {{0}};
+struct ss_filter ss_filters[8][5] = {{{0}}};
+uint8_t ss_setup[8][6] = {{0}};
+uint32_t ss_note_stamp[8] = {0};
+uint32_t ss_filter_samples[8] = {0};
 static uint8_t ss_descriptor[0x192] = {0};
+static uint8_t ss_lfo_descriptor[0x192] = {0};
+
+void ss_config(unsigned track);
+static int ss_assigned(uint32_t track);
+uint8_t *ss_page(uint8_t *original,uint32_t track);
+void ss_type_fmt(char *out,int value);
+void ss_fine_fmt(char *out,int value);
 
 int ss_marker(const char *path) {
     const char *base = path;
@@ -36,14 +48,20 @@ static const char *ss_settings(uint32_t address) {
 
 static void ss_activate(uint32_t track, uint8_t selected, uint16_t previous_gain) {
     if (!ss_active[track])
-        for (unsigned v=0;v<4;++v) ss_init(&ss_poly_voices[track][v]);
-    if (!ss_active[track] || !previous_gain) ss_init(&ss_voices[track]);
+        for (unsigned v=0;v<4;++v) {
+            ss_init(&ss_poly_voices[track][v]);
+            ss_filter_reset(&ss_filters[track][v]);
+        }
+    if (!ss_active[track] || !previous_gain) {
+        ss_init(&ss_voices[track]);ss_filter_reset(&ss_filters[track][4]);
+    }
     ss_active[track] = selected;
 }
 void ss_begin(uint32_t track, const uint8_t *state) {
     if (track >= 8) return;
     uint32_t settings = *(volatile uint32_t *)(uintptr_t)(0x800049d8u+0xa8u*track+8);
     uint8_t selected = (uint8_t)ss_marker(ss_settings(settings));
+    if(selected) { ++ss_note_stamp[track];ss_config(track); }
     ss_activate(track, selected, *(const uint16_t *)(state+38));
 }
 
@@ -64,6 +82,11 @@ int ss_fill(uint32_t track, uint8_t *state, const uint16_t *fp,
     };
     int16_t audio[32];
     ss_render(&ss_voices[track], &params, audio, n);
+    struct ss_filter_params f={(fp[3]>>8)&127,ss_setup[track][1],ss_setup[track][2],ss_setup[track][3],ss_setup[track][4]};
+    if(f.type || ss_filters[track][4].wet) {
+        ss_filter_run(&ss_filters[track][4],&f,ss_note_stamp[track],audio,n);
+        ss_filter_samples[track]+=n;
+    }
     /* A held AMP level needs no per-sample ramp arithmetic. */
     uint32_t previous = *(uint16_t *)(state+38);
     if (*(uint32_t *)(state+24) == previous) {
@@ -97,13 +120,19 @@ int ss_fill(uint32_t track, uint8_t *state, const uint16_t *fp,
 
 /* The bridge pins the native pool layout: four 64-byte records per track.
  * Native code owns allocation, MIDI/chord identity, pitch and AMP targets.
- * We own oscillator history only. A warm stolen voice keeps phase, like FM. */
-void ss_carry(uint32_t track, uint32_t voice) {
+ * We own oscillator and filter history. Warm steals retain phase; their
+ * new note stamp retriggers the independent filter envelope. */
+void ss_carry(uint32_t track, uint32_t voice, uint32_t stamp) {
     if (track < 8 && voice < 4 && ss_active[track]) {
         /* Volatile byte copy: freestanding ColdFire has no libc memcpy. */
         volatile uint8_t *dst=(volatile uint8_t *)&ss_poly_voices[track][voice];
         const uint8_t *src=(const uint8_t *)&ss_voices[track];
         for (unsigned i=0;i<sizeof(struct ss_voice);++i) dst[i]=src[i];
+        dst=(volatile uint8_t *)&ss_filters[track][voice];
+        src=(const uint8_t *)&ss_filters[track][4];
+        for(unsigned i=0;i<sizeof(struct ss_filter);++i)dst[i]=src[i];
+        /* This is the same sounding note, now identified by native V_AGE. */
+        ss_filters[track][voice].stamp=stamp;
     }
 }
 
@@ -135,13 +164,18 @@ int ss_track_fill(uint32_t track, uint8_t *state, const uint16_t *fp,
         if (!native[36]) continue;
         uint32_t previous=*(uint16_t *)(native+60);
         uint32_t target=*(uint32_t *)(native+24);
-        if (!previous) ss_init(&ss_poly_voices[track][v]);
+        if (!previous) { ss_init(&ss_poly_voices[track][v]);ss_filter_reset(&ss_filters[track][v]); }
         /* Native poly gains are <=32767; bound malformed state as well. */
         if (previous>32767) previous=32767;
         if (target>32767) target=32767;
         params.increment=*(uint32_t *)(native+12);
         int16_t audio[32];
         ss_render(&ss_poly_voices[track][v],&params,audio,n);
+        struct ss_filter_params f={(fp[3]>>8)&127,ss_setup[track][1],ss_setup[track][2],ss_setup[track][3],ss_setup[track][4]};
+        if(f.type || ss_filters[track][v].wet) {
+            ss_filter_run(&ss_filters[track][v],&f,*(uint32_t *)(native+48),audio,n);
+            ss_filter_samples[track]+=n;
+        }
         if (previous==target) {
             for (uint32_t i=0;i<n;++i) mix[i]+=(audio[i]*(int32_t)target)>>15;
         } else {
@@ -181,18 +215,45 @@ static int ss_assigned(uint32_t track) {
 
 uint8_t *ss_page(uint8_t *original, uint32_t track) {
     if (!ss_assigned(track)) return original;
+    ss_config(track);
     for (unsigned i=0; i<sizeof(ss_descriptor); ++i) ss_descriptor[i]=original[i];
     const char title[9] = "SUPERSAW";
     for (unsigned i=0; i<9; ++i) ss_descriptor[9+i]=(uint8_t)title[i];
-    const char names[6][6]={"PTCH","DETU","MORF","FINE","SUB","DRIV"};
+    const char names[6][6]={"PTCH","DETU","MORF","CUT","SUB","DRIV"};
     for (unsigned i=0; i<36; ++i) ss_descriptor[0x16+i]=((const uint8_t *)names)[i];
-    /* Keep pitch and cents formatters; other values use the stock decimal
+    /* Keep pitch formatter; other values use the stock decimal
      * formatter/dial and ordinary one-unit handler (no FM ratio snapping). */
     for (unsigned slot=1; slot<6; ++slot) {
-        if (slot == 3) continue;
+
         *(uint32_t *)(ss_descriptor+0xca+4*slot)=0;
         *(uint32_t *)(ss_descriptor+0xfa+4*slot)=0;
         *(uint32_t *)(ss_descriptor+0x12a+4*slot)=0;
     }
+    const char setup[6][6]={"FINE","RES","ENV","DEC","TYPE",""};
+    for(unsigned i=0;i<36;++i)ss_descriptor[0x3a+i]=((const uint8_t *)setup)[i];
+    for(unsigned i=6;i<12;++i) {
+        *(uint32_t *)(ss_descriptor+0x6a+4*i)=0;
+        *(uint32_t *)(ss_descriptor+0x9a+4*i)=i==10?4:i==11?1:128;
+        *(uint32_t *)(ss_descriptor+0xca+4*i)=0;
+        *(uint32_t *)(ss_descriptor+0xfa+4*i)=0;
+        *(uint32_t *)(ss_descriptor+0x12a+4*i)=0;
+    }
+    *(uint32_t *)(ss_descriptor+0xca+24)=(uint32_t)(uintptr_t)ss_fine_fmt;
+    *(uint32_t *)(ss_descriptor+0xca+40)=(uint32_t)(uintptr_t)ss_type_fmt;
+    *(uint32_t *)(ss_descriptor+0x18a)=0x00000000;
+    *(uint32_t *)(ss_descriptor+0x18e)=0x55555555;
+    /* Nibbles 6..10 live; nibble 11 disabled (across the two words). */
+    *(uint32_t *)(ss_descriptor+0x18a)=0x00000555;
     return ss_descriptor;
 }
+
+uint8_t *ss_lfo_page(uint8_t *original,unsigned track) {
+    if(!ss_assigned(track))return original;
+    for(unsigned i=0;i<sizeof(ss_lfo_descriptor);++i)ss_lfo_descriptor[i]=original[i];
+    for(unsigned i=0;i<6;++i)ss_lfo_descriptor[0x16+30+i]=0;
+    *(uint32_t *)(ss_lfo_descriptor+0x18e)&=0xff0fffff;
+    *(uint32_t *)(ss_lfo_descriptor+0x6a+20)=0;
+    *(uint32_t *)(ss_lfo_descriptor+0x9a+20)=1;
+    return ss_lfo_descriptor;
+}
+#include "ui.h"
