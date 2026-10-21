@@ -13,7 +13,7 @@ must be checked against its C sources and generators. Original credits remain.
 | [midi-follow](../modules/midi-follow/README.md) | 7 | MIDI Part State; optional Scales/Loopback/Harmony |
 | [midi-sram](../modules/midi-sram/README.md) | 5 | MIDI Part State; precise sparse SRAM claims |
 | [midi-harmony](../modules/midi-harmony/README.md) | 63 | MIDI Part State + STORE + MIDI SRAM |
-| [harmony-plocks](SYSTEM_EVENTS.md) | 3 | MIDI Harmony + upstream PLOCKS P2 |
+| [System-event clients](SYSTEM_EVENTS.md) | 3 | HARM/Follow callbacks into Octabam platform modules |
 | [pio-write-fix](../modules/pio-write-fix/README.md) | 3 | upstream MEMORY; conflicts with STEM REC owning same fix |
 | [quantizer-midi-drawer compatibility name](../modules/quantizer-midi-drawer/README.md) | upstream-owned | no additional hooks after #741 |
 | [original drawer implementation](../modules/_legacy_quantizer-midi-drawer/README.md) | 3 | superseded by upstream #741; inactive |
@@ -43,7 +43,7 @@ logic. The remaining handwritten assembly implements native hooks and ownership.
 | Chord and degree math | `harmony.s`, `voicing.s`, `size.c`, `{core,roots,packed}.c` and generated output | bounds, all keys/modes, native IDs, degree codec, register guards |
 | Live play and editing | `ownership.s`, `play.s`, `chord-{part,record,ui,display,name,sequence}.s`, `{events,recording,ui}.c`, panel/hooks | Part vs playback context, note ownership, recorder handoff, UI dispatch |
 | Complete persistence | `chord-files.s`, `{storage,track-retention,operations}.c`, track-retention and native copy hooks | STORE failure propagation, all tracks, corruption, clear/copy/undo, interrupted saves |
-| Optional shared-module composition | `scenes.c`, `scene-access.s`, `modules/harmony-plocks/bridge.s`, KITS callbacks | unchanged PLOCKS/Scenes capacity, all KITS modes, coexistence and restart |
+| Optional shared-module composition | `scenes.c`, `scene-access.s`, `edit-hooks.s` and `transport.s`, KITS callbacks | unchanged PLOCKS/Scenes capacity, all KITS modes, coexistence and restart |
 
 These are inspection units inside coherent feature stages, not permission to
 ship half a lifecycle. The first usable Harmony contribution must include its

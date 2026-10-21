@@ -4,7 +4,7 @@
  * 0xff is unlocked; the reader inherits that pattern's Part CHRD default.
  * The current bank has a packed CS1 mirror, with a generation ticket to
  * prevent an engine writer from committing over a preempting UI writer.
- * The manifest owns this SRAM. Shared retention and HARMONY PLOCKS
+ * The manifest owns this SRAM. Shared retention and EDIT EVENTS
  * compose with PLOCKS P2 without overlapping either checkpoint.
  */
     .set CH_BANK_BYTES,8192
