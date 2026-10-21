@@ -11,6 +11,7 @@ import struct
 import subprocess
 import sys
 import wave
+import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT/'tools'))
@@ -92,7 +93,9 @@ def rms(values):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument('--project',type=Path,required=True)
+    mode=ap.add_mutually_exclusive_group(required=True)
+    mode.add_argument('--project',type=Path)
+    mode.add_argument('--analyze',type=Path,help='recheck a completed capture without rerunning firmware')
     ap.add_argument('--tracks',default='2,6')
     ap.add_argument('--rich',action='store_true')
     ap.add_argument('--sequence',action='store_true')
@@ -103,6 +106,9 @@ def main():
     args = ap.parse_args()
     tracks = tuple(int(t)-1 for t in args.tracks.split(','))
     assert tracks and len(set(tracks)) == len(tracks) and all(0 <= t < 8 for t in tracks)
+    if args.analyze:
+        analyze(args.analyze,tracks,args.rich,args.sequence,args.mixed)
+        return
     work = ROOT/'out/supersaw-port'/args.name
     work.mkdir(parents=True,exist_ok=True)
     assert not (work/'project').exists(), 'use a new case name to retain previous evidence'
@@ -135,8 +141,14 @@ def main():
     (work/'command.json').write_text(json.dumps(cmd,indent=2)+'\n')
     with (work/'port.log').open('w') as log:
         result = subprocess.run(cmd,cwd=ROOT,stdout=log,stderr=subprocess.STDOUT,timeout=600)
+    assert result.returncode == 0, work/'port.log'
+    analyze(work,tracks,args.rich,args.sequence,args.mixed)
+
+
+def analyze(work,tracks,rich=False,sequence=False,mixed=False):
+    cmd=json.loads((work/'command.json').read_text())
     log = (work/'port.log').read_text()
-    assert result.returncode == 0 and 'run ended REACHED' in log, work/'port.log'
+    assert 'run ended REACHED' in log, work/'port.log'
     assert 'LOAD PROJECT handled' in log
     assert all(x not in log for x in ('DID NOT RETURN','main never spun','unimplemented opcode')), work/'port.log'
     blocks = blockdump.read(work/'blocks.bin')
@@ -154,18 +166,24 @@ def main():
         level, quiet = rms(sounding), rms(audio[-400*16:])
         assert level > 100, ('silent',t,level)
         assert quiet < max(2,level*.001), ('did not stop',t,quiet)
-        if not args.sequence:
+        if not sequence:
             # Source release must be silent. FX output may still contain the
             # filter/delay tail; confusing the two rejects a correct note-off.
             source = recloop.track_audio(classes,t+1)
             assert len(source) == 48000
             assert rms(source[1650*16:1750*16]) < 8, ('source note-off',t)
-        hz = sample.pitch(sounding)
-        if not args.rich:
+        # The detuned pair/pulse can cross zero twice per fundamental cycle.
+        # Find the strongest non-DC spectral peak over the entire spectrum,
+        # without restricting the search to the expected pitch's octave.
+        power=np.abs(np.fft.rfft(np.asarray(sounding)*np.hanning(len(sounding)),n=4*len(sounding)))
+        freqs=np.fft.rfftfreq(4*len(sounding),1/44100)
+        power[freqs<20]=0
+        hz=float(freqs[np.argmax(power)])
+        if not rich:
             assert abs(hz-261.6256) < 2, ('C4 pitch',t,hz)
-        metrics[f'T{t+1}'] = dict(rms=level,stopped_rms=quiet,pitch_hz=hz)
+        metrics[f'T{t+1}'] = dict(rms=level,stopped_rms=quiet,spectral_peak_hz=hz)
     counts = struct.unpack('>8I',(work/'ss_samples.bin').read_bytes())
-    ss_tracks = set(tracks[:-1] if args.mixed else tracks)
+    ss_tracks = set(tracks[:-1] if mixed else tracks)
     assert all(n>16000 if t in ss_tracks else n==0 for t,n in enumerate(counts)), counts
     assert (work/'ss_unsupported.bin').read_bytes() == bytes(32)
     records = (work/'dsp-records.bin').read_bytes()
@@ -179,7 +197,7 @@ def main():
         audio=metrics,ss_samples=counts,cpu=cpu.group(1) if cpu else None,
         hardware_tested=False,command=cmd)
     (work/'receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
-    print('[ok]',args.name,metrics,receipt['cpu'],flush=True)
+    print('[ok]',work.name,metrics,receipt['cpu'],flush=True)
 
 
 if __name__ == '__main__':

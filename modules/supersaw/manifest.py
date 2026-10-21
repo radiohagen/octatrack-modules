@@ -1,10 +1,10 @@
-"""Original seven-oscillator Supersaw through the existing Synth transport."""
+"""Original two-oscillator Supersaw through the existing Synth transport."""
 from remix.schema import Category, Gate, Kind, Linked, Module, Proof
 MODULE = Module(
     name='supersaw', key='SUPERSAW', kind=Kind.CF_PATCH,
     category=Category.MACHINES, author='radiohagen',
     author_url='https://github.com/radiohagen/octatrack-modules',
-    doc='Seven detuned saws, sub and drive on FMSYNTH-SUPERSAW marker tracks.',
+    doc='Two detuned saws per note, morph, sub and drive on FMSYNTH-SUPERSAW marker tracks.',
     proof=Proof.CHECK, proof_note='experimental; hardware unqualified',
     requires=('SYNTH MACHINE',),
     linked=(Linked('supersaw', 'modules/supersaw/adapter.s', dram=True),

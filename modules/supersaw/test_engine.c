@@ -5,8 +5,7 @@
 #include <string.h>
 #include "adapter.c"
 
-/* Scalar oracle for the optimized grouping of equal-weight oscillators.
- * Intentionally multiply each lane independently, as the imported engine did. */
+/* Scalar oracle for the chunked oscillator and resampler paths. */
 static void reference(struct ss_voice *v, const struct ss_params *p,
                       int16_t *out, unsigned count) {
     struct ss_params core = *p;
@@ -21,9 +20,9 @@ static void reference(struct ss_voice *v, const struct ss_params *p,
         }
         ss_prepare(v, &core);
         int32_t sum = 0;
-        for (unsigned lane = 0; lane < 7; ++lane) {
+        for (unsigned lane = 0; lane < 2; ++lane) {
             sum += lookup(ss_saws[v->bank], v->phase[lane]) *
-                   (lane == 3 ? v->centre_weight : v->side_weight);
+                   (lane == 0 ? v->saw_weight : v->morph_weight);
             v->phase[lane] += v->increments[lane];
         }
         sum += lookup(ss_sine, v->sub_phase) * v->sub_gain;
@@ -124,7 +123,7 @@ static void check_poly(void) {
         total+=n;assert(ss_samples[3]==total);
     }
     /* Coherent four-note peaks saturate instead of wrapping signed 16.16. */
-    memset(pool,0,sizeof(pool));fp[5]=127<<8;
+    memset(pool,0,sizeof(pool));fp[2]=0;fp[4]=0;fp[5]=127<<8;
     for (unsigned v=0;v<4;++v) {
         pool[v][3]=21426141;pool[v][6]=16384;((uint8_t *)pool[v])[36]=1;
         *(uint16_t *)((uint8_t *)pool[v]+60)=16384;ss_init(&ss_poly_voices[3][v]);
@@ -132,7 +131,7 @@ static void check_poly(void) {
     ss_track_fill(3,(uint8_t *)state,fp,out,32,(uint8_t *)pool);
     unsigned saturated=0;
     for(unsigned i=0;i<32;++i) saturated+=(out[2*i]==INT32_MIN || out[2*i]==2147418112);
-    assert(saturated);fp[5]=30<<8;
+    assert(saturated);fp[2]=110<<8;fp[4]=40<<8;fp[5]=30<<8;
     /* Native mono -> poly carries every resampler/oscillator bit. */
     ss_init(&ss_voices[3]);struct ss_params p={21426141,96,110,40,30};
     int16_t scratch[3];ss_render(&ss_voices[3],&p,scratch,3);
@@ -179,7 +178,7 @@ int main(int argc, char **argv) {
     for (unsigned knob = 0; knob < 4; ++knob) {
         struct ss_params q = p;
         if (knob == 0) q.detune = 0;
-        if (knob == 1) q.mix = 0;
+        if (knob == 1) q.morph = 0;
         if (knob == 2) q.sub = 0;
         if (knob == 3) q.drive = 0;
         ss_init(&a); ss_render(&a, &q, other, 4096);
@@ -198,7 +197,7 @@ int main(int argc, char **argv) {
     for (unsigned i = 0; i < 300; ++i) {
         if (i % 5 == 0) p.increment += 123456;
         if (i % 5 == 1) p.detune = (uint8_t)i;
-        if (i % 5 == 2) p.mix = (uint8_t)(i*3);
+        if (i % 5 == 2) p.morph = (uint8_t)(i*3);
         if (i % 5 == 3) p.sub = (uint8_t)(i*7);
         if (i % 5 == 4) p.drive = (uint8_t)(i*11);
         for (unsigned repeat = 0; repeat < 3; ++repeat) {
@@ -219,10 +218,10 @@ int main(int argc, char **argv) {
     assert(ss_fill(0,(uint8_t *)state,fp,out,16));
     assert(ss_fill(1,(uint8_t *)state,fp,out2,16));
     assert(!memcmp(out,out2,32*sizeof(*out)));
-    uint32_t held_phase = ss_voices[0].phase[3];
+    uint32_t held_phase = ss_voices[0].phase[0];
     assert(held_phase);
-    ss_activate(0,1,32768); assert(ss_voices[0].phase[3] == held_phase);
-    ss_activate(0,1,0); assert(ss_voices[0].phase[3] == 0);
+    ss_activate(0,1,32768); assert(ss_voices[0].phase[0] == held_phase);
+    ss_activate(0,1,0); assert(ss_voices[0].phase[0] == 0);
     ((uint8_t *)state)[80] = 1;
     assert(ss_fill(0,(uint8_t *)state,fp,out,16));
     for (unsigned i=0;i<32;++i) assert(out[i] == 0);
@@ -239,12 +238,27 @@ int main(int argc, char **argv) {
         for (unsigned j=0;j<n;++j) assert(whole[j]>=-27308 && whole[j]<=27308);
         assert(!memcmp(&a, &b, sizeof(a)));
     }
+    /* Fixed pair per note: +/-1.5625% spread, independent sub, no hidden
+     * seven-lane state. MORF endpoints are equally weighted sum/difference. */
+    assert(sizeof(a.phase)/sizeof(a.phase[0])==2);
+    ss_init(&a); p=(struct ss_params){21426141,127,0,0,0};
+    ss_render(&a,&p,whole,2);
+    assert(a.increments[0]+a.increments[1]==2*a.base);
+    assert(abs((int)(a.base-a.increments[0])-(int)(a.base/64))<=1);
+    assert(a.saw_weight==a.morph_weight);
+    uint32_t phases[2]={a.phase[0],a.phase[1]};
+    p.morph=127;ss_render(&a,&p,whole,2);
+    assert(a.morph_weight==-a.saw_weight);
+    assert(a.phase[0]==phases[0]+a.increments[0]);
+    assert(a.phase[1]==phases[1]+a.increments[1]);
     check_gain();
     check_poly();
     if (argc == 2) {
         FILE *f = fopen(argv[1], "wb"); assert(f);
         p = (struct ss_params){21426141,0,0,0,0};
         ss_init(&a); ss_render(&a,&p,whole,4096);
+        assert(fwrite(whole,sizeof(*whole),4096,f)==4096);
+        p.morph=127; ss_init(&a); ss_render(&a,&p,whole,4096);
         assert(fwrite(whole,sizeof(*whole),4096,f)==4096); fclose(f);
     }
     puts("[ok] Supersaw split blocks, independent voices, controls, extremes, markers and mono/four-note lifecycles");

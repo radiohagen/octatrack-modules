@@ -1,5 +1,5 @@
 /* SPDX-License-Identifier: MIT
- * Octatrack adapter for the original seven-saw engine.
+ * Octatrack adapter for the original two-saw engine.
  * Up to four Supersaw notes per track; the existing synth owns notes/AMP.
  */
 #include <stdint.h>
@@ -59,7 +59,7 @@ int ss_fill(uint32_t track, uint8_t *state, const uint16_t *fp,
     }
     struct ss_params params = {
         .increment = *(uint32_t *)(state+12),
-        .detune = (fp[1] >> 8) & 127, .mix = (fp[2] >> 8) & 127,
+        .detune = (fp[1] >> 8) & 127, .morph = (fp[2] >> 8) & 127,
         .sub = (fp[4] >> 8) & 127, .drive = (fp[5] >> 8) & 127
     };
     int16_t audio[32];
@@ -120,7 +120,7 @@ int ss_track_fill(uint32_t track, uint8_t *state, const uint16_t *fp,
     for (unsigned v=0;v<4;++v) active |= pool[v*64+36];
     if (!state[80]) {
         ss_fill(track,state,fp,out,n);
-        if (!active) return 1; /* Preserve the S4 mono samples exactly. */
+        if (!active) return 1; /* No poly tail: the mono render is already complete. */
     } else {
         *(uint16_t *)(state+38)=0;
         ss_samples[track]+=n;
@@ -184,7 +184,7 @@ uint8_t *ss_page(uint8_t *original, uint32_t track) {
     for (unsigned i=0; i<sizeof(ss_descriptor); ++i) ss_descriptor[i]=original[i];
     const char title[9] = "SUPERSAW";
     for (unsigned i=0; i<9; ++i) ss_descriptor[9+i]=(uint8_t)title[i];
-    const char names[6][6]={"PTCH","DETU","MIX","FINE","SUB","DRIV"};
+    const char names[6][6]={"PTCH","DETU","MORF","FINE","SUB","DRIV"};
     for (unsigned i=0; i<36; ++i) ss_descriptor[0x16+i]=((const uint8_t *)names)[i];
     /* Keep pitch and cents formatters; other values use the stock decimal
      * formatter/dial and ordinary one-unit handler (no FM ratio snapping). */

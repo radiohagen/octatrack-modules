@@ -12,26 +12,28 @@ static int32_t lookup(const int16_t *table, uint32_t phase) {
     return table[(phase + 0x100000u) >> 21];
 }
 void ss_init(struct ss_voice *voice) {
-    for (unsigned i = 0; i < 7; ++i) voice->phase[i] = 0;
+    for (unsigned i = 0; i < 2; ++i) voice->phase[i] = 0;
+    /* A quarter-cycle offset makes subtraction a pulse at zero detune. */
+    voice->phase[1] = 0x40000000u;
     voice->sub_phase = 0;
     voice->last = voice->previous = voice->older = 0; voice->pending = 0;
     voice->base = voice->controls = voice->bank = 0;
-    voice->centre_weight = voice->side_weight = voice->sub_gain = voice->drive_gain = 0;
-    for (unsigned i = 0; i < 7; ++i) voice->increments[i] = 0;
+    voice->saw_weight = voice->morph_weight = voice->sub_gain = voice->drive_gain = 0;
+    for (unsigned i = 0; i < 2; ++i) voice->increments[i] = 0;
 }
 /* Keep the cache guard before its arithmetic. Inlining lets GCC hoist
  * control products into every source call, even on a warm cache. */
 static __attribute__((noinline)) void ss_prepare(struct ss_voice *voice, const struct ss_params *params) {
     uint32_t base = params->increment;
-    unsigned detune = params->detune & 127, mix = params->mix & 127;
+    unsigned detune = params->detune & 127, morph = params->morph & 127;
     unsigned sub = params->sub & 127, drive = params->drive & 127;
     if (base < 1024) base = 1024;
     if (base > 0x7d000000u) base = 0x7d000000u;
-    uint32_t controls = detune | (mix << 8) | (sub << 16) | (drive << 24);
+    uint32_t controls = detune | (morph << 8) | (sub << 16) | (drive << 24);
     if (voice->base == base && voice->controls == controls) return;
     voice->base = base; voice->controls = controls;
     uint32_t maximum = 0;
-    for (unsigned i = 0; i < 7; ++i) {
+    for (unsigned i = 0; i < 2; ++i) {
         /* Split the Q20 ratio around unity: bounded signed 32-bit products,
          * avoiding a ColdFire 64-bit runtime helper. At most one phase LSB
          * of rounding error, applied once per source call. */
@@ -44,16 +46,15 @@ static __attribute__((noinline)) void ss_prepare(struct ss_voice *voice, const s
     unsigned bank = 0;
     while (bank < 7 && maximum <= (0x7fffffffu >> (bank + 1))) ++bank;
     voice->bank = bank;
-    /* Constant weights: MIX 0 is the centre oscillator, MIX 127 makes
-     * the six side oscillators together as loud as the centre. The sub
-     * shares a fixed output budget. No per-sample variable division. */
-    int32_t side_gain = (int32_t)mix * 129;
-    int32_t centre_gain = 32768 - side_gain;
+    /* Equal saw pair. MORF continuously reverses the second saw's polarity:
+     * sum at 0, difference (pulse at zero detune) at 127. Weights stay
+     * bounded even at the endpoints, with a separate fixed sub budget. */
     int32_t sub_gain = (int32_t)sub * 64;
     int32_t saw_gain = 32768 - sub_gain;
+    int32_t polarity = 32768 - (int32_t)morph * 65536 / 127;
     voice->drive_gain = 256 + (int32_t)drive * 6;
-    voice->centre_weight = (centre_gain * saw_gain) >> 15;
-    voice->side_weight = (((side_gain * 5461) >> 15) * saw_gain) >> 15;
+    voice->saw_weight = saw_gain / 2;
+    voice->morph_weight = (voice->saw_weight * polarity) >> 15;
     voice->sub_gain = sub_gain;
 }
 static void ss_core_render(struct ss_voice *voice, const struct ss_params *params,
@@ -64,50 +65,19 @@ static void ss_core_render(struct ss_voice *voice, const struct ss_params *param
     ss_prepare(voice, params);
     uint32_t base = voice->base;
     const int16_t *table = ss_saws[voice->bank];
-    int32_t centre_weight = voice->centre_weight, side_weight = voice->side_weight;
+    int32_t saw_weight = voice->saw_weight, morph_weight = voice->morph_weight;
     int32_t sub_gain = voice->sub_gain, drive_gain = voice->drive_gain;
     unsigned drive = params->drive & 127;
-    /* Keep one oscillator's phase, increment and weight in registers. The
-     * bounded accumulator avoids spilling eight live oscillator lanes on
-     * every sample. Phase continuity is independent of external call splitting. */
-    int32_t sum[16];
-    if (side_weight) {
-        /* Seed from the first side oscillator instead of clearing a scratch
-         * buffer and then adding that same oscillator. */
-        uint32_t phase = voice->phase[0], step = voice->increments[0];
-        for (uint32_t n = 0; n < count; ++n) {
-            sum[n] = lookup(table, phase);
-            phase += step;
-        }
-        voice->phase[0] = phase;
-        for (unsigned lane = 1; lane < 7; ++lane) {
-            if (lane == 3) continue;
-            phase = voice->phase[lane];
-            step = voice->increments[lane];
-            uint32_t n = 0;
-            /* Four at a time reduces the ColdFire loop overhead. The tail
-             * keeps odd and short calls bit-identical to the scalar path. */
-            for (; n + 4 <= count; n += 4) {
-                sum[n+0] += lookup(table, phase); phase += step;
-                sum[n+1] += lookup(table, phase); phase += step;
-                sum[n+2] += lookup(table, phase); phase += step;
-                sum[n+3] += lookup(table, phase); phase += step;
-            }
-            for (; n < count; ++n) {
-                sum[n] += lookup(table, phase); phase += step;
-            }
-            voice->phase[lane] = phase;
-        }
-    } else {
-        for (unsigned lane = 0; lane < 7; ++lane)
-            if (lane != 3) voice->phase[lane] += voice->increments[lane] * count;
-    }
-    uint32_t centre_phase = voice->phase[3], sub_phase = voice->sub_phase;
+    /* Both phases always advance, including where MORF nearly cancels the
+     * second saw. No oscillator reallocation when another note is played. */
+    uint32_t first = voice->phase[0], second = voice->phase[1];
+    uint32_t step1 = voice->increments[0], step2 = voice->increments[1];
+    uint32_t sub_phase = voice->sub_phase;
     int32_t previous = voice->last, previous2 = voice->previous, previous3 = voice->older;
     for (uint32_t n = 0; n < count; ++n) {
-        int32_t value = side_weight ? sum[n] * side_weight : 0;
-        value += lookup(table, centre_phase) * centre_weight;
-        centre_phase += voice->increments[3];
+        int32_t value = lookup(table, first) * saw_weight
+                      + lookup(table, second) * morph_weight;
+        first += step1; second += step2;
         if (sub_gain) value += lookup(ss_sine, sub_phase) * sub_gain;
         sub_phase += base / 2;
         int32_t sample = value >> 15;
@@ -132,7 +102,7 @@ static void ss_core_render(struct ss_voice *voice, const struct ss_params *param
     }
     voice->last = (int16_t)previous;
     voice->previous = (int16_t)previous2; voice->older = (int16_t)previous3;
-    voice->phase[3] = centre_phase;
+    voice->phase[0] = first; voice->phase[1] = second;
     voice->sub_phase = sub_phase;
 }
 

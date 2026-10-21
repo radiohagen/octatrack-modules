@@ -33,21 +33,26 @@ def main():
                         '-fsanitize=address,undefined','modules/supersaw/test_engine.c',
                         '-o',str(exe)],cwd=ROOT,check=True)
         subprocess.run([str(exe),str(raw)],check=True)
-        pcm = array.array('h',raw.read_bytes())
+        samples = array.array('h',raw.read_bytes())
+        assert len(samples) == 8192
         increment = 21426141
         harmonics = 1
         while harmonics < 128 and increment*2*harmonics*2 < 2**31: harmonics *= 2
-        # Independent analytical Fourier series at the actual phase; no engine tables.
-        def exact(n):
-            return -20000/math.pi * sum(math.sin(2*math.pi*k*((n*increment)%2**32)/2**32)/k
-                         for k in range(1,harmonics+1))
-        # Independent half-rate synthesis + causal four-point interpolation.
-        reference = [exact(max(0,n-3)) if n % 2 else
-                     (-exact(max(0,n-6))+9*exact(max(0,n-4))+9*exact(max(0,n-2))-exact(n))/16
-                     for n in range(len(pcm))]
-        error = math.sqrt(sum((a-b)**2 for a,b in zip(pcm,reference))/sum(b*b for b in reference))
-        assert error < .035, ('Fourier reference error',error)
-        assert abs(sum(pcm)/len(pcm)) < 150
-        print(f'[ok] independent Fourier reference relative RMS error {error:.6f}')
+        for morph,polarity,pcm in ((0,1,samples[:4096]),(127,-1,samples[4096:])):
+            # Independent analytical Fourier series at the actual phase; no engine tables.
+            def exact(n):
+                if n < 0: return 0  # cold causal history
+                phase = ((n*increment)%2**32)/2**32
+                return -10000/math.pi * sum(
+                    (math.sin(2*math.pi*k*phase) + polarity*math.sin(2*math.pi*k*(phase+.25)))/k
+                    for k in range(1,harmonics+1))
+            # Independent two-saw sum, half-rate source and causal interpolation.
+            reference = [exact(n-3) if n % 2 else
+                         (-exact(n-6)+9*exact(n-4)+9*exact(n-2)-exact(n))/16
+                         for n in range(len(pcm))]
+            error = math.sqrt(sum((a-b)**2 for a,b in zip(pcm,reference))/sum(b*b for b in reference))
+            assert error < .035, ('Fourier reference error',error)
+            assert abs(sum(pcm)/len(pcm)) < 150
+            print(f'[ok] independent Fourier reference MORF={morph} relative RMS error {error:.6f}')
     print('[ok] unselected images preserve prior Synth source; no competing native hooks')
 if __name__ == '__main__': main()

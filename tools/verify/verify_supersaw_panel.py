@@ -21,15 +21,16 @@ sys.path.insert(0, str(ROOT/'tools/emu'))
 import lcd_view
 
 
-def analyze(work, tracks):
+def analyze(work, tracks, control="DETU"):
     cmd = json.loads((work/'command.json').read_text())
     image = Path(cmd[cmd.index('--image')+1])
     project = Path(cmd[cmd.index('--card')+1]).parent/'project'
     log = (work/'port.log').read_text()
     assert 'ended on quit' in log and 'LOAD PROJECT handled' in log
     assert all(x not in log for x in ('WAIT TIMEOUT','ended early','unimplemented opcode','DID NOT RETURN'))
-    lane = 0x80000810+72*tracks[0]+1
-    for value in ('65','60'):
+    knob, initial, change = (1,96,5) if control=="DETU" else (2,110,-20)
+    lane = 0x80000810+72*tracks[0]+knob
+    for value in (f"{initial+change:02x}",f"{initial:02x}"):
         assert f'wait {lane:#x} {value} eq met' in log, 'encoder update did not reach the live lane'
     n = int(re.search(r'over (\d+) frames, ended on quit',log)[1])
     rows = blockdump.read(work/'blocks.bin')
@@ -81,9 +82,9 @@ def analyze(work, tracks):
     receipt = dict(result='pass',image_sha256=hashlib.sha256(image.read_bytes()).hexdigest(),
         simultaneous_tracks=len(tracks),frames=spans[0][2],script_frame_counter=n,
         audio=audio,encoder_audio_response=dict(before_relative_difference=before,after_relative_difference=after),
-        ss_samples=counts,real_panel=True,hardware_tested=False,command=cmd)
+        ss_samples=counts,control=control,real_panel=True,hardware_tested=False,command=cmd)
     (work/'audio-ui-receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
-    print(f'[ok] {len(tracks)} Supersaw tracks: real panel DETU edit changes audio, note-off, continuous output on both cores, unchanged FX slots',flush=True)
+    print(f'[ok] {len(tracks)} Supersaw tracks: real panel {control} edit changes audio, note-off, continuous output on both cores, unchanged FX slots',flush=True)
     return receipt
 
 
@@ -94,11 +95,12 @@ def main():
     mode.add_argument('--analyze',type=Path,help='inspect an existing capture without rerunning firmware')
     parser.add_argument('--tracks',default='1,2,3,4,5,6,7,8')
     parser.add_argument('--name',default='panel-eight')
+    parser.add_argument('--control',choices=('DETU','MORF'),default='DETU')
     args = parser.parse_args()
     tracks = tuple(int(t)-1 for t in args.tracks.split(','))
     assert 2<=len(tracks)<=8 and len(set(tracks))==len(tracks) and all(0<=t<8 for t in tracks)
     if args.analyze:
-        analyze(args.analyze,tracks)
+        analyze(args.analyze,tracks,args.control)
         return
     work = ROOT/'out/supersaw-port'/args.name
     work.mkdir(parents=True,exist_ok=False)
@@ -106,14 +108,15 @@ def main():
     shutil.copy2(ROOT/'out/mainos_bus.bin',work/'candidate.bin')
     raw = subprocess.check_output(['m68k-elf-nm',str(ROOT/'out/platform/runtime/runtime.elf')],text=True)
     sym = {f[2]:int(f[0],16) for line in raw.splitlines() if len(f:=line.split())==3}
-    lane = 0x80000810+72*tracks[0]+1
+    knob, initial, change = (1,96,5) if args.control=="DETU" else (2,110,-20)
+    lane = 0x80000810+72*tracks[0]+knob
     rows=['0 key 0x32 down','40 key 0x32 up','100 pot 128',
         f'200 key {0x10+tracks[0]:#x} down',f'240 key {0x10+tracks[0]:#x} up',
         '400 key 0x22 down','440 key 0x22 up','660 key 0x28 down','700 key 0x28 up']
     rows += [f'800 midi {0x90+t:02x} 54 64' for t in tracks]
-    rows += ['1400 enc 1 5',f'1900 wait {lane:#x} 65 eq 1']
+    rows += [f'1400 enc {knob} {change}',f'1900 wait {lane:#x} {initial+change:02x} eq 1']
     rows += [f'2300 midi {0x80+t:02x} 54 00' for t in tracks]
-    rows += ['2900 enc 1 -5',f'3000 wait {lane:#x} 60 eq 1','3200 quit']
+    rows += [f'2900 enc {knob} {-change}',f'3000 wait {lane:#x} {initial:02x} eq 1','3200 quit']
     (work/'panel.script').write_text('\n'.join(rows)+'\n')
     dumps=';'.join(f'{sym[k]:#x},32={work}/{k}.bin' for k in ('ss_samples','ss_unsupported'))
     dumps+=f';0x80000110,512={work}/dsp-records.bin;0x80000810,576={work}/lanes.bin'
@@ -125,7 +128,7 @@ def main():
     with (work/'port.log').open('w') as log:
         result=subprocess.run(cmd,cwd=ROOT,stdout=log,stderr=subprocess.STDOUT,timeout=300)
     assert result.returncode == 0, work/'port.log'
-    analyze(work,tracks)
+    analyze(work,tracks,args.control)
 
 
 if __name__=='__main__': main()

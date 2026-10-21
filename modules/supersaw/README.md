@@ -1,6 +1,6 @@
 # Supersaw
 
-Seven detuned saw oscillators, a sine sub and bounded drive, generated entirely
+Two detuned saw oscillators per note, a sine sub and bounded drive, generated entirely
 on the ColdFire CPU. **Both FX1 and FX2 remain available.** No DSP synthesis code,
 effect ID or bus buffer is allocated. The normal DSP signal path still applies
 the track's effects, routing and output mix, as it does for a sample.
@@ -9,17 +9,25 @@ Load `FMSYNTH-SUPERSAW.wav` into one FLEX sample slot and select it on the desir
 track. Multiple tracks can share that marker slot. Create the silent marker with
 `python3 modules/supersaw/marker.py out/AUDIO/FMSYNTH-SUPERSAW.wav`.
 Set LFO-page **VOIC to 1–4** for the maximum simultaneous notes on that track.
-Each note has seven saw oscillators and its own sine sub. For keyboard/MIDI
+Each note has two saw oscillators and its own sine sub. For keyboard/MIDI
 chords set **CHRD to ----**; a chord shape instead generates a chord from each
 trigger, including sequencer trigs. No extra track or FX slot is reserved.
 
-PLAYBACK controls are PTCH, DETU, MIX, FINE, SUB and DRIV. DETU reaches ±35 cents
-with a quadratic response. MIX balances the centre oscillator and six detuned
-sides. SUB adds a sine one octave below. DRIV adds bounded saturation; zero
+PLAYBACK controls are PTCH, DETU, MORF, FINE, SUB and DRIV. DETU linearly spreads
+the pair to ±1.5625% in frequency (about 27 cents). MORF changes the second saw
+from added to subtracted; with zero detune its quarter-cycle offset produces a
+pulse at MORF 127. SUB adds a sine one octave below. DRIV adds bounded saturation; zero
 bypasses it. AMP supplies the note envelope. The existing Synth Machine owns
 MIDI, sequencer, pitch and voice lifecycle; ordinary FM remains selectable.
 
 ## Implementation and limits
+
+S6 follows the op1r Supersaw topology: a fixed pair plus sub per note, limited
+here to four voices. It does not redistribute oscillators or stack voices in
+a separate unison mode. MORF replaces the earlier MIX control in the same knob
+position; existing experimental patches keep their numbers but sound different.
+The mathematical band-limited tables, interpolation and amplitude budget remain
+our own. The reference is [op1r source](https://github.com/pcppcp/op1r-src/blob/main/synth_sdk/plugins/supersaw/supersaw.c); this is not a sample-exact port.
 
 The original MIT-licensed fixed-point engine is recovered from module-repository
 commit `e789014` (import provenance: Octabam `3bd99bca`). It contains no OP-1 code
@@ -37,7 +45,13 @@ is inherited, including its documented held REL INF machine-switch limitation.
 
 The loader does not clear `.bss`. Every mutable Supersaw object therefore has an
 explicit initializer and is emitted into `.data`; the linked-code gate verifies
-all 4,442 initialized bytes. The imported version left those objects uninitialized.
+all 2,842 initialized bytes in S6 (4,442 in S5). The imported version left those objects uninitialized.
+
+## Historical seven-saw measurements (S1–S5)
+
+The following results belong to the previous seven-saw engine. S6 changes its
+sound and cost; its evidence is recorded separately below.
+
 Equal-weight side oscillators are summed before multiplication, preserving every
 sample and phase bit. Keeping preparation out of line prevents GCC from moving
 cached control products ahead of their cache guard. Isolated ColdFire counts for
@@ -135,3 +149,28 @@ remix suite, which has retained reference-fixture failures, into a clean pass.
 Run the gates inside the prepared Octabam worktree; see
 [CPU Supersaw integration](../../integration/SUPERSAW.md). Neither a build nor an
 emulator pass establishes physical-device acceptance.
+
+## Two-saw engine (S6)
+
+Each of the four notes now has two symmetrically detuned saws and one sub.
+MORF replaces MIX and continuously changes the second saw from addition to
+subtraction. This follows op1r's fixed per-note topology; it keeps our own
+band-limited synthesis and does not claim an exact OP-1 sound match.
+
+The linked four-note rich held block uses 3,900 instructions per 16 output
+samples, down from S5's 5,692 (31.5%). Rich single-note synthesis uses 712
+instructions (S5: 1,160), and the full-gain mono adapter uses 916 (S5: 1,360).
+These are instruction counts, not measured physical CPU headroom. Per-note
+history shrank from 96 to 56 bytes; initialized mutable storage is 2,842 bytes.
+Independent Fourier checks cover both MORF endpoints; source sanitizer tests
+cover changing controls, pitch bounds, split calls and four-note lifecycles.
+
+S6 passes the standalone full check and all scoped exact-image cases: mono
+regressions, native labels, eight-track DETU/MORF panel edits, four-note MIDI
+with both FX occupied, sequencer chords, live mono/poly transitions and four
+rich four-note tracks (16 notes). Both DSP capture paths remain continuous.
+The sequence analyzer initially reported an octave error because it counted
+zero crossings of the new paired waveform. A full-spectrum peak check confirms
+C4; reanalysis passes on the unchanged capture. The original failure remains
+retained. The first full check stopped on stale generated docs; the corrected
+rerun passed. These are emulator results; hardware remains unverified.

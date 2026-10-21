@@ -66,7 +66,7 @@ def verify_adapter(uc, call, sym):
                 actual.append(int.from_bytes(uc.mem_read(sym['ss_samples'],4),'big'))
                 assert bytes(uc.mem_read(0x26000+n*8,272-n*8))==bytes([0xa5])*(272-n*8), 'output overrun'
             if n==16:
-                limit=1460 if previous==target else 1600
+                limit=1000 if previous==target else 1150
                 assert iterations[1]<=limit, ('adapter instruction regression',previous,target,iterations,limit)
             costs.append(dict(previous=previous,target=target,samples=n,cold_instructions=iterations[0],warm_instructions=iterations[1]))
     assert tuple(actual)==expected, 'adapter output or envelope differs from host'
@@ -101,11 +101,11 @@ def verify_poly(uc,call,sym):
         actual.extend(struct.unpack(f'>{2*n}I',bytes(uc.mem_read(0x26000,n*8))))
         actual.extend(int.from_bytes(uc.mem_read(0x27000+64*v+60,2),'big') for v in range(4))
         assert bytes(uc.mem_read(0x26000+n*8,272-n*8))==bytes([0xa5])*(272-n*8)
-        if n==16: assert count<8000, ('four-note adapter instruction budget',count)
+        if n==16: assert count<5000, ('four-note adapter instruction budget',count)
         costs.append(dict(samples=n,target_gain=g,instructions=count))
     assert tuple(actual)==expected,'four-note native output differs from host'
     steady=call('ss_track_fill',2,0x24000,0x25000,0x26000,16,0x27000)
-    assert steady<6500, ('four-note steady instruction budget',steady)
+    assert steady<4100, ('four-note steady instruction budget',steady)
     return dict(exact_values=len(actual),costs=costs,steady_16_instructions=steady)
 
 
@@ -145,7 +145,7 @@ def main():
     source += 'struct ss_voice v; int16_t out[65];\n'
     for case in CASES:
         for n in COUNTS:
-            source += 'v=(struct ss_voice){{'+','.join(str(p)+'u' for p in PHASES[:7])+'},'+str(PHASES[7])+'u};\n'
+            source += 'v=(struct ss_voice){{'+','.join(str(p)+'u' for p in PHASES[:2])+'},'+str(PHASES[2])+'u};\n'
             source += '{struct ss_params p={'+','.join(str(p)+'u' for p in case)+'};'
             source += f'ss_render(&v,&p,out,{n});ss_render(&v,&p,out,{n});fwrite(out,2,{n},stdout);}}\n'
     source += 'return 0;}\n'
@@ -157,7 +157,7 @@ def main():
     costs = []
     for case in CASES:
         for n in COUNTS:
-            initial = struct.pack('>8I',*PHASES)+bytes(stride-32)
+            initial = struct.pack('>3I',*PHASES[:3])+bytes(stride-12)
             uc.mem_write(0x24000,initial)
             uc.mem_write(0x25000,struct.pack('>IBBBB',*case))
             cold = call('ss_render',0x24000,0x25000,0x26000,n)
@@ -168,8 +168,8 @@ def main():
             if n == 16:
                 # A regression budget for this generated engine, not a claim
                 # about hardware cycles or the whole frame's CPU headroom.
-                # S4 budgets include the four-point interpolator's measured cost.
-                limit = 560 if case[1:] == (0,0,0,0) else 1200
+                # S6 fixed pair plus sub and four-point interpolation.
+                limit = 520 if case[1:] == (0,0,0,0) else 750
                 assert warm <= limit, ('render instruction regression',case,warm,limit)
             costs.append(dict(params=case,samples=n,cold_instructions=cold,warm_instructions=warm))
     assert tuple(actual)==expected, [(i,a,b) for i,(a,b) in enumerate(zip(actual,expected)) if a!=b][:10]

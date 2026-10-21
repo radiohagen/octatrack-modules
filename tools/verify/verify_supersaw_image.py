@@ -40,6 +40,10 @@ def main():
     subprocess.run([sys.executable,'tools/verify/verify_supersaw_panel.py',
         '--project',project,'--name',name],cwd=ROOT,check=True)
     receipts.append(str(ROOT/'out/supersaw-port'/name/'audio-ui-receipt.json'))
+    name = prefix+'-panel-morph'
+    subprocess.run([sys.executable,'tools/verify/verify_supersaw_panel.py',
+        '--project',project,'--name',name,'--control','MORF'],cwd=ROOT,check=True)
+    receipts.append(str(ROOT/'out/supersaw-port'/name/'audio-ui-receipt.json'))
     for mode in ('midi','sequence','transition'):
         name = prefix+'-poly-'+mode
         subprocess.run([sys.executable,'tools/verify/verify_supersaw_poly.py',

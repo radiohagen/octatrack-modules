@@ -25,11 +25,11 @@ Sophie, Post Fader or other experimental engine is added.
 Commands, from Octabam:
 
 ```sh
-make check REMIX=supersaw BUILD=S5
-make rmx REMIX=supersaw-inserts BUILD=S5 RMX='SAW INSERTS S5'
-OT_PROJECT=/path/to/local/project REMIX=supersaw-inserts BUILD=S5 \
-  RMXNAME='SAW INSERTS S5' .venv/bin/python tools/verify/verify_supersaw_image.py
-make check REMIX=supersaw-inserts BUILD=S5
+make check REMIX=supersaw BUILD=S6
+make rmx REMIX=supersaw-inserts BUILD=S6 RMX='SAW INSERTS S6'
+OT_PROJECT=/path/to/local/project REMIX=supersaw-inserts BUILD=S6 \
+  RMXNAME='SAW INSERTS S6' .venv/bin/python tools/verify/verify_supersaw_image.py
+make check REMIX=supersaw-inserts BUILD=S6
 ```
 
 Firmware/card images and private project fixtures stay in ignored local output.
@@ -53,3 +53,17 @@ driver failed staging a fixture on a full disk; retain the original failure.
 Additional rich tests pass on four tracks (16 notes); the 32-note stress case
 misses later MIDI changes and is not qualified. Physical acceptance is still
 unverified. The module source pin and final RMX hash identify this S5 evidence.
+
+S6 follows the op1r two-saw-plus-sub topology, retaining the four-voice native
+allocator and both FX slots. MORF replaces MIX. S4/S5 packages and receipts stay
+unchanged; their seven-saw audio is historical, not S6 evidence.
+
+S6 passes the standalone full check and all scoped exact-image cases: mono
+regressions, native labels, eight-track DETU/MORF panel edits, four-note MIDI
+with both FX occupied, sequencer chords, live mono/poly transitions and four
+rich four-note tracks (16 notes). Both DSP capture paths remain continuous.
+The sequence analyzer initially reported an octave error because it counted
+zero crossings of the new paired waveform. A full-spectrum peak check confirms
+C4; reanalysis passes on the unchanged capture. The original failure remains
+retained. The first full check stopped on stale generated docs; the corrected
+rerun passed. These are emulator results; hardware remains unverified.
