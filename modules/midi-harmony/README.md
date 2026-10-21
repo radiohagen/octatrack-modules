@@ -84,7 +84,7 @@ volatile and start at zero after project load or power-on.
 
 ## MIDI Follow
 
-When both modules are selected, include [HARMONY FOLLOW](../harmony-follow/README.md)
+Both modules register with [SEQUENCER EVENTS](../../docs/SYSTEM_EVENTS.md)
 to share transport and successful-note events. Follow supplies a source note set.
 A HARM OFF source supplies N1–4; a HARM NOTE/CHORD source supplies only its
 resolved degree:oct root as Note 1. HARM OFF on the follower plays the supplied

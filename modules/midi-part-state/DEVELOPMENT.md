@@ -51,7 +51,7 @@ the other settings. Fresh Parts initialize all flags to zero. Follow's REG
 now occupies its own packed field at offset 15, not the shared flag byte.
 
 Transport and successful-note hooks belong to Follow and Harmony. Select
-HARMONY FOLLOW when both are present; its shared dispatcher notifies each
+SEQUENCER EVENTS; its shared dispatcher notifies each
 consumer once. Part State supplies persistence and coherent publication only.
 
 For full firmware checks on a copied project, run

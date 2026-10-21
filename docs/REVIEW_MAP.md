@@ -13,7 +13,7 @@ must be checked against its C sources and generators. Original credits remain.
 | [midi-follow](../modules/midi-follow/README.md) | 7 | MIDI Part State; optional Scales/Loopback/Harmony |
 | [midi-sram](../modules/midi-sram/README.md) | 5 | MIDI Part State; precise sparse SRAM claims |
 | [midi-harmony](../modules/midi-harmony/README.md) | 63 | MIDI Part State + STORE + MIDI SRAM |
-| [harmony-plocks](../modules/harmony-plocks/README.md) | 3 | MIDI Harmony + upstream PLOCKS P2 |
+| [harmony-plocks](SYSTEM_EVENTS.md) | 3 | MIDI Harmony + upstream PLOCKS P2 |
 | [pio-write-fix](../modules/pio-write-fix/README.md) | 3 | upstream MEMORY; conflicts with STEM REC owning same fix |
 | [quantizer-midi-drawer compatibility name](../modules/quantizer-midi-drawer/README.md) | upstream-owned | no additional hooks after #741 |
 | [original drawer implementation](../modules/_legacy_quantizer-midi-drawer/README.md) | 3 | superseded by upstream #741; inactive |

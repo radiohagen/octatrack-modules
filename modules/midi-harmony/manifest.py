@@ -4,8 +4,7 @@ from remix.schema import Store, Category, Claims, Detour, Gate, Kind, Linked, Mo
 
 def follow_inc(modules, remix=None):
     return (('.set HAVE_FOLLOW,1\n' if 'MIDI FOLLOW' in modules else '') +
-            ('.set HAVE_SCALES,1\n' if 'MIDI SCALES' in modules else '') +
-            ('.set HAVE_PLOCKS_BRIDGE,1\n' if 'HARMONY PLOCKS' in modules else ''))
+            ('.set HAVE_SCALES,1\n' if 'MIDI SCALES' in modules else ''))
 
 
 MODULE = Module(
@@ -14,8 +13,7 @@ MODULE = Module(
     author_url='https://github.com/radiohagen/octatrack-modules', proof=Proof.PORT,
     proof_note='',
     doc='Scale-degree roots, generated chords and CHORD PLAY using native ARP KEY; optional MIDI Follow.',
-    conflicts=(("EUCLID", "shared transport start/resume hooks need a composition bridge"),),
-    requires=('MIDI PART STATE','STORE','MIDI SRAM'),
+    requires=('MIDI PART STATE','STORE','MIDI SRAM','SEQUENCER EVENTS','EDIT EVENTS'),
     linked=(Linked('chordpart', 'modules/midi-harmony/chord-part.s', dram=True),
             Linked('harmonytransport', 'modules/midi-harmony/transport.s', dram=True),
             Linked('harmonyownership', 'modules/midi-harmony/ownership.s', dram=True),
@@ -77,10 +75,6 @@ MODULE = Module(
         Poke(0x400d43aa, bytes.fromhex('00000080'), bytes.fromhex('00000054'), 'Native Part DEG range 0..83')),
     claims=Claims(part_window=tuple((0x4e2+36*t+f, 1, 'Harmony Part setting') for t in range(8) for f in (5,16,18,19))),
     detours=(
-        Detour(0x4009c3d4, bytes.fromhex('23c0800065b8'), 'harmonytransport', 'mh_start_a', 'reset Harmony accumulator on transport start'),
-        Detour(0x4009c4d4, bytes.fromhex('23c0800065b8'), 'harmonytransport', 'mh_start_b', 'reset Harmony accumulator on transport resume'),
-        Detour(0x4009fbb2, bytes.fromhex('7339400d807c'), 'harmonytransport', 'mh_sent_a', 'advance Harmony accumulator after successful note-on'),
-        Detour(0x4009fcfa, bytes.fromhex('7139400d807c'), 'harmonytransport', 'mh_sent_b', 'advance Harmony accumulator after ownership replacement'),
         *(Detour(addr, bytes.fromhex('41f946c78d70'), 'harmonyownership', symbol,
                  'track-owned generated keyboard release slot') for addr,symbol in (
                      (0x4009eab4,'mh_key_slot_on'), (0x4009eaea,'mh_key_slot_arp'),
@@ -93,26 +87,6 @@ MODULE = Module(
         Detour(0x40033aac, bytes.fromhex('4cd77cfc4fef002c'), 'chordoperations', 'ch_bitmap_all', 'include CHRD in current-pattern lock indicators', pad_to=8),
         Detour(0x40033bba, bytes.fromhex('4cd7001c4fef000c'), 'chordoperations', 'ch_bitmap_step', 'include CHRD in step lock indicator', pad_to=8),
         Detour(0x40043728, bytes.fromhex("4feffff048d70c0c"), "harmonyplay", "ch_release_track", "release CHORD PLAY ownership on native mode/grid/project cleanup", pad_to=8),
-        Detour(0x400267e8, bytes.fromhex('4eb940020898'), 'chordoperations', 'ch_memcpy', 'CHRD pattern and MIDI track copies', kind='jsr'),
-        Detour(0x40026884, bytes.fromhex('4eb940020898'), 'chordoperations', 'ch_memcpy', 'CHRD pattern and MIDI track copies', kind='jsr'),
-        Detour(0x40026ece, bytes.fromhex('4eb940020898'), 'chordoperations', 'ch_memcpy', 'CHRD pattern and MIDI track copies', kind='jsr'),
-        Detour(0x40026f5e, bytes.fromhex('4eb940020898'), 'chordoperations', 'ch_memcpy', 'CHRD pattern and MIDI track copies', kind='jsr'),
-        Detour(0x40027764, bytes.fromhex('4eb940020898'), 'chordoperations', 'ch_memcpy', 'CHRD pattern and MIDI track copies', kind='jsr'),
-        Detour(0x40027834, bytes.fromhex('4eb940020898'), 'chordoperations', 'ch_memcpy', 'CHRD pattern and MIDI track copies', kind='jsr'),
-        Detour(0x4002924c, bytes.fromhex('4eb940020898'), 'chordoperations', 'ch_memcpy', 'CHRD pattern and MIDI track copies', kind='jsr'),
-        Detour(0x40029280, bytes.fromhex('4eb940020898'), 'chordoperations', 'ch_memcpy', 'CHRD pattern and MIDI track copies', kind='jsr'),
-        Detour(0x40029316, bytes.fromhex('4eb940020898'), 'chordoperations', 'ch_memcpy', 'CHRD pattern and MIDI track copies', kind='jsr'),
-        Detour(0x40029352, bytes.fromhex('4eb940020898'), 'chordoperations', 'ch_memcpy', 'CHRD pattern and MIDI track copies', kind='jsr'),
-        Detour(0x40029980, bytes.fromhex('4eb940020898'), 'chordoperations', 'ch_memcpy', 'CHRD pattern and MIDI track copies', kind='jsr'),
-        Detour(0x40029652, bytes.fromhex('49f940020898'), 'chordoperations', 'ch_memcpy', 'CHRD pattern and MIDI track copies', kind='lea'),
-        Detour(0x4002978e, bytes.fromhex('49f940020898'), 'chordoperations', 'ch_memcpy', 'CHRD pattern and MIDI track copies', kind='lea'),
-        Detour(0x4002b370, bytes.fromhex('45f940020898'), 'chordoperations', 'ch_memcpy', 'CHRD pattern and MIDI track copies', kind='lea'),
-        Detour(0x4002b42e, bytes.fromhex('45f940020898'), 'chordoperations', 'ch_memcpy', 'CHRD pattern and MIDI track copies', kind='lea'),
-        Detour(0x4002b4b2, bytes.fromhex('49f940020898'), 'chordoperations', 'ch_memcpy', 'CHRD pattern and MIDI track copies', kind='lea'),
-        Detour(0x4002b692, bytes.fromhex('49f940020898'), 'chordoperations', 'ch_memcpy', 'CHRD pattern and MIDI track copies', kind='lea'),
-        Detour(0x4002b9da, bytes.fromhex('45f940020898'), 'chordoperations', 'ch_memcpy', 'CHRD pattern and MIDI track copies', kind='lea'),
-        Detour(0x4003de14, bytes.fromhex('47f940020898'), 'chordoperations', 'ch_memcpy', 'CHRD pattern and MIDI track copies', kind='lea'),
-        Detour(0x4003e036, bytes.fromhex('47f940020898'), 'chordoperations', 'ch_memcpy', 'CHRD pattern and MIDI track copies', kind='lea'),
         Detour(0x4005fd8a, bytes.fromhex('e98e260dd686'), 'chordoperations', 'ch_place', 'CHRD MIDI edit lifecycle', pad_to=6),
         Detour(0x40040d44, bytes.fromhex('4fefffd448d77cfc'), 'chordoperations', 'ch_clear_locks', 'CHRD MIDI edit lifecycle', pad_to=8),
         Detour(0x40039b00, bytes.fromhex('4fefffc848d77cfc'), 'chordoperations', 'ch_clear_track', 'CHRD MIDI edit lifecycle', pad_to=8),
@@ -129,7 +103,6 @@ MODULE = Module(
         Detour(0x4004e1f6, bytes.fromhex('2d40ffb02040'), 'chordui', 'ch_descriptor', 'CHRD descriptor for CHORD tracks'),
         Detour(0x4004e382, bytes.fromhex('226effcc20690030'), 'chordui', 'ch_draw_value', 'CHRD held-step or live value', pad_to=8),
         Detour(0x40055008, bytes.fromhex('4fefffd048d77cfc'), 'chordui', 'ch_encoder', 'live CHRD selection without native writes', pad_to=8),
-        Detour(0x400508e4, bytes.fromhex('4fefffb048d77cfc'), 'chordui', 'ch_step_encoder', 'dedicated CHRD held-step editor', pad_to=8),
         Detour(0x40043fdc, bytes.fromhex('4fefffbc48d73c7c'), 'harmonyplay', 'ch_play_leds', 'root and variation LED groups outside grid recording', pad_to=8),
         Detour(0x40044920, bytes.fromhex('4fefffd448d77cfc'), 'harmonyplay', 'ch_play_guide', 'CHORD PLAY key layout guide', pad_to=8),
         Detour(0x400501d8, bytes.fromhex('2f02206f0008'), 'harmonyplay', 'ch_play_key', 'CHORD PLAY trig dispatch'),
@@ -153,7 +126,9 @@ MODULE = Module(
                     'Degree scene A seed/range before unchanged MIDISC hold', kind='jsr'),
              Detour(0x40052ec2, bytes.fromhex('4eb94006dbcc'), 'degreesceneaccess', 'hd_scene_hold_b',
                     'Degree scene B seed/range before unchanged MIDISC hold', kind='jsr')),
-    gates=(Gate('tools/verify/verify_harmony_accumulator.py', stage='image', venv=True),
+    gates=(Gate('tools/verify/verify_harmony_plocks.py', stage='image', venv=True),
+           Gate('tools/verify/verify_harmony_follow_port.py', stage='image', venv=True),
+           Gate('tools/verify/verify_harmony_accumulator.py', stage='image', venv=True),
            Gate('tools/verify/verify_harmony_store.py', stage='image', venv=True),
            Gate('tools/verify/verify_harmony_load_hooks.py', stage='image', venv=True),
            Gate('tools/verify/verify_midi_harmony_stress.py', stage='image', venv=True),

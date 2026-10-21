@@ -116,7 +116,7 @@ This layout claims no contiguous tail SRAM. PLOCKS P2, MIDI Scenes and KITS
 retain their upstream reservations. PLOCKS P2 retains upstream storage
 and its 4,768-lock recovery limit. Its separate trig-release editor fix does
 not alter storage.
-HARMONY PLOCKS still composes their shared editing/copy hooks. The protected
+EDIT EVENTS owns their shared editing/copy hooks and calls independent clients. The protected
 fields are reverse-engineered reclamation, not an official free-space contract.
 
 There is one implementation: degree-based NOTE/CHORD, ACC, HDP4 companions

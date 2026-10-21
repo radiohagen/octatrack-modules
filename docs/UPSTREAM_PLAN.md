@@ -122,7 +122,7 @@ Other-module work is explicit: Part State is required; Scales needs the
 composed-reference adapter in the candidate. Harmony's companion branch
 `codex/harmony-follow-integration` supplies its event ownership changes,
 HARMONY FOLLOW bridge and the SRAM branch-range fix for the larger image.
-EUCLID remains refused until a separate transport bridge is implemented.
+That historical branch refused EUCLID. The shared-event migration replaces the bridges with platform callbacks; see SYSTEM_EVENTS.md.
 
 The Harmony companion and full-bus interaction checks are recorded in
 [the scoped validation receipt](../integration/harmony-follow-validation.json).
