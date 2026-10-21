@@ -46,7 +46,7 @@ and voice-state bits, including odd call boundaries. S3 warm counts were 1,089
 for the rich patch and 473 for neutral (S1: 623). These are instruction counts,
 not hardware cycles. The linked gate guards against instruction regressions.
 
-**S3 runs eight simultaneous Supersaw tracks in the full-firmware emulator.**
+**S4 runs eight simultaneous Supersaw tracks in the full-firmware emulator.**
 The real-panel gate sends MIDI notes, presses the track/SRC keys, turns DETU
 while all eight notes sound, and restores it. The live parameter and audio both
 change, note-offs reach silence, both DSP paths deliver every captured frame,
@@ -77,8 +77,10 @@ selected bank harmonics across much of the tested pitch range, with less
 high-note attenuation. This includes interpolation images and lookup error,
 not only aliasing. Near the internal Nyquist limit the improvement is smaller.
 The isolated full adapter costs 1,360 warm instructions for the rich held patch
-and 1,538 while ramping (S3: 1,289 / 1,467). Full S4 image qualification is
-pending; S3 remains the eight-track-qualified fallback.
+and 1,538 while ramping (S3: 1,289 / 1,467). The rich oscillator loop uses 1,160 warm instructions (neutral: 537),
+still below S1 despite the interpolation improvement. S4 passes the standalone
+`make check` and the exact named Inserts image gate, including eight-track
+real-panel audio. S3 measurements and failed idle-call receipts remain retained.
 
 ## Verification
 
