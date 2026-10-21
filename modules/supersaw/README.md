@@ -26,8 +26,8 @@ detune ratios are generated mathematically. The Synth bridge pins Tim Hastie's
 `poly.s` source hash and applies unique anchors; unselected source stays verbatim.
 Sophie is optional legacy compatibility only and is not part of this qualification.
 
-Synthesis runs at 22.05 kHz with linear interpolation to 44.1 kHz, one output
-sample of latency, and state preserved across split calls. Eight 2048-point
+Synthesis runs at 22.05 kHz with four-point interpolation to 44.1 kHz, three output
+samples of latency, and state preserved across split calls. Eight 2048-point
 harmonic banks (1–128 partials) limit aliasing; the fundamental is clamped below
 10.77 kHz. This is not alias-free, particularly after drive. Controls update per
 source call without smoothing. The Synth Machine's voice/machine-change behavior
@@ -35,14 +35,14 @@ is inherited, including its documented held REL INF machine-switch limitation.
 
 The loader does not clear `.bss`. Every mutable Supersaw object therefore has an
 explicit initializer and is emitted into `.data`; the linked-code gate verifies
-all 1,210 initialized bytes. The imported version left those objects uninitialized.
+all 1,242 initialized bytes. The imported version left those objects uninitialized.
 Equal-weight side oscillators are summed before multiplication, preserving every
 sample and phase bit. Keeping preparation out of line prevents GCC from moving
 cached control products ahead of their cache guard. Isolated ColdFire counts for
 16 rich-patch samples improved from 1,378 in the import to 1,282 in S1. The
 S2 loop seeds the side sum from its first lane, unrolls accumulation four samples
 at a time, and interpolates directly into the destination. It preserves output
-and voice-state bits, including odd call boundaries. Warm counts are now 1,089
+and voice-state bits, including odd call boundaries. S3 warm counts were 1,089
 for the rich patch and 473 for neutral (S1: 623). These are instruction counts,
 not hardware cycles. The linked gate guards against instruction regressions.
 
@@ -68,6 +68,17 @@ The complete rich-patch adapter uses 1,289 warm instructions at steady full
 gain (S2: 1,485), or 1,467 while ramping. A wide-arithmetic envelope oracle
 covers every call length 0–32, attack, release, held/intermediate/clamped
 levels and output bounds. S2 was superseded before its queued audio tests.
+
+S4 replaces linear interpolation with the causal four-point kernel
+`(-1, 9, 9, -1) / 16`. It adds two output samples (45 microseconds) of latency
+and 32 bytes of voice history. The bounded source keeps interpolation peaks
+within +/-27,308. Coherent host FFT probes show 5–7 dB less energy outside the
+selected bank harmonics across much of the tested pitch range, with less
+high-note attenuation. This includes interpolation images and lookup error,
+not only aliasing. Near the internal Nyquist limit the improvement is smaller.
+The isolated full adapter costs 1,360 warm instructions for the rich held patch
+and 1,538 while ramping (S3: 1,289 / 1,467). Full S4 image qualification is
+pending; S3 remains the eight-track-qualified fallback.
 
 ## Verification
 

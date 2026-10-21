@@ -7,7 +7,8 @@
 #include <stdint.h>
 struct ss_voice {
     uint32_t phase[7], sub_phase;
-    int16_t last; uint16_t pending;
+    /* Three source samples for the causal four-point interpolator. */
+    int16_t last, previous, older; uint16_t pending;
     /* Derived controls are constant until pitch or a knob changes. */
     uint32_t base, increments[7], controls, bank;
     int32_t centre_weight, side_weight, sub_gain, drive_gain;

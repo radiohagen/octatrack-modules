@@ -14,7 +14,7 @@ static int32_t lookup(const int16_t *table, uint32_t phase) {
 void ss_init(struct ss_voice *voice) {
     for (unsigned i = 0; i < 7; ++i) voice->phase[i] = 0;
     voice->sub_phase = 0;
-    voice->last = 0; voice->pending = 0;
+    voice->last = voice->previous = voice->older = 0; voice->pending = 0;
     voice->base = voice->controls = voice->bank = 0;
     voice->centre_weight = voice->side_weight = voice->sub_gain = voice->drive_gain = 0;
     for (unsigned i = 0; i < 7; ++i) voice->increments[i] = 0;
@@ -103,7 +103,7 @@ static void ss_core_render(struct ss_voice *voice, const struct ss_params *param
             if (lane != 3) voice->phase[lane] += voice->increments[lane] * count;
     }
     uint32_t centre_phase = voice->phase[3], sub_phase = voice->sub_phase;
-    int32_t previous = voice->last;
+    int32_t previous = voice->last, previous2 = voice->previous, previous3 = voice->older;
     for (uint32_t n = 0; n < count; ++n) {
         int32_t value = side_weight ? sum[n] * side_weight : 0;
         value += lookup(table, centre_phase) * centre_weight;
@@ -121,20 +121,23 @@ static void ss_core_render(struct ss_voice *voice, const struct ss_params *param
             sample = x - ((cube * 10923) >> 15);
         }
         int32_t current = (int16_t)sample;
-        /* Interpolate directly into the destination: no temporary source
-         * array or second pass. An odd last sample leaves its pair pending. */
-        *output++ = (int16_t)((previous + current) >> 1);
-        if (n < pairs) *output++ = (int16_t)current;
+        /* Four-point half-sample interpolation: (-1,9,9,-1)/16. The
+         * causal history adds two output samples of latency versus linear,
+         * with less high-band droop and weaker interpolation images. The
+         * source is bounded to 21846; the filter peak stays below 27308. */
+        *output++ = (int16_t)((9*(previous + previous2) - previous3 - current) >> 4);
+        if (n < pairs) *output++ = (int16_t)previous;
         else voice->pending = 1;
-        previous = current;
+        previous3 = previous2; previous2 = previous; previous = current;
     }
     voice->last = (int16_t)previous;
+    voice->previous = (int16_t)previous2; voice->older = (int16_t)previous3;
     voice->phase[3] = centre_phase;
     voice->sub_phase = sub_phase;
 }
 
-/* Half-rate synthesis leaves headroom for the standard remix. Linear
- * interpolation has one output sample of latency. Pending preserves the
+/* Half-rate synthesis leaves headroom for the standard remix. Four-point
+ * interpolation has three output samples of latency. Pending preserves the
  * resampler across arbitrary native sub-frame call boundaries. */
 void ss_render(struct ss_voice *voice, const struct ss_params *params,
                int16_t *output, uint32_t count) {
@@ -143,7 +146,7 @@ void ss_render(struct ss_voice *voice, const struct ss_params *params,
     if (core.increment > 0x3e800000u) core.increment = 0x3e800000u;
     core.increment *= 2;
     if (voice->pending && count) {
-        *output++ = voice->last;
+        *output++ = voice->previous;
         voice->pending = 0; --count;
     }
     while (count) {

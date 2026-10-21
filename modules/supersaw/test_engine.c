@@ -15,7 +15,7 @@ static void reference(struct ss_voice *v, const struct ss_params *p,
     core.increment *= 2;
     while (count--) {
         if (v->pending) {
-            *out++ = v->last;
+            *out++ = v->previous;
             v->pending = 0;
             continue;
         }
@@ -35,7 +35,8 @@ static void reference(struct ss_voice *v, const struct ss_params *p,
             if (x < -32767) x = -32767;
             value = x - (((((x*x) >> 15)*x >> 15)*10923) >> 15);
         }
-        *out++ = (int16_t)(((int32_t)v->last + value) >> 1);
+        *out++ = (int16_t)((9*((int32_t)v->last + v->previous) - v->older - value) >> 4);
+        v->older = v->previous; v->previous = v->last;
         v->last = (int16_t)value;
         v->pending = 1;
     }
@@ -164,6 +165,7 @@ int main(int argc, char **argv) {
         ss_render(&a, &q, whole, n);
         reference(&b, &q, split, n);
         assert(!memcmp(whole, split, n*sizeof(*whole)));
+        for (unsigned j=0;j<n;++j) assert(whole[j]>=-27308 && whole[j]<=27308);
         assert(!memcmp(&a, &b, sizeof(a)));
     }
     check_gain();

@@ -65,7 +65,7 @@ def verify_adapter(uc, call, sym):
                 actual.append(int.from_bytes(uc.mem_read(sym['ss_samples'],4),'big'))
                 assert bytes(uc.mem_read(0x26000+n*8,272-n*8))==bytes([0xa5])*(272-n*8), 'output overrun'
             if n==16:
-                limit=1350 if previous==target else 1530
+                limit=1460 if previous==target else 1600
                 assert iterations[1]<=limit, ('adapter instruction regression',previous,target,iterations,limit)
             costs.append(dict(previous=previous,target=target,samples=n,cold_instructions=iterations[0],warm_instructions=iterations[1]))
     assert tuple(actual)==expected, 'adapter output or envelope differs from host'
@@ -131,7 +131,8 @@ def main():
             if n == 16:
                 # A regression budget for this generated engine, not a claim
                 # about hardware cycles or the whole frame's CPU headroom.
-                limit = 500 if case[1:] == (0,0,0,0) else 1150
+                # S4 budgets include the four-point interpolator's measured cost.
+                limit = 560 if case[1:] == (0,0,0,0) else 1200
                 assert warm <= limit, ('render instruction regression',case,warm,limit)
             costs.append(dict(params=case,samples=n,cold_instructions=cold,warm_instructions=warm))
     assert tuple(actual)==expected, [(i,a,b) for i,(a,b) in enumerate(zip(actual,expected)) if a!=b][:10]

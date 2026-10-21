@@ -41,8 +41,9 @@ def main():
         def exact(n):
             return -20000/math.pi * sum(math.sin(2*math.pi*k*((n*increment)%2**32)/2**32)/k
                          for k in range(1,harmonics+1))
-        # Independent half-rate synthesis + causal linear interpolation.
-        reference = [exact(n-1) if n % 2 else (exact(max(0,n-2))+exact(n))/2
+        # Independent half-rate synthesis + causal four-point interpolation.
+        reference = [exact(max(0,n-3)) if n % 2 else
+                     (-exact(max(0,n-6))+9*exact(max(0,n-4))+9*exact(max(0,n-2))-exact(n))/16
                      for n in range(len(pcm))]
         error = math.sqrt(sum((a-b)**2 for a,b in zip(pcm,reference))/sum(b*b for b in reference))
         assert error < .035, ('Fourier reference error',error)
