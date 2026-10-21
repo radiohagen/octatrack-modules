@@ -8,8 +8,10 @@ the track's effects, routing and output mix, as it does for a sample.
 Load `FMSYNTH-SUPERSAW.wav` into one FLEX sample slot and select it on the desired
 track. Multiple tracks can share that marker slot. Create the silent marker with
 `python3 modules/supersaw/marker.py out/AUDIO/FMSYNTH-SUPERSAW.wav`.
-Set LFO-page **VOIC to 1**: seven oscillators form one note, not seven MIDI voices.
-VOIC 2–4 is unsupported and silent. No extra track is reserved or stolen.
+Set LFO-page **VOIC to 1–4** for the maximum simultaneous notes on that track.
+Each note has seven saw oscillators and its own sine sub. For keyboard/MIDI
+chords set **CHRD to ----**; a chord shape instead generates a chord from each
+trigger, including sequencer trigs. No extra track or FX slot is reserved.
 
 PLAYBACK controls are PTCH, DETU, MIX, FINE, SUB and DRIV. DETU reaches ±35 cents
 with a quadratic response. MIX balances the centre oscillator and six detuned
@@ -35,7 +37,7 @@ is inherited, including its documented held REL INF machine-switch limitation.
 
 The loader does not clear `.bss`. Every mutable Supersaw object therefore has an
 explicit initializer and is emitted into `.data`; the linked-code gate verifies
-all 1,242 initialized bytes. The imported version left those objects uninitialized.
+all 4,442 initialized bytes. The imported version left those objects uninitialized.
 Equal-weight side oscillators are summed before multiplication, preserving every
 sample and phase bit. Keeping preparation out of line prevents GCC from moving
 cached control products ahead of their cache guard. Isolated ColdFire counts for
@@ -46,7 +48,7 @@ and voice-state bits, including odd call boundaries. S3 warm counts were 1,089
 for the rich patch and 473 for neutral (S1: 623). These are instruction counts,
 not hardware cycles. The linked gate guards against instruction regressions.
 
-**S4 runs eight simultaneous Supersaw tracks in the full-firmware emulator.**
+**The S4 mono baseline ran eight simultaneous tracks in the full-firmware emulator.**
 The real-panel gate sends MIDI notes, presses the track/SRC keys, turns DETU
 while all eight notes sound, and restores it. The live parameter and audio both
 change, note-offs reach silence, both DSP paths deliver every captured frame,
@@ -59,8 +61,10 @@ per-voice worker occupies that idle time; the actual priority-3 panel path
 still works. A failed idle-call probe does not establish a physical track limit
 or an unresponsive panel. Its purpose is not established as timestretch, and
 neither marker TSMODE=0 nor a shorter marker removed the idle-call failure.
-There is no automatic voice stealing or imposed track cap. Hardware CPU
-headroom, audio and controls remain unverified.
+S5 reuses the native per-track note cap and stealing policy: a new note at
+the cap replaces an older voice, preferring releasing voices. This does not
+allocate or steal FX slots. Hardware CPU headroom, audio and controls remain
+unverified.
 
 S3 also uses an exact Q4 AMP ramp: the former Q15 accumulator overflowed on a
 32-sample full attack. A held-level fast path avoids redundant arithmetic.
@@ -81,6 +85,23 @@ and 1,538 while ramping (S3: 1,289 / 1,467). The rich oscillator loop uses 1,160
 still below S1 despite the interpolation improvement. S4 passes the standalone
 `make check` and the exact named Inserts image gate, including eight-track
 real-panel audio. S3 measurements and failed idle-call receipts remain retained.
+
+## Four-note adapter (S5)
+
+The pinned Synth Machine still owns MIDI and sequencer note allocation, chord
+shapes, individual pitches, AMP envelopes and the per-track voice limit. The
+Supersaw adapter renders its four native note records using independent
+oscillator/resampler histories. Native poly gains retain their equal-power
+scaling; the sum saturates safely rather than wrapping if coherent peaks
+exceed full scale. One track's notes share that track's controls and effects.
+
+Changing VOIC across a sounding note preserves the native transition: mono
+history is copied into the carried voice; poly tails fade under a new mono
+note. Warm retriggers preserve phase, cold voices reset. The mono path without
+tails keeps S4's samples unchanged. Added mutable storage is 3,200 bytes,
+including per-note diagnostic counters, initialized in the runtime image.
+Source, cross-architecture arithmetic and carry-hook checks pass; S5 full
+firmware qualification is pending.
 
 ## Verification
 

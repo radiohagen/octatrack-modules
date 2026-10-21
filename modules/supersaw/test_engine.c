@@ -82,6 +82,77 @@ static void check_gain(void) {
     }
 }
 
+static void check_poly(void) {
+    uint32_t pool[4][16]={{0}}, state[32]={0};
+    uint16_t fp[6]={0x4000,96<<8,110<<8,0x4000,40<<8,30<<8};
+    struct ss_voice oracle[4];
+    int32_t out[66];
+    ss_active[3]=1; ss_samples[3]=0;
+    ((uint8_t *)state)[80]=1;
+    for (unsigned v=0;v<4;++v) {
+        ss_init(&oracle[v]); ss_init(&ss_poly_voices[3][v]);
+        ss_poly_samples[3][v]=0;
+    }
+    unsigned total=0;
+    for (unsigned round=0;round<100;++round) {
+        unsigned n=round%33;
+        int32_t expected[32]={0};
+        for (unsigned v=0;v<4;++v) {
+            uint8_t *native=(uint8_t *)pool[v];
+            native[36]=(round%11==v) ? 0 : 1;
+            pool[v][3]=21426141u*(v+1); /* Four independently pitched notes. */
+            pool[v][6]=(round%7==v) ? 0 : (round%5==v ? 32767 : 16384);
+            if (!n || !native[36]) continue;
+            unsigned previous=*(uint16_t *)(native+60),target=pool[v][6];
+            if (!previous) ss_init(&oracle[v]);
+            struct ss_params p={pool[v][3],96,110,40,30};
+            int16_t audio[32]; reference(&oracle[v],&p,audio,n);
+            int64_t gain=(int64_t)previous*65536;
+            int64_t step=((int64_t)target-previous)*65536/n;
+            for (unsigned i=0;i<n;++i) {
+                gain+=step; expected[i]+=(int32_t)((audio[i]*(gain>>16))>>15);
+            }
+        }
+        for (unsigned i=0;i<66;++i) out[i]=123456;
+        assert(ss_track_fill(3,(uint8_t *)state,fp,out,n,(uint8_t *)pool));
+        for (unsigned i=0;i<n;++i) {
+            int32_t x=expected[i];if(x>32767)x=32767;if(x< -32768)x= -32768;
+            assert(out[2*i]==x*65536 && out[2*i+1]==out[2*i]);
+        }
+        for (unsigned i=2*n;i<66;++i) assert(out[i]==123456);
+        for (unsigned v=0;v<4;++v) assert(!memcmp(&oracle[v],&ss_poly_voices[3][v],sizeof(oracle[v])));
+        total+=n;assert(ss_samples[3]==total);
+    }
+    /* Coherent four-note peaks saturate instead of wrapping signed 16.16. */
+    memset(pool,0,sizeof(pool));fp[5]=127<<8;
+    for (unsigned v=0;v<4;++v) {
+        pool[v][3]=21426141;pool[v][6]=16384;((uint8_t *)pool[v])[36]=1;
+        *(uint16_t *)((uint8_t *)pool[v]+60)=16384;ss_init(&ss_poly_voices[3][v]);
+    }
+    ss_track_fill(3,(uint8_t *)state,fp,out,32,(uint8_t *)pool);
+    unsigned saturated=0;
+    for(unsigned i=0;i<32;++i) saturated+=(out[2*i]==INT32_MIN || out[2*i]==2147418112);
+    assert(saturated);fp[5]=30<<8;
+    /* Native mono -> poly carries every resampler/oscillator bit. */
+    ss_init(&ss_voices[3]);struct ss_params p={21426141,96,110,40,30};
+    int16_t scratch[3];ss_render(&ss_voices[3],&p,scratch,3);
+    ss_carry(3,2);assert(!memcmp(&ss_voices[3],&ss_poly_voices[3][2],sizeof(struct ss_voice)));
+    /* Inactive native voices leave the existing mono render bit-identical. */
+    memset(pool,0,sizeof(pool));memset(state,0,sizeof(state));state[3]=21426141;state[6]=32768;
+    ss_init(&ss_voices[3]);ss_init(&ss_voices[4]);ss_active[4]=1;
+    uint32_t copy[32];memcpy(copy,state,sizeof(state));int32_t mono[64];
+    ss_fill(4,(uint8_t *)copy,fp,mono,32);
+    ss_track_fill(3,(uint8_t *)state,fp,out,32,(uint8_t *)pool);
+    assert(!memcmp(out,mono,sizeof(mono)));
+    /* The poly -> mono tail is mixed, and releasing it leaves mono alone. */
+    ss_carry(3,0);pool[0][3]=21426141;pool[0][6]=0;
+    ((uint8_t *)pool)[36]=3;*(uint16_t *)((uint8_t *)pool+60)=16384;
+    memcpy(copy,state,sizeof(state));ss_voices[4]=ss_voices[3];
+    ss_fill(4,(uint8_t *)copy,fp,mono,16);
+    ss_track_fill(3,(uint8_t *)state,fp,out,16,(uint8_t *)pool);
+    assert(memcmp(out,mono,32*sizeof(*out)));assert(!*(uint16_t *)((uint8_t *)pool+60));
+}
+
 int main(int argc, char **argv) {
     assert(ss_marker("../AUDIO/FMSYNTH-SUPERSAW.wav"));
     assert(ss_marker("FMSYNTH-SUPERSAW-pad.wav"));
@@ -169,12 +240,13 @@ int main(int argc, char **argv) {
         assert(!memcmp(&a, &b, sizeof(a)));
     }
     check_gain();
+    check_poly();
     if (argc == 2) {
         FILE *f = fopen(argv[1], "wb"); assert(f);
         p = (struct ss_params){21426141,0,0,0,0};
         ss_init(&a); ss_render(&a,&p,whole,4096);
         assert(fwrite(whole,sizeof(*whole),4096,f)==4096); fclose(f);
     }
-    puts("[ok] Supersaw split blocks, independent voices, controls, extremes, markers and mono boundary");
+    puts("[ok] Supersaw split blocks, independent voices, controls, extremes, markers and mono/four-note lifecycles");
     return 0;
 }

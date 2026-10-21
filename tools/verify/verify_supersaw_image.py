@@ -40,8 +40,13 @@ def main():
     subprocess.run([sys.executable,'tools/verify/verify_supersaw_panel.py',
         '--project',project,'--name',name],cwd=ROOT,check=True)
     receipts.append(str(ROOT/'out/supersaw-port'/name/'audio-ui-receipt.json'))
+    for mode in ('midi','sequence','transition'):
+        name = prefix+'-poly-'+mode
+        subprocess.run([sys.executable,'tools/verify/verify_supersaw_poly.py',
+            '--project',project,'--name',name,'--mode',mode],cwd=ROOT,check=True)
+        receipts.append(str(ROOT/'out/supersaw-port'/name/'receipt.json'))
     (ROOT/'out/supersaw-qualification.json').write_text(json.dumps(dict(
-        remix=remix.name,receipts=receipts,simultaneous_tracks=8,
+        remix=remix.name,receipts=receipts,simultaneous_tracks=8,voices_per_track=4,
         hardware_tested=False),indent=2)+'\n')
 
 if __name__ == '__main__': main()

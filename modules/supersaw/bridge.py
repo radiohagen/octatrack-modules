@@ -47,4 +47,13 @@ def assembly(modules, remix=None):
            'ss_amp_frame:\n        move.l  52(%sp),%d2              | track (d2 was RTIM above)\n')
     insert('po_pg_have:\n        move.l  %a2,%d0\n',
            'po_pg_have:\n        move.l  %a2,%d0\n        jsr ss_page_hook\n')
+    # Pinned native pool, allocation and envelopes; no second note allocator.
+    insert('po_ca_g:\n', 'po_ca_g:\n        jsr ss_carry_hook\n')
+    insert('        move.l  %d0,V_INC(%a6)\n',
+           '        move.l  %d0,V_INC(%a6)\n'
+           '        lea ss_active,%a0\n        tst.b (%a0,%d2.l)\n'
+           '        bne ss_poly_amp\n')
+    insert('        move.l  V_HOLD(%a6),%d0          | a gated sequencer note:',
+           'ss_poly_amp:\n        move.l  V_HOLD(%a6),%d0          | a gated sequencer note:')
+    source += '\n        .global ss_native_voices\n        .set ss_native_voices,po_voices\n'
     return source

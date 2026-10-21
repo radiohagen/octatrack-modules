@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: MIT
  * Octatrack adapter for the original seven-saw engine.
- * One mono Supersaw voice per marker track; the existing synth owns notes/AMP.
+ * Up to four Supersaw notes per track; the existing synth owns notes/AMP.
  */
 #include <stdint.h>
 #include "engine.c"
@@ -10,6 +10,8 @@
 uint8_t ss_active[8] = {0};
 uint32_t ss_samples[8] = {0}, ss_unsupported[8] = {0};
 static struct ss_voice ss_voices[8] = {0};
+static struct ss_voice ss_poly_voices[8][4] = {0};
+uint32_t ss_poly_samples[8][4] = {{0}};
 static uint8_t ss_descriptor[0x192] = {0};
 
 int ss_marker(const char *path) {
@@ -33,6 +35,8 @@ static const char *ss_settings(uint32_t address) {
 }
 
 static void ss_activate(uint32_t track, uint8_t selected, uint16_t previous_gain) {
+    if (!ss_active[track])
+        for (unsigned v=0;v<4;++v) ss_init(&ss_poly_voices[track][v]);
     if (!ss_active[track] || !previous_gain) ss_init(&ss_voices[track]);
     ss_active[track] = selected;
 }
@@ -88,6 +92,79 @@ int ss_fill(uint32_t track, uint8_t *state, const uint16_t *fp,
     }
     *(uint16_t *)(state+38) = (uint16_t)(gain > 0 ? gain/16 : 0);
     ss_samples[track] += n;
+    return 1;
+}
+
+/* The bridge pins the native pool layout: four 64-byte records per track.
+ * Native code owns allocation, MIDI/chord identity, pitch and AMP targets.
+ * We own oscillator history only. A warm stolen voice keeps phase, like FM. */
+void ss_carry(uint32_t track, uint32_t voice) {
+    if (track < 8 && voice < 4 && ss_active[track]) {
+        /* Volatile byte copy: freestanding ColdFire has no libc memcpy. */
+        volatile uint8_t *dst=(volatile uint8_t *)&ss_poly_voices[track][voice];
+        const uint8_t *src=(const uint8_t *)&ss_voices[track];
+        for (unsigned i=0;i<sizeof(struct ss_voice);++i) dst[i]=src[i];
+    }
+}
+
+int ss_track_fill(uint32_t track, uint8_t *state, const uint16_t *fp,
+                  int32_t *out, uint32_t n, uint8_t *pool) {
+    if (track >= 8 || !ss_active[track]) return 0;
+    if (n > 32) {
+        ++ss_unsupported[track];
+        for (uint32_t i=0;i<n;++i) out[2*i]=out[2*i+1]=0;
+        return 1;
+    }
+    if (!n) return 1;
+    unsigned active=0;
+    for (unsigned v=0;v<4;++v) active |= pool[v*64+36];
+    if (!state[80]) {
+        ss_fill(track,state,fp,out,n);
+        if (!active) return 1; /* Preserve the S4 mono samples exactly. */
+    } else {
+        *(uint16_t *)(state+38)=0;
+        ss_samples[track]+=n;
+        for (uint32_t i=0;i<n;++i) out[2*i]=out[2*i+1]=0;
+    }
+    int32_t mix[32];
+    for (uint32_t i=0;i<n;++i) mix[i]=out[2*i]>>16;
+    struct ss_params params = {0,(fp[1]>>8)&127,(fp[2]>>8)&127,
+                                 (fp[4]>>8)&127,(fp[5]>>8)&127};
+    for (unsigned v=0;v<4;++v) {
+        uint8_t *native=pool+v*64;
+        if (!native[36]) continue;
+        uint32_t previous=*(uint16_t *)(native+60);
+        uint32_t target=*(uint32_t *)(native+24);
+        if (!previous) ss_init(&ss_poly_voices[track][v]);
+        /* Native poly gains are <=32767; bound malformed state as well. */
+        if (previous>32767) previous=32767;
+        if (target>32767) target=32767;
+        params.increment=*(uint32_t *)(native+12);
+        int16_t audio[32];
+        ss_render(&ss_poly_voices[track][v],&params,audio,n);
+        if (previous==target) {
+            for (uint32_t i=0;i<n;++i) mix[i]+=(audio[i]*(int32_t)target)>>15;
+        } else {
+            /* Match native po_fill: reach the target over this call, Q16.
+             * +/-32767 bounds keep the step and accumulator in int32. */
+            int32_t gain=(int32_t)previous*65536;
+            int32_t step=((int32_t)target-(int32_t)previous)*65536/(int32_t)n;
+            for (uint32_t i=0;i<n;++i) {
+                gain+=step;
+                mix[i]+=(audio[i]*(gain>>16))>>15;
+            }
+        }
+        *(uint16_t *)(native+60)=(uint16_t)target;
+        ss_poly_samples[track][v]+=n;
+    }
+    /* Up to four notes plus a fading mono transition: accumulate before
+     * saturation, never add signed 16.16 values that can wrap. */
+    for (uint32_t i=0;i<n;++i) {
+        int32_t value=mix[i];
+        if (value>32767) value=32767;
+        if (value< -32768) value= -32768;
+        out[2*i]=out[2*i+1]=value*65536;
+    }
     return 1;
 }
 
