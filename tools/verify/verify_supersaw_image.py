@@ -43,10 +43,12 @@ def main():
     for mode in ('midi','sequence','transition'):
         name = prefix+'-poly-'+mode
         subprocess.run([sys.executable,'tools/verify/verify_supersaw_poly.py',
-            '--project',project,'--name',name,'--mode',mode],cwd=ROOT,check=True)
+            '--project',project,'--name',name,'--mode',mode,
+            *(['--rich'] if mode=='midi' else []),
+            *(['--fx'] if mode=='midi' and pair=='SPECTRUM,CHARACTER' else [])],cwd=ROOT,check=True)
         receipts.append(str(ROOT/'out/supersaw-port'/name/'receipt.json'))
     (ROOT/'out/supersaw-qualification.json').write_text(json.dumps(dict(
-        remix=remix.name,receipts=receipts,simultaneous_tracks=8,voices_per_track=4,
+        remix=remix.name,receipts=receipts,simultaneous_tracks=8,voices_per_track=4,polyphony_test_tracks=1,
         hardware_tested=False),indent=2)+'\n')
 
 if __name__ == '__main__': main()

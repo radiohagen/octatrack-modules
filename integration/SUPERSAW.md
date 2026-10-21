@@ -25,11 +25,11 @@ Sophie, Post Fader or other experimental engine is added.
 Commands, from Octabam:
 
 ```sh
-make check REMIX=supersaw BUILD=S4
-make rmx REMIX=supersaw-inserts BUILD=S4 RMX='SAW INSERTS S4'
-OT_PROJECT=/path/to/local/project REMIX=supersaw-inserts BUILD=S4 \
-  RMXNAME='SAW INSERTS S4' .venv/bin/python tools/verify/verify_supersaw_image.py
-make check REMIX=supersaw-inserts BUILD=S4
+make check REMIX=supersaw BUILD=S5
+make rmx REMIX=supersaw-inserts BUILD=S5 RMX='SAW INSERTS S5'
+OT_PROJECT=/path/to/local/project REMIX=supersaw-inserts BUILD=S5 \
+  RMXNAME='SAW INSERTS S5' .venv/bin/python tools/verify/verify_supersaw_image.py
+make check REMIX=supersaw-inserts BUILD=S5
 ```
 
 Firmware/card images and private project fixtures stay in ignored local output.
@@ -44,3 +44,12 @@ S4 qualification is for the named image `SAW INSERTS S4`. Keep `BUILD` and
 `RMXNAME` identical during rebuilds and compare the RMX hash with every receipt.
 The standalone S4 full check passes; the broader combined suite still has the
 retained S1 fixture exceptions described in the companion remix documentation.
+
+S5 adds up to four notes per track using the pinned Synth allocator and AMP
+records. Its standalone full check passes. All named-image cases pass, including
+four-note MIDI with both FX occupied, sequencer chords and real-panel VOIC
+transitions. Two final cases were completed separately after the first image
+driver failed staging a fixture on a full disk; retain the original failure.
+Additional rich tests pass on four tracks (16 notes); the 32-note stress case
+misses later MIDI changes and is not qualified. Physical acceptance is still
+unverified. The module source pin and final RMX hash identify this S5 evidence.

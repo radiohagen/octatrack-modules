@@ -100,8 +100,23 @@ history is copied into the carried voice; poly tails fade under a new mono
 note. Warm retriggers preserve phase, cold voices reset. The mono path without
 tails keeps S4's samples unchanged. Added mutable storage is 3,200 bytes,
 including per-note diagnostic counters, initialized in the runtime image.
-Source, cross-architecture arithmetic and carry-hook checks pass; S5 full
-firmware qualification is pending.
+Source, cross-architecture arithmetic and carry-hook checks pass. The complete
+four-note rich adapter uses 5,692 instructions per 16-sample held block in the
+linked ColdFire probe; this is not a hardware cycle or CPU-headroom measurement.
+S5 passes the standalone `make check`. All cases pass on the exact named
+`SAW INSERTS S5` image: mono regressions, native page, eight-track panel input,
+four-note rich chords with SPECTRUM + CHARACTER in the two FX slots, sequencer
+chords and mono/poly transitions. The original image driver stopped on disk-full
+while staging a fixture; its remaining two cases passed separately on the same
+image. The original failed run is retained and is not called clean. An earlier
+standalone attempt also failed on disk-full; its complete rerun passed.
+
+Scoped emulator cases pass for two, three and four notes, including independent
+note-offs, replacement at the voice cap, silence and retrigger. Two and four simultaneous
+rich four-note tracks also pass (up to 16 notes tested successfully). The 32-rich-voice stress case fails later MIDI
+note changes even with messages spaced 5 ms apart; do not treat 32 voices as
+qualified. Both DSP capture paths remained continuous, and the cause of missed
+input is not established. Failed captures and logs are retained.
 
 ## Verification
 
@@ -109,7 +124,9 @@ firmware qualification is pending.
 The host gate uses ASan/UBSan, an independent Fourier reference and 10,000 changing
 control blocks against a scalar arithmetic oracle. The linked ColdFire gate
 checks boot initialization, 702 exact samples, empty/odd/chunked calls, extreme
-pitches, phase wraps and bounded warm instruction counts.
+pitches, phase wraps and bounded warm instruction counts. The polyphonic wrapper
+adds 372 exact host/ColdFire output values, safe coherent-peak mixing and an
+actual assembly carry-hook register/history check.
 The image gate runs disposable project copies and checks note-off at the source,
 separately from effect tails. It also resolves native Supersaw/FM descriptors and exercises actual panel
 input while eight voices run. These results do not turn the broader combined
