@@ -2,6 +2,7 @@
 
 | Module | Role |
 |---|---|
+| [Euclid LFO](euclid-lfo/README.md) | Fixed-duration Euclidean steps and accents for native audio/MIDI LFO destinations; separate test integration |
 | MIDI Scales | Seven diatonic modes in native MIDI ARP KEY |
 | MIDI Loopback | Per-Part EXT / INT / BOTH routing |
 | MIDI Follow | Root following, register, response and mute behavior |

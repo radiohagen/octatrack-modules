@@ -46,6 +46,12 @@
       "slug": "quantizer-midi-drawer",
       "source_commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "status": "compatibility-upstream-owned"
+    },
+    {
+      "slug": "euclid-lfo",
+      "origin": "authored",
+      "integration_commit": "c845059dff5d0da58218b965025a174643650998",
+      "status": "scoped integration; not staged into the existing MIDI package"
     }
   ],
   "files": {
@@ -1910,6 +1916,276 @@
       "path": "remixes/test/quantizer-midi-drawer/README.md",
       "sha256": "7d857380018adadbaeebbf714e387d6c9a8b9394baf36f3f2cefdf6412e2fe32",
       "source_mode": "100644"
+    },
+    "remixes/test/euclid-lfo/README.md": {
+      "origin": "authored",
+      "repository": "https://github.com/radiohagen/octatrack-modules",
+      "path": "remixes/test/euclid-lfo/README.md",
+      "sha256": "b7671d66ff5a6f48f0329fb2fd42305f61afb559ed136b728fc442e4c46b3cab",
+      "published_sha256": "b7671d66ff5a6f48f0329fb2fd42305f61afb559ed136b728fc442e4c46b3cab",
+      "source_mode": "100644",
+      "stage": false
+    },
+    "remixes/test/euclid-lfo/remix.py": {
+      "origin": "authored",
+      "repository": "https://github.com/radiohagen/octatrack-modules",
+      "path": "remixes/test/euclid-lfo/remix.py",
+      "sha256": "4112d749a8956ebafc30edfc52b8a886d50fb59dc06035797e8bb308503fa956",
+      "published_sha256": "4112d749a8956ebafc30edfc52b8a886d50fb59dc06035797e8bb308503fa956",
+      "source_mode": "100644",
+      "stage": false
+    },
+    "modules/euclid-lfo/DECISIONS.md": {
+      "origin": "authored",
+      "repository": "https://github.com/radiohagen/octatrack-modules",
+      "path": "modules/euclid-lfo/DECISIONS.md",
+      "sha256": "8f6c3e464956daaed93265cafefd10f4e63f6de6761322457189719e350d19b1",
+      "published_sha256": "84b294289ec39c062a1db8a765c92d578f5c2b55e7cf998b7f8038a0dda3021f",
+      "source_mode": "100644",
+      "stage": false
+    },
+    "modules/euclid-lfo/generate_control.py": {
+      "origin": "authored",
+      "repository": "https://github.com/radiohagen/octatrack-modules",
+      "path": "modules/euclid-lfo/generate_control.py",
+      "sha256": "870ba7018d4de12ab5cff1fd00fe09fad4d5491ab6b3708be54018647f28ac70",
+      "published_sha256": "870ba7018d4de12ab5cff1fd00fe09fad4d5491ab6b3708be54018647f28ac70",
+      "source_mode": "100644",
+      "stage": false
+    },
+    "modules/euclid-lfo/lifecycle.c": {
+      "origin": "authored",
+      "repository": "https://github.com/radiohagen/octatrack-modules",
+      "path": "modules/euclid-lfo/lifecycle.c",
+      "sha256": "2864b0e4690cb580eaf9c8c1c0e03282fba5441f3400f15cec74866147b86f81",
+      "published_sha256": "2864b0e4690cb580eaf9c8c1c0e03282fba5441f3400f15cec74866147b86f81",
+      "source_mode": "100644",
+      "stage": false
+    },
+    "modules/euclid-lfo/retention.h": {
+      "origin": "authored",
+      "repository": "https://github.com/radiohagen/octatrack-modules",
+      "path": "modules/euclid-lfo/retention.h",
+      "sha256": "d1385d048643b5503222781d58289478ce908f8a22fedcecb5562b1d9928ed85",
+      "published_sha256": "d1385d048643b5503222781d58289478ce908f8a22fedcecb5562b1d9928ed85",
+      "source_mode": "100644",
+      "stage": false
+    },
+    "modules/euclid-lfo/test_storage.c": {
+      "origin": "authored",
+      "repository": "https://github.com/radiohagen/octatrack-modules",
+      "path": "modules/euclid-lfo/test_storage.c",
+      "sha256": "24b89f74f129f1d6dd7b982b86026d002e183e2749a86eec9facc088ddbb6b3d",
+      "published_sha256": "24b89f74f129f1d6dd7b982b86026d002e183e2749a86eec9facc088ddbb6b3d",
+      "source_mode": "100644",
+      "stage": false
+    },
+    "modules/euclid-lfo/storage.h": {
+      "origin": "authored",
+      "repository": "https://github.com/radiohagen/octatrack-modules",
+      "path": "modules/euclid-lfo/storage.h",
+      "sha256": "9f532ba182d9faf23031f20b8dff5f698cb77d83779d972453a27bcfba5fcfa3",
+      "published_sha256": "9f532ba182d9faf23031f20b8dff5f698cb77d83779d972453a27bcfba5fcfa3",
+      "source_mode": "100644",
+      "stage": false
+    },
+    "modules/euclid-lfo/test_lifecycle.c": {
+      "origin": "authored",
+      "repository": "https://github.com/radiohagen/octatrack-modules",
+      "path": "modules/euclid-lfo/test_lifecycle.c",
+      "sha256": "3c470c4f9a3efa0b52fb62cbfcf6d2f10cd9986e4cecfc75e94cdac3c9e7e2d6",
+      "published_sha256": "3c470c4f9a3efa0b52fb62cbfcf6d2f10cd9986e4cecfc75e94cdac3c9e7e2d6",
+      "source_mode": "100644",
+      "stage": false
+    },
+    "modules/euclid-lfo/native_io.c": {
+      "origin": "authored",
+      "repository": "https://github.com/radiohagen/octatrack-modules",
+      "path": "modules/euclid-lfo/native_io.c",
+      "sha256": "02017083fb8c078fff23cb0d36ab951063e4217ca7fefd739ffa876a2103ae60",
+      "published_sha256": "02017083fb8c078fff23cb0d36ab951063e4217ca7fefd739ffa876a2103ae60",
+      "source_mode": "100644",
+      "stage": false
+    },
+    "modules/euclid-lfo/engine.c": {
+      "origin": "authored",
+      "repository": "https://github.com/radiohagen/octatrack-modules",
+      "path": "modules/euclid-lfo/engine.c",
+      "sha256": "9988f3ad3dce9df05c31f24c326ca0f9afcf030cd1ad13c2459f2601a253d4bd",
+      "published_sha256": "9988f3ad3dce9df05c31f24c326ca0f9afcf030cd1ad13c2459f2601a253d4bd",
+      "source_mode": "100644",
+      "stage": false
+    },
+    "modules/euclid-lfo/README.md": {
+      "origin": "authored",
+      "repository": "https://github.com/radiohagen/octatrack-modules",
+      "path": "modules/euclid-lfo/README.md",
+      "sha256": "fa8551404bbc6ca77547e71e267a8673704722f51e74c9cc954a56d5b2673306",
+      "published_sha256": "fa8551404bbc6ca77547e71e267a8673704722f51e74c9cc954a56d5b2673306",
+      "source_mode": "100644",
+      "stage": false
+    },
+    "modules/euclid-lfo/control.c": {
+      "origin": "authored",
+      "repository": "https://github.com/radiohagen/octatrack-modules",
+      "path": "modules/euclid-lfo/control.c",
+      "sha256": "2e981241a9ee7b6dd9033afc330ffecdaf294ee24d05130ea0c3a624bab865e1",
+      "published_sha256": "2e981241a9ee7b6dd9033afc330ffecdaf294ee24d05130ea0c3a624bab865e1",
+      "source_mode": "100644",
+      "stage": false
+    },
+    "modules/euclid-lfo/lifecycle.h": {
+      "origin": "authored",
+      "repository": "https://github.com/radiohagen/octatrack-modules",
+      "path": "modules/euclid-lfo/lifecycle.h",
+      "sha256": "02a143911b8b992dd0fd2624d57e8802ae4c26bd03d133d9d28acb16507ab483",
+      "published_sha256": "02a143911b8b992dd0fd2624d57e8802ae4c26bd03d133d9d28acb16507ab483",
+      "source_mode": "100644",
+      "stage": false
+    },
+    "modules/euclid-lfo/integration.patch": {
+      "origin": "authored",
+      "repository": "https://github.com/radiohagen/octatrack-modules",
+      "path": "modules/euclid-lfo/integration.patch",
+      "sha256": "9cce140cb5b86b5c6a46436aed9322f20e080f21850c7d6166299d0f4a2c7e8a",
+      "published_sha256": "9cce140cb5b86b5c6a46436aed9322f20e080f21850c7d6166299d0f4a2c7e8a",
+      "source_mode": "100644",
+      "stage": false
+    },
+    "modules/euclid-lfo/probe.cpp": {
+      "origin": "authored",
+      "repository": "https://github.com/radiohagen/octatrack-modules",
+      "path": "modules/euclid-lfo/probe.cpp",
+      "sha256": "b2a67d78df5d0fc4943abc5640be4f408abf7cad7f6b6bd6dfe57f0cedaf4679",
+      "published_sha256": "b2a67d78df5d0fc4943abc5640be4f408abf7cad7f6b6bd6dfe57f0cedaf4679",
+      "source_mode": "100644",
+      "stage": false
+    },
+    "modules/euclid-lfo/retention.c": {
+      "origin": "authored",
+      "repository": "https://github.com/radiohagen/octatrack-modules",
+      "path": "modules/euclid-lfo/retention.c",
+      "sha256": "2ef544e9a1e80c9e740660a663bdabbc27211b8b36783aca221767aa52b21bb9",
+      "published_sha256": "2ef544e9a1e80c9e740660a663bdabbc27211b8b36783aca221767aa52b21bb9",
+      "source_mode": "100644",
+      "stage": false
+    },
+    "modules/euclid-lfo/storage.c": {
+      "origin": "authored",
+      "repository": "https://github.com/radiohagen/octatrack-modules",
+      "path": "modules/euclid-lfo/storage.c",
+      "sha256": "d811c6a97f0669dbab50a15ded9f8540926ca2019861a5456c88d31905fed991",
+      "published_sha256": "d811c6a97f0669dbab50a15ded9f8540926ca2019861a5456c88d31905fed991",
+      "source_mode": "100644",
+      "stage": false
+    },
+    "modules/euclid-lfo/manifest.py": {
+      "origin": "authored",
+      "repository": "https://github.com/radiohagen/octatrack-modules",
+      "path": "modules/euclid-lfo/manifest.py",
+      "sha256": "0be71d2bb003ae6dcec0a49f2ced6e76a5b484325d75c2eba1871604de2b67f4",
+      "published_sha256": "0be71d2bb003ae6dcec0a49f2ced6e76a5b484325d75c2eba1871604de2b67f4",
+      "source_mode": "100644",
+      "stage": false
+    },
+    "modules/euclid-lfo/ui-pixels.json": {
+      "origin": "authored",
+      "repository": "https://github.com/radiohagen/octatrack-modules",
+      "path": "modules/euclid-lfo/ui-pixels.json",
+      "sha256": "dbf3882a323e2859bb5df16501b3e4c67188fab6e4558010ee06996dac68e254",
+      "published_sha256": "dbf3882a323e2859bb5df16501b3e4c67188fab6e4558010ee06996dac68e254",
+      "source_mode": "100644",
+      "stage": false
+    },
+    "modules/euclid-lfo/hooks.s": {
+      "origin": "authored",
+      "repository": "https://github.com/radiohagen/octatrack-modules",
+      "path": "modules/euclid-lfo/hooks.s",
+      "sha256": "73feae4bea716b5a23a6ab2265c510de2299ef4a49b10746df94f9aafcc6b4cd",
+      "published_sha256": "73feae4bea716b5a23a6ab2265c510de2299ef4a49b10746df94f9aafcc6b4cd",
+      "source_mode": "100644",
+      "stage": false
+    },
+    "modules/euclid-lfo/runtime.c": {
+      "origin": "authored",
+      "repository": "https://github.com/radiohagen/octatrack-modules",
+      "path": "modules/euclid-lfo/runtime.c",
+      "sha256": "dbdd146ba4e615c576b92e1e6b2e17682ab8f82d156349325bb7000a99288819",
+      "published_sha256": "dbdd146ba4e615c576b92e1e6b2e17682ab8f82d156349325bb7000a99288819",
+      "source_mode": "100644",
+      "stage": false
+    },
+    "modules/euclid-lfo/engine.h": {
+      "origin": "authored",
+      "repository": "https://github.com/radiohagen/octatrack-modules",
+      "path": "modules/euclid-lfo/engine.h",
+      "sha256": "399f3c6682210edd7d762d6e8e7f0b1a1141f55e53e743d87f104bda1f293013",
+      "published_sha256": "399f3c6682210edd7d762d6e8e7f0b1a1141f55e53e743d87f104bda1f293013",
+      "source_mode": "100644",
+      "stage": false
+    },
+    "modules/euclid-lfo/control.s": {
+      "origin": "authored",
+      "repository": "https://github.com/radiohagen/octatrack-modules",
+      "path": "modules/euclid-lfo/control.s",
+      "sha256": "3adb703aa7235e887283b7ebe34c0521ac27d06560f745e1b2330cddf0e5f773",
+      "published_sha256": "3adb703aa7235e887283b7ebe34c0521ac27d06560f745e1b2330cddf0e5f773",
+      "source_mode": "100644",
+      "stage": false
+    },
+    "modules/euclid-lfo/test_engine.c": {
+      "origin": "authored",
+      "repository": "https://github.com/radiohagen/octatrack-modules",
+      "path": "modules/euclid-lfo/test_engine.c",
+      "sha256": "f8dbd0ffaf51ae369be32697f61c038f078194e1ff5609a3c41134e31f84a602",
+      "published_sha256": "f8dbd0ffaf51ae369be32697f61c038f078194e1ff5609a3c41134e31f84a602",
+      "source_mode": "100644",
+      "stage": false
+    },
+    "tools/verify/verify_euclid_lfo_load.py": {
+      "origin": "authored",
+      "repository": "https://github.com/radiohagen/octatrack-modules",
+      "path": "tools/verify/verify_euclid_lfo_load.py",
+      "sha256": "f598cdf31e7e25bd2ca7abc5b08c9f3ee060ee1a657a360a6497793a806f86ba",
+      "published_sha256": "f598cdf31e7e25bd2ca7abc5b08c9f3ee060ee1a657a360a6497793a806f86ba",
+      "source_mode": "100644",
+      "stage": false
+    },
+    "tools/verify/verify_euclid_lfo.py": {
+      "origin": "authored",
+      "repository": "https://github.com/radiohagen/octatrack-modules",
+      "path": "tools/verify/verify_euclid_lfo.py",
+      "sha256": "41b99a2d6854e8beba150121bd39cddee97db79f873e689c7d16727a921f4f9e",
+      "published_sha256": "41b99a2d6854e8beba150121bd39cddee97db79f873e689c7d16727a921f4f9e",
+      "source_mode": "100644",
+      "stage": false
+    },
+    "tools/verify/verify_euclid_lfo_ui.py": {
+      "origin": "authored",
+      "repository": "https://github.com/radiohagen/octatrack-modules",
+      "path": "tools/verify/verify_euclid_lfo_ui.py",
+      "sha256": "1102a42608de5987bdbbb29ab69ecabd9b1a54d6d54da7fe0e49881a10968353",
+      "published_sha256": "1102a42608de5987bdbbb29ab69ecabd9b1a54d6d54da7fe0e49881a10968353",
+      "source_mode": "100644",
+      "stage": false
+    },
+    "tools/verify/verify_euclid_lfo_card.py": {
+      "origin": "authored",
+      "repository": "https://github.com/radiohagen/octatrack-modules",
+      "path": "tools/verify/verify_euclid_lfo_card.py",
+      "sha256": "d3c1528a70013aa92d331aca6e1a8dfe477a2fe2cb7d5d47f03bd4aca2b3fa6a",
+      "published_sha256": "d3c1528a70013aa92d331aca6e1a8dfe477a2fe2cb7d5d47f03bd4aca2b3fa6a",
+      "source_mode": "100644",
+      "stage": false
+    },
+    "tools/verify/verify_euclid_lfo_audio.py": {
+      "origin": "authored",
+      "repository": "https://github.com/radiohagen/octatrack-modules",
+      "path": "tools/verify/verify_euclid_lfo_audio.py",
+      "sha256": "85e6386356aff7b9156775259612cb8b1b751e531f47b4ff894b5331ca7d91f3",
+      "published_sha256": "85e6386356aff7b9156775259612cb8b1b751e531f47b4ff894b5331ca7d91f3",
+      "source_mode": "100644",
+      "stage": false
     }
   },
   "submodules": {},
