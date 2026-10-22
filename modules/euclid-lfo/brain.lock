@@ -1,0 +1,21 @@
+{
+ "params": {},
+ "retired": {
+  "params": [],
+  "settings": []
+ },
+ "settings": {
+  "1": {
+   "labels": [
+    "SRAM",
+    "SIDECAR"
+   ],
+   "name": "RETENTION",
+   "type": "option"
+  }
+ },
+ "store": {
+  "id": "radiohagen.euclid-lfo",
+  "major": 1
+ }
+}

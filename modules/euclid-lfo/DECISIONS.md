@@ -4,6 +4,13 @@ This fixed-step revision supersedes the original bar-fitted prototype.
 Evidence is image-specific; no physical-device acceptance or card installation
 is claimed. Historical local prototypes are not part of this source release.
 
+## Bus composition retention
+
+The bus remix explicitly selects SIDECAR. It leaves PLOCKS P2, MIDI Scenes,
+KITS and Harmony retained allocations unchanged. Unsaved LFO edits are not
+restored after power-off. The existing file codec and STORE refusal handling
+remain in use; no second file format or journal is introduced.
+
 ## Exact audio-clock correction (22 October 2026)
 
 This supersedes the earlier image's timing claims below. Paired native

@@ -57,10 +57,11 @@ settings with fewer than 16 steps now run proportionally shorter cycles.
 Sidecar bytes and native project formats are unchanged; this is an intentional
 timing change, not a claim of sound-compatible migration of those prototypes.
 
-This initial module cannot be combined with **PLOCKS P2**: their retained SRAM
-allocations overlap, and the build refuses the combination. Native project
-file formats are unchanged: WAVE selection uses the native Part field, while
-additional settings use versioned `eulfNN.work/.strd` sidecars.
+Retention is selected when composing the firmware. **SRAM** retains unsaved edits
+but conflicts with PLOCKS P2. **SIDECAR** uses no battery-backed allocation and
+can coexist with PLOCKS P2: use SAVE PROJECT before powering off to retain edits.
+The versioned `eulfNN.work/.strd` files and native project formats are unchanged.
+On power-up SIDECAR also loads the bank that native firmware restores from SRAM.
 
 ## Development checks
 

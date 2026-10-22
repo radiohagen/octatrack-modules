@@ -1930,8 +1930,9 @@
       "repository": "https://github.com/radiohagen/octatrack-modules",
       "path": "modules/midi-follow/events.s",
       "sha256": "227bcc18a819e8934e1f2aacb74a0685a55290464858cab43ff87e4dd35f2ce8",
-      "published_sha256": "cdad64558b07f619e4ec0c2e815b72e1fa4748261c38d4a699d2e75cd32dfa25",
-      "source_mode": "100644"
+      "published_sha256": "6e4f810c2710d8667564b28758666984dcdb4d75d6c4bc3bf81cb58a85a80dc7",
+      "source_mode": "100644",
+      "update_note": "Shared sequencer event integration and optional sidecar-only LFO retention, 2026-10-22; original source hash preserved."
     },
     "modules/README.md": {
       "origin": "authored",
@@ -1947,8 +1948,9 @@
       "repository": "https://github.com/radiohagen/octatrack-modules",
       "path": "modules/midi-harmony/transport.s",
       "sha256": "78ca4fc73b0b17ccf6a5dce66492924dd35633afdbf780cb7df71e54034f6c94",
-      "published_sha256": "3265746a6eaab46ab695c6768d824a8a6b7f99693c36d69528c7b35caa4869a9",
-      "source_mode": "100644"
+      "published_sha256": "ee4d17b08bf7ab4d35fc371992b44feb46fcc283fad7b357ef5d6777ceeb9513",
+      "source_mode": "100644",
+      "update_note": "Shared sequencer event integration and optional sidecar-only LFO retention, 2026-10-22; original source hash preserved."
     },
     "tools/verify/verify_harmony_follow_port.py": {
       "origin": "authored",
@@ -2251,18 +2253,20 @@
       "repository": "https://github.com/radiohagen/octatrack-modules",
       "path": "modules/euclid-lfo/DECISIONS.md",
       "sha256": "8f6c3e464956daaed93265cafefd10f4e63f6de6761322457189719e350d19b1",
-      "published_sha256": "04568b69a055bb33e4295ef9514e1b86b76d326fa7267ef07aab9683b00dc4ea",
+      "published_sha256": "03db33db1d06e690efa810d74a29af2a2839e56793614b7e9622ced8f844e80c",
       "source_mode": "100644",
-      "stage": false
+      "stage": false,
+      "update_note": "Shared sequencer event integration and optional sidecar-only LFO retention, 2026-10-22; original source hash preserved."
     },
     "modules/euclid-lfo/generate_control.py": {
       "origin": "authored",
       "repository": "https://github.com/radiohagen/octatrack-modules",
       "path": "modules/euclid-lfo/generate_control.py",
       "sha256": "870ba7018d4de12ab5cff1fd00fe09fad4d5491ab6b3708be54018647f28ac70",
-      "published_sha256": "870ba7018d4de12ab5cff1fd00fe09fad4d5491ab6b3708be54018647f28ac70",
+      "published_sha256": "58ab7033ca5164e998d9bcf6701f24d5355f11d8d80556135403a40265095ecb",
       "source_mode": "100644",
-      "stage": false
+      "stage": false,
+      "update_note": "Shared sequencer event integration and optional sidecar-only LFO retention, 2026-10-22; original source hash preserved."
     },
     "modules/euclid-lfo/lifecycle.c": {
       "origin": "authored",
@@ -2305,9 +2309,10 @@
       "repository": "https://github.com/radiohagen/octatrack-modules",
       "path": "modules/euclid-lfo/test_lifecycle.c",
       "sha256": "3c470c4f9a3efa0b52fb62cbfcf6d2f10cd9986e4cecfc75e94cdac3c9e7e2d6",
-      "published_sha256": "3c470c4f9a3efa0b52fb62cbfcf6d2f10cd9986e4cecfc75e94cdac3c9e7e2d6",
+      "published_sha256": "0a780f066a9b12fce263cb595c46c9c149ea793f79b9211af3ca597513942c98",
       "source_mode": "100644",
-      "stage": false
+      "stage": false,
+      "update_note": "Shared sequencer event integration and optional sidecar-only LFO retention, 2026-10-22; original source hash preserved."
     },
     "modules/euclid-lfo/native_io.c": {
       "origin": "authored",
@@ -2332,9 +2337,10 @@
       "repository": "https://github.com/radiohagen/octatrack-modules",
       "path": "modules/euclid-lfo/README.md",
       "sha256": "fa8551404bbc6ca77547e71e267a8673704722f51e74c9cc954a56d5b2673306",
-      "published_sha256": "817f03edbd2b71a6b6218077862d321666ed0b1bd8667a21fd62d0c9120ed8b8",
+      "published_sha256": "fe83bf913beebe15e5fb790d65a6529f2f88b352972e4c43e3c60462579850a3",
       "source_mode": "100644",
-      "stage": false
+      "stage": false,
+      "update_note": "Shared sequencer event integration and optional sidecar-only LFO retention, 2026-10-22; original source hash preserved."
     },
     "modules/euclid-lfo/control.c": {
       "origin": "authored",
@@ -2377,9 +2383,10 @@
       "repository": "https://github.com/radiohagen/octatrack-modules",
       "path": "modules/euclid-lfo/retention.c",
       "sha256": "2ef544e9a1e80c9e740660a663bdabbc27211b8b36783aca221767aa52b21bb9",
-      "published_sha256": "2ef544e9a1e80c9e740660a663bdabbc27211b8b36783aca221767aa52b21bb9",
+      "published_sha256": "5875dcc35c150fbf656a3f4d5b887684d4240b280875aeea4103837a5dd0fe30",
       "source_mode": "100644",
-      "stage": false
+      "stage": false,
+      "update_note": "Shared sequencer event integration and optional sidecar-only LFO retention, 2026-10-22; original source hash preserved."
     },
     "modules/euclid-lfo/storage.c": {
       "origin": "authored",
@@ -2395,9 +2402,10 @@
       "repository": "https://github.com/radiohagen/octatrack-modules",
       "path": "modules/euclid-lfo/manifest.py",
       "sha256": "0be71d2bb003ae6dcec0a49f2ced6e76a5b484325d75c2eba1871604de2b67f4",
-      "published_sha256": "0be71d2bb003ae6dcec0a49f2ced6e76a5b484325d75c2eba1871604de2b67f4",
+      "published_sha256": "5e2b0167290430a5cf680802865c742516d017ef4be4e4d15cb60950aa52d76e",
       "source_mode": "100644",
-      "stage": false
+      "stage": false,
+      "update_note": "Shared sequencer event integration and optional sidecar-only LFO retention, 2026-10-22; original source hash preserved."
     },
     "modules/euclid-lfo/ui-pixels.json": {
       "origin": "authored",
@@ -2413,18 +2421,20 @@
       "repository": "https://github.com/radiohagen/octatrack-modules",
       "path": "modules/euclid-lfo/hooks.s",
       "sha256": "73feae4bea716b5a23a6ab2265c510de2299ef4a49b10746df94f9aafcc6b4cd",
-      "published_sha256": "19332ce7d54e29375dd31a147940410546fbf6f3153dbbe58918e0e2b1840b0a",
+      "published_sha256": "8b161a2d2fe411d43c550fad90a38c5c1c3bb0886478f83450b800bace97e995",
       "source_mode": "100644",
-      "stage": false
+      "stage": false,
+      "update_note": "Shared sequencer event integration and optional sidecar-only LFO retention, 2026-10-22; original source hash preserved."
     },
     "modules/euclid-lfo/runtime.c": {
       "origin": "authored",
       "repository": "https://github.com/radiohagen/octatrack-modules",
       "path": "modules/euclid-lfo/runtime.c",
       "sha256": "dbdd146ba4e615c576b92e1e6b2e17682ab8f82d156349325bb7000a99288819",
-      "published_sha256": "00b6e79ec447e4e5d92b719e5a7c2432549f8fd8a75dd7cdef68b535c9411490",
+      "published_sha256": "6b46c58f1543b68037da574e663526cf8db24582fa4ada8d6a07fa2121610d48",
       "source_mode": "100644",
-      "stage": false
+      "stage": false,
+      "update_note": "Shared sequencer event integration and optional sidecar-only LFO retention, 2026-10-22; original source hash preserved."
     },
     "modules/euclid-lfo/engine.h": {
       "origin": "authored",
@@ -2440,9 +2450,10 @@
       "repository": "https://github.com/radiohagen/octatrack-modules",
       "path": "modules/euclid-lfo/control.s",
       "sha256": "3adb703aa7235e887283b7ebe34c0521ac27d06560f745e1b2330cddf0e5f773",
-      "published_sha256": "0b8e6956494ad1d5a5d8a089cfe7b9b453552fcb3948c52f04534d818a3a99b7",
+      "published_sha256": "bdd563a1a4cb9f963bcfebc1ee658fed308ec6fea4a63dbf248bbb7dcd9c0138",
       "source_mode": "100644",
-      "stage": false
+      "stage": false,
+      "update_note": "Shared sequencer event integration and optional sidecar-only LFO retention, 2026-10-22; original source hash preserved."
     },
     "modules/euclid-lfo/test_engine.c": {
       "origin": "authored",
@@ -2582,6 +2593,18 @@
       "path": "tools/verify/verify_sophie_port.py",
       "sha256": "2939380651830b80cd2dade1fb581e199b526c19ce9cba681066e00ac0920fb3",
       "source_mode": "100644"
+    },
+    "modules/euclid-lfo/control-sidecar.s": {
+      "path": "modules/euclid-lfo/control-sidecar.s",
+      "sha256": "a679a2a74fe7a99b1e97f92c57b90c2fa8f1b2787339a8cac3c7620c16616612",
+      "source_mode": "100644",
+      "origin": "Authored for bus-events integration on 2026-10-22; derived from EUCLID LFO source in this repository."
+    },
+    "modules/euclid-lfo/brain.lock": {
+      "path": "modules/euclid-lfo/brain.lock",
+      "sha256": "f370482507b9ed51ab33b990ae800a3326c5fb2511bb2bf896bc1924b757f3e4",
+      "source_mode": "100644",
+      "origin": "Authored for bus-events integration on 2026-10-22; derived from EUCLID LFO source in this repository."
     }
   },
   "submodules": {},
