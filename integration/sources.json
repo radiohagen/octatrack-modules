@@ -3,7 +3,7 @@
   "source_commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
   "source_commit_availability": "preserved original local repository; selected content is published here with file hashes",
   "previous_author_snapshot": "e789014597e80114e971d16374e20f105594ab37",
-  "integration_commit": "385f9d20baf0ea5bd456eb4f5f232b635914a994",
+  "integration_commit": "fa5cf5eb14f2afffd934bb5ecf85b9ab9a8ed670",
   "modules": [
     {
       "slug": "midi-scales",
@@ -49,7 +49,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-follow/README.md",
       "sha256": "b984d044ef4eb3bec749dd2752d07d004c137dc95d51cab13aca4bf8aa5e4b2c",
-      "published_sha256": "8896fa856eef9cb29fba5ec7fe2420f33eccbd946ea88cd9cb301d63832f59c3",
+      "published_sha256": "bf1ff56d9ac3dfd51258ad65956e2bbcd75f1b44db53343f4ff78e957ef9e160",
       "source_mode": "100644"
     },
     "modules/midi-follow/manifest.py": {
@@ -1256,7 +1256,7 @@
     "modules/midi-follow/DEVELOPMENT.md": {
       "path": "modules/midi-follow/DEVELOPMENT.md",
       "sha256": "b984d044ef4eb3bec749dd2752d07d004c137dc95d51cab13aca4bf8aa5e4b2c",
-      "published_sha256": "b0bedb3d75c70b97b26389eeb39c0749471cdba73354e4596969c0584024401e",
+      "published_sha256": "e6a5f5751798cf4fa0f9f82c14882c90877b395165ae6d5a6fb34577148b42f9",
       "source_mode": "100644",
       "origin": "Split from adjacent README in this repository; historical evidence is retained in the text."
     },

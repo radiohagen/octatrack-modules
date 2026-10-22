@@ -1,7 +1,7 @@
 {
   "repository": "https://github.com/radiohagen/octabam.git",
-  "commit": "385f9d20baf0ea5bd456eb4f5f232b635914a994",
-  "recorded_on": "2026-10-19",
-  "status": "integration-verified",
-  "note": "Scoped Follow/Harmony software and emulator qualification; see harmony-follow-validation.json. Includes native N1-4 Follow, logical Harmony root handoff, explicit event bridge, and optional SRAM branch fix. The frozen N1 hardware package receipt is unchanged. No hardware, flash, or recovery acceptance."
+  "commit": "fa5cf5eb14f2afffd934bb5ecf85b9ab9a8ed670",
+  "recorded_on": "2026-10-22",
+  "status": "reference-only",
+  "note": "Published shared-event integration with author adapters. Select this author checkout in modules/midi-harmony/upstream and copy its accumulator verifier as described in integration/README.md. Qualification is recorded separately; historical N1 and explicit-bridge receipts do not qualify this composition."
 }

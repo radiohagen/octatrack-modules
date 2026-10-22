@@ -181,7 +181,7 @@ Parts and ordinary pattern changes do not.
 
 Run `python3 modules/midi-follow/generate.py --check` for generated assembly,
 `verify_midi_follow_gravity.py` for linked policy/lifecycle/packing, and
-`verify_midi_follow_gravity_port.py --project DIR` for physical panel events
+`verify_midi_follow_gravity_port.py --project DIR` for emulated panel events
 and full-firmware MIDI output. These are emulator proofs, not hardware tests.
 
 ## Root update timing: TRIG / LIVE
@@ -216,7 +216,7 @@ receiver keyboard notes.
 `tools/verify/verify_midi_follow_response.py` checks linked machine code,
 release deadlines, silence gates and MIDI ownership. The companion
 `tools/verify/verify_midi_follow_response_port.py --project /path/to/project`
-operates physical encoder D and captures the full firmware's MIDI output.
+operates emulated encoder D and captures the full firmware's MIDI output.
 These tests do not establish physical MIDI latency or external-synth timing.
 
 
@@ -236,6 +236,6 @@ This exercises linked ColdFire code, not physical outgoing-MIDI timing.
 Run `make check REMIX=midi-follow` for the standalone module. The manifest
 runs linked routing, register, response and graph stress checks. With a prepared
 project copy, `verify_midi_follow_response_port.py --project DIR` checks LIVE
-response through physical panel events and MIDI output. Combined Harmony
+response through emulated panel events and MIDI output. Combined Harmony
 settings/persistence coverage lives in `verify_midi_harmony_port.py --settings-only`,
 and NOTE SETUP confirmation in `verify_midi_setup_port.py`.

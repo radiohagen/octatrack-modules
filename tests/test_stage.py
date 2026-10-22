@@ -67,6 +67,21 @@ class StageGuards(unittest.TestCase):
             'path': name, 'stage': False}
         self.assertEqual(retired_paths(self.work, receipt), [])
 
+    def test_author_adapter_is_not_replaced_by_native_source(self):
+        source = self.root / 'source'
+        name = 'modules/example/manifest.py'
+        src, dst = source / name, self.work / name
+        src.parent.mkdir(parents=True)
+        dst.parent.mkdir(parents=True)
+        src.write_text('# native author declaration')
+        dst.write_text('# pinned author adapter')
+        self.run_git('-C', str(self.work), 'update-index', '--add', '--cacheinfo',
+                     f'160000,{self.commit},modules/example/upstream')
+        receipt = {'files': {name: {'path': name}}, 'submodules': {}}
+        with self.assertRaisesRegex(ValueError, 'author adapter'):
+            plan(source, self.work, receipt)
+        self.assertEqual(dst.read_text(), '# pinned author adapter')
+
     def test_rename_preserves_origin_and_retires_only_tracked_files(self):
         source = self.root / 'source'
         old, new = 'modules/old/manifest.py', 'modules/new/manifest.py'
