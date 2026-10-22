@@ -1,0 +1,109 @@
+diff --git a/README.md b/README.md
+index 8f774c79..48d66330 100644
+--- a/README.md
++++ b/README.md
+@@ -63,6 +63,7 @@ from the card (section 5).
+ | [**CHARACTER TXTR**](modules/character-txtr/README.md) | [sambanks](https://github.com/sambanks) | Character plus TXTR (Airwindows Pockey2): fold, texture, saturation, tilt, compressor, width. For testing: 4x this beside the reverb is unmeasured on hardware. | `make check` |
+ | [**CLOUDS VERB**](modules/clouds-verb/README.md) | [Emilie Gillet (Mutable Instruments), ported here](https://github.com/pichenettes/eurorack) | Clouds' Griesinger plate reverb: amount, input gain, time, diffusion, tone. One FX2 slot per instance. | local render: `verify_cloudsverb` (dsp_host, against a float model of Clouds' reverb); not on a unit |
+ | [**EUCLID**](modules/euclid/README.md) | [repeat98](https://github.com/repeat98) | Euclidean LP/BP/HP/notch/amp sequencer: swing, envelope, gate, random and loop. | local render: its own render gates; not on hardware |
++| [**EUCLID LFO**](modules/euclid-lfo/README.md) | [radiohagen](https://github.com/radiohagen) | Independent 1–16-step Euclidean audio/MIDI LFO with accents and native routing. | `make check`: emulator tested; no hardware acceptance |
+ | [**LOFI2**](modules/lofi2/README.md) | [Bryan T](https://github.com/bryantysinger) | Ring mod or frequency shifter, then sample-rate and bit reduction. | on hardware: Bryan T's MKII, images 96-99 (Oct 2026, this tree): tracks 1 and 5, five instances at once; `_bt_oct` build 11 (12 Oct 2026, the 414-cycle loop): eight in SHIFT at once, four per core, UP/DOWN switched while playing |
+ | [**MINIVERB**](modules/miniverb/README.md) | [repeat98](https://github.com/repeat98) | Modulated diffused FDN reverb; independent FX2 buffers, smoothed controls. | local render: `make verify-miniverb`; not flashed |
+ | [**MODULATION**](modules/modulation/README.md) | [sambanks](https://github.com/sambanks) | FX1 station: a modulation pedal -- Juno, Dimension, flanger, phaser, comb; FX1 only. | on hardware: Sam's MKII |
+diff --git a/modules/store/README.md b/modules/store/README.md
+index 9cae28d4..4132dc42 100644
+--- a/modules/store/README.md
++++ b/modules/store/README.md
+@@ -39,6 +39,7 @@ link cannot find stops the build. A client declares `requires=("STORE",)`.
+ |---|---|
+ | PLOCKS P2 (`plk`) | loadall_pre, loadmask_pre, newproj, bankw_pre, bankcopy, tocs1, fromcs1 |
+ | KITS (`kits`) | loadall_pre/post, loadmask_pre/post, newproj, bankw_post, pstore_pre/post, preload_post, partsaved, partclear |
++| EUCLID LFO (`eul`) | loadall_pre/post, loadmask_pre/post, newproj, bankw_pre, bankcopy, partsaved, partclear, tocs1, fromcs1 |
+
+ ## Caller census
+
+@@ -76,7 +77,8 @@ LEVEL scrolls the list; YES answers; NO closes it without an answer, leaving the
+ entries listed and asking no more until the next load. No answer touches the
+ card: the callbacks run in the UI task and the save in the engine task (a file
+ copy called through the port's `--call` never returned). Client ids: 0 PLOCKS P2
+-(argument = the bank), 1 KITS, 2 MIDI SCENES. PLOCKS P2 used to read a refused
++(argument = the bank), 1 KITS, 2 MIDI SCENES, 3 EUCLID LFO (bank).
++EUCLID LFO's name/answer entries are only emitted when selected. PLOCKS P2 used to read a refused
+ `p2lkNN.work` as empty and overwrite it at the next bank write.
+
+ ## Measured
+diff --git a/modules/store/manifest.py b/modules/store/manifest.py
+index 5cd7f2f3..8445ea7b 100644
+--- a/modules/store/manifest.py
++++ b/modules/store/manifest.py
+@@ -33,19 +33,27 @@ CLIENTS = (
+     ("MIDI SCENES", "scn", ("loadall_pre", "loadall_post", "loadmask_pre", "loadmask_post", "newproj", "bankw_post",
+                             "pstore_pre", "pstore_post", "preload_post", "tocs1",
+                             "fromcs1", "partclear")),
++    ("EUCLID LFO", "eul", ("loadall_pre", "loadall_post", "loadmask_pre", "loadmask_post",
++                            "newproj", "bankw_pre", "bankcopy", "partsaved", "partclear",
++                            "tocs1", "fromcs1")),
+ )
+
+
+ # A client's number in the refusal registry (store_refuse) and in ans_tab.
+-CLIENT_IDS = {"PLOCKS P2": 0, "KITS": 1, "MIDI SCENES": 2}
++CLIENT_IDS = {"PLOCKS P2": 0, "KITS": 1, "MIDI SCENES": 2, "EUCLID LFO": 3}
+
+
+ def store_inc(modules):
++    euclid = "EUCLID LFO" in modules
+     out = ["ev_ctl:", "        .long   kits_level" if "KITS" in modules else "        .long   0",
+-           "name_tab:", "        .long   nm_plk, nm_kits, nm_scn",
+-           'nm_plk: .asciz "P2LK%02d.WORK"', 'nm_kits: .asciz "KITS.WORK"', 'nm_scn: .asciz "SCENES.WORK"',
+-           ".balign 2", "ans_tab:"]
++           "name_tab:", "        .long   nm_plk, nm_kits, nm_scn" + (", nm_eul" if euclid else ""),
++           'nm_plk: .asciz "P2LK%02d.WORK"', 'nm_kits: .asciz "KITS.WORK"', 'nm_scn: .asciz "SCENES.WORK"']
++    if euclid:
++        out.append('nm_eul: .asciz "EULF%02d.WORK"')
++    out += [".balign 2", "ans_tab:"]
+     for key, _prefix, _events in sorted(CLIENTS, key=lambda c: CLIENT_IDS[c[0]]):
++        if key == "EUCLID LFO" and not euclid:
++            continue  # Preserve every old remix's STORE bytes and offsets.
+         pre = {k: p for k, p, _e in CLIENTS}[key]
+         out.append(f"        .long   {pre}_st_answer" if key in modules else "        .long   0")
+     for ev in EVENTS:
+diff --git a/remixes/test/README.md b/remixes/test/README.md
+index ead7c3e5..8808c56a 100644
+--- a/remixes/test/README.md
++++ b/remixes/test/README.md
+@@ -18,6 +18,7 @@ Each carries one module, or one combination, for that module's gates: `make chec
+ | [`direct-jump-kyoti`](direct-jump-kyoti/README.md) | stock effects with DIRECT_JUMP_KYOTI: [PTN] + [YES] toggles an immediate, clock-locked pattern change. | `make check` |
+ | [`erase-empty-trigless-locks`](erase-empty-trigless-locks/README.md) | stock effects with ERASE_EMPTY_TRIGLESS_LOCKS: an emptied trigless lock disappears. | `make check` |
+ | [`euclid`](euclid/README.md) | Euclid rhythmic modulation: 12 dB LP/BP/HP or AMP, both FX slots. | local render: the module's render gates |
++| [`euclid-lfo`](euclid-lfo/README.md) | Euclidean audio and MIDI LFOs; stock FX. | `make check`: emulator tested; no hardware acceptance |
+ | [`kits`](kits/README.md) | KITS (255 Kits per project) on the stock effects. | port-gated: verify_kits under the port |
+ | [`kyoti-fixes`](kyoti-fixes/README.md) | stock effects with QUANTIZE_LIVE_REC_TOGGLE, ERASE_EMPTY_TRIGLESS_LOCKS and BATCH_BUGFIXES together. | `make check` |
+ | [`kyoti-mute-jump`](kyoti-mute-jump/README.md) | stock effects with MUTE_MODES and DIRECT_JUMP_KYOTI together. | `make check` |
+diff --git a/tools/emu/ot_emu/CMakeLists.txt b/tools/emu/ot_emu/CMakeLists.txt
+index bf21d280..2eebe324 100644
+--- a/tools/emu/ot_emu/CMakeLists.txt
++++ b/tools/emu/ot_emu/CMakeLists.txt
+@@ -179,6 +179,10 @@ add_test(NAME repitch-patch COMMAND ot_repitch_stock_test --patched out/mainos_b
+ add_executable(ot_euclid_test ../../harness/euclid_probe.cpp)
+ target_link_libraries(ot_euclid_test PRIVATE ot_machine)
+
++add_executable(ot_euclid_lfo_test ../../../modules/euclid-lfo/probe.cpp
++    ../../../modules/euclid-lfo/engine.c)
++target_link_libraries(ot_euclid_lfo_test PRIVATE ot_machine)
++
+ add_executable(ot_tapeecho_cpu_test ../../harness/tapeecho_cpu_probe.cpp
+     ../../../modules/tapeecho/cpu.c)
+ target_compile_definitions(ot_tapeecho_cpu_test PRIVATE TE_HOST=1)
+diff --git a/tools/remix/selftest.py b/tools/remix/selftest.py
+index 200b8304..4465813c 100644
+--- a/tools/remix/selftest.py
++++ b/tools/remix/selftest.py
+@@ -878,6 +878,7 @@ def main():
+              "remix-switch": (), "remix-switch-trace": (),   # REMIX SWITCH's park in dead vectors, no region words
+              "usb-out-main-cue": (), "usb-out-main": (), "usb-midi": (), "stems": (),     # stock effects + ColdFire modules, no DSP words
+              "rec-threshold": (), "plocks-p2": (), "scenes-midisc": (), "kits": (), "analog-bassdrum": ("SPRING REV",),
++             "euclid-lfo": (),  # Independent ColdFire waveform; every stock FX remains.
+              "sidechain-compressor": ("SPRING REV",), "kyoti-mute-sidechain": ("SPRING REV",),   # its DSP section in SPRING's words
+              "repitch-repeat98-kyoti": ("SPRING REV",),   # its kernel in SPRING's P run, its tables in SPRING's X data (#603)
+              # Zac Kyoti's ColdFire modules on the stock effects, no DSP words

@@ -5,6 +5,10 @@ Source for MIDI Scales, Loopback, Follow, Harmony and Musical Units, maintained 
 [Octabam](https://github.com/sambanks/octabam) supplies the firmware builder
 and shared platform.
 
+[Euclid LFO](modules/euclid-lfo/README.md) adds independent fixed-step rhythmic
+modulation to native audio and MIDI LFOs. Its [scoped integration](integration/EUCLID_LFO.md)
+is separate from the existing MIDI package and does not advance that package's pin.
+
 - [Modules and controls](modules/README.md)
 - [Build and source integration](integration/README.md)
 - [Licensing and attribution](THIRD_PARTY.md)
