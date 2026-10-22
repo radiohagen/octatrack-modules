@@ -6,14 +6,16 @@
 \name:
         cmpi.l #19,%d7
         bne.s 1f
-        lea -24(%sp),%sp
-        movem.l %d1/%a0-%a1,12(%sp)
+        lea -28(%sp),%sp
+        movem.l %d1/%a0-%a1,16(%sp)
         move.l %d0,(%sp)
-        move.l 28(%sp),4(%sp)
-        clr.l 8(%sp)
-        jsr eul_scale_increment
-        movem.l 12(%sp),%d1/%a0-%a1
-        lea 24(%sp),%sp
+        move.l 32(%sp),4(%sp)
+        mvs.w 12(%a2,%d2.l*2),%d1
+        move.l %d1,8(%sp)
+        move.l %d4,12(%sp)
+        jsr eul_scale_audio
+        movem.l 16(%sp),%d1/%a0-%a1
+        lea 28(%sp),%sp
 1:      move.l %d6,24(%a3)
         move.l %d0,(%sp)
         jmp \continuation

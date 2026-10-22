@@ -42,8 +42,14 @@ int32_t eul_process(EulState *s, const EulParams *p, uint32_t phase,
  * Field 3 edits shape only; virtual field 10 edits DIR in mode bit 2. */
 unsigned eul_edit(EulParams *p, unsigned field, int delta);
 /* Native phase clock, scaled before native trigger/wrap/ONE/HALF handling.
- * 16 steps preserve the stock cycle; one step is always 1/16 of that cycle.
+ * MIDI uses the native tick increment; audio uses eul_audio_clock below.
  * Native increments fit signed 27 bits. Carry signed division residue so odd
  * lengths do not accumulate truncation drift, including reverse SPD. */
 int32_t eul_clock(int32_t increment, unsigned steps, int32_t *remainder);
+/* Exact audio-frame clock. Signed live SPD is Q8; tempo is BPM*24, MULT
+ * is its native shift (0..6). Requires tempo<=8191 and steps=1..16.
+ * Carry is in units of 1/(496125*steps); reset it when steps changes.
+ * Only 32-bit arithmetic, including fractional/modulated and reverse SPD. */
+int32_t eul_audio_clock(int speed, unsigned tempo, unsigned mult,
+                        unsigned steps, int32_t *remainder);
 #endif

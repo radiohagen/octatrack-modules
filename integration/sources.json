@@ -1940,7 +1940,7 @@
       "repository": "https://github.com/radiohagen/octatrack-modules",
       "path": "modules/euclid-lfo/DECISIONS.md",
       "sha256": "8f6c3e464956daaed93265cafefd10f4e63f6de6761322457189719e350d19b1",
-      "published_sha256": "84b294289ec39c062a1db8a765c92d578f5c2b55e7cf998b7f8038a0dda3021f",
+      "published_sha256": "04568b69a055bb33e4295ef9514e1b86b76d326fa7267ef07aab9683b00dc4ea",
       "source_mode": "100644",
       "stage": false
     },
@@ -2012,7 +2012,7 @@
       "repository": "https://github.com/radiohagen/octatrack-modules",
       "path": "modules/euclid-lfo/engine.c",
       "sha256": "9988f3ad3dce9df05c31f24c326ca0f9afcf030cd1ad13c2459f2601a253d4bd",
-      "published_sha256": "9988f3ad3dce9df05c31f24c326ca0f9afcf030cd1ad13c2459f2601a253d4bd",
+      "published_sha256": "c5a17bdd05d7759808244da6d53b084f334a381da27f0081fe3bf61d6dece735",
       "source_mode": "100644",
       "stage": false
     },
@@ -2021,7 +2021,7 @@
       "repository": "https://github.com/radiohagen/octatrack-modules",
       "path": "modules/euclid-lfo/README.md",
       "sha256": "fa8551404bbc6ca77547e71e267a8673704722f51e74c9cc954a56d5b2673306",
-      "published_sha256": "fa8551404bbc6ca77547e71e267a8673704722f51e74c9cc954a56d5b2673306",
+      "published_sha256": "817f03edbd2b71a6b6218077862d321666ed0b1bd8667a21fd62d0c9120ed8b8",
       "source_mode": "100644",
       "stage": false
     },
@@ -2057,7 +2057,7 @@
       "repository": "https://github.com/radiohagen/octatrack-modules",
       "path": "modules/euclid-lfo/probe.cpp",
       "sha256": "b2a67d78df5d0fc4943abc5640be4f408abf7cad7f6b6bd6dfe57f0cedaf4679",
-      "published_sha256": "b2a67d78df5d0fc4943abc5640be4f408abf7cad7f6b6bd6dfe57f0cedaf4679",
+      "published_sha256": "efae7999459fb26c71ff0ad13022ff9c483adc7650aee654d9a1c7a352f4ecc8",
       "source_mode": "100644",
       "stage": false
     },
@@ -2102,7 +2102,7 @@
       "repository": "https://github.com/radiohagen/octatrack-modules",
       "path": "modules/euclid-lfo/hooks.s",
       "sha256": "73feae4bea716b5a23a6ab2265c510de2299ef4a49b10746df94f9aafcc6b4cd",
-      "published_sha256": "73feae4bea716b5a23a6ab2265c510de2299ef4a49b10746df94f9aafcc6b4cd",
+      "published_sha256": "19332ce7d54e29375dd31a147940410546fbf6f3153dbbe58918e0e2b1840b0a",
       "source_mode": "100644",
       "stage": false
     },
@@ -2111,7 +2111,7 @@
       "repository": "https://github.com/radiohagen/octatrack-modules",
       "path": "modules/euclid-lfo/runtime.c",
       "sha256": "dbdd146ba4e615c576b92e1e6b2e17682ab8f82d156349325bb7000a99288819",
-      "published_sha256": "dbdd146ba4e615c576b92e1e6b2e17682ab8f82d156349325bb7000a99288819",
+      "published_sha256": "00b6e79ec447e4e5d92b719e5a7c2432549f8fd8a75dd7cdef68b535c9411490",
       "source_mode": "100644",
       "stage": false
     },
@@ -2120,7 +2120,7 @@
       "repository": "https://github.com/radiohagen/octatrack-modules",
       "path": "modules/euclid-lfo/engine.h",
       "sha256": "399f3c6682210edd7d762d6e8e7f0b1a1141f55e53e743d87f104bda1f293013",
-      "published_sha256": "399f3c6682210edd7d762d6e8e7f0b1a1141f55e53e743d87f104bda1f293013",
+      "published_sha256": "65938b52d82622a73b2cca0827cfed727854431fa1cd4cc85e860080a1b2c5f9",
       "source_mode": "100644",
       "stage": false
     },
@@ -2129,7 +2129,7 @@
       "repository": "https://github.com/radiohagen/octatrack-modules",
       "path": "modules/euclid-lfo/control.s",
       "sha256": "3adb703aa7235e887283b7ebe34c0521ac27d06560f745e1b2330cddf0e5f773",
-      "published_sha256": "3adb703aa7235e887283b7ebe34c0521ac27d06560f745e1b2330cddf0e5f773",
+      "published_sha256": "0b8e6956494ad1d5a5d8a089cfe7b9b453552fcb3948c52f04534d818a3a99b7",
       "source_mode": "100644",
       "stage": false
     },
@@ -2138,7 +2138,7 @@
       "repository": "https://github.com/radiohagen/octatrack-modules",
       "path": "modules/euclid-lfo/test_engine.c",
       "sha256": "f8dbd0ffaf51ae369be32697f61c038f078194e1ff5609a3c41134e31f84a602",
-      "published_sha256": "f8dbd0ffaf51ae369be32697f61c038f078194e1ff5609a3c41134e31f84a602",
+      "published_sha256": "c6e2e33882108240fe5ee5273d3eb1f97d4fb0672f6a9c05d3663098f53e10af",
       "source_mode": "100644",
       "stage": false
     },

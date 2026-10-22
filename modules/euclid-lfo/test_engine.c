@@ -24,6 +24,35 @@ int main(void) {
         }
     }
     puts("PASS: 4.8 million fixed-step clock cases, all lengths, forward/stopped/reverse, no odd-length drift");
+    unsigned audio_cases=0;
+    for(unsigned steps=1;steps<=16;++steps) for(unsigned mult=0;mult<=6;++mult)
+    for(int sign=-1;sign<=1;++sign) {
+        int32_t remainder=0;
+        int64_t input=0,output=0,denominator=496125*steps;
+        for(unsigned frame=0;frame<10000;++frame) {
+            /* Tempo/speed modulation, including signed 16-bit extrema and
+             * zero, all native MULTs, odd lengths and overflow boundary. */
+            int speed=sign*(int)(frame%5==0?32767:frame%5==1?0:16384+frame%256);
+            if(sign<0 && frame%5==0) speed=-32768;
+            unsigned tempo=frame%4==0?8191:frame%4==1?2400:frame%4==2?2880:3288;
+            input+=(int64_t)speed*tempo*8*(16u<<mult);
+            output+=eul_audio_clock(speed,tempo,mult,steps,&remainder);
+            assert(output==input/denominator);
+            assert(remainder==input%denominator);
+            ++audio_cases;
+        }
+        /* Changing direction and MULT must conserve the exact rational sum. */
+        for(unsigned frame=0;frame<1000;++frame) {
+            int speed=frame%3==0?-32768:frame%3==1?32767:0;
+            unsigned shift=frame%7,tempo=frame%8192;
+            input+=(int64_t)speed*tempo*8*(16u<<shift);
+            output+=eul_audio_clock(speed,tempo,shift,steps,&remainder);
+            assert(output*denominator+remainder==input);
+            assert(remainder>-denominator && remainder<denominator);
+            ++audio_cases;
+        }
+    }
+    printf("PASS: %u exact audio-clock cases against independent 64-bit oracle; fractional SPD, tempo/MULT changes, reverse and bounds\n",audio_cases);
     EulParams p; eul_defaults(&p);
     uint16_t hits,accents;
     eul_masks(&p,&hits,&accents);

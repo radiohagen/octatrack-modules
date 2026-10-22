@@ -24,19 +24,31 @@ static unsigned eul_clip_valid[2] __attribute__((section(".data")))={0};
 void eul_changed(unsigned bank,unsigned part);
 extern void eul_stock_draw(void);
 
-int32_t eul_scale_increment(int32_t increment,unsigned index,unsigned midi) {
-    if(index>=24) return increment;
+static unsigned clock_steps(unsigned index,unsigned midi) {
+    if(index>=24) return 0;
     unsigned track=index/3, id=index+(midi?24:0);
     unsigned bank=U8(0x8000182au+track), part=U8(0x80001832u+track);
     if(bank>=16 || part>=4) { bank=U8(0x80001828u); part=U8(0x80001829u); }
-    if(bank>=16 || part>=4) return increment;
+    if(bank>=16 || part>=4) return 0;
     unsigned steps=eul_bank[bank][part][id].steps;
     if(!steps) steps=8; else if(steps>16) steps=16;
     unsigned context=1+steps+32*(part+4*bank);
     if(eul_clock_context[id]!=context) {
         eul_remainder[id]=0; eul_clock_context[id]=context;
     }
-    return eul_clock(increment,steps,&eul_remainder[id]);
+    return steps;
+}
+int32_t eul_scale_increment(int32_t increment,unsigned index,unsigned midi) {
+    unsigned steps=clock_steps(index,midi);
+    return steps?eul_clock(increment,steps,&eul_remainder[index+(midi?24:0)]):increment;
+}
+int32_t eul_scale_audio(int32_t increment,unsigned index,int speed,unsigned mult) {
+    unsigned steps=clock_steps(index,0), tempo=U32(0x8000181cu);
+    if(!steps) return increment;
+    /* Defensive overflow boundary, above the native 300 BPM maximum.
+     * Invalid live data must not enter either clock with a stale residue. */
+    if(tempo>8191 || mult>6) { eul_remainder[index]=0; return increment; }
+    return eul_audio_clock(speed,tempo,mult,steps,&eul_remainder[index]);
 }
 
 void eul_wave(uint32_t *native,unsigned index,unsigned midi,unsigned reset) {

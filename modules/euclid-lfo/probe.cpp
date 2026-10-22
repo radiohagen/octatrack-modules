@@ -30,10 +30,27 @@ int main(int argc,char **argv) {
     auto *cpu=m.getCpuState();
     constexpr uint32_t stack=0x47100000,stop=0x470ff000;
     unsigned peak=0,last_count=0;
+    bool audio_reference=false;
+    int64_t reference_remainder[24]={};
     auto run_to=[&](uint32_t pc,uint32_t end) {
         m68k_set_reg(cpu,M68K_REG_PC,pc);
         unsigned count=0;
-        while(m.pc()!=end && count++<500000) if(!m.step()) break;
+        while(m.pc()!=end && count++<500000) {
+            // Test-only oracle: feed the unchanged stock SQR trigger/wrap
+            // consumer an independently calculated exact increment. No image
+            // patch, no skipped trigger/output instructions. EUCL runs its
+            // complete installed clock without this intervention.
+            if(audio_reference && m.pc()==0x40003c4a) {
+                unsigned sp=m68k_get_reg(cpu,M68K_REG_SP),id=m.read32(sp+4);
+                unsigned page=m68k_get_reg(cpu,M68K_REG_A2),lane=m68k_get_reg(cpu,M68K_REG_D2);
+                int speed=(int16_t)m.read16(page+12+2*lane);
+                unsigned mult=m68k_get_reg(cpu,M68K_REG_D4);
+                int64_t numerator=(int64_t)speed*m.read32(0x8000181c)*8*(1u<<mult)+reference_remainder[id];
+                m68k_set_reg(cpu,M68K_REG_D0,(int32_t)(numerator/496125));
+                reference_remainder[id]=numerator%496125;
+            }
+            if(!m.step()) break;
+        }
         if(m.pc()!=end) {
             std::fprintf(stderr,"failed at %08x from %08x after %u instructions\n",m.pc(),pc,count);
             return false;
@@ -226,11 +243,14 @@ int main(int argc,char **argv) {
     // Execute the complete native clock/trigger consumers, not just their
     // waveform dispatch tails. Restore identical native state before SQR and
     // EUCLID calls; only +4/+8 (waveform/held output) may differ afterward.
+    // Audio SQR receives the exact independent oracle above; MIDI is stock.
     // The firmware initializer copies these exact ROM control tables.
     args(); if(!run_to(0x40009062,0x4000908c)) return 1;
     m.write32(0x8000181c,2880); m.write32(0x800000e0,0);
     unsigned clock_cases=0,held_cases=0,terminal_cases=0;
     for(unsigned midi=0;midi<2;++midi) for(unsigned trial=0;trial<4;++trial) {
+        const unsigned tempos[]={2400,2880,3288,7200};
+        m.write32(0x8000181c,tempos[trial]);
         uint32_t state_base=midi?0x46c770e0:0x800010e8;
         std::vector<uint8_t> native_state[2]={std::vector<uint8_t>(672),std::vector<uint8_t>(672)};
         for(unsigned id=0;id<24;++id) {
@@ -239,6 +259,8 @@ int main(int argc,char **argv) {
             eul_defaults(&p); p.steps=16; p.mode=(id+trial)%4; p.accents=2; p.boost=127;
             for(unsigned b=0;b<sizeof(p);++b) m.write8(bank+sizeof(p)*(id+24*midi)+b,((uint8_t *)&p)[b]);
             m.write32(symbols["eul_context"]+4*(id+24*midi),0);
+            m.write32(symbols["eul_clock_context"]+4*(id+24*midi),0);
+            reference_remainder[id]=0;
         }
         for(unsigned frame=0;frame<128;++frame) {
             unsigned event=frame==3?8:frame==7?16:frame==11?24:0;
@@ -258,13 +280,15 @@ int main(int argc,char **argv) {
                             m.write8(live+6+lane,speed); m.write8(live+9+lane,16);
                             m.write8(live+18+lane,64);
                         } else {
-                            m.write16(page+12+2*lane,speed*256);
+                            m.write16(page+12+2*lane,speed*256+(speed?(int)trial*37:0));
                             m.write16(page+18+2*lane,16*256);
                             m.write16(0x80000110+64*track+12+2*lane,64*256);
                         }
                     }
                 }
+                audio_reference=!midi && !variant;
                 args(0); if(!run(midi?0x40003df8:0x40003b90)) return 1;
+                audio_reference=false;
                 if(variant) for(unsigned id=0;id<24;++id) {
                     unsigned trig=id/3;
                     uint32_t native=state_base+28*id,phase=m.read32(native);
@@ -291,7 +315,8 @@ int main(int argc,char **argv) {
         }
     }
     if(!held_cases || !terminal_cases) return 1;
-    std::printf("PASS: %u complete native audio/MIDI clock cases match stock phase/state across eight TRIG modes, note/sync events, MULT and positive/zero/reverse speed; %u HOLD and %u terminal checks\n",clock_cases,held_cases,terminal_cases);
+    m.write32(0x8000181c,2880);
+    std::printf("PASS: %u complete native audio/MIDI clock cases match independent exact-audio/stock-MIDI phase/state across eight TRIG modes, note/sync events, MULT and positive/zero/reverse speed; %u HOLD and %u terminal checks\n",clock_cases,held_cases,terminal_cases);
     // Exercise all three installed detours, including the ISR's inline copy.
     // Check the displaced instructions and live registers, not only C math.
     unsigned step_clock_cases=0;
@@ -301,9 +326,17 @@ int main(int argc,char **argv) {
         m.write8(bank+sizeof(p)*identity,steps);
         m.write32(symbols["eul_clock_context"]+4*identity,0);
         int32_t remainder=0;
+        int64_t audio_remainder=0;
         for(int sign=-1;sign<=1;++sign) {
             int32_t increment=sign*12347, expected=increment;
-            if(wave==19) expected=eul_clock(increment,steps,&remainder);
+            if(wave==19) {
+                if(midi) expected=eul_clock(increment,steps,&remainder);
+                else {
+                    int64_t numerator=(int64_t)(sign*16384)*2880*8*32+audio_remainder;
+                    expected=numerator/(496125*steps);
+                    audio_remainder=numerator%(496125*steps);
+                }
+            }
             args(id); m.write32(stack+68,increment);
             constexpr uint32_t state=0x47018000;
             m.write32(state,1000000);
@@ -311,7 +344,11 @@ int main(int argc,char **argv) {
             for(unsigned r=0;r<7;++r) reg((m68k_register_t)(M68K_REG_A0+r),0x23450000+r);
             reg(M68K_REG_D0,increment);
             if(midi) { reg(M68K_REG_D3,0x80000000|wave); reg(M68K_REG_D5,id%3); reg(M68K_REG_D7,id/3*3); reg(M68K_REG_A2,state); }
-            else { reg(M68K_REG_D7,wave); reg(M68K_REG_A3,state); }
+            else {
+                reg(M68K_REG_D7,wave); reg(M68K_REG_A3,state);
+                reg(M68K_REG_A2,0x47019000); reg(M68K_REG_D2,id%3); reg(M68K_REG_D4,1);
+                m.write16(0x47019000+12+2*(id%3),sign*16384);
+            }
             unsigned saved[15];
             for(unsigned r=0;r<15;++r) saved[r]=m68k_get_reg(cpu,(m68k_register_t)(M68K_REG_D1+r));
             uint32_t start=site==0?0x40003c4a:site==1?0x4000cfe4:0x40003eec;
@@ -356,7 +393,8 @@ int main(int argc,char **argv) {
                     unsigned phase=m.read32(state_base);
                     total+=(phase-old_stock)&(EUL_PHASE-1); old_stock=phase;
                 } else for(unsigned id=0;id<24;++id) {
-                    uint64_t scaled=total*16/7;
+                    uint64_t scaled=midi?total*16/7:
+                        (uint64_t)(frame+1)*16384*2880*8*32/(496125*7);
                     unsigned limit=id%3==1?EUL_PHASE:EUL_PHASE/2;
                     unsigned expected=id%3==0?scaled&(EUL_PHASE-1):scaled>=limit?limit:(unsigned)scaled;
                     unsigned got=m.read32(state_base+28*id);
@@ -370,7 +408,7 @@ int main(int argc,char **argv) {
         }
         if(!ends) return 1;
     }
-    puts("PASS: complete native audio/MIDI seven-step FREE/ONE/HALF clocks match independent accumulated-increment oracle for 6000 frames");
+    puts("PASS: complete native audio/MIDI seven-step FREE/ONE/HALF clocks match independent exact-audio/native-tick oracle for 6000 frames");
     // Use the real SETUP drawer and font, on a correctly shaped native surface.
     constexpr uint32_t window=0x47000000,plane=0x47001000;
     m.write32(0x400bc038,window);

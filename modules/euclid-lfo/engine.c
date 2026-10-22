@@ -11,6 +11,25 @@ int32_t eul_clock(int32_t increment, unsigned steps, int32_t *remainder) {
     return result;
 }
 
+int32_t eul_audio_clock(int speed, unsigned tempo, unsigned mult,
+                        unsigned steps, int32_t *remainder) {
+    /* Exact rational: speed*tempo*8*(16<<mult)/(496125*steps).
+     * Split before multiplying so even -32768 SPD, tempo 8191, MULT64
+     * fit signed 32 bits. No 64-bit divide helper in the frame interrupt.
+     * 496125 = 44100*45/4. At SPD64/MULT2, each step is one sixteenth
+     * at 16 samples/frame, independently of the pattern length. */
+    int32_t base=speed*(int32_t)(tempo*8);
+    int32_t whole=base/496125, fraction=base-whole*496125;
+    int32_t scale=16<<mult, scaled=whole*scale;
+    int32_t result=scaled/(int32_t)steps;
+    int32_t numerator=(scaled-result*(int32_t)steps)*496125
+                      +fraction*scale+*remainder;
+    int32_t denominator=496125*(int32_t)steps;
+    int32_t extra=numerator/denominator;
+    *remainder=numerator-extra*denominator;
+    return result+extra;
+}
+
 _Static_assert(sizeof(EulParams) == 10, "version 1 settings payload");
 static unsigned min_u(unsigned a, unsigned b) { return a < b ? a : b; }
 static uint32_t random_value(uint32_t *state) {

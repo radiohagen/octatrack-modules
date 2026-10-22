@@ -45,8 +45,9 @@ Custom native speeds display VAR; zero displays STOP, and turning RATE
 from STOP selects 1/16. Native SPD/MULT can still be edited normally, and
 selecting EUCL does not overwrite them. No extra rate field is persisted.
 SPD 64 + MULT 2x gives 1/16; SPD 64 + MULT 1x gives 1/8.
-The clock scales the native increment by 16/STPS before stock cycle handling;
-at 16 steps the native cycle is unchanged. TRIG restarts the whole pattern,
+The audio clock uses exact tempo/SPD/MULT arithmetic with fractional carry;
+MIDI scales its native tick increment by 16/STPS. Both feed stock cycle handling.
+TRIG restarts the whole pattern,
 HOLD retains its native latch behavior, and FREE continues while stopped.
 ONE plays one complete pattern; HALF plays half a pattern (3.5 steps at STPS 7).
 Both end at zero modulation. SYNC variants retain native reset events.
@@ -79,8 +80,9 @@ ColdFire codec execution), fault-injects the STORE client lifecycle, tests
 the installed Part Save/Clear callbacks, Part Reload copy adapter and native
 Part clipboard capture/paste/undo routines (including cross-bank snapshots),
 executes the installed ColdFire handlers against a native C reference across
-48 lanes, compares complete native audio/MIDI clocks with stock across all eight
-TRIG modes and checks HOLD/terminal behavior, register preservation and native
+48 lanes, compares complete native trigger consumers against an independent
+exact audio-clock oracle and stock MIDI across all eight TRIG modes, and checks
+HOLD/terminal behavior, register preservation and native
 encoder dispatch, and renders
 the editor using the firmware's actual fonts and knob widgets. Both layouts
 are rendered at minimum/maximum values in every mode for audio and MIDI,
@@ -88,6 +90,12 @@ with checks against framebuffer overflow and edits from inactive controls.
 Its receipt, original pixels and enlarged previews are under
 `out/euclid-lfo/`. These are software checks, not hardware acceptance or a full
 release gate.
+
+The exact audio-clock revision fixes the small accumulating timing error found
+in the earlier audio renders; it does not alter stock LFO waveforms. It also
+does not make this module identical to the original EUCLID effect: this LFO
+uses SPD/MULT rather than the track's speed/swing mask, and the destination's
+native gain/parameter curve determines the audible envelope shape.
 
 The panel check boots a copied project, selects EUCLID using the native WAVE
 encoder, opens the editor, edits all six pattern controls one count each and
