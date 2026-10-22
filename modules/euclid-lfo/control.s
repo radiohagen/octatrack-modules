@@ -570,7 +570,7 @@ eul_publish.part.0:
 	add.l #-480,%d0
 .L108:
 #APP
-| 268 "modules/euclid-lfo/runtime.c" 1
+| 270 "modules/euclid-lfo/runtime.c" 1
 	move.w %sr,%d2
 	move.w #0x2700,%sr
 | 0 "" 2
@@ -581,7 +581,7 @@ eul_publish.part.0:
 	move.l (%a1)+,(%a0)+
 	move.w (%a1),(%a0)
 #APP
-| 270 "modules/euclid-lfo/runtime.c" 1
+| 272 "modules/euclid-lfo/runtime.c" 1
 	move.w %d2,%sr
 | 0 "" 2
 #NO_APP
@@ -648,7 +648,7 @@ eul_snapshot.part.0:
 	add.l #-480,%d1
 .L123:
 #APP
-| 308 "modules/euclid-lfo/runtime.c" 1
+| 310 "modules/euclid-lfo/runtime.c" 1
 	move.w %sr,%d2
 	move.w #0x2700,%sr
 | 0 "" 2
@@ -659,7 +659,7 @@ eul_snapshot.part.0:
 	move.l (%a1)+,(%a0)+
 	move.w (%a1),(%a0)
 #APP
-| 310 "modules/euclid-lfo/runtime.c" 1
+| 312 "modules/euclid-lfo/runtime.c" 1
 	move.w %d2,%sr
 | 0 "" 2
 #NO_APP
@@ -711,7 +711,7 @@ eul_snapshot_part.part.0:
 	move.l %d6,%d1
 .L133:
 #APP
-| 322 "modules/euclid-lfo/runtime.c" 1
+| 324 "modules/euclid-lfo/runtime.c" 1
 	move.w %sr,%d2
 	move.w #0x2700,%sr
 | 0 "" 2
@@ -722,7 +722,7 @@ eul_snapshot_part.part.0:
 	move.l (%a1)+,(%a0)+
 	move.w (%a1),(%a0)
 #APP
-| 324 "modules/euclid-lfo/runtime.c" 1
+| 326 "modules/euclid-lfo/runtime.c" 1
 	move.w %d2,%sr
 | 0 "" 2
 #NO_APP
@@ -2206,7 +2206,7 @@ eul_nv_checkpoint.part.0:
 	mov3q.l #3,48(%sp)
 .L430:
 #APP
-| 251 "modules/euclid-lfo/runtime.c" 1
+| 253 "modules/euclid-lfo/runtime.c" 1
 	move.w %sr,%d0
 	move.w #0x2700,%sr
 | 0 "" 2
@@ -2219,12 +2219,12 @@ eul_nv_checkpoint.part.0:
 	move.l %d3,eul_nv_ticket
 	move.l (%a0,%a1.l*4),%a0
 	move.l %a0,52(%sp)
-	move.b %d1,269460960
-	move.b %d1,269460961
-	move.b %d1,269460962
-	move.b %d1,269460963
+	move.b %d1,269452800
+	move.b %d1,269452801
+	move.b %d1,269452802
+	move.b %d1,269452803
 #APP
-| 255 "modules/euclid-lfo/runtime.c" 1
+| 257 "modules/euclid-lfo/runtime.c" 1
 	move.w %d0,%sr
 | 0 "" 2
 #NO_APP
@@ -2238,7 +2238,7 @@ eul_nv_checkpoint.part.0:
 	move.l %sp,%d7
 	mvz.w #3840,%d4
 	move.l 80(%sp),%d5
-	move.l #269460976,%a2
+	move.l #269452816,%a2
 	lsl.l #8,%d2
 	clr.l %d6
 	muls.l %d4,%d5
@@ -2250,7 +2250,7 @@ eul_nv_checkpoint.part.0:
 	move.l %d2,44(%sp)
 .L424:
 #APP
-| 251 "modules/euclid-lfo/runtime.c" 1
+| 253 "modules/euclid-lfo/runtime.c" 1
 	move.w %sr,%d2
 	move.w #0x2700,%sr
 | 0 "" 2
@@ -2273,7 +2273,7 @@ eul_nv_checkpoint.part.0:
 	move.l (%a0)+,70(%sp)
 	move.w (%a0),(%a3)
 #APP
-| 255 "modules/euclid-lfo/runtime.c" 1
+| 257 "modules/euclid-lfo/runtime.c" 1
 	move.w %d2,%sr
 | 0 "" 2
 #NO_APP
@@ -2325,7 +2325,7 @@ eul_nv_checkpoint.part.0:
 	cmp.l %a1,%a0
 	jne .L421
 #APP
-| 251 "modules/euclid-lfo/runtime.c" 1
+| 253 "modules/euclid-lfo/runtime.c" 1
 	move.w %sr,%d1
 	move.w #0x2700,%sr
 | 0 "" 2
@@ -2357,7 +2357,7 @@ eul_nv_checkpoint.part.0:
 	move.b %d4,2(%a2)
 	move.b %d2,3(%a2)
 #APP
-| 255 "modules/euclid-lfo/runtime.c" 1
+| 257 "modules/euclid-lfo/runtime.c" 1
 	move.w %d1,%sr
 | 0 "" 2
 #NO_APP
@@ -2388,7 +2388,7 @@ eul_nv_checkpoint.part.0:
 	cmp.l %a5,%a3
 	jne .L427
 #APP
-| 251 "modules/euclid-lfo/runtime.c" 1
+| 253 "modules/euclid-lfo/runtime.c" 1
 	move.w %sr,%d2
 	move.w #0x2700,%sr
 | 0 "" 2
@@ -2401,7 +2401,7 @@ eul_nv_checkpoint.part.0:
 	cmp.l (%a0,%a1.l*4),%d1
 	jeq .L454
 #APP
-| 255 "modules/euclid-lfo/runtime.c" 1
+| 257 "modules/euclid-lfo/runtime.c" 1
 	move.w %d2,%sr
 | 0 "" 2
 #NO_APP
@@ -2417,7 +2417,7 @@ eul_nv_checkpoint.part.0:
 	rts
 .L451:
 #APP
-| 255 "modules/euclid-lfo/runtime.c" 1
+| 257 "modules/euclid-lfo/runtime.c" 1
 	move.w %d2,%sr
 | 0 "" 2
 #NO_APP
@@ -2429,7 +2429,7 @@ eul_nv_checkpoint.part.0:
 	rts
 .L452:
 #APP
-| 255 "modules/euclid-lfo/runtime.c" 1
+| 257 "modules/euclid-lfo/runtime.c" 1
 	move.w %d1,%sr
 | 0 "" 2
 #NO_APP
@@ -2454,37 +2454,37 @@ eul_nv_checkpoint.part.0:
 	move.l %d0,%d7
 	clr.w %d7
 	swap %d7
-	move.b %d3,269460964
+	move.b %d3,269452804
 	clr.w %d4
 	swap %d4
 	moveq #24,%d3
 	lsr.l %d3,%d5
 	move.l %d1,%d3
 	lsr.l #8,%d3
-	move.b %d7,269460965
+	move.b %d7,269452805
 	move.w %a0,%d7
 	lea (83,%sp),%a0
-	move.b %d7,269460966
-	move.b %d0,269460967
+	move.b %d7,269452806
+	move.b %d0,269452807
 	clr.b %d0
-	move.b %d0,269460968
-	move.b %d0,269460969
-	move.b %d0,269460970
+	move.b %d0,269452808
+	move.b %d0,269452809
+	move.b %d0,269452810
 	moveq #69,%d0
-	move.b (%a0),269460971
-	move.b %d5,269460972
-	move.b %d4,269460973
-	move.b %d3,269460974
-	move.b %d1,269460975
+	move.b (%a0),269452811
+	move.b %d5,269452812
+	move.b %d4,269452813
+	move.b %d3,269452814
+	move.b %d1,269452815
 	moveq #85,%d1
 	moveq #78,%d3
 	moveq #49,%d4
-	move.b %d0,269460960
-	move.b %d1,269460961
-	move.b %d3,269460962
-	move.b %d4,269460963
+	move.b %d0,269452800
+	move.b %d1,269452801
+	move.b %d3,269452802
+	move.b %d4,269452803
 #APP
-| 255 "modules/euclid-lfo/runtime.c" 1
+| 257 "modules/euclid-lfo/runtime.c" 1
 	move.w %d2,%sr
 | 0 "" 2
 #NO_APP
@@ -2495,7 +2495,7 @@ eul_nv_checkpoint.part.0:
 .L453:
 	move.l %a0,%d0
 #APP
-| 255 "modules/euclid-lfo/runtime.c" 1
+| 257 "modules/euclid-lfo/runtime.c" 1
 	move.w %d2,%sr
 | 0 "" 2
 #NO_APP
@@ -2515,11 +2515,11 @@ eul_nv_restore.part.0:
 	move.l %d0,%d2
 	tst.l %d0
 	jeq .L456
-	move.b 269460960,%d0
-	move.b 269460961,%d2
+	move.b 269452800,%d0
+	move.b 269452801,%d2
 	moveq #24,%d4
-	move.b 269460962,%d1
-	mvz.b 269460963,%d3
+	move.b 269452802,%d1
+	mvz.b 269452803,%d3
 	lsl.l %d4,%d0
 	mvz.b %d2,%d2
 	mvz.b %d1,%d1
@@ -2539,11 +2539,11 @@ eul_nv_restore.part.0:
 	unlk %fp
 	rts
 .L458:
-	move.b 269460964,%d0
-	move.b 269460965,%d2
+	move.b 269452804,%d0
+	move.b 269452805,%d2
 	moveq #24,%d6
-	move.b 269460966,%d1
-	mvz.b 269460967,%d3
+	move.b 269452806,%d1
+	mvz.b 269452807,%d3
 	lsl.l %d6,%d0
 	mvz.b %d2,%d2
 	mvz.b %d1,%d1
@@ -2555,10 +2555,10 @@ eul_nv_restore.part.0:
 	or.l %d1,%d0
 	cmp.l -22(%fp),%d0
 	jne .L459
-	move.b 269460968,%d0
-	move.b 269460969,%d2
-	move.b 269460970,%d1
-	mvz.b 269460971,%d3
+	move.b 269452808,%d0
+	move.b 269452809,%d2
+	move.b 269452810,%d1
+	mvz.b 269452811,%d3
 	lsl.l %d6,%d0
 	mvz.b %d2,%d2
 	mvz.b %d1,%d1
@@ -2570,20 +2570,20 @@ eul_nv_restore.part.0:
 	or.l %d1,%d0
 	cmp.l 8(%fp),%d0
 	jne .L459
-	move.l #-269460982,%a1
+	move.l #-269452822,%a1
 	add.l %fp,%a1
-	move.l #269460964,%a0
+	move.l #269452804,%a0
 .L460:
 	move.b (%a0),(%a1,%a0.l)
 	addq.l #1,%a0
-	cmp.l #269460972,%a0
+	cmp.l #269452812,%a0
 	jne .L460
 	move.b (%a0),%d3
-	move.b 269460973,%d4
+	move.b 269452813,%d4
 	moveq #24,%d7
 	mov3q.l #-1,%d1
-	move.b 269460974,%d2
-	mvz.b 269460975,%d5
+	move.b 269452814,%d2
+	mvz.b 269452815,%d5
 	lea (-18,%fp),%a0
 	lea (-10,%fp),%a4
 	lsl.l %d7,%d3
@@ -2624,7 +2624,7 @@ eul_nv_restore.part.0:
 	move.l 8(%fp),%d5
 	move.l %fp,%d4
 	clr.l %d3
-	move.l #269460976,%a2
+	move.l #269452816,%a2
 	add.l #-23,%d4
 	lsl.l #8,%d5
 .L463:
@@ -2873,7 +2873,7 @@ eul_file_decode:
 	.type	eul_nv_forget, @function
 eul_nv_forget:
 #APP
-| 251 "modules/euclid-lfo/runtime.c" 1
+| 253 "modules/euclid-lfo/runtime.c" 1
 	move.w %sr,%d0
 	move.w #0x2700,%sr
 | 0 "" 2
@@ -2883,12 +2883,12 @@ eul_nv_forget:
 	mov3q.l #1,eul_nv_suspended
 	clr.l eul_nv_ready
 	clr.l eul_nv_pending
-	move.b %d1,269460960
-	move.b %d1,269460961
-	move.b %d1,269460962
-	move.b %d1,269460963
+	move.b %d1,269452800
+	move.b %d1,269452801
+	move.b %d1,269452802
+	move.b %d1,269452803
 #APP
-| 255 "modules/euclid-lfo/runtime.c" 1
+| 257 "modules/euclid-lfo/runtime.c" 1
 	move.w %d0,%sr
 | 0 "" 2
 #NO_APP
@@ -2956,13 +2956,13 @@ eul_nv_touch_part:
 	addq.l #8,%sp
 	tst.l %d0
 	jeq .L540
-	move.b 269460960,%d0
-	move.b 269460961,%d1
+	move.b 269452800,%d0
+	move.b 269452801,%d1
 	moveq #24,%d4
 	lsl.l %d4,%d0
 	move.w %d1,%a0
-	move.b 269460962,%d1
-	mvz.b 269460963,%d3
+	move.b 269452802,%d1
+	mvz.b 269452803,%d3
 	move.l %d3,%d4
 	move.w %a0,%d3
 	mvz.b %d1,%d1
@@ -2975,13 +2975,13 @@ eul_nv_touch_part:
 	or.l %d1,%d0
 	cmp.l #1163218481,%d0
 	jne .L542
-	move.b 269460964,%d0
-	move.b 269460965,%d1
+	move.b 269452804,%d0
+	move.b 269452805,%d1
 	moveq #24,%d4
 	lsl.l %d4,%d0
 	move.w %d1,%a0
-	move.b 269460966,%d1
-	mvz.b 269460967,%d3
+	move.b 269452806,%d1
+	mvz.b 269452807,%d3
 	move.l %d3,%d4
 	move.w %a0,%d3
 	mvz.b %d1,%d1
@@ -2994,13 +2994,13 @@ eul_nv_touch_part:
 	or.l %d1,%d0
 	cmp.l -14(%fp),%d0
 	jne .L542
-	move.b 269460968,%d0
-	move.b 269460969,%d1
+	move.b 269452808,%d0
+	move.b 269452809,%d1
 	moveq #24,%d4
 	lsl.l %d4,%d0
 	move.w %d1,%a0
-	move.b 269460970,%d1
-	mvz.b 269460971,%d3
+	move.b 269452810,%d1
+	mvz.b 269452811,%d3
 	move.l %d3,%d4
 	move.w %a0,%d3
 	mvz.b %d1,%d1
@@ -3022,7 +3022,7 @@ eul_nv_touch_part:
 	muls.l %d2,%d1
 	muls.l %d4,%d2
 	move.l %d0,%a0
-	add.l #269460976,%a0
+	add.l #269452816,%a0
 	move.l %d3,-24(%fp)
 	mvz.w #3840,%d3
 	move.l -44(%fp),%d0
@@ -3038,16 +3038,16 @@ eul_nv_touch_part:
 	move.l %d1,-56(%fp)
 .L553:
 #APP
-| 251 "modules/euclid-lfo/runtime.c" 1
+| 253 "modules/euclid-lfo/runtime.c" 1
 	move.w %sr,%d1
 	move.w #0x2700,%sr
 | 0 "" 2
 #NO_APP
-	move.b 269460960,%d0
-	move.b 269460961,%d3
+	move.b 269452800,%d0
+	move.b 269452801,%d3
 	move.w %d3,%a1
-	move.b 269460962,%d3
-	mvz.b 269460963,%d4
+	move.b 269452802,%d3
+	mvz.b 269452803,%d4
 	move.l %d4,%a0
 	moveq #24,%d4
 	lsl.l %d4,%d0
@@ -3063,11 +3063,11 @@ eul_nv_touch_part:
 	or.l %d3,%d0
 	cmp.l #1163218481,%d0
 	jne .L544
-	move.b 269460968,%d0
-	move.b 269460969,%d3
+	move.b 269452808,%d0
+	move.b 269452809,%d3
 	move.w %d3,%a0
-	move.b 269460970,%d3
-	mvz.b 269460971,%d4
+	move.b 269452810,%d3
+	mvz.b 269452811,%d4
 	move.l %d4,%a1
 	moveq #24,%d4
 	lsl.l %d4,%d0
@@ -3094,7 +3094,7 @@ eul_nv_touch_part:
 	move.l (%a1,%d3.l*4),%a1
 	move.l %a1,-32(%fp)
 #APP
-| 255 "modules/euclid-lfo/runtime.c" 1
+| 257 "modules/euclid-lfo/runtime.c" 1
 	move.w %d1,%sr
 | 0 "" 2
 #NO_APP
@@ -3145,7 +3145,7 @@ eul_nv_touch_part:
 	cmp.l %a1,%fp
 	jne .L550
 #APP
-| 251 "modules/euclid-lfo/runtime.c" 1
+| 253 "modules/euclid-lfo/runtime.c" 1
 	move.w %sr,%d1
 	move.w #0x2700,%sr
 | 0 "" 2
@@ -3155,7 +3155,7 @@ eul_nv_touch_part:
 	jeq .L574
 .L551:
 #APP
-| 255 "modules/euclid-lfo/runtime.c" 1
+| 257 "modules/euclid-lfo/runtime.c" 1
 	move.w %d1,%sr
 | 0 "" 2
 #NO_APP
@@ -3177,12 +3177,12 @@ eul_nv_touch_part:
 	lea eul_revision,%a0
 	cmp.l (%a0,%a1.l*4),%d3
 	jne .L551
-	move.b 269460960,%d3
-	move.b 269460961,%d4
+	move.b 269452800,%d3
+	move.b 269452801,%d4
 	move.w %d4,%a0
-	move.b 269460962,%d4
+	move.b 269452802,%d4
 	move.b %d4,-40(%fp)
-	mvz.b 269460963,%d4
+	mvz.b 269452803,%d4
 	move.l %d4,-36(%fp)
 	moveq #24,%d4
 	lsl.l %d4,%d3
@@ -3205,12 +3205,12 @@ eul_nv_touch_part:
 	or.l %d4,%d3
 	cmp.l #1163218481,%d3
 	jne .L551
-	move.b 269460968,%d3
-	move.b 269460969,%d4
+	move.b 269452808,%d3
+	move.b 269452809,%d4
 	move.w %d4,%a0
-	move.b 269460970,%d4
+	move.b 269452810,%d4
 	move.b %d4,-40(%fp)
-	mvz.b 269460971,%d4
+	mvz.b 269452811,%d4
 	move.l %d4,-36(%fp)
 	moveq #24,%d4
 	lsl.l %d4,%d3
@@ -3262,7 +3262,7 @@ eul_nv_touch_part:
 	move.b %d3,2(%a0)
 	move.b %d4,3(%a0)
 #APP
-| 255 "modules/euclid-lfo/runtime.c" 1
+| 257 "modules/euclid-lfo/runtime.c" 1
 	move.w %d1,%sr
 | 0 "" 2
 #NO_APP
@@ -3278,7 +3278,7 @@ eul_nv_touch_part:
 	jra (eul_nv_checkpoint.part.0)
 .L544:
 #APP
-| 255 "modules/euclid-lfo/runtime.c" 1
+| 257 "modules/euclid-lfo/runtime.c" 1
 	move.w %d1,%sr
 | 0 "" 2
 #NO_APP
@@ -3305,7 +3305,7 @@ eul_publish_part.part.0:
 	add.l %d2,%d1
 .L576:
 #APP
-| 284 "modules/euclid-lfo/runtime.c" 1
+| 286 "modules/euclid-lfo/runtime.c" 1
 	move.w %sr,%d2
 	move.w #0x2700,%sr
 | 0 "" 2
@@ -3316,7 +3316,7 @@ eul_publish_part.part.0:
 	move.l (%a1)+,(%a0)+
 	move.w (%a1),(%a0)
 #APP
-| 286 "modules/euclid-lfo/runtime.c" 1
+| 288 "modules/euclid-lfo/runtime.c" 1
 	move.w %d2,%sr
 | 0 "" 2
 #NO_APP
@@ -3424,7 +3424,7 @@ eul_new_project:
 	lea (-24,%sp),%sp
 	movem.l #31748,(%sp)
 #APP
-| 251 "modules/euclid-lfo/runtime.c" 1
+| 253 "modules/euclid-lfo/runtime.c" 1
 	move.w %sr,%d0
 	move.w #0x2700,%sr
 | 0 "" 2
@@ -3434,12 +3434,12 @@ eul_new_project:
 	mov3q.l #1,eul_nv_suspended
 	clr.l eul_nv_ready
 	clr.l eul_nv_pending
-	move.b %d1,269460960
-	move.b %d1,269460961
-	move.b %d1,269460962
-	move.b %d1,269460963
+	move.b %d1,269452800
+	move.b %d1,269452801
+	move.b %d1,269452802
+	move.b %d1,269452803
 #APP
-| 255 "modules/euclid-lfo/runtime.c" 1
+| 257 "modules/euclid-lfo/runtime.c" 1
 	move.w %d0,%sr
 | 0 "" 2
 #NO_APP
@@ -3898,7 +3898,7 @@ eul_load_mask:
 	.type	eul_load_all, @function
 eul_load_all:
 #APP
-| 251 "modules/euclid-lfo/runtime.c" 1
+| 253 "modules/euclid-lfo/runtime.c" 1
 	move.w %sr,%d0
 	move.w #0x2700,%sr
 | 0 "" 2
@@ -3908,12 +3908,12 @@ eul_load_all:
 	mov3q.l #1,eul_nv_suspended
 	clr.l eul_nv_ready
 	clr.l eul_nv_pending
-	move.b %d1,269460960
-	move.b %d1,269460961
-	move.b %d1,269460962
-	move.b %d1,269460963
+	move.b %d1,269452800
+	move.b %d1,269452801
+	move.b %d1,269452802
+	move.b %d1,269452803
 #APP
-| 255 "modules/euclid-lfo/runtime.c" 1
+| 257 "modules/euclid-lfo/runtime.c" 1
 	move.w %d0,%sr
 | 0 "" 2
 #NO_APP
@@ -4206,7 +4206,7 @@ eul_write_mask:
 	tst.l %d0
 	jne .L776
 #APP
-| 298 "modules/euclid-lfo/runtime.c" 1
+| 300 "modules/euclid-lfo/runtime.c" 1
 	move.w %sr,%d0
 	move.w #0x2700,%sr
 | 0 "" 2
@@ -4216,7 +4216,7 @@ eul_write_mask:
 	neg.l %d3
 	move.b %d3,(%a2,%d2.l)
 #APP
-| 300 "modules/euclid-lfo/runtime.c" 1
+| 302 "modules/euclid-lfo/runtime.c" 1
 	move.w %d0,%sr
 | 0 "" 2
 #NO_APP
@@ -5705,7 +5705,7 @@ eul_current_bank:
 	.globl	eul_nv_memory
 	.type	eul_nv_memory, @function
 eul_nv_memory:
-	move.l #269460960,%d0
+	move.l #269452800,%d0
 	rts
 	.size	eul_nv_memory, .-eul_nv_memory
 	.align	2
@@ -5713,7 +5713,7 @@ eul_nv_memory:
 	.type	eul_nv_lock, @function
 eul_nv_lock:
 #APP
-| 251 "modules/euclid-lfo/runtime.c" 1
+| 253 "modules/euclid-lfo/runtime.c" 1
 	move.w %sr,%d0
 	move.w #0x2700,%sr
 | 0 "" 2
@@ -5726,7 +5726,7 @@ eul_nv_lock:
 eul_nv_unlock:
 	move.w 6(%sp),%d0
 #APP
-| 255 "modules/euclid-lfo/runtime.c" 1
+| 257 "modules/euclid-lfo/runtime.c" 1
 	move.w %d0,%sr
 | 0 "" 2
 #NO_APP
@@ -5792,7 +5792,7 @@ eul_finish_write:
 	move.l %d2,-(%sp)
 	move.l 8(%sp),%d1
 #APP
-| 298 "modules/euclid-lfo/runtime.c" 1
+| 300 "modules/euclid-lfo/runtime.c" 1
 	move.w %sr,%d0
 	move.w #0x2700,%sr
 | 0 "" 2
@@ -5807,7 +5807,7 @@ eul_finish_write:
 	move.b %d0,(%a1,%d1.l)
 	move.w %a0,%d0
 #APP
-| 300 "modules/euclid-lfo/runtime.c" 1
+| 302 "modules/euclid-lfo/runtime.c" 1
 	move.w %d0,%sr
 | 0 "" 2
 #NO_APP

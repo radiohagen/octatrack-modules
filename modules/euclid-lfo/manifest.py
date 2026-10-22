@@ -1,7 +1,13 @@
 """Independent Euclidean waveform and editor for audio and MIDI LFOs."""
-from remix.schema import Category, Claims, Detour, Gate, Kind, Linked, Module, Poke, Proof, SymbolRef, TableGrow
+from remix.schema import Apply, Option, Setting, Store, Category, Claims, Detour, Gate, Kind, Linked, Module, Poke, Proof, SymbolRef, TableGrow
 
 H=bytes.fromhex
+
+def retention_variant(values):
+    if values['RETENTION'] == 'SIDECAR':
+        return dict(claims=Claims(), linked=(Linked('eul', 'modules/euclid-lfo/control-sidecar.s', cpu='5475', dram=True),))
+    return {}
+
 MODULE=Module(
     name="euclid-lfo", key="EUCLID LFO", kind=Kind.CF_PATCH,
     category=Category.TRACK, author="radiohagen",
@@ -9,10 +15,13 @@ MODULE=Module(
     proof=Proof.CHECK, proof_note="emulator tested; no hardware acceptance",
     doc="Independent 1–16-step Euclidean audio/MIDI LFO with accents and native routing.",
     requires=("STORE",),
+    store=Store('radiohagen.euclid-lfo'),
+    settings=(Setting(1,'RETENTION',Option('SRAM','SIDECAR'),default='SRAM',apply=Apply.BUILD,
+                      doc='SIDECAR requires saving before power-off; it leaves battery SRAM to other modules.'),),
+    variant=retention_variant,
     gates=(Gate("tools/verify/verify_euclid_lfo.py",stage="image"),),
-    # Upper portion of the original PLOCKS reservation. The integration selects
-    # bounded compressed PLOCKS retention when both modules are present.
-    claims=Claims(sram=((0x100fa5e0,6160,"Euclid LFO current-bank retained journal"),)),
+    # SRAM mode conflicts with PLOCKS P2. SIDECAR mode claims no journal.
+    claims=Claims(sram=((0x100f8600,6160,"Euclid LFO current-bank retained journal"),)),
     linked=(Linked("eul", "modules/euclid-lfo/control.s", cpu="5475", dram=True),),
     detours=(
         Detour(0x40003c4a,H("274600182e80"),"eul","eul_clock_audio",

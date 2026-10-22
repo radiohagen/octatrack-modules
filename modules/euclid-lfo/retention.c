@@ -2,6 +2,17 @@
  * subsequently commits independently so an interrupted edit cannot invalidate
  * other lanes. CRCs detect corruption, not cryptographic authenticity. */
 #include "retention.h"
+#ifdef EUL_SIDECAR_ONLY
+/* On power-up stock omits its SRAM-restored bank from the disk-load mask.
+ * Still load that bank's LFO sidecar; no battery-backed journal is read/written. */
+volatile unsigned eul_nv_suspended=0,eul_nv_ready=0,eul_nv_pending=0;
+unsigned eul_nv_bad_records=0;
+void eul_nv_forget(void) { eul_nv_pending=0; }
+void eul_nv_boot(unsigned bank) { eul_nv_pending=bank<16 ? bank+1 : 0; }
+unsigned eul_nv_checkpoint(unsigned bank) { (void)bank; return 0; }
+unsigned eul_nv_restore(unsigned bank) { (void)bank; return 0; }
+void eul_nv_touch_part(unsigned bank,unsigned part) { (void)bank; (void)part; }
+#else
 #ifdef __m68k__
 #define EUL_NV_DATA __attribute__((section(".data")))
 #else
@@ -144,3 +155,5 @@ unsigned eul_nv_restore(unsigned bank) {
     if(changed) { eul_publish(bank,eul_nv_stage); eul_dirty[bank]=1; }
     return 1;
 }
+
+#endif

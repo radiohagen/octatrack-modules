@@ -245,7 +245,9 @@ void eul_ui_encoder(unsigned encoder,int delta) {
 }
 
 unsigned eul_current_bank(void) { return U8(0x80000002u); }
+#ifndef EUL_SIDECAR_ONLY
 volatile uint8_t *eul_nv_memory(void) { return (volatile uint8_t *)(uintptr_t)EUL_NV_BASE; }
+#endif
 uint16_t eul_nv_lock(void) {
     uint16_t sr;
     __asm__ volatile("move.w %%sr,%0\n\tmove.w #0x2700,%%sr" : "=d"(sr) :: "memory");
