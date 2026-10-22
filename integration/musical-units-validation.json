@@ -1,0 +1,306 @@
+{
+  "date": "2026-10-22",
+  "integration_base": "3b3da30e1f36abed6202d46d5fc97a47a825b17f",
+  "integration_source_commit": "d9bf960b259833f4065fae8d849e547f9cdfad81",
+  "integration_source_commit_availability": "local-only; reconstruct with these files and patch",
+  "module_source": "byte-identical to validated integration",
+  "copy_files": [
+    "docs/site/img/musical-units/arp-division.png",
+    "docs/site/img/musical-units/arp-ms.png",
+    "docs/site/img/musical-units/audio-division.png",
+    "docs/site/img/musical-units/audio-lock.png",
+    "docs/site/img/musical-units/audio-ms.png",
+    "docs/site/img/musical-units/audio-seconds.png",
+    "docs/site/img/musical-units/audio-stop.png",
+    "docs/site/img/musical-units/audio-triplet.png",
+    "docs/site/img/musical-units/delay-division.png",
+    "docs/site/img/musical-units/delay-ms.png",
+    "docs/site/img/musical-units/midi-division.png",
+    "docs/site/img/musical-units/midi-setup.png",
+    "docs/site/img/musical-units/note-division.png",
+    "docs/site/img/musical-units/note-lock.png",
+    "docs/site/img/musical-units/note-ms.png",
+    "docs/site/img/musical-units/recorder-fades.png",
+    "docs/site/img/musical-units/retrig-division.png",
+    "docs/site/img/musical-units/retrig-ms.png",
+    "docs/site/usage/musical-units.md",
+    "modules/musical-units/DEVELOPMENT.md",
+    "modules/musical-units/README.md",
+    "modules/musical-units/manifest.py",
+    "modules/musical-units/units.s",
+    "remixes/test/musical-units/README.md",
+    "remixes/test/musical-units/remix.py",
+    "tools/verify/verify_musical_units.py",
+    "tools/verify/verify_musical_units_port.py"
+  ],
+  "support_patch": "integration/musical-units-octabam.patch",
+  "support_patch_sha256": "5ff1d0904f6e32050daf15053eb934ffcaa13299159e0f8be0e0b5f6c5e1941a",
+  "support_files": [
+    "README.md",
+    "docs/contributing/SCREENSHOTS.md",
+    "docs/site/mkdocs.yml",
+    "docs/site/screenshots.json",
+    "remixes/test/README.md",
+    "tools/remix/selftest.py",
+    "tools/site/capture_manual.py",
+    "tools/verify/verify_menu.py"
+  ],
+  "validated_files": {
+    "README.md": {
+      "sha256": "5708f02a478a877df73ab090d0516550a86c4d60a0069ac469b2a817116a9d75",
+      "mode": "100644"
+    },
+    "docs/contributing/SCREENSHOTS.md": {
+      "sha256": "1de82fdb948ac9b3d091b8d0339e4ff33f76762e192a9eb729f995c0487e30f0",
+      "mode": "100644"
+    },
+    "docs/site/img/musical-units/arp-division.png": {
+      "sha256": "7db10285f28a9e2c07cd5bbd3653311bb7ef3225da106160830191af48e2c766",
+      "mode": "100644"
+    },
+    "docs/site/img/musical-units/arp-ms.png": {
+      "sha256": "6be9ba783cb5c893d68025e3cd70e3fb2e313694031696c3e1a56cc2255a8f97",
+      "mode": "100644"
+    },
+    "docs/site/img/musical-units/audio-division.png": {
+      "sha256": "0e83dd903d5fd7672dcef5417aa662c3a7a87a4c0b9144912e4eaa9066bf4a4d",
+      "mode": "100644"
+    },
+    "docs/site/img/musical-units/audio-lock.png": {
+      "sha256": "15316ffd9a8432b2d99125a04e793111fd1bda843d2a4c6372dd985f8d276f14",
+      "mode": "100644"
+    },
+    "docs/site/img/musical-units/audio-ms.png": {
+      "sha256": "c515aa2c5a9b166fcdcb2a2383d0e40e17b8c3f95ab5efe290b8ab6706c38639",
+      "mode": "100644"
+    },
+    "docs/site/img/musical-units/audio-seconds.png": {
+      "sha256": "0a897ade0002dbaa7e1a242298774476bf0dad7146ffd626bf8412995c47a069",
+      "mode": "100644"
+    },
+    "docs/site/img/musical-units/audio-stop.png": {
+      "sha256": "04474b312b6eb46f98a62139aac30285f06c4e071bf60f90c2ea0627067d8c4c",
+      "mode": "100644"
+    },
+    "docs/site/img/musical-units/audio-triplet.png": {
+      "sha256": "56729dbccbed6c1d2f126da4518f16ac9a86913cef577b9ce0b755fbf4c9524d",
+      "mode": "100644"
+    },
+    "docs/site/img/musical-units/delay-division.png": {
+      "sha256": "140ef414a45364395653292fcaa2d185695da35b65ea2d7df012f48da0e9f336",
+      "mode": "100644"
+    },
+    "docs/site/img/musical-units/delay-ms.png": {
+      "sha256": "a616e732b061b52b55c92e8c7951431a7f0ab0da06cae27eef9b24f3b43386dd",
+      "mode": "100644"
+    },
+    "docs/site/img/musical-units/midi-division.png": {
+      "sha256": "030415a9087439e6ec968e7ef5406bf35de16cf6cc68e0ef74a7f5ffb61c9939",
+      "mode": "100644"
+    },
+    "docs/site/img/musical-units/midi-setup.png": {
+      "sha256": "2272a737a20810b91f83b631ae5c17724bbf79c24f73109c46421a332da1e6a1",
+      "mode": "100644"
+    },
+    "docs/site/img/musical-units/note-division.png": {
+      "sha256": "255eed200d2b7a4f5a542f6c08d019acd789fd3972f9577a89071deee09476e5",
+      "mode": "100644"
+    },
+    "docs/site/img/musical-units/note-lock.png": {
+      "sha256": "95365ec5da953fb83d8ab4f0dd16dbc69785b260d9e5c7f3e5f0b15cef883725",
+      "mode": "100644"
+    },
+    "docs/site/img/musical-units/note-ms.png": {
+      "sha256": "9d76fb14099f4ad6a0321e8d4328aeb6505f2bef74da13ffcd4226ebce9dd79b",
+      "mode": "100644"
+    },
+    "docs/site/img/musical-units/recorder-fades.png": {
+      "sha256": "3c20a7ee93bcba06fa9c3d0a147e5f800a03324267023b643f76faecb8c6add6",
+      "mode": "100644"
+    },
+    "docs/site/img/musical-units/retrig-division.png": {
+      "sha256": "6f70fb69daa5eb185a7d428a792576479faac8408e940de1c6611a5734e3cf53",
+      "mode": "100644"
+    },
+    "docs/site/img/musical-units/retrig-ms.png": {
+      "sha256": "93e6ee080078a5b263749d188144d92861df731a8518b17ca1bbc1c765b7b328",
+      "mode": "100644"
+    },
+    "docs/site/mkdocs.yml": {
+      "sha256": "f222a484487921f0fa3ddeb02abb0be1c53c741654a708653fb7882b4ceea989",
+      "mode": "100644"
+    },
+    "docs/site/screenshots.json": {
+      "sha256": "4f7869f8e4d2f95febb974018440084a040a100db7da9f7a87b31e33c05a9847",
+      "mode": "100644"
+    },
+    "docs/site/usage/musical-units.md": {
+      "sha256": "acefcbf8dd891206155211e706fbbe9ddde1c70130f6d53d09f874b411d34123",
+      "mode": "100644"
+    },
+    "modules/musical-units/DEVELOPMENT.md": {
+      "sha256": "70b844f418472b2268edfd047f6f1f105de4bea905c79e6b0f662cd038a5509b",
+      "mode": "100644"
+    },
+    "modules/musical-units/README.md": {
+      "sha256": "5d9e4490533e948bb9c9fbbe2441fc3a19291023f2ecf0f2a83ae82343d903e6",
+      "mode": "100644"
+    },
+    "modules/musical-units/manifest.py": {
+      "sha256": "c714ac8febe279484f66cc9123f8ea1a6a0bcfe94d24c48e1cbdfb4e6fa2ae92",
+      "mode": "100644"
+    },
+    "modules/musical-units/units.s": {
+      "sha256": "5f92ef5c74b4c1e652460c208e19207a8537803c7a8efa8f4f3f30be38fd6494",
+      "mode": "100644"
+    },
+    "remixes/test/README.md": {
+      "sha256": "b436cdd99fe55891d0928e584d2fb2b1d9e86a24a262872f53d2608c6931541b",
+      "mode": "100644"
+    },
+    "remixes/test/musical-units/README.md": {
+      "sha256": "de80ab662eee9abb5769897932493bc4a5bd85454fe2940eb3d1e77245ac2a40",
+      "mode": "100644"
+    },
+    "remixes/test/musical-units/remix.py": {
+      "sha256": "662fe4c8ff26b407434e0aeede8482adbcf99c99393c291998302ed29138f7d3",
+      "mode": "100644"
+    },
+    "tools/remix/selftest.py": {
+      "sha256": "4ca6e8460698b2aa4aa08abad993212691aa666f9579f615ec0503fc2da1a971",
+      "mode": "100644"
+    },
+    "tools/site/capture_manual.py": {
+      "sha256": "ecbf5f6bd818ac8347ab4556dc99d49805c7bfd3204a0ab4b26ed01c53091c22",
+      "mode": "100644"
+    },
+    "tools/verify/verify_menu.py": {
+      "sha256": "d1deaf3bba264625af3a5f482505897b064f8b1e6dd3c670ef1af0a42ea6614d",
+      "mode": "100644"
+    },
+    "tools/verify/verify_musical_units.py": {
+      "sha256": "afde809dc490dba85fb2a1c9c3cfa589f2a774d416febe11d21ecc7a721de973",
+      "mode": "100644"
+    },
+    "tools/verify/verify_musical_units_port.py": {
+      "sha256": "7ace8c16383c5cc96907947841e56b97647a7d0bcc4550038e4a644597766815",
+      "mode": "100644"
+    }
+  },
+  "checks": [
+    {
+      "command": "make check REMIX=musical-units MODULES='MUSICAL UNITS'",
+      "status": "passed",
+      "log_sha256": "9df640f1f14f307a02e8b70392c042af4882c8a25050f5fbe66fabe5861b9d3e"
+    },
+    {
+      "command": ".venv/bin/python tools/site/capture_manual.py musical-units --project <disposable fixture>",
+      "status": "passed",
+      "log_sha256": "c58ca5a4df2175c07785f8d96605d6c5166c4dc455935c1c09aa2273aa322a56"
+    },
+    {
+      "command": "make verify-docs",
+      "status": "passed",
+      "log_sha256": "157465be24a8fa97ab5220853145efcd00624e17c86be0f6db1ff831bfe4e223"
+    },
+    {
+      "command": ".venv-site/bin/mkdocs build --strict -f docs/site/mkdocs.yml",
+      "status": "passed",
+      "log_sha256": "ba15ba31cbcc138ffb8a83215e6a83174408b2b58b3f4a6d95ffff9048944155"
+    }
+  ],
+  "formatters": {
+    "status": "pass",
+    "formatter_calls": 21000,
+    "image_sha256": "eb9f5260010e24332d2f43fc441c0ed87293be6b76ac0b102d378d62e1b5708e",
+    "scope": "linked formatters and installed descriptors; engine and live panel checked separately"
+  },
+  "timing": {
+    "midi_ticks_per_second_at_120_bpm": 192,
+    "audio": [
+      {
+        "bpm": 30,
+        "speed": 32,
+        "mult": 1,
+        "phase": 1520,
+        "nominal_phase": 1521.742947845805
+      },
+      {
+        "bpm": 90,
+        "speed": 63,
+        "mult": 8,
+        "phase": 71816,
+        "nominal_phase": 71902.3542857143
+      },
+      {
+        "bpm": 120,
+        "speed": 64,
+        "mult": 64,
+        "phase": 778560,
+        "nominal_phase": 779132.3892970522
+      },
+      {
+        "bpm": 120,
+        "speed": 96,
+        "mult": 32,
+        "phase": 584448,
+        "nominal_phase": 584349.2919727891
+      },
+      {
+        "bpm": 300,
+        "speed": 127,
+        "mult": 64,
+        "phase": 3865024,
+        "nominal_phase": 3865227.0875283442
+      }
+    ],
+    "midi": [
+      {
+        "speed": 1,
+        "mult": 1,
+        "phase": 512
+      },
+      {
+        "speed": 32,
+        "mult": 8,
+        "phase": 131072
+      },
+      {
+        "speed": 63,
+        "mult": 64,
+        "phase": 2064384
+      },
+      {
+        "speed": 64,
+        "mult": 64,
+        "phase": 2097216
+      },
+      {
+        "speed": 96,
+        "mult": 32,
+        "phase": 1572864
+      },
+      {
+        "speed": 127,
+        "mult": 64,
+        "phase": 4161600
+      }
+    ],
+    "status": "pass",
+    "image_sha256": "eb9f5260010e24332d2f43fc441c0ed87293be6b76ac0b102d378d62e1b5708e",
+    "scope": "native emulator; nominal full-cycle periods, not hardware acceptance"
+  },
+  "panel_captures": 18,
+  "fixture": "Disposable sample-free project at 120 BPM; Static/Flex, MIDI and DELAY screens. Original project is not distributed.",
+  "skips": [
+    "Project-backed verify_set: no OT_PROJECT for the composed-image suite.",
+    "USB-specific early/runtime gates are inapplicable to this selection."
+  ],
+  "hardware_acceptance": false,
+  "other_remix_qualification": false,
+  "publication_reconstruction": {
+    "status": "passed",
+    "method": "Executed the documented recipe in a clean, detached worktree at integration_base; staged all 35 changed files and compared git write-tree with integration_source_commit^{tree}.",
+    "tree": "ec452ea9309966933c6d2c5497e7f6ace1105294"
+  }
+}
