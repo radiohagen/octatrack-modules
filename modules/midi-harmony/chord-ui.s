@@ -426,3 +426,40 @@ ch_step_push:
     jmp 0x40050414
     .balign 4
 ch_toggle_active: .long 0
+
+/* EDIT EVENTS ownership predicate. No edits; d0=encoder, d1=delta.
+ * Non-Harmony contexts continue through the shared dispatcher. */
+    .global mh_ed_claim,mh_ed_handle
+mh_ed_handle:
+    jmp ch_step_encoder
+mh_ed_claim:
+    tst.l 0x80000012
+    beq.s mh_ed_no
+    tst.l mh_page_win
+    bne.s mh_ed_yes
+    move.l %d0,-(%sp)
+    move.l (%sp),%d1
+    jsr ha_ui_owned
+    tst.l %d0
+    bne.s mh_ed_claimed
+    move.l (%sp),%d1
+    jsr hd_ui_owned
+    tst.l %d0
+    bne.s mh_ed_claimed
+    move.l (%sp),%d1
+    jsr hd_ui_disabled
+    tst.l %d0
+    bne.s mh_ed_claimed
+    move.l (%sp),%d1
+    bsr.w ch_ui_owned
+    tst.l %d0
+    bne.s mh_ed_claimed
+    lea 4(%sp),%sp
+mh_ed_no:
+    moveq #0,%d0
+    rts
+mh_ed_claimed:
+    lea 4(%sp),%sp
+mh_ed_yes:
+    moveq #1,%d0
+    rts

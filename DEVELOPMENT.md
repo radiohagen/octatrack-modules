@@ -22,9 +22,11 @@ Run `make check` for source checks and staging safeguards. Building firmware
 requires the owner's OS 1.40C and the pinned public Octabam integration below.
 No firmware, samples or device projects are distributed here.
 
-`main` is the reviewed migration source. Make future changes on short-lived
-`codex/<feature>` branches in worktrees. The migration preserves native build
-paths; per-module external adapters will be qualified in the upstream series.
+`main` is the reviewed author source. Make future changes on short-lived
+`codex/<feature>` branches in worktrees. The current Harmony/Follow integration
+uses pinned author adapters and shared-event clients; follow the exact
+[integration workflow](integration/README.md). Older migration and candidate
+receipts remain historical evidence for their named snapshots.
 
 The first standalone contribution is [MIDI Scales](https://github.com/radiohagen/octabam/tree/codex/pr/midi-scales),
 with [only its own author source](https://github.com/radiohagen/octatrack-modules/tree/codex/pr/midi-scales)

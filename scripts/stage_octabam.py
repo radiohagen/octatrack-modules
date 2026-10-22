@@ -30,12 +30,18 @@ def validate_target(target: Path, commit: str) -> None:
 
 def plan(source: Path, target: Path, receipt: dict) -> list[tuple[Path, Path]]:
     source, target = source.resolve(), target.resolve()
+    adapters = [line.split('\t', 1)[1].removesuffix('/upstream')
+                for line in git(target, 'ls-files', '--stage', '--', 'modules').splitlines()
+                if line.startswith('160000 ') and line.endswith('/upstream')]
     pairs = []
     for name, record in receipt['files'].items():
         if record.get('stage') is False:
             continue  # historical shared helpers are owned by the builder
         if not name.startswith(('modules/', 'tools/verify/', 'remixes/')):
             continue  # licence copies and provenance stay in the author repository
+        if any(name.startswith(adapter + '/') for adapter in adapters):
+            raise ValueError(f'Refusing to overwrite an author adapter: {name}; '
+                             'select the author submodule commit per integration/README.md')
         src, dst = source / name, target / name
         if not src.resolve().is_relative_to(source) or not dst.resolve().is_relative_to(target):
             raise ValueError(f'Path escapes its workspace: {name}')

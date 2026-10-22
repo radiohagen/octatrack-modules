@@ -1,25 +1,8 @@
-# Reproduce the MIDI integration
+# Integration developer notes
 
-The public [Octabam fork](https://github.com/radiohagen/octabam) contains the
-`codex/package-current-20261018` branch. `octabam.json` pins a concrete commit containing
-shared fixes, module source and verification support. Unlike the earlier private
-import baseline, this commit is published for a fresh public clone.
-
-1. Clone `https://github.com/radiohagen/octabam.git` with its submodules.
-2. Create a separate worktree at the commit in `integration/octabam.json`.
-3. Run `python3 scripts/stage_octabam.py --octabam /absolute/worktree` here.
-   The inspection reports differences; `--apply` copies only after all guards
-   pass. It refuses primary checkouts, dirty trees and a different baseline.
-4. Follow that worktree's BUILDING.md with your own OS 1.40C. Build using
-   `RMXNAME='MATT MIDI N1' make bus REMIX=harmony-track-bus BUILD=N1 OCTABAM_PGO=0`.
-5. Run applicable CONTRIBUTING.md checks and project-backed tests on disposable
-   fixtures. See the remix README and the published validation record.
-
-The author source and fork currently retain native Octabam paths. This is an
-explicit staging workflow, not a completed external-adapter integration.
-Per-module adapters and source-relative gate/generator paths belong in the
-small upstream contributions, with byte and behavior checks at each step.
-Shared STORE, KITS, PLOCKS, emulator and ledger changes remain in Octabam.
+Follow [the current adapter workflow](README.md) for Harmony/Follow.
+The older native staging and N1 package recipes remain in Git history.
+Do not copy those recipes over the shared-event adapter checkout.
 
 Source records preserve the original file SHA-256 and also the published hash
 where documentation links were made portable. Never silently advance pins.

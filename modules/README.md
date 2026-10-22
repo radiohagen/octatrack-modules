@@ -9,6 +9,7 @@
 | MIDI Harmony | Degree roots, chords, Chord Play, voicing and retained steps |
 | MIDI Part State | Shared native Part settings and coherent copy/clear |
 | MIDI SRAM | Protected retained native MIDI step padding |
+| Harmony Follow | Shared transport and successful-note events for Harmony and Follow |
 | Harmony PLOCKS | Shared editing and copy hooks beside upstream PLOCKS |
 | MIDI Loopback Scenes | Scenes/USB producer routing through Loopback |
 | PIO Write Fix | Existing first-sector ordering fix, without STEM REC |

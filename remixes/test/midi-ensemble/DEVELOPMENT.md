@@ -1,7 +1,7 @@
 # MIDI ensemble verification carrier
 
 Scales, Follow and Harmony beside STORE, KITS, MIDI SCENES, SCENES P2,
-PLOCKS P2, MIDI PART STATE, MIDI SRAM and HARMONY PLOCKS. Audio effects
+PLOCKS P2, MIDI PART STATE, MIDI SRAM, SEQUENCER EVENTS and EDIT EVENTS. Audio effects
 stay stock. It exercises the same MIDI/persistence composition as the personal
 BottleService carrier without requiring its audio rig or USB layout.
 

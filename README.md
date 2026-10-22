@@ -14,6 +14,6 @@ is separate from the existing MIDI package and does not advance that package's p
 - [Licensing and attribution](THIRD_PARTY.md)
 
 The repository includes the modules' Part storage, retained-memory support
-and integration bridges. Firmware, samples and device projects are not distributed.
+and shared-event callbacks. Firmware, samples and device projects are not distributed.
 
 [Developer notes and verification](DEVELOPMENT.md).

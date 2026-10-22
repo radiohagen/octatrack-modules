@@ -1,26 +1,26 @@
     .include "remix.inc"
     .text
     .global hd_memcpy,hd_step_copy,hd_step_apply
-/* Native memcpy ABI, with source identity captured before any aliasing write. */
+/* Compatibility entry points route through the system, not another client. */
+    .global ch_memcpy,mh_ed_copy_pre,mh_ed_copy_post
+ch_memcpy:
 hd_memcpy:
+    jmp ed_copy
+/* d0/d1/d2 = destination/source/length. Save native ABI arguments because
+ * the generated C helpers may reuse their incoming argument slots. */
+mh_ed_copy_pre:
     lea -12(%sp),%sp
-    movem.l %d1/%a0-%a1,(%sp)
-    move.l 24(%sp),-(%sp)
-    move.l 24(%sp),-(%sp)
-    move.l 24(%sp),-(%sp)
-    jsr hd_copy_before_c
-    /* Reload arguments: callees own their incoming argument slots. */
-    move.l 28(%sp),(%sp)
-    move.l 32(%sp),4(%sp)
-    move.l 36(%sp),8(%sp)
-    /* The bridge lets P2 copy its own mirror before the one native copy. */
-    .ifdef HAVE_PLOCKS_BRIDGE
-    jsr plk_memcpy
-    .else
-    jsr 0x40020898
-    .endif
-    lea 12(%sp),%sp
+    movem.l %d0-%d2,(%sp)
+    move.l %d2,-(%sp)
+    move.l %d1,-(%sp)
     move.l %d0,-(%sp)
+    jsr ch_copy_mirror
+    movem.l 12(%sp),%d0-%d2
+    movem.l %d0-%d2,(%sp)
+    jsr hd_copy_before_c
+    lea 24(%sp),%sp
+    rts
+mh_ed_copy_post:
     jsr hd_copy_after_c
     tst.l %d0
     bmi.s .copy_done
@@ -30,9 +30,6 @@ hd_memcpy:
     bne.s .copy_done
     jsr ch_nv_save
 .copy_done:
-    move.l (%sp)+,%d0
-    movem.l (%sp),%d1/%a0-%a1
-    lea 12(%sp),%sp
     rts
 hd_step_copy: /* ordinary five-argument step-copy ABI, all registers kept */
     lea -16(%sp),%sp
