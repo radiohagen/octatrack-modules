@@ -17,3 +17,9 @@ generation and envelope curves are adapted from Jannik Aßfalg (`repeat98`)'s
 EUCLID effect in Octabam, originally introduced in commit
 `da7fa67589905dfcf0dbd6629c3e72e1c69f96c2`. The effect itself is not included or
 modified by this module. The existing MIT terms and attribution are preserved.
+
+The separately authorized Supersaw experiment uses its own mathematical oscillator
+tables and fixed-point engine. Its CPU SEM filter adapts the equations and
+resonance mapping of sambanks' SPECTRUM module in Octabam (MIT), whose design
+references Vadim Zavalishin and audiojs/filter (MIT). The reference gate runs the
+actual SPECTRUM DSP implementation; this is not an OP-1 source-code import.
