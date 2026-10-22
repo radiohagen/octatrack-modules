@@ -17,3 +17,6 @@ The repository includes the modules' Part storage, retained-memory support
 and shared-event callbacks. Firmware, samples and device projects are not distributed.
 
 [Developer notes and verification](DEVELOPMENT.md).
+
+The separately authorized [CPU Supersaw experiment](modules/supersaw/README.md)
+keeps both FX slots available. It is outside the MIDI upstream series.
