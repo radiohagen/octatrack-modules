@@ -2,6 +2,7 @@
 
 | Module | Role |
 |---|---|
+| [Musical Units](musical-units/README.md) | Display musical divisions, ms/s and semitones on native controls |
 | MIDI Scales | Seven diatonic modes in native MIDI ARP KEY |
 | MIDI Loopback | Per-Part EXT / INT / BOTH routing |
 | MIDI Follow | Root following, register, response and mute behavior |
@@ -14,5 +15,5 @@
 | PIO Write Fix | Existing first-sector ordering fix, without STEM REC |
 | Quantizer MIDI Drawer | Preserve native MIDI octave rendering beside Quantizer |
 
-The first four provide player controls. The others provide shared storage,
+Musical Units and the four MIDI features provide player controls. The others provide shared storage,
 integration or compatibility support. Open a module's README for its behavior.

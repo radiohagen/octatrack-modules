@@ -42,6 +42,14 @@
       "slug": "quantizer-midi-drawer",
       "source_commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "status": "compatibility-upstream-owned"
+    },
+    {
+      "slug": "musical-units",
+      "source_commit": "d9bf960b259833f4065fae8d849e547f9cdfad81",
+      "repository": "https://github.com/radiohagen/octabam",
+      "source_commit_availability": "local integration snapshot; published here as source and reconstructible support patch",
+      "stage": false,
+      "integration": "integration/musical-units.md"
     }
   ],
   "files": {
@@ -1918,7 +1926,7 @@
       "repository": "https://github.com/radiohagen/octatrack-modules",
       "path": "modules/README.md",
       "sha256": "ac24d8383fa03e2836422ce90ef88c6608164c0d64c7a1ac60e00f15b0a9a3fa",
-      "published_sha256": "ac24d8383fa03e2836422ce90ef88c6608164c0d64c7a1ac60e00f15b0a9a3fa",
+      "published_sha256": "18c9f3a30ab90d5d107787f07f08d5327ac258eaa656b303fc683770ae38db26",
       "source_mode": "100644",
       "stage": false
     },
@@ -1937,6 +1945,276 @@
       "sha256": "76c90bf36cc9ca3876b93ee3e43c590d4203974664a69794f8e71c1bb07e7035",
       "published_sha256": "bf64de6894662101ed88af380f42b48bcfa90f8060472895fbc4d497bac551a4",
       "source_mode": "100644"
+    },
+    "docs/site/img/musical-units/arp-division.png": {
+      "repository": "https://github.com/radiohagen/octabam",
+      "commit": "d9bf960b259833f4065fae8d849e547f9cdfad81",
+      "path": "docs/site/img/musical-units/arp-division.png",
+      "sha256": "7db10285f28a9e2c07cd5bbd3653311bb7ef3225da106160830191af48e2c766",
+      "published_sha256": "7db10285f28a9e2c07cd5bbd3653311bb7ef3225da106160830191af48e2c766",
+      "source_mode": "100644",
+      "stage": false,
+      "note": "MUSICAL UNITS has its own baseline; use integration/musical-units.md."
+    },
+    "docs/site/img/musical-units/arp-ms.png": {
+      "repository": "https://github.com/radiohagen/octabam",
+      "commit": "d9bf960b259833f4065fae8d849e547f9cdfad81",
+      "path": "docs/site/img/musical-units/arp-ms.png",
+      "sha256": "6be9ba783cb5c893d68025e3cd70e3fb2e313694031696c3e1a56cc2255a8f97",
+      "published_sha256": "6be9ba783cb5c893d68025e3cd70e3fb2e313694031696c3e1a56cc2255a8f97",
+      "source_mode": "100644",
+      "stage": false,
+      "note": "MUSICAL UNITS has its own baseline; use integration/musical-units.md."
+    },
+    "docs/site/img/musical-units/audio-division.png": {
+      "repository": "https://github.com/radiohagen/octabam",
+      "commit": "d9bf960b259833f4065fae8d849e547f9cdfad81",
+      "path": "docs/site/img/musical-units/audio-division.png",
+      "sha256": "0e83dd903d5fd7672dcef5417aa662c3a7a87a4c0b9144912e4eaa9066bf4a4d",
+      "published_sha256": "0e83dd903d5fd7672dcef5417aa662c3a7a87a4c0b9144912e4eaa9066bf4a4d",
+      "source_mode": "100644",
+      "stage": false,
+      "note": "MUSICAL UNITS has its own baseline; use integration/musical-units.md."
+    },
+    "docs/site/img/musical-units/audio-lock.png": {
+      "repository": "https://github.com/radiohagen/octabam",
+      "commit": "d9bf960b259833f4065fae8d849e547f9cdfad81",
+      "path": "docs/site/img/musical-units/audio-lock.png",
+      "sha256": "15316ffd9a8432b2d99125a04e793111fd1bda843d2a4c6372dd985f8d276f14",
+      "published_sha256": "15316ffd9a8432b2d99125a04e793111fd1bda843d2a4c6372dd985f8d276f14",
+      "source_mode": "100644",
+      "stage": false,
+      "note": "MUSICAL UNITS has its own baseline; use integration/musical-units.md."
+    },
+    "docs/site/img/musical-units/audio-ms.png": {
+      "repository": "https://github.com/radiohagen/octabam",
+      "commit": "d9bf960b259833f4065fae8d849e547f9cdfad81",
+      "path": "docs/site/img/musical-units/audio-ms.png",
+      "sha256": "c515aa2c5a9b166fcdcb2a2383d0e40e17b8c3f95ab5efe290b8ab6706c38639",
+      "published_sha256": "c515aa2c5a9b166fcdcb2a2383d0e40e17b8c3f95ab5efe290b8ab6706c38639",
+      "source_mode": "100644",
+      "stage": false,
+      "note": "MUSICAL UNITS has its own baseline; use integration/musical-units.md."
+    },
+    "docs/site/img/musical-units/audio-seconds.png": {
+      "repository": "https://github.com/radiohagen/octabam",
+      "commit": "d9bf960b259833f4065fae8d849e547f9cdfad81",
+      "path": "docs/site/img/musical-units/audio-seconds.png",
+      "sha256": "0a897ade0002dbaa7e1a242298774476bf0dad7146ffd626bf8412995c47a069",
+      "published_sha256": "0a897ade0002dbaa7e1a242298774476bf0dad7146ffd626bf8412995c47a069",
+      "source_mode": "100644",
+      "stage": false,
+      "note": "MUSICAL UNITS has its own baseline; use integration/musical-units.md."
+    },
+    "docs/site/img/musical-units/audio-stop.png": {
+      "repository": "https://github.com/radiohagen/octabam",
+      "commit": "d9bf960b259833f4065fae8d849e547f9cdfad81",
+      "path": "docs/site/img/musical-units/audio-stop.png",
+      "sha256": "04474b312b6eb46f98a62139aac30285f06c4e071bf60f90c2ea0627067d8c4c",
+      "published_sha256": "04474b312b6eb46f98a62139aac30285f06c4e071bf60f90c2ea0627067d8c4c",
+      "source_mode": "100644",
+      "stage": false,
+      "note": "MUSICAL UNITS has its own baseline; use integration/musical-units.md."
+    },
+    "docs/site/img/musical-units/audio-triplet.png": {
+      "repository": "https://github.com/radiohagen/octabam",
+      "commit": "d9bf960b259833f4065fae8d849e547f9cdfad81",
+      "path": "docs/site/img/musical-units/audio-triplet.png",
+      "sha256": "56729dbccbed6c1d2f126da4518f16ac9a86913cef577b9ce0b755fbf4c9524d",
+      "published_sha256": "56729dbccbed6c1d2f126da4518f16ac9a86913cef577b9ce0b755fbf4c9524d",
+      "source_mode": "100644",
+      "stage": false,
+      "note": "MUSICAL UNITS has its own baseline; use integration/musical-units.md."
+    },
+    "docs/site/img/musical-units/delay-division.png": {
+      "repository": "https://github.com/radiohagen/octabam",
+      "commit": "d9bf960b259833f4065fae8d849e547f9cdfad81",
+      "path": "docs/site/img/musical-units/delay-division.png",
+      "sha256": "140ef414a45364395653292fcaa2d185695da35b65ea2d7df012f48da0e9f336",
+      "published_sha256": "140ef414a45364395653292fcaa2d185695da35b65ea2d7df012f48da0e9f336",
+      "source_mode": "100644",
+      "stage": false,
+      "note": "MUSICAL UNITS has its own baseline; use integration/musical-units.md."
+    },
+    "docs/site/img/musical-units/delay-ms.png": {
+      "repository": "https://github.com/radiohagen/octabam",
+      "commit": "d9bf960b259833f4065fae8d849e547f9cdfad81",
+      "path": "docs/site/img/musical-units/delay-ms.png",
+      "sha256": "a616e732b061b52b55c92e8c7951431a7f0ab0da06cae27eef9b24f3b43386dd",
+      "published_sha256": "a616e732b061b52b55c92e8c7951431a7f0ab0da06cae27eef9b24f3b43386dd",
+      "source_mode": "100644",
+      "stage": false,
+      "note": "MUSICAL UNITS has its own baseline; use integration/musical-units.md."
+    },
+    "docs/site/img/musical-units/midi-division.png": {
+      "repository": "https://github.com/radiohagen/octabam",
+      "commit": "d9bf960b259833f4065fae8d849e547f9cdfad81",
+      "path": "docs/site/img/musical-units/midi-division.png",
+      "sha256": "030415a9087439e6ec968e7ef5406bf35de16cf6cc68e0ef74a7f5ffb61c9939",
+      "published_sha256": "030415a9087439e6ec968e7ef5406bf35de16cf6cc68e0ef74a7f5ffb61c9939",
+      "source_mode": "100644",
+      "stage": false,
+      "note": "MUSICAL UNITS has its own baseline; use integration/musical-units.md."
+    },
+    "docs/site/img/musical-units/midi-setup.png": {
+      "repository": "https://github.com/radiohagen/octabam",
+      "commit": "d9bf960b259833f4065fae8d849e547f9cdfad81",
+      "path": "docs/site/img/musical-units/midi-setup.png",
+      "sha256": "2272a737a20810b91f83b631ae5c17724bbf79c24f73109c46421a332da1e6a1",
+      "published_sha256": "2272a737a20810b91f83b631ae5c17724bbf79c24f73109c46421a332da1e6a1",
+      "source_mode": "100644",
+      "stage": false,
+      "note": "MUSICAL UNITS has its own baseline; use integration/musical-units.md."
+    },
+    "docs/site/img/musical-units/note-division.png": {
+      "repository": "https://github.com/radiohagen/octabam",
+      "commit": "d9bf960b259833f4065fae8d849e547f9cdfad81",
+      "path": "docs/site/img/musical-units/note-division.png",
+      "sha256": "255eed200d2b7a4f5a542f6c08d019acd789fd3972f9577a89071deee09476e5",
+      "published_sha256": "255eed200d2b7a4f5a542f6c08d019acd789fd3972f9577a89071deee09476e5",
+      "source_mode": "100644",
+      "stage": false,
+      "note": "MUSICAL UNITS has its own baseline; use integration/musical-units.md."
+    },
+    "docs/site/img/musical-units/note-lock.png": {
+      "repository": "https://github.com/radiohagen/octabam",
+      "commit": "d9bf960b259833f4065fae8d849e547f9cdfad81",
+      "path": "docs/site/img/musical-units/note-lock.png",
+      "sha256": "95365ec5da953fb83d8ab4f0dd16dbc69785b260d9e5c7f3e5f0b15cef883725",
+      "published_sha256": "95365ec5da953fb83d8ab4f0dd16dbc69785b260d9e5c7f3e5f0b15cef883725",
+      "source_mode": "100644",
+      "stage": false,
+      "note": "MUSICAL UNITS has its own baseline; use integration/musical-units.md."
+    },
+    "docs/site/img/musical-units/note-ms.png": {
+      "repository": "https://github.com/radiohagen/octabam",
+      "commit": "d9bf960b259833f4065fae8d849e547f9cdfad81",
+      "path": "docs/site/img/musical-units/note-ms.png",
+      "sha256": "9d76fb14099f4ad6a0321e8d4328aeb6505f2bef74da13ffcd4226ebce9dd79b",
+      "published_sha256": "9d76fb14099f4ad6a0321e8d4328aeb6505f2bef74da13ffcd4226ebce9dd79b",
+      "source_mode": "100644",
+      "stage": false,
+      "note": "MUSICAL UNITS has its own baseline; use integration/musical-units.md."
+    },
+    "docs/site/img/musical-units/recorder-fades.png": {
+      "repository": "https://github.com/radiohagen/octabam",
+      "commit": "d9bf960b259833f4065fae8d849e547f9cdfad81",
+      "path": "docs/site/img/musical-units/recorder-fades.png",
+      "sha256": "3c20a7ee93bcba06fa9c3d0a147e5f800a03324267023b643f76faecb8c6add6",
+      "published_sha256": "3c20a7ee93bcba06fa9c3d0a147e5f800a03324267023b643f76faecb8c6add6",
+      "source_mode": "100644",
+      "stage": false,
+      "note": "MUSICAL UNITS has its own baseline; use integration/musical-units.md."
+    },
+    "docs/site/img/musical-units/retrig-division.png": {
+      "repository": "https://github.com/radiohagen/octabam",
+      "commit": "d9bf960b259833f4065fae8d849e547f9cdfad81",
+      "path": "docs/site/img/musical-units/retrig-division.png",
+      "sha256": "6f70fb69daa5eb185a7d428a792576479faac8408e940de1c6611a5734e3cf53",
+      "published_sha256": "6f70fb69daa5eb185a7d428a792576479faac8408e940de1c6611a5734e3cf53",
+      "source_mode": "100644",
+      "stage": false,
+      "note": "MUSICAL UNITS has its own baseline; use integration/musical-units.md."
+    },
+    "docs/site/img/musical-units/retrig-ms.png": {
+      "repository": "https://github.com/radiohagen/octabam",
+      "commit": "d9bf960b259833f4065fae8d849e547f9cdfad81",
+      "path": "docs/site/img/musical-units/retrig-ms.png",
+      "sha256": "93e6ee080078a5b263749d188144d92861df731a8518b17ca1bbc1c765b7b328",
+      "published_sha256": "93e6ee080078a5b263749d188144d92861df731a8518b17ca1bbc1c765b7b328",
+      "source_mode": "100644",
+      "stage": false,
+      "note": "MUSICAL UNITS has its own baseline; use integration/musical-units.md."
+    },
+    "docs/site/usage/musical-units.md": {
+      "repository": "https://github.com/radiohagen/octabam",
+      "commit": "d9bf960b259833f4065fae8d849e547f9cdfad81",
+      "path": "docs/site/usage/musical-units.md",
+      "sha256": "acefcbf8dd891206155211e706fbbe9ddde1c70130f6d53d09f874b411d34123",
+      "published_sha256": "acefcbf8dd891206155211e706fbbe9ddde1c70130f6d53d09f874b411d34123",
+      "source_mode": "100644",
+      "stage": false,
+      "note": "MUSICAL UNITS has its own baseline; use integration/musical-units.md."
+    },
+    "modules/musical-units/DEVELOPMENT.md": {
+      "repository": "https://github.com/radiohagen/octabam",
+      "commit": "d9bf960b259833f4065fae8d849e547f9cdfad81",
+      "path": "modules/musical-units/DEVELOPMENT.md",
+      "sha256": "70b844f418472b2268edfd047f6f1f105de4bea905c79e6b0f662cd038a5509b",
+      "published_sha256": "70b844f418472b2268edfd047f6f1f105de4bea905c79e6b0f662cd038a5509b",
+      "source_mode": "100644",
+      "stage": false,
+      "note": "MUSICAL UNITS has its own baseline; use integration/musical-units.md."
+    },
+    "modules/musical-units/README.md": {
+      "repository": "https://github.com/radiohagen/octabam",
+      "commit": "d9bf960b259833f4065fae8d849e547f9cdfad81",
+      "path": "modules/musical-units/README.md",
+      "sha256": "5d9e4490533e948bb9c9fbbe2441fc3a19291023f2ecf0f2a83ae82343d903e6",
+      "published_sha256": "5d9e4490533e948bb9c9fbbe2441fc3a19291023f2ecf0f2a83ae82343d903e6",
+      "source_mode": "100644",
+      "stage": false,
+      "note": "MUSICAL UNITS has its own baseline; use integration/musical-units.md."
+    },
+    "modules/musical-units/manifest.py": {
+      "repository": "https://github.com/radiohagen/octabam",
+      "commit": "d9bf960b259833f4065fae8d849e547f9cdfad81",
+      "path": "modules/musical-units/manifest.py",
+      "sha256": "c714ac8febe279484f66cc9123f8ea1a6a0bcfe94d24c48e1cbdfb4e6fa2ae92",
+      "published_sha256": "c714ac8febe279484f66cc9123f8ea1a6a0bcfe94d24c48e1cbdfb4e6fa2ae92",
+      "source_mode": "100644",
+      "stage": false,
+      "note": "MUSICAL UNITS has its own baseline; use integration/musical-units.md."
+    },
+    "modules/musical-units/units.s": {
+      "repository": "https://github.com/radiohagen/octabam",
+      "commit": "d9bf960b259833f4065fae8d849e547f9cdfad81",
+      "path": "modules/musical-units/units.s",
+      "sha256": "5f92ef5c74b4c1e652460c208e19207a8537803c7a8efa8f4f3f30be38fd6494",
+      "published_sha256": "5f92ef5c74b4c1e652460c208e19207a8537803c7a8efa8f4f3f30be38fd6494",
+      "source_mode": "100644",
+      "stage": false,
+      "note": "MUSICAL UNITS has its own baseline; use integration/musical-units.md."
+    },
+    "remixes/test/musical-units/README.md": {
+      "repository": "https://github.com/radiohagen/octabam",
+      "commit": "d9bf960b259833f4065fae8d849e547f9cdfad81",
+      "path": "remixes/test/musical-units/README.md",
+      "sha256": "de80ab662eee9abb5769897932493bc4a5bd85454fe2940eb3d1e77245ac2a40",
+      "published_sha256": "de80ab662eee9abb5769897932493bc4a5bd85454fe2940eb3d1e77245ac2a40",
+      "source_mode": "100644",
+      "stage": false,
+      "note": "MUSICAL UNITS has its own baseline; use integration/musical-units.md."
+    },
+    "remixes/test/musical-units/remix.py": {
+      "repository": "https://github.com/radiohagen/octabam",
+      "commit": "d9bf960b259833f4065fae8d849e547f9cdfad81",
+      "path": "remixes/test/musical-units/remix.py",
+      "sha256": "662fe4c8ff26b407434e0aeede8482adbcf99c99393c291998302ed29138f7d3",
+      "published_sha256": "662fe4c8ff26b407434e0aeede8482adbcf99c99393c291998302ed29138f7d3",
+      "source_mode": "100644",
+      "stage": false,
+      "note": "MUSICAL UNITS has its own baseline; use integration/musical-units.md."
+    },
+    "tools/verify/verify_musical_units.py": {
+      "repository": "https://github.com/radiohagen/octabam",
+      "commit": "d9bf960b259833f4065fae8d849e547f9cdfad81",
+      "path": "tools/verify/verify_musical_units.py",
+      "sha256": "afde809dc490dba85fb2a1c9c3cfa589f2a774d416febe11d21ecc7a721de973",
+      "published_sha256": "afde809dc490dba85fb2a1c9c3cfa589f2a774d416febe11d21ecc7a721de973",
+      "source_mode": "100644",
+      "stage": false,
+      "note": "MUSICAL UNITS has its own baseline; use integration/musical-units.md."
+    },
+    "tools/verify/verify_musical_units_port.py": {
+      "repository": "https://github.com/radiohagen/octabam",
+      "commit": "d9bf960b259833f4065fae8d849e547f9cdfad81",
+      "path": "tools/verify/verify_musical_units_port.py",
+      "sha256": "7ace8c16383c5cc96907947841e56b97647a7d0bcc4550038e4a644597766815",
+      "published_sha256": "7ace8c16383c5cc96907947841e56b97647a7d0bcc4550038e4a644597766815",
+      "source_mode": "100644",
+      "stage": false,
+      "note": "MUSICAL UNITS has its own baseline; use integration/musical-units.md."
     }
   },
   "submodules": {},
