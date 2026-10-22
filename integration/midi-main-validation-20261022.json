@@ -1,0 +1,139 @@
+{
+  "recorded_on": "2026-10-22",
+  "author_repository": "https://github.com/radiohagen/octatrack-modules",
+  "author_source_commit": "25069ddd14bd8f08dacb0fbff979629e3363d399",
+  "firmware_source_unchanged_from": "62b75b97648cf802c4967db6117a973794807fdd",
+  "original_regression_commits": [
+    "60dfc5c",
+    "1e24248"
+  ],
+  "integration_repository": "https://github.com/radiohagen/octabam",
+  "integration_base_commit": "fa5cf5eb14f2afffd934bb5ecf85b9ab9a8ed670",
+  "local_validation_commit": "434f737af5a4f46a86b78a9d3b988e0a65f7e3b0",
+  "local_validation_commit_published": false,
+  "reproduction": "Use integration/README.md: retain the published Octabam adapters, select the author commit in modules/midi-harmony/upstream, and copy the author accumulator verifier. Final promotion changes only documentation and this receipt beyond the tested author commit.",
+  "accumulator_verifier_sha256": "18b024a44d3e650dc08abc9ae7e417ba23af3a305076c830f60c904977fe1668",
+  "build": "79",
+  "images": {
+    "midi-harmony-follow": "48784174e5dc742fe515e043b99daba3d86e4df897277c220c0e9d58fdfcef64",
+    "midi-harmony": "8457406485ca96c0fdb2b256caac21e5623988261ff5e0538d5d5559acb101c9",
+    "midi-follow": "71cba0529d2d65ca0c2e8596e394b0d9536ea232d484b70eca578c2ed2a15a30",
+    "shared-events": "babcfcd9e8c82394cafca464dc3781d410e7090df460d840340119a38c9e1aa6"
+  },
+  "emulator_sha256": "e80ef29b6e583219f0d28b9474fc0edd3aab2d3786b32bc06912fa2ec7ad3c65",
+  "checks": [
+    {
+      "command": "make check",
+      "scope": "author repository source, provenance and unit tests",
+      "exit_code": 0,
+      "tests": 23
+    },
+    {
+      "command": "make check REMIX=midi-harmony-follow",
+      "exit_code": 0,
+      "image_gate_invocations": 39,
+      "image_gate_failures": 0
+    },
+    {
+      "command": "make check-remixes REMIXES=\"midi-follow midi-harmony\" JOBS=2",
+      "exit_code": 0,
+      "midi_follow_image_gate_invocations": 11,
+      "midi_harmony_image_gate_invocations": 32,
+      "note": "Per-remix halves; shared checks passed in the combined make check. No cache hits reported."
+    },
+    {
+      "command": "make bus REMIX=shared-events",
+      "exit_code": 0
+    },
+    {
+      "command": ".venv/bin/python3 tools/verify/verify_event_clients.py shared-events",
+      "exit_code": 0,
+      "callbacks": 15,
+      "exclusively_owned_hooks": 25
+    },
+    {
+      "command": ".venv/bin/python3 tools/verify/verify_harmony_plocks.py shared-events",
+      "exit_code": 0,
+      "harmony_steps": 8192,
+      "plocks_locks": 4768,
+      "copy_undo_save_failure_guards": "passed"
+    },
+    {
+      "command": "REMIX=shared-events .venv/bin/python3 tools/verify/verify_dram_boot.py",
+      "exit_code": 0
+    },
+    {
+      "command": ".venv/bin/python3 tools/verify/verify_harmony_follow_port.py shared-events --project \"$FIXTURE\"",
+      "exit_code": 0,
+      "cases": 18,
+      "source_tracks": [
+        1,
+        8
+      ],
+      "harmony_modes": [
+        "OFF",
+        "NOTE",
+        "CHORD"
+      ],
+      "complete_pitches_and_balanced_releases": true
+    }
+  ],
+  "fixture": {
+    "description": "Disposable emulator fixture from the earlier Harmony/Follow UART matrix; never a mounted device",
+    "files": 26,
+    "tree_sha256": "150699f9a2685f8215475040253830805ee4f94353467a3175fc209eb1312bad",
+    "digest_recipe": "SHA256 of sorted relative file names followed by NUL and each file SHA256 digest"
+  },
+  "c_minor_regression": {
+    "note_outputs_in_scale": 270,
+    "source_key_inheritance": true,
+    "source_chord_extensions": [
+      "TRI",
+      "ADD9",
+      "DOM7"
+    ],
+    "source_extensions_stay_local": true,
+    "follower_own_accumulator_and_voicing": true
+  },
+  "combined_sweeps": {
+    "accumulator_boundary_outputs": 10752,
+    "playability_transitions": 172800,
+    "voicing_cases": 54000,
+    "musical_matrix_voicings": 13824,
+    "musical_checks": 29488,
+    "musical_issues": 0
+  },
+  "combined_skips": [
+    "[SKIP] Harmony/Follow UART matrix: supply --project DIR or OT_PROJECT",
+    "[SKIP] Harmony/PLOCKS composition: select both clients",
+    "[SKIP] concert UART suite: supply --project DIR or OT_PROJECT",
+    "[SKIP] port project test: supply --project DIR or OT_PROJECT (source is only read)",
+    "[SKIP] runtime: no brain, no USB module, or no USB setting with an early CS1 entry (the resolved values stand)",
+    "[SKIP] verify_reserve_writes: no project (OT_PROJECT=<dir> or ~/.octabam_project)",
+    "[SKIP] verify_set: no project (OT_PROJECT=<dir> or --project)"
+  ],
+  "standalone_skips": [
+    "[SKIP] Harmony/Follow UART matrix: supply --project DIR or OT_PROJECT",
+    "[SKIP] Harmony/PLOCKS composition: select both clients",
+    "[SKIP] concert UART suite: supply --project DIR or OT_PROJECT",
+    "[SKIP] port project test: supply --project DIR or OT_PROJECT (source is only read)",
+    "[SKIP] runtime: no brain, no USB module, or no USB setting with an early CS1 entry (the resolved values stand)",
+    "[SKIP] verify_set: no project (OT_PROJECT=<dir> or --project)"
+  ],
+  "separate_coverage": "The skipped Harmony/PLOCKS and Harmony/Follow UART checks were run explicitly on shared-events with the same author source. General project/concert suites remain skipped; the 18-case UART matrix does not replace them.",
+  "log_sha256": {
+    "midi-main-source-check-20261022.log": "edfc299d26c4f7a59c1fed8a826cebca7d8d230729811880c29546472a95b71e",
+    "midi-main-combined-check-20261022.log": "ff7a9f096228397a783dc17aec4f6f040415e27b4bf5540f8410dc44dc394097",
+    "midi-main-variants-check-20261022.log": "b21d8a4f3c5baa7cd899c60b6c04f7282ae6f58dee588998e6c2c0f7686c1ede",
+    "midi-main-events-check-20261022.log": "7365ae44fadf248b17df95599c4cc91169dc3fae115ddbb39c7fecb60faf6c57",
+    "midi-main-uart-matrix-20261022.log": "19e5d4a4a209aaaa5086a93004cd7d0709b371c833b389d7311753c6be38335e"
+  },
+  "local_logs": "artifacts/midi-main-reconciliation-20261022 (not published; no firmware or fixture contents in this receipt)",
+  "hardware_tested": false,
+  "limits": [
+    "No physical boot, MIDI timing, recovery or hardware acceptance.",
+    "No new package, card copy or device installation.",
+    "All-client shared-events selection received focused interaction gates and the UART matrix, not a complete make check for that selection.",
+    "Older dirty worktrees and unrelated experimental branches were not promoted."
+  ]
+}

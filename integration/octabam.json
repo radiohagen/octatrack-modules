@@ -2,6 +2,6 @@
   "repository": "https://github.com/radiohagen/octabam.git",
   "commit": "fa5cf5eb14f2afffd934bb5ecf85b9ab9a8ed670",
   "recorded_on": "2026-10-22",
-  "status": "reference-only",
-  "note": "Published shared-event integration with author adapters. Select this author checkout in modules/midi-harmony/upstream and copy its accumulator verifier as described in integration/README.md. Qualification is recorded separately; historical N1 and explicit-bridge receipts do not qualify this composition."
+  "status": "integration-verified",
+  "note": "Published shared-event adapter base. Select this author source and accumulator verifier per integration/README.md. Combined and standalone software checks plus all-client interaction/UART checks are recorded in midi-main-validation-20261022.json. No hardware or package acceptance."
 }

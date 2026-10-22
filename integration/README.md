@@ -36,6 +36,13 @@ Do not use it to replace this integration's manifests or shared harnesses.
 `make check` verifies those hashes and modes; it does not build firmware.
 [Developer notes](DEVELOPMENT.md) explain source receipts.
 
+## Current qualification
+
+The [22 October source reconciliation receipt](midi-main-validation-20261022.json)
+records the exact author source, integration base, image hashes, standalone and
+combined results, C-minor regressions, all-client checks and 18-case UART matrix.
+It lists project-dependent skips and hardware boundaries explicitly.
+
 ## Evidence history
 
 The [October 19 explicit-bridge receipt](harmony-follow-validation.json) and
