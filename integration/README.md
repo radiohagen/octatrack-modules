@@ -5,6 +5,14 @@
 SEQUENCER EVENTS, EDIT EVENTS, STORE, KITS, PLOCKS and emulator. This
 repository owns the Harmony/Follow clients and musical behavior.
 
+## Sophie source
+
+[Sophie](../modules/sophie/README.md) is a separate experimental Synth Machine
+adapter. Its manifest requires `SYNTH MACHINE` and the pinned Digisophie
+submodule. The Octabam pin above qualifies Harmony/Follow; it does not include
+or qualify Sophie. Build and image checks require a Sophie-enabled Octabam
+integration, and physical audio acceptance remains open.
+
 ## Musical Units
 
 [Musical Units has a separate integration recipe](musical-units.md), based on

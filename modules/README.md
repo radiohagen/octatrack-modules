@@ -4,6 +4,7 @@
 |---|---|
 | [Musical Units](musical-units/README.md) | Display musical divisions, ms/s and semitones on native controls |
 | [Euclid LFO](euclid-lfo/README.md) | Fixed-duration Euclidean steps and accents for native audio/MIDI LFO destinations; separate test integration |
+| [Sophie](sophie/README.md) | Experimental mono FUSE voice through Synth Machine; separate integration |
 | MIDI Scales | Seven diatonic modes in native MIDI ARP KEY |
 | MIDI Loopback | Per-Part EXT / INT / BOTH routing |
 | MIDI Follow | Root following, register, response and mute behavior |

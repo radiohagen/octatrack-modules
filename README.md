@@ -9,6 +9,10 @@ and shared platform.
 modulation to native audio and MIDI LFOs. Its [scoped integration](integration/EUCLID_LFO.md)
 is separate from the existing MIDI package and does not advance that package's pin.
 
+[Sophie](modules/sophie/README.md) is an experimental mono percussion voice
+for the Synth Machine transport. Its source is separate from the MIDI package
+and requires a Sophie-enabled Octabam integration to build firmware.
+
 - [Modules and controls](modules/README.md)
 - [Build and source integration](integration/README.md)
 - [Licensing and attribution](THIRD_PARTY.md)

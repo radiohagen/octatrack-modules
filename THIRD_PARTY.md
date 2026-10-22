@@ -12,6 +12,11 @@ repository. Its source provenance is recorded separately. No third-party
 source is relicensed by this migration. The original repositories remain intact.
 No Elektron firmware, generated firmware, samples or device projects are included.
 
+Sophie adapts [soejrd/digisophie](https://github.com/soejrd/digisophie).
+The unmodified MIT-licensed engine is pinned as a submodule at
+`ce17b9e4868027bafe8684054b45f28ea368bd7c`; the Octatrack adapter
+and its source provenance remain separate from the engine.
+
 Euclid LFO is new radiohagen ColdFire source. Its pulse distribution, random
 generation and envelope curves are adapted from Jannik Aßfalg (`repeat98`)'s
 EUCLID effect in Octabam, originally introduced in commit
