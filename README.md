@@ -1,6 +1,6 @@
 # Octatrack modules
 
-Source for MIDI Scales, Loopback, Follow and Harmony, maintained by
+Source for MIDI Scales, Loopback, Follow, Harmony and Musical Units, maintained by
 [radiohagen](https://github.com/radiohagen).
 [Octabam](https://github.com/sambanks/octabam) supplies the firmware builder
 and shared platform.

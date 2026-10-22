@@ -1,0 +1,390 @@
+diff --git a/README.md b/README.md
+index 72c28270..e52757a9 100644
+--- a/README.md
++++ b/README.md
+@@ -147,6 +147,7 @@ from the card (section 5).
+ |---|---|---|---|
+ | [**BUFFER SAVER**](modules/buffer-saver/README.md) | [Chupitnik](https://github.com/Chupitnik) | SAVE PROJECT (and SAVE TO NEW) offers to save unsaved recorder takes, each back into its own buffer, so they reload with the project. | on hardware: Chupitnik's MKII, 15-16 Oct 2026, AUTOSAVE1 and AUTOSAVE2 from the card (the module under its first name): after a take FUNC + PROJ and PROJECT > SAVE ask SAVE SAMPLES?; YES saves R<n>-YYMMDD-HHMM and assigns it to its buffer, two buffers in one save, an immediate re-save does not ask, a reload brings the takes back, NO saves as stock |
+ | [**COPY PROJECT**](modules/copy-project/README.md) | [iliamurzinov](https://github.com/ilia-murzinov) | PROJECT > COPY PROJECT: duplicate a project folder on the card without loading it. | on hardware: flashed with CF card update and tested on author's MKII (17 Oct 2026); BUILD not recorded |
++| [**MUSICAL UNITS**](modules/musical-units/README.md) | [radiohagen](https://github.com/radiohagen) | Musical/physical units for LFOs, delay, MIDI note lengths, arpeggiator speed/transpose, sample retriggers and recorder fades. Display only. | `make check`: Linked formatter checks and native panel captures; no hardware acceptance. |
+ | [**REMIX SWITCH**](modules/remix-switch/README.md) | [sanderlegit](https://github.com/sanderlegit) | MAIN MENU > BRAIN lists the raw OS images (.RMX) in /BRAIN/REMIXES/ and boots the one picked without writing the flash; remembers the choice across reboots. | on hardware: an MKII, 29 Sep 2026 (OCTABAM14 with BOOT TRACE): switched to its own image and to stock 1.40C, audio and play working; and with the park moved into the dead vector run (BSRETVEC) booted, played and switched away again -- 40 region words down to 18; `verify_remix_switch`. The list in BRAIN's pane and /BRAIN/REMIXES/ (8 Oct 2026), and the persisted selection (#743): under the port only |
+ | [**RND NAME**](modules/rnd-name/README.md) | [iliamurzinov](https://github.com/ilia-murzinov) | Project name editors: FUNC+CUE fills YYMMDD + random pool name. | on hardware: cursory testing on Sam's MKII (owner report, 16 Oct 2026); FUNC+CUE on CREATE / SAVE PROJECT AS / CHOOSE NEW PROJECT NAME under the port (verify_rnd_name); pools from unit |
+ 
+diff --git a/docs/contributing/SCREENSHOTS.md b/docs/contributing/SCREENSHOTS.md
+index c85f5fdb..b08820c5 100644
+--- a/docs/contributing/SCREENSHOTS.md
++++ b/docs/contributing/SCREENSHOTS.md
+@@ -61,6 +61,7 @@ Groups and what each captures, from the `shot(...)` calls:
+ | `machines` | `analog-bassdrum`, `octatrick`, `blackpyramids-303`, `octa303` | analog-bassdrum, synth, direct-jump, blackpyramids-303, octa303 |
+ | `octa303` | `octa303` (test remix) | octa303 alone (its two pages), without re-capturing the other machines |
+ | `midi-loopback` | `midi-loopback` | midi-loopback (EXT/INT/BOTH windows and CHAN indicators) |
++| `musical-units` | `musical-units` | LFO, delay, MIDI LEN/ARP, sample RTIM, recorder FIN/FOUT, ms/s and held locks |
+ | `midi-scales` | `midi-scales` | midi-scales (OFF, Major, Dorian, Mixolydian) |
+ | `probes` | `cfmeter` | CF METER |
+ | `utilities` | `buffer-saver` | buffer-saver (a one-second take, then FUNC + PROJ: the SAVE SAMPLES? question) |
+diff --git a/docs/site/mkdocs.yml b/docs/site/mkdocs.yml
+index 8d0928d7..8f63b982 100644
+--- a/docs/site/mkdocs.yml
++++ b/docs/site/mkdocs.yml
+@@ -93,6 +93,7 @@ nav:
+       - Persistent Buffers: reference/modules/persistent-buffers.md
+       - Store: reference/modules/store.md
+   - Utilities:
++      - Musical Units: reference/modules/musical-units.md
+       - Buffer Saver: reference/modules/buffer-saver.md
+       - Copy Project: reference/modules/copy-project.md
+       - Random Naming: reference/modules/rnd-name.md
+diff --git a/docs/site/screenshots.json b/docs/site/screenshots.json
+index 0cfb7d3b..955e7cee 100644
+--- a/docs/site/screenshots.json
++++ b/docs/site/screenshots.json
+@@ -857,5 +857,133 @@
+       "source": "emulator panel UART",
+       "firmware_sha256": "0057aee76367bd82548e35cc3b804a4f8a5a98d8f9f6272a3fe42a88081ffd0d"
+     }
++  },
++  "musical-units": {
++    "audio-division": {
++      "image": "musical-units/audio-division.png",
++      "caption": "Audio LFO: SPD 64, MULT 32 gives a 1/16 cycle.",
++      "remix": "musical-units",
++      "source": "emulator panel UART",
++      "firmware_sha256": "eb9f5260010e24332d2f43fc441c0ed87293be6b76ac0b102d378d62e1b5708e"
++    },
++    "audio-ms": {
++      "image": "musical-units/audio-ms.png",
++      "caption": "The next speed remains available: SPD 65 displays 123ms at 120 BPM.",
++      "remix": "musical-units",
++      "source": "emulator panel UART",
++      "firmware_sha256": "eb9f5260010e24332d2f43fc441c0ed87293be6b76ac0b102d378d62e1b5708e"
++    },
++    "audio-triplet": {
++      "image": "musical-units/audio-triplet.png",
++      "caption": "SPD 96, MULT 32: an exact sixteenth-note triplet, 1/16T.",
++      "remix": "musical-units",
++      "source": "emulator panel UART",
++      "firmware_sha256": "eb9f5260010e24332d2f43fc441c0ed87293be6b76ac0b102d378d62e1b5708e"
++    },
++    "audio-stop": {
++      "image": "musical-units/audio-stop.png",
++      "caption": "Zero speed displays STOP.",
++      "remix": "musical-units",
++      "source": "emulator panel UART",
++      "firmware_sha256": "eb9f5260010e24332d2f43fc441c0ed87293be6b76ac0b102d378d62e1b5708e"
++    },
++    "audio-seconds": {
++      "image": "musical-units/audio-seconds.png",
++      "caption": "LFO SETUP: SPD 63, MULT 1 gives a 4.06s cycle at 120 BPM.",
++      "remix": "musical-units",
++      "source": "emulator panel UART",
++      "firmware_sha256": "eb9f5260010e24332d2f43fc441c0ed87293be6b76ac0b102d378d62e1b5708e"
++    },
++    "audio-lock": {
++      "image": "musical-units/audio-lock.png",
++      "caption": "Held trig: a speed lock displays its own 123ms cycle.",
++      "remix": "musical-units",
++      "source": "emulator panel UART",
++      "firmware_sha256": "eb9f5260010e24332d2f43fc441c0ed87293be6b76ac0b102d378d62e1b5708e"
++    },
++    "midi-division": {
++      "image": "musical-units/midi-division.png",
++      "caption": "MIDI LFO: the same 1/16 cycle notation.",
++      "remix": "musical-units",
++      "source": "emulator panel UART",
++      "firmware_sha256": "eb9f5260010e24332d2f43fc441c0ed87293be6b76ac0b102d378d62e1b5708e"
++    },
++    "midi-setup": {
++      "image": "musical-units/midi-setup.png",
++      "caption": "MIDI LFO SETUP: the intermediate speed displays 123ms.",
++      "remix": "musical-units",
++      "source": "emulator panel UART",
++      "firmware_sha256": "eb9f5260010e24332d2f43fc441c0ed87293be6b76ac0b102d378d62e1b5708e"
++    },
++    "delay-division": {
++      "image": "musical-units/delay-division.png",
++      "caption": "Synced Echo Freeze TIME 8 displays 1/16.",
++      "remix": "musical-units",
++      "source": "emulator panel UART",
++      "firmware_sha256": "eb9f5260010e24332d2f43fc441c0ed87293be6b76ac0b102d378d62e1b5708e"
++    },
++    "delay-ms": {
++      "image": "musical-units/delay-ms.png",
++      "caption": "Synced TIME 9 displays 141ms at 120 BPM.",
++      "remix": "musical-units",
++      "source": "emulator panel UART",
++      "firmware_sha256": "eb9f5260010e24332d2f43fc441c0ed87293be6b76ac0b102d378d62e1b5708e"
++    },
++    "note-division": {
++      "image": "musical-units/note-division.png",
++      "caption": "MIDI NOTE LEN: six clock ticks displays 1/16.",
++      "remix": "musical-units",
++      "source": "emulator panel UART",
++      "firmware_sha256": "eb9f5260010e24332d2f43fc441c0ed87293be6b76ac0b102d378d62e1b5708e"
++    },
++    "note-ms": {
++      "image": "musical-units/note-ms.png",
++      "caption": "MIDI NOTE LEN: the next setting displays 146ms at 120 BPM.",
++      "remix": "musical-units",
++      "source": "emulator panel UART",
++      "firmware_sha256": "eb9f5260010e24332d2f43fc441c0ed87293be6b76ac0b102d378d62e1b5708e"
++    },
++    "note-lock": {
++      "image": "musical-units/note-lock.png",
++      "caption": "Held MIDI trig: note length retains its numeric widget and full-width label.",
++      "remix": "musical-units",
++      "source": "emulator panel UART",
++      "firmware_sha256": "eb9f5260010e24332d2f43fc441c0ed87293be6b76ac0b102d378d62e1b5708e"
++    },
++    "arp-division": {
++      "image": "musical-units/arp-division.png",
++      "caption": "ARP: TRAN is 12st; SPD and NLEN both display 1/16.",
++      "remix": "musical-units",
++      "source": "emulator panel UART",
++      "firmware_sha256": "eb9f5260010e24332d2f43fc441c0ed87293be6b76ac0b102d378d62e1b5708e"
++    },
++    "arp-ms": {
++      "image": "musical-units/arp-ms.png",
++      "caption": "ARP: intermediate speed and note length both display 146ms at 120 BPM.",
++      "remix": "musical-units",
++      "source": "emulator panel UART",
++      "firmware_sha256": "eb9f5260010e24332d2f43fc441c0ed87293be6b76ac0b102d378d62e1b5708e"
++    },
++    "retrig-division": {
++      "image": "musical-units/retrig-division.png",
++      "caption": "Sample retrigger interval RTIM displays 1/16.",
++      "remix": "musical-units",
++      "source": "emulator panel UART",
++      "firmware_sha256": "eb9f5260010e24332d2f43fc441c0ed87293be6b76ac0b102d378d62e1b5708e"
++    },
++    "retrig-ms": {
++      "image": "musical-units/retrig-ms.png",
++      "caption": "The next RTIM setting displays 132ms at 120 BPM.",
++      "remix": "musical-units",
++      "source": "emulator panel UART",
++      "firmware_sha256": "eb9f5260010e24332d2f43fc441c0ed87293be6b76ac0b102d378d62e1b5708e"
++    },
++    "recorder-fades": {
++      "image": "musical-units/recorder-fades.png",
++      "caption": "Recorder FIN displays 1/16; FOUT displays 133ms at 120 BPM.",
++      "remix": "musical-units",
++      "source": "emulator panel UART",
++      "firmware_sha256": "eb9f5260010e24332d2f43fc441c0ed87293be6b76ac0b102d378d62e1b5708e"
++    }
+   }
+ }
+diff --git a/remixes/test/README.md b/remixes/test/README.md
+index 8d8c2e02..97ba787b 100644
+--- a/remixes/test/README.md
++++ b/remixes/test/README.md
+@@ -35,6 +35,7 @@ Each carries one module, or one combination, for that module's gates: `make chec
+ | [`midi-scenes`](midi-scenes/README.md) | Reference minimal build: the MIDI SCENES ColdFire patch, plus direct-jump so `swd` runs. | port-gated: `verify_scenes` against MIDISC2.1 under the port; not flashed |
+ | [`miniverb`](miniverb/README.md) | Minimal allocator-owned FDN reverb. | local render: `make verify-miniverb` |
+ | [`mods`](mods/README.md) | Every ColdFire mod in one image on the stock effects: MIDI SCENES, KITS, the recorder fixes, the KYOTI direct jump and reload, USB. | port-gated |
++| [`musical-units`](musical-units/README.md) | Stock effects with musical timing, MIDI note/arp, sample retrigger and recorder fade units. | `make check`: Linked formatter checks and native panel captures; no hardware acceptance. |
+ | [`mute-modes`](mute-modes/README.md) | stock effects with MUTE_MODES: PERSONALIZE > MUTE MODE (OT, OTFX, OTFX-T, DT-T). | `make check` |
+ | [`octa303`](octa303/README.md) | the OCTA-303 machine (a circuit-modelled TB-303 voice on the ColdFire) with the stock effects. | port-gated: built and its UI gate run under the port, 19 Oct 2026; OCTA303 itself on the owner's MK1 in remix acidtrack (ACIDV70, BUILD 87) |
+ | [`octatrick`](octatrick/README.md) | SYNTH MACHINE + SCALE QUANTIZER + DIRECT JUMP + TUNER + USB (20 channels out, 4 in onto A-D) on the stock effects less SPATIALIZER. | on hardware: Tim's MKI, test build 3.0 b40 (this selection at BUILD 40), 29 Sep 2026: USB AUDIO IN brings the Mac's audio onto the inputs in a one-minute check (long runs not yet tested). The same four modules with the 26 Sep USB AUDIO (out only) ran on the same MKI through the 2.9 test builds; the tuner works on test build 3.0 b40 (UP + TEMPO); the last two 2.9 fixes are not yet confirmed on hardware |
+diff --git a/tools/remix/selftest.py b/tools/remix/selftest.py
+index 01beb9d8..009c4ad1 100644
+--- a/tools/remix/selftest.py
++++ b/tools/remix/selftest.py
+@@ -903,7 +903,7 @@ def main():
+     _rig = ("FILTER", "SPATIALIZER", "EQUALIZER", "PHASER", "FLANGER", "CHORUS",
+                  "PLATE REV", "SPRING REV", "DARK REV", "COMPRESSOR", "LO-FI",
+                  "DJ EQ", "COMB FILTER")
+-    _want = {"midi-loopback": (), "midi-scales": (), "mods": (), "ata-write-guard": (), "octabam-core": (), "usb-out-tracks-main-cue": ("PLATE REV",), "usb-out-tracks": (), "usb-out-master": (),
++    _want = {"musical-units": (), "midi-loopback": (), "midi-scales": (), "mods": (), "ata-write-guard": (), "octabam-core": (), "usb-out-tracks-main-cue": ("PLATE REV",), "usb-out-tracks": (), "usb-out-master": (),
+              "usb-out-tracks-post": (),
+              "remix-switch": (), "remix-switch-trace": (),   # REMIX SWITCH's park in dead vectors, no region words
+              "usb-out-main-cue": (), "usb-out-main": (), "usb-midi": (), "stems": (),     # stock effects + ColdFire modules, no DSP words
+diff --git a/tools/site/capture_manual.py b/tools/site/capture_manual.py
+index d9099fc4..b0e762d9 100644
+--- a/tools/site/capture_manual.py
++++ b/tools/site/capture_manual.py
+@@ -315,6 +315,100 @@ def capture_midi_scales(p,r):
+     shot(p,'midi-scales','c-mixolydian','MIDI ARP SETUP: C Mixolydian selected with encoder F.',r)
+ 
+ 
++def capture_musical_units(p,r):
++    """Actual native cells: exact, intermediate, setup, MIDI and held locks."""
++    bank=p.long(0x46c82456)
++    screens={}
++    def set_raw(knob,offset,want,scale=1):
++        # Editors have different fine/coarse resolutions; verify the actual
++        # Part byte after driving the native encoder, never assume 1:1 steps.
++        address=bank+offset
++        got=p.peek(address,1)[0]
++        delta=max(-127,min(127,round((want-got)*scale)))
++        if delta:
++            p.proc.command(f'knob {0x30+knob:#x} {delta}','ok');p.run(80)
++        for _ in range(512):
++            got=p.peek(address,1)[0]
++            if got==want:return
++            p.proc.command(f'knob {0x30+knob:#x} {1 if got<want else -1}','ok');p.run(60)
++        raise AssertionError(('encoder value',knob,hex(offset),got,want))
++    def capture(name,caption,midi=False,speed=None,mult=5):
++        if speed is not None:
++            spd=0x8f168 if midi else 0x8ee9a
++            mul=0x8f280 if midi else 0x8f08a
++            assert p.peek(bank+spd,1)[0]==speed, (name,'SPD')
++            assert p.peek(bank+mul,1)[0]==mult, (name,'MULT')
++        screens[name]=p.link.lcd_rows()
++        if name=='audio-lock':
++            normal=screens['audio-ms'];held=screens[name]
++            assert all(held[y][x] != normal[y][x] for y in range(22,27) for x in range(60,79)), 'held label must invert all 19 pixels'
++            assert all(held[y][x] == normal[y][x] for y in range(29,56) for x in range(60,119)), 'neighboring depth cells changed'
++        if name=='note-lock':
++            normal=screens['note-ms'];held=screens[name]
++            assert all(held[y][x] != normal[y][x] for y in range(16,21) for x in range(100,119)), 'held numeric label must invert all 19 pixels'
++        shot(p,'musical-units',name,caption,r)
++    press(p,'t1');press(p,'pg_lfo')
++    enc(p,0,-127);enc(p,0,64)
++    capture('audio-division','Audio LFO: SPD 64, MULT 32 gives a 1/16 cycle.',speed=64)
++    enc(p,0,1)
++    capture('audio-ms','The next speed remains available: SPD 65 displays 123ms at 120 BPM.',speed=65)
++    enc(p,0,31)
++    capture('audio-triplet','SPD 96, MULT 32: an exact sixteenth-note triplet, 1/16T.',speed=96)
++    enc(p,0,-127)
++    capture('audio-stop','Zero speed displays STOP.',speed=0)
++    enc(p,0,63)
++    p.chord('func','pg_lfo')
++    bank=p.long(0x46c82456)
++    def multiplier(want):
++        p.proc.command('knob 0x32 -127','ok');p.run(60)
++        if want:
++            p.proc.command(f'knob 0x32 {want*4}','ok');p.run(60)
++        close(p)
++        got=p.peek(bank+0x8f08a,1)[0]
++        assert got==want, ('LFO MULT',got,want)
++        p.chord('func','pg_lfo')
++    multiplier(0);enc(p,4,1);enc(p,4,-1)
++    capture('audio-seconds','LFO SETUP: SPD 63, MULT 1 gives a 4.06s cycle at 120 BPM.',speed=63,mult=0)
++    multiplier(5);close(p)
++    enc(p,0,1)
++    press(p,'rec');press(p,'trig1');p.key('trig1',True);p.run(100);enc(p,0,1)
++    capture('audio-lock','Held trig: a speed lock displays its own 123ms cycle.')
++    p.key('trig1',False);p.run(100);press(p,'rec')
++    press(p,'midi');press(p,'pg_lfo');enc(p,0,-127);enc(p,0,64)
++    capture('midi-division','MIDI LFO: the same 1/16 cycle notation.',speed=64,midi=True)
++    p.chord('func','pg_lfo');enc(p,4,1)
++    capture('midi-setup','MIDI LFO SETUP: the intermediate speed displays 123ms.',speed=65,midi=True)
++    close(p);press(p,'pg_playback');set_raw(2,0x8f164,6,4)
++    capture('note-division','MIDI NOTE LEN: six clock ticks displays 1/16.')
++    set_raw(2,0x8f164,7,4)
++    capture('note-ms','MIDI NOTE LEN: the next setting displays 146ms at 120 BPM.')
++    set_raw(2,0x8f164,6,4)
++    press(p,'rec');press(p,'trig2');p.key('trig2',True);p.run(100);enc(p,2,1)
++    capture('note-lock','Held MIDI trig: note length retains its numeric widget and full-width label.')
++    p.key('trig2',False);p.run(100);press(p,'rec')
++    press(p,'pg_amp');set_raw(3,0x8f171,5,4/3)
++    set_raw(5,0x8f173,7);set_raw(5,0x8f173,6)
++    set_raw(0,0x8f16e,77);set_raw(0,0x8f16e,76)
++    capture('arp-division','ARP: TRAN is 12st; SPD and NLEN both display 1/16.')
++    set_raw(3,0x8f171,6,4/3);set_raw(5,0x8f173,7)
++    set_raw(0,0x8f16e,77);set_raw(0,0x8f16e,76)
++    capture('arp-ms','ARP: intermediate speed and note length both display 146ms at 120 BPM.')
++    press(p,'midi');press(p,'pg_playback')
++    machine=p.peek(bank+0x8eda2,1)[0]
++    assert machine in (0,1), ('RTIM needs Static/Flex',machine)
++    retrig=0x8edaa+machine*6+5
++    set_raw(5,retrig,91)
++    capture('retrig-division','Sample retrigger interval RTIM displays 1/16.')
++    set_raw(5,retrig,92)
++    capture('retrig-ms','The next RTIM setting displays 132ms at 120 BPM.')
++    p.chord('func','reccd');set_raw(0,0x8f388,16,128/113);set_raw(1,0x8f389,17,128/113)
++    capture('recorder-fades','Recorder FIN displays 1/16; FOUT displays 133ms at 120 BPM.')
++    close(p);press(p,'pg_fx2');enc(p,0,-127);enc(p,0,7)
++    capture('delay-division','Synced Echo Freeze TIME 8 displays 1/16.')
++    enc(p,0,1)
++    capture('delay-ms','Synced TIME 9 displays 141ms at 120 BPM.')
++
++
+ def prepare(remix,project,assignments):
+     label='manual-features' if remix.startswith('../') else remix
+     work=OUT/label;work.mkdir(parents=True,exist_ok=True)
+@@ -345,6 +439,20 @@ def prepare(remix,project,assignments):
+         otp.set_fx(fixture,slot,track,key,page=values[:6],page2=values[6:],guard=False)
+     if assignments and not any(fixture.glob('bank*.work')):
+         raise SystemExit(f'{fixture}: set_fx had no banks to write')
++    if remix=='musical-units':
++        import re
++        for project_file in fixture.glob('project.*'):
++            raw=project_file.read_bytes()
++            raw=re.sub(rb'\[SAMPLE\].*?\[/SAMPLE\]\r?\n',b'',raw,flags=re.S)
++            project_file.write_bytes(raw)
++        for bank in fixture.glob('bank*.work'):
++            def mut(data):
++                for i in range(otp.NPARTS_ALL):
++                    base=otp.PART_BASE+i*otp.PART_STRIDE+9
++                    data[base+0x30a:base+0x30d]=bytes((5,5,5))
++                    data[base+0x500:base+0x503]=bytes((5,5,5))
++                    data[base+0x304+3]=1
++            otp._bank_write(fixture,int(bank.stem[4:]),mut,guard=False)
+     audio=[]
+     if remix=='octatrick':
+         import re,wave
+@@ -376,13 +484,14 @@ def prepare(remix,project,assignments):
+ 
+ def main():
+     ap=argparse.ArgumentParser(description=__doc__)
+-    ap.add_argument('groups',nargs='+',choices=['core','plocks','features','inserts','bus','extras','machines','probes','midi-scales','midi-loopback','utilities','varispeed','usb','octa303'])
++    ap.add_argument('groups',nargs='+',choices=['core','plocks','features','inserts','bus','extras','machines','probes','midi-scales','midi-loopback','utilities','varispeed','usb','octa303','musical-units'])
+     cfg=Path.home()/'.octabam_project'
+     ap.add_argument('--project',default=os.environ.get('OT_PROJECT') or (cfg.read_text().strip() if cfg.is_file() else ''))
+     a=ap.parse_args();OUT.mkdir(parents=True,exist_ok=True)
+     for group in a.groups:
+         assignments=[]
+-        if group=='core': jobs=[('octabam-core',capture_core,[])]
++        if group=='musical-units': jobs=[('musical-units',capture_musical_units,[(1,'fx2','DELAY')])]
++        elif group=='core': jobs=[('octabam-core',capture_core,[])]
+         elif group=='midi-loopback':jobs=[('midi-loopback',capture_midi_loopback,[])]
+         elif group=='plocks': jobs=[('octabam-core',capture_plocks,[(1,'fx2','PLATE REV')])]
+         elif group=='midi-scales':jobs=[('midi-scales',capture_midi_scales,[])]
+diff --git a/tools/verify/verify_menu.py b/tools/verify/verify_menu.py
+index 2706bd17..8b6a6d65 100644
+--- a/tools/verify/verify_menu.py
++++ b/tools/verify/verify_menu.py
+@@ -148,6 +148,28 @@ def _runtime_syms() -> dict:
+     return {f[2]: int(f[0], 16) for f in (l.split() for l in out.splitlines()) if len(f) == 3}
+ 
+ 
++def _stock_descriptor(name, pointer, stock):
++    """Stock bytes plus only explicitly declared DRAM display pointers.
++
++    Compare exact linked addresses, never mask whole arrays or descriptors.
++    Counts, defaults, names and undeclared display slots remain stock.
++    """
++    expected = bytearray(stock[pointer-BASE:pointer-BASE+0x192])
++    for (target, slot), (symbol, offset) in REG_DRAM.items():
++        if target == name:
++            at = P_FMT1 + 4*slot
++            expected[at:at+4] = (RUNTIME_SYMS[symbol]+offset).to_bytes(4, 'big')
++    for key in REMIX.modules:
++        module = _MODS[key]
++        dram_units = {unit.label for unit in module.linked if unit.dram}
++        for ref in module.symbol_refs:
++            at = ref.addr-pointer
++            if (ref.unit in dram_units and P_FMT1 <= at < P_FMT2+48
++                    and (at-P_FMT1)%4 == 0):
++                expected[at:at+4] = (RUNTIME_SYMS[ref.symbol]+ref.addend).to_bytes(4, 'big')
++    return bytes(expected)
++
++
+ def _built_for(img: bytes) -> str | None:
+     """Which remix wrote BUILT, from the sidecar build_bus leaves beside it --
+     None when there is no sidecar or it describes different bytes (an image
+@@ -277,11 +299,11 @@ def main():
+     for name, (fx_id, pos) in EXPECT.items():
+         P = rd32(img, FX2_IDS + fx_id * 4)
+         if name in STOCK_KEYS:
+-            # Nothing of a stock row is ours to check but its untouchedness.
++            # Stock rows may opt into declared display adapters; other bytes stay stock.
+             check(P == rd32(stock, FX2_IDS + fx_id * 4),
+                   f"{name}: FX2_IDS[0x{fx_id:02x}] is stock's own descriptor")
+-            check(img[P - BASE:P - BASE + 0x192] == stock[P - BASE:P - BASE + 0x192],
+-                  f"{name}: stock descriptor bytes at P=0x{P:08x} unchanged")
++            check(img[P - BASE:P - BASE + 0x192] == _stock_descriptor(name, P, stock),
++                  f"{name}: stock descriptor at P=0x{P:08x} matches stock plus declared display pointers")
+             continue
+         lo, hi = rd32(img, P + P_PENABLE_LO), rd32(img, P + P_PENABLE_HI)
+         got = {i for i in range(12)

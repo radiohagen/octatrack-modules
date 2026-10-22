@@ -5,6 +5,13 @@
 SEQUENCER EVENTS, EDIT EVENTS, STORE, KITS, PLOCKS and emulator. This
 repository owns the Harmony/Follow clients and musical behavior.
 
+## Musical Units
+
+[Musical Units has a separate integration recipe](musical-units.md), based on
+upstream Octabam `3b3da30e`. Its source, tests, 18 screenshots and small shared
+support patch reproduce the validated standalone composition. It does not
+advance the Harmony/Follow pin or qualify a combined personal package.
+
 ## Current Harmony/Follow checkout
 
 1. Clone `https://github.com/radiohagen/octabam.git`, fetch branch
