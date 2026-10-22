@@ -10,9 +10,9 @@ MODULE=Module(
     doc="Independent 1–16-step Euclidean audio/MIDI LFO with accents and native routing.",
     requires=("STORE",),
     gates=(Gate("tools/verify/verify_euclid_lfo.py",stage="image"),),
-    # The known free-to-stock SRAM tail, deliberately not shared with PLOCKS P2.
-    # The claims ledger rejects that combination instead of corrupting either.
-    claims=Claims(sram=((0x100f8600,6160,"Euclid LFO current-bank retained journal"),)),
+    # Upper portion of the original PLOCKS reservation. The integration selects
+    # bounded compressed PLOCKS retention when both modules are present.
+    claims=Claims(sram=((0x100fa5e0,6160,"Euclid LFO current-bank retained journal"),)),
     linked=(Linked("eul", "modules/euclid-lfo/control.s", cpu="5475", dram=True),),
     detours=(
         Detour(0x40003c4a,H("274600182e80"),"eul","eul_clock_audio",

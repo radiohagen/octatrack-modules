@@ -160,7 +160,7 @@ eul_st_answer:
         rts
 eul_io_refuse:
         move.l 4(%sp),%d1
-        moveq #3,%d0
+        moveq #4,%d0
         jmp store_refuse
 
         .globl eul_capture_clip,eul_capture_undo
