@@ -1,5 +1,10 @@
 # Verification boundaries
 
+Current Harmony/Follow shared-event qualification is recorded in the
+[22 October reconciliation receipt](../integration/midi-main-validation-20261022.json).
+Source, emulator and hardware boundaries are separate. The older results below
+apply only to their named snapshots.
+
 Original completed source: `03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d`.
 Upstream base: `2d1cbcf471cf8b63e2279b3c372a6ebb47456a99`.
 Selection: `harmony-track-bus`, BUILD 79, PGO disabled.

@@ -3,7 +3,7 @@
  * destinations. Audio-track copies deliberately have no CHRD counterpart.
  */
     .text
-    .global ch_memcpy,ch_clear_locks,ch_clear_track,ch_place,ch_step_copy,ch_step_paste
+    .global ch_copy_mirror,ch_clear_locks,ch_clear_track,ch_place,ch_step_copy,ch_step_paste
 .ui_bank:
     move.l 0x46c82456,%d0
     subi.l #0x400e21e0,%d0
@@ -240,7 +240,7 @@ ch_step_paste:
     adda.l %d3,%a0
 .loc_done:
     rts
-ch_memcpy:
+ch_copy_mirror:
     move.l 12(%sp),%d0
     cmpi.l #0x8b0,%d0
     beq.s .copy_owned
@@ -281,7 +281,7 @@ ch_memcpy:
     movem.l (%sp),%d2-%d5/%a2-%a3
     lea 24(%sp),%sp
 .copy_stock:
-    jmp hd_memcpy
+    rts
     .bss
     .balign 4
 ch_clip: .space 512

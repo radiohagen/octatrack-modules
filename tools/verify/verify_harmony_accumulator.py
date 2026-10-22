@@ -12,7 +12,7 @@ from verify_harmony_degree_files import Files
 from verify_harmony_track_retention import encode, header
 from verify_harmony_degree_packed import oracle
 from verify_harmony_degree_files import fnv
-from unicorn.m68k_const import UC_M68K_REG_D7, UC_M68K_REG_A7, UC_M68K_REG_PC, UC_M68K_REG_D1, UC_M68K_REG_A0, UC_M68K_REG_A1
+from unicorn.m68k_const import UC_M68K_REG_D7, UC_M68K_REG_A7, UC_M68K_REG_PC, UC_M68K_REG_D1, UC_M68K_REG_A0, UC_M68K_REG_A1, UC_M68K_REG_A5
 import harmony_retained as retained
 from verify_harmony_degree_integration import symbols
 
@@ -33,6 +33,107 @@ def machine():
                 u.mem_write(base+0x4e2+track*36+field,bytes((value,)))
     m.call('hd_bank_loaded',0)
     return m
+
+
+def c_minor_follow(m):
+    """Check the generated pool, including Follow's effective KEY and CHRD."""
+    u,s=m.uc,m.sym
+    if 'bf_pitches' not in s:
+        print('[N/A] C minor Follow examples require the combined image',flush=True)
+        return
+    part=BANK+0x8ed80+0x4e2
+    u.mem_write(part+17,b'\x02')       # Source T1 KEY C minor.
+    u.mem_write(part+36+3,b'\x01')    # Follower T2 RFOL T1.
+    u.mem_write(part+36+5,b'\x01')    # Follower HARM NOTE.
+    u.mem_write(part+36+17,b'\x01')   # Its own KEY is C major.
+    assert m.c('hd_scale_c',0,0,1)==320
+    minor={0,2,3,5,7,8,10}
+
+    def generate():
+        m.c('ha_fire_c',0,0,1,0)
+        u.mem_write(m.scratch,b'\x24'*4)
+        assert m.call('mh_generate',1,0,a0=m.scratch)==1
+        notes=tuple(u.mem_read(m.scratch,4))
+        m.c('ha_sounded_c',1)
+        return notes
+
+    count=0
+    for mode in range(3):                 # FIXED, GRAV, SOURCE.
+        u.mem_write(part+36+15,bytes(((mode<<4)|3,)))
+        for amount in (1,2,-1):
+            m.c('ha_bank_reset_c',0)
+            m.c('ha_set_c',0,0,1,0,amount+9 if amount<0 else amount+8)
+            for root in (48,51,55,56,58,52):  # Last root is chromatic E.
+                m.c('ha_runtime_reset_c')
+                m.c('bf_reset_c')
+                u.mem_write(s['bf_pitches'],bytes((root,)))
+                u.mem_write(s['bf_roots'],bytes((root,)))
+                for _ in range(5):
+                    note=generate()[0]
+                    assert note%12 in minor,(mode,amount,root,note)
+                    count+=1
+
+    # The follower uses the source KEY. A C-major or KEY OFF source yields
+    # E natural even when the follower's own KEY says C minor.
+    u.mem_write(part+36+15,b'\x03')
+    u.mem_write(part+36+17,b'\x02')
+    u.mem_write(s['bf_pitches'],b'\x30')
+    u.mem_write(s['bf_roots'],b'\x30')
+    m.c('ha_bank_reset_c',0)
+    m.c('ha_set_c',0,0,1,0,9)
+    for source_key,expected in ((2,(48,50,51,53,55)),
+                                (1,(48,50,52,53,55)),
+                                (0,(48,50,52,53,55))):
+        u.mem_write(part+17,bytes((source_key,)))
+        m.c('ha_runtime_reset_c')
+        assert tuple(generate()[0] for _ in range(5))==expected,source_key
+
+    # Scale-relative TRI stays in C minor. Explicit MAJ intervals retain
+    # their chromatic notes on C and D, while E-flat major fits the scale.
+    u.mem_write(part+17,b'\x02')
+    u.mem_write(part+36+5,b'\x02')
+    for quality,expected in (
+            (0,((48,51,55,48),(50,53,56,50),(51,55,58,51))),
+            (5,((48,52,55,48),(50,54,57,50),(51,55,58,51)))):
+        u.mem_write(s['ch_current']+1,bytes((quality,)))
+        m.c('ha_runtime_reset_c')
+        assert tuple(generate() for _ in range(3))==expected,quality
+    print(f'[ok] C minor Follow: {count} NOTE outputs in scale; source KEY and explicit CHRD behavior',flush=True)
+
+    # A CHORD source may sound a ninth or an explicit chromatic dominant
+    # third. Follow publishes only its logical degree:oct root, so neither
+    # generated voice nor dormant native NOT2-4 may seed a follower slot.
+    if 'bf_latch_extra' not in s:
+        print('[N/A] CHORD-source extension handoff requires the combined image',flush=True)
+        return
+    u.mem_write(part+5,b'\x02')
+    u.mem_write(part+36+17,b'\x01')
+    source_lane=0x47002000
+    u.mem_write(source_lane+0x220,bytes((48,90,6,68,71,76)))
+    u.mem_write(source_lane+0x22c,b'\x40')
+    source_chords={0:(48,51,55,48),2:(48,51,55,62),7:(48,52,55,58)}
+    follower_chords={1:((48,)*4,(50,)*4),
+                     2:((48,51,55,48),(50,53,56,50))}
+    for follower_mode,expected in follower_chords.items():
+        u.mem_write(part+36+5,bytes((follower_mode,)))
+        u.mem_write(s['ch_current']+1,b'\0') # Follower chooses its own TRI.
+        for quality,source_expected in source_chords.items():
+            m.c('ha_bank_reset_c',0)
+            m.c('ha_set_c',0,0,1,0,9) # Follower ACC +1 scale degree.
+            m.c('ha_runtime_reset_c')
+            m.c('bf_reset_c')
+            u.mem_write(s['bf_pitches'],b'\x30')
+            u.mem_write(s['bf_roots'],b'\x30')
+            u.mem_write(s['ch_current'],bytes((quality,)))
+            u.mem_write(m.scratch,b'\x30'*4)
+            assert m.call('mh_generate',0,0,a0=m.scratch)==1
+            assert tuple(u.mem_read(m.scratch,4))==source_expected,quality
+            u.mem_write(s['bf_intervals'],bytes((4,7,12)))
+            m.call('bf_latch_extra',regs={UC_M68K_REG_D7:0,UC_M68K_REG_A5:source_lane})
+            assert bytes(u.mem_read(s['bf_intervals'],3))==b'\x80'*3,quality
+            actual=tuple(generate() for _ in range(2))
+            assert actual==expected,(follower_mode,quality,actual)
+    print('[ok] C minor CHORD source: TRI/ADD9/DOM7 voices stay local; NOTE/CHORD followers use root and own ACC +1',flush=True)
 
 
 def main():
@@ -124,29 +225,62 @@ def main():
         assert event()==(48 if policy&2 else 53)
         m.c('ha_transport_c')
         assert event()==(48 if policy&1 else 50 if policy&2 else 55)
-    for hook,continuation in (('mp_start_a',0x4009c3da),('mp_start_b',0x4009c4da)):
+    # Enter the installed firmware detour, not an uninstalled helper with the
+    # same behavior. Both standalone Harmony and the Follow bridge must notify
+    # every selected consumer exactly once.
+    with_follow = 'bf_register_sent' in s
+    events = {
+        'start_a': (0x4009c3d4, 0x4009c3da),
+        'start_b': (0x4009c4d4, 0x4009c4da),
+        'sent_a': (0x4009fbb2, 0x4009fbb8),
+        'sent_b': (0x4009fcfa, 0x4009fd00),
+    }
+    for name, (site, _) in events.items():
+        expected = s[{'start_a':'seq_start','start_b':'seq_resume','sent_a':'seq_sent_a','sent_b':'seq_sent_b'}[name]]
+        assert bytes(u.mem_read(site, 6)) == b'\x4e\xf9' + expected.to_bytes(4, 'big'), name
+        s['installed_' + name] = site
+
+    def installed(name, d0=0, regs=None, notify=True):
+        callbacks = (['ha_transport_c'] if name.startswith('start') else ['ha_note_sent'])
+        if with_follow:
+            callbacks += ['bf_register_reset' if name.startswith('start') else 'bf_register_sent']
+        counts = {symbol: 0 for symbol in callbacks}
+        def count_callback(uc, pc, size, data):
+            for symbol in callbacks:
+                if pc == s[symbol]:
+                    counts[symbol] += 1
+        token = u.hook_add(UC_HOOK_CODE, count_callback)
+        try:
+            result = m.call('installed_' + name, d0, stop=events[name][1], regs=regs)
+        finally:
+            u.hook_del(token)
+        assert counts == {symbol: int(notify) for symbol in callbacks}, (name, counts)
+        return result
+
+    for hook in ('start_a', 'start_b'):
         setting(0,7,reset=1,base=9)
         assert event()==48 and event()==50
         saved={UC_M68K_REG_D1:0x12345678,UC_M68K_REG_A0:m.scratch,UC_M68K_REG_A1:m.scratch+32}
-        assert m.call(hook,1,stop=continuation,regs=saved)==1
+        assert installed(hook,1,regs=saved)==1
         assert all(u.reg_read(reg)==value for reg,value in saved.items())
         assert u.reg_read(UC_M68K_REG_A7)==m.stack
         assert bytes(u.mem_read(0x800065b8,4))==b'\0\0\0\1'
         assert event()==48
     # Actual successful-send continuations: velocity zero and live arp pools
     # cannot consume a sequenced event. Register/stack ABI executes as linked.
-    setting(0,7,base=9)
-    m.c('ha_fire_c',0,0,0,0)
-    u.mem_write(0x46c77b1e,b'\0');u.mem_write(0x400d807c,b'\x90\x30\0')
-    m.call('mp_sent_a',stop=0x4009fbb8,regs={UC_M68K_REG_D7:0})
-    assert event(sound=False)==48
-    u.mem_write(0x400d807e,b'\x64');u.mem_write(0x46c77b1e,b'\1')
-    m.call('mp_sent_b',stop=0x4009fd00,regs={UC_M68K_REG_D7:0})
-    assert event(sound=False)==48
-    u.mem_write(0x46c77b1e,b'\0')
-    m.call('mp_sent_a',stop=0x4009fbb8,regs={UC_M68K_REG_D7:0})
-    assert event(sound=False)==50
-    print('[ok] inherited/OFF, silent occurrences, reset policies and successful-send guards',flush=True)
+    for hook in ('sent_a', 'sent_b'):
+        setting(0,7,base=9)
+        m.c('ha_fire_c',0,0,0,0)
+        u.mem_write(0x46c77b1e,b'\0');u.mem_write(0x400d807c,b'\x90\x30\0')
+        installed(hook,regs={UC_M68K_REG_D7:0},notify=False)
+        assert event(sound=False)==48
+        u.mem_write(0x400d807e,b'\x64');u.mem_write(0x46c77b1e,b'\1')
+        installed(hook,regs={UC_M68K_REG_D7:0},notify=False)
+        assert event(sound=False)==48
+        u.mem_write(0x46c77b1e,b'\0')
+        installed(hook,regs={UC_M68K_REG_D7:0})
+        assert event(sound=False)==50
+    print('[ok] installed event hooks: one callback per selected consumer; silent/live guards, reset policies and register ABI',flush=True)
     # All 16 states survive a dense same-step checkpoint, including OFF.
     expected=bytearray()
     for lane in range(128):
@@ -214,6 +348,7 @@ def main():
     cleared=bytearray(before);cleared[1]&=0xf0
     assert bytes(u.mem_read(s['ha_lanes'],4736))==cleared
     print('[ok] native track/pattern clipboard bridge carries ACC; step clear is scoped',flush=True)
+    c_minor_follow(m)
     result=dict(boundary_outputs=counts,dense_steps=8192,obsolete_formats_rejected=True,hardware_tested=False)
     out=__import__('pathlib').Path(__file__).resolve().parents[2]/'out/harmony-accumulator'
     out.mkdir(parents=True,exist_ok=True);(out/'linked.json').write_text(json.dumps(result,indent=2)+'\n')

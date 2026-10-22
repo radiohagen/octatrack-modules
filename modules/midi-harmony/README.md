@@ -82,6 +82,15 @@ Copy/paste/undo includes them; clearing step locks restores inheritance.
 Configuration survives save/reload and retained restart; running offsets are
 volatile and start at zero after project load or power-on.
 
+## MIDI Follow
+
+Both modules register with [SEQUENCER EVENTS](../../docs/SYSTEM_EVENTS.md)
+to share transport and successful-note events. Follow supplies a source note set.
+A HARM OFF source supplies N1–4; a HARM NOTE/CHORD source supplies only its
+resolved degree:oct root as Note 1. HARM OFF on the follower plays the supplied
+set. HARM NOTE/CHORD on the follower generates its own notes from that root.
+The source's generated chord voices are ignored.
+
 ## Chord Play
 
 With HARM CHORD, select **CHORD PLAY** using FUNC + UP/DOWN.
@@ -113,8 +122,9 @@ NOTE fields are storage mirrors and can play different pitches on stock.
 Stock also resets voicing/spread/root choices and clamps extended KEY modes
 to B Minor; saving persists those changes for the bank written.
 
-Requires **MIDI Part State**, **STORE** and **MIDI SRAM**. When combined with
-PLOCKS P2, also select the **Harmony PLOCKS bridge**. KITS libraries are per
+Requires **MIDI Part State**, **STORE**, **MIDI SRAM**, **SEQUENCER EVENTS**
+and **EDIT EVENTS**. HARM and PLOCKS P2 register independently with EDIT EVENTS;
+no combination-specific bridge is selected. KITS libraries are per
 project; recalling a kit supplies Part defaults while pattern locks stay with
 the patterns. See [storage](DEVELOPMENT.md#compact-harmony-storage) and [KITS](KITS.md).
 

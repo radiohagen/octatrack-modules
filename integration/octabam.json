@@ -1,7 +1,7 @@
 {
   "repository": "https://github.com/radiohagen/octabam.git",
-  "commit": "a668063f953da59ca50026e2e525f3377ede447e",
-  "recorded_on": "2026-10-18",
+  "commit": "fa5cf5eb14f2afffd934bb5ecf85b9ab9a8ed670",
+  "recorded_on": "2026-10-22",
   "status": "integration-verified",
-  "note": "N1 software/emulator qualification completed on a668063 and image SHA-256 c46b450892d52aa8e6d5260de0ee854928ff8c5db8d90684d891c9eb43deff41. Includes canonical ACCUM release 4744643, corrected native menu/layout and three-octave bounds. The complete selected-remix run retained two disk-affected failures; exact unchanged Follow and Harmony-stress reruns both exited zero. All other gates and separate full-project/visual/lifecycle workers passed. Source staging matches 241 files byte-for-byte. Hardware, flash and recovery remain unverified."
+  "note": "Published shared-event adapter base. Select this author source and accumulator verifier per integration/README.md. Combined and standalone software checks plus all-client interaction/UART checks are recorded in midi-main-validation-20261022.json. No hardware or package acceptance."
 }

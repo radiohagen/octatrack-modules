@@ -224,6 +224,84 @@
       "passed": true,
       "hardware_tested": false,
       "submission_qualification": "Rebase and make reach RUN=1 KEEP=1 before submission."
+    },
+    {
+      "branch": "codex/pr/midi-follow-voices",
+      "local_branch": "codex/pr/midi-follow",
+      "title": "Add MIDI Follow with logical source note sets",
+      "repository": "https://github.com/radiohagen/octabam",
+      "commit": "63caee8445f1bede786ef1666d109b9eebea578a",
+      "base": "8250be0c23ca0a0a953cb7e5721e3bdb98dadfe5",
+      "prerequisite": "f4f208cdd091cfc2f2811cd839edeac8cc8daf68",
+      "author_commit": "e151238a6aef385c81083440afa1ffb255615b8d",
+      "publication_status": "Published and remote commit verified on radiohagen/octabam. No upstream PR submitted; review the prepared series before submission.",
+      "image_sha256": "b6a20d82979a14d11d7b87b3d91fae55257cd1d8adcfa1b2cf8ff0cdb89da662",
+      "full_checks_commit": "b21dc3f0cf38fc5e70149122a8e1880e34efc360",
+      "checks": [
+        "make check REMIX=midi-follow: all ten image gates and shared checks passed on b21dc3f0; final documentation update rebuilt the identical image",
+        "Final make reach against 8250be0c: all six groups passed; 274 acceptance tests with five skips; 24 reference builds and 34 bus cases bit identical; all four remixes passed, with 17 of 18 image/input jobs cached and Follow rerun",
+        "make docs, make verify-docs and mkdocs build --strict passed on the final documentation update; 68 modules, 81 remixes, zero documentation problems",
+        "Independent include-callback prerequisite f4f208cd passed its own make reach: shared checks and midi-loopback/midi-scales per-remix gates",
+        "Retained same-image UART suite: 12 groups passed; native four-voice output with absent follower N2-4 passed with balanced releases; not rerun after this rebase"
+      ],
+      "dependencies": [
+        "Two-argument include callback adapters for Part State, Scales and Loopback are a separate prerequisite",
+        "Follow needs MIDI Part State; Harmony is optional",
+        "Scales retains its isolated author oracle for standalone builds; composed Follow/Harmony symbol variants use image gates",
+        "Harmony companion branch codex/harmony-follow-integration moves old Part event hooks to Harmony and adds the explicit HARMONY FOLLOW bridge; includes SRAM long-branch fix for the large image",
+        "EUCLID is refused pending a separate transport hook bridge"
+      ],
+      "hardware_tested": false,
+      "submission_qualification": "Review the prepared series; recheck upstream and rerun required reach gates after any new rebase before submission.",
+      "branch_url": "https://github.com/radiohagen/octabam/tree/codex/pr/midi-follow-voices",
+      "prerequisite_branch_url": "https://github.com/radiohagen/octabam/tree/codex/pr/midi-include-abi",
+      "previous_review_snapshot": {
+        "commit": "a1bf33ba24eafc0e6db93b7e6ef2cf417e67dce7",
+        "base": "bf3e265704ea0068a1cb6dbed2b67157deb8b64e",
+        "prerequisite": "e2f82db56b3a8c6ef632b3a11913485d6c0ce2e6",
+        "author_commit": "93a420d3255db80745ea56847071ff5db6d258dc",
+        "full_checks_commit": "82b15a75cb3867c24c9b9bd110a358026b9711e3",
+        "checks": [
+          "make check REMIX=midi-follow: ten image gates and shared checks passed",
+          "REFHASH_BASE=upstream/main make reach BASE=upstream/main TESTS=1 RUN=1 KEEP=1: all six reached groups passed; 272 acceptance tests, five skips; 24 reference builds and 34 bus cases bit identical; three shards reused matching image/input cache entries",
+          "Final pin/verifier update rebuilt the identical image; corrected machine gate passed with bounded 5000-instruction pre-capture allowance",
+          "Same-image direct UART suite: 12 groups passed; native four-voice output with absent follower N2-4 passed with balanced releases"
+        ]
+      },
+      "final_reach_commit": "63caee8445f1bede786ef1666d109b9eebea578a",
+      "validation_receipt": {
+        "commit": "63caee8445f1bede786ef1666d109b9eebea578a",
+        "author_commit": "e151238a6aef385c81083440afa1ffb255615b8d",
+        "base": "8250be0c23ca0a0a953cb7e5721e3bdb98dadfe5",
+        "checks": [
+          {
+            "command": "make bus REMIX=midi-follow",
+            "exit_code": 0,
+            "seconds": 3.11,
+            "log": "out/midi-follow/final-20261020/build.log"
+          },
+          {
+            "command": "make verify-docs",
+            "exit_code": 0,
+            "seconds": 1.03,
+            "log": "out/midi-follow/final-20261020/docs.log"
+          },
+          {
+            "command": "out/site-venv/bin/mkdocs build --strict --config-file docs/site/mkdocs.yml",
+            "exit_code": 0,
+            "seconds": 3.93,
+            "log": "out/midi-follow/final-20261020/site.log"
+          },
+          {
+            "command": "make reach BASE=8250be0c23ca0a0a953cb7e5721e3bdb98dadfe5 TESTS=1 RUN=1 KEEP=1",
+            "exit_code": 0,
+            "seconds": 207.45,
+            "log": "out/midi-follow/final-20261020/reach.log"
+          }
+        ],
+        "hardware_tested": false,
+        "image_sha256": "b6a20d82979a14d11d7b87b3d91fae55257cd1d8adcfa1b2cf8ff0cdb89da662"
+      }
     }
   ],
   "limits": "These are prepared candidates. Each needs current make reach qualification before submission. KITS has inherited broad-suite failures and is held. Later feature boundaries are documented but not yet submitted or qualified branches."
