@@ -1,0 +1,3 @@
+[submodule "modules/sophie/upstream"]
+	path = modules/sophie/upstream
+	url = https://github.com/soejrd/digisophie.git

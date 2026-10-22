@@ -56,6 +56,12 @@
       "origin": "authored",
       "integration_commit": "c845059dff5d0da58218b965025a174643650998",
       "status": "scoped integration; not staged into the existing MIDI package"
+    },
+    {
+      "slug": "sophie",
+      "source_commit": "33ba0c90533e925af29929fd761c5dc8f48eab4a",
+      "upstream_commit": "ce17b9e4868027bafe8684054b45f28ea368bd7c",
+      "status": "experimental; separate Synth Machine integration"
     }
   ],
   "files": {
@@ -1932,7 +1938,7 @@
       "repository": "https://github.com/radiohagen/octatrack-modules",
       "path": "modules/README.md",
       "sha256": "ac24d8383fa03e2836422ce90ef88c6608164c0d64c7a1ac60e00f15b0a9a3fa",
-      "published_sha256": "24e2bea9ec7fa0a2d08ba4a9fa8642f41ea05d6cc05e488403a9a124c5c08f12",
+      "published_sha256": "549278707b8901180bcccfb0469157d8fcc2baa799284c5ef48ea9c8638dbb37",
       "source_mode": "100644",
       "stage": false
     },
@@ -2491,6 +2497,91 @@
       "published_sha256": "85e6386356aff7b9156775259612cb8b1b751e531f47b4ff894b5331ca7d91f3",
       "source_mode": "100644",
       "stage": false
+    },
+    ".gitmodules": {
+      "commit": "33ba0c90533e925af29929fd761c5dc8f48eab4a",
+      "path": ".gitmodules",
+      "sha256": "96ca497c23890275295f63596efae718530d07a2761c4de120e644be20e59e02",
+      "source_mode": "100644"
+    },
+    "modules/sophie/README.md": {
+      "commit": "33ba0c90533e925af29929fd761c5dc8f48eab4a",
+      "path": "modules/sophie/README.md",
+      "sha256": "0125f81700b71a3d3cc0889e5225cbc89291e59355eb28e29c9f458de1077cb4",
+      "source_mode": "100644",
+      "published_sha256": "d3818319bbaf4851569e00ab4fa08e9071e3dc40f76d39947790caf058f609ee"
+    },
+    "modules/sophie/adapter.c": {
+      "commit": "33ba0c90533e925af29929fd761c5dc8f48eab4a",
+      "path": "modules/sophie/adapter.c",
+      "sha256": "dffc37cc5a82428191962fc99f39f373ad2e4524df811d335d1e3db2e8d27e0a",
+      "source_mode": "100644"
+    },
+    "modules/sophie/adapter.s": {
+      "commit": "33ba0c90533e925af29929fd761c5dc8f48eab4a",
+      "path": "modules/sophie/adapter.s",
+      "sha256": "b860e5fd76e45fa6a89be7fc98d2a05048bf16dd301ebc7ef0ef032606de4997",
+      "source_mode": "100644"
+    },
+    "modules/sophie/bridge.py": {
+      "commit": "33ba0c90533e925af29929fd761c5dc8f48eab4a",
+      "path": "modules/sophie/bridge.py",
+      "sha256": "db9b15bd9fca5fcb3fc5da35b9074b698252d66c2aaac8772852a028ff49f0bb",
+      "source_mode": "100644"
+    },
+    "modules/sophie/generate.py": {
+      "commit": "33ba0c90533e925af29929fd761c5dc8f48eab4a",
+      "path": "modules/sophie/generate.py",
+      "sha256": "a3996981a94f77700c81c7d51e2ec4b7114f22b87d8c15715526fbba46595c1a",
+      "source_mode": "100644"
+    },
+    "modules/sophie/hooks.s": {
+      "commit": "33ba0c90533e925af29929fd761c5dc8f48eab4a",
+      "path": "modules/sophie/hooks.s",
+      "sha256": "0d8c9f00b6f06daec10056217f53e90f6d740935031af570cb1087b327bb3f95",
+      "source_mode": "100644"
+    },
+    "modules/sophie/manifest.py": {
+      "commit": "33ba0c90533e925af29929fd761c5dc8f48eab4a",
+      "path": "modules/sophie/manifest.py",
+      "sha256": "5bb80f43a68efbf988034eb3b788e1aba42c091f18f3a6c4d92c16c4833d315a",
+      "source_mode": "100644"
+    },
+    "modules/sophie/marker.py": {
+      "commit": "33ba0c90533e925af29929fd761c5dc8f48eab4a",
+      "path": "modules/sophie/marker.py",
+      "sha256": "3482032ee6952deb07c43423218e6e9576f4cf109fef731195b692794e6604c5",
+      "source_mode": "100644"
+    },
+    "modules/sophie/test_adapter.c": {
+      "commit": "33ba0c90533e925af29929fd761c5dc8f48eab4a",
+      "path": "modules/sophie/test_adapter.c",
+      "sha256": "6d64eea8bb7937f0a1f04bd1c4095d70f464c04a275e9099b0a5eca00f7bafa4",
+      "source_mode": "100644"
+    },
+    "tools/verify/verify_sophie.py": {
+      "commit": "33ba0c90533e925af29929fd761c5dc8f48eab4a",
+      "path": "tools/verify/verify_sophie.py",
+      "sha256": "9f81ee5dfe71090d9f378d52f0f77d31a7f0d2eff47afab36e274123858dabcb",
+      "source_mode": "100644"
+    },
+    "tools/verify/verify_sophie_image.py": {
+      "commit": "33ba0c90533e925af29929fd761c5dc8f48eab4a",
+      "path": "tools/verify/verify_sophie_image.py",
+      "sha256": "cc6113ae1eb16d2ca858832eee4609d03837e99a3810c29e5e78510e61e9a82f",
+      "source_mode": "100644"
+    },
+    "tools/verify/verify_sophie_page.py": {
+      "commit": "33ba0c90533e925af29929fd761c5dc8f48eab4a",
+      "path": "tools/verify/verify_sophie_page.py",
+      "sha256": "7ad7bfd30c73a508d960edc7eaec8a3d22c784386dd8c0d942fef6ced6fc6488",
+      "source_mode": "100644"
+    },
+    "tools/verify/verify_sophie_port.py": {
+      "commit": "33ba0c90533e925af29929fd761c5dc8f48eab4a",
+      "path": "tools/verify/verify_sophie_port.py",
+      "sha256": "2939380651830b80cd2dade1fb581e199b526c19ce9cba681066e00ac0920fb3",
+      "source_mode": "100644"
     }
   },
   "submodules": {},
