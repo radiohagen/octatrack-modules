@@ -49,6 +49,20 @@ def assembly(modules, remix=None):
            'po_pg_have:\n        move.l  %a2,%d0\n        jsr ss_page_hook\n')
     # Pinned native pool, allocation and envelopes; no second note allocator.
     insert('po_ca_g:\n', 'po_ca_g:\n        jsr ss_carry_hook\n')
+    # The per-voice FM calculation is already bypassed below. Its per-track
+    # ratio/feedback/index/decay preparation is equally unused by Supersaw.
+    insert('po_fr_params:\n', 'po_fr_params:\n'
+           '        lea ss_active,%a0\n        tst.b (%a0,%d2.l)\n'
+           '        bne ss_poly_amp_params\n')
+    insert('        move.l  #CV_STRIDE,%d0           | AMP REL -> the release k (po_relk: the DSP\'s law, plan B)\n',
+           'ss_poly_amp_params:\n'
+           '        move.l  #CV_STRIDE,%d0           | AMP REL -> the release k (po_relk: the DSP\'s law, plan B)\n')
+    # Voice capacity must not attenuate a Supersaw note. Native FM keeps
+    # its equal-power cap; Supersaw sums in int32 and saturates only once.
+    insert('        move.l  %d0,T_GMAX(%a5)          | and po_fill\'s limiter holds the sum at FS (in phase it reaches 2.0 FS at 4)\n',
+           '        lea ss_active,%a0\n        tst.b (%a0,%d2.l)\n'
+           '        beq ss_native_gmax\n        move.l #32767,%d0\n'
+           'ss_native_gmax:\n        move.l %d0,T_GMAX(%a5)\n')
     insert('        move.l  %d0,V_INC(%a6)\n',
            '        move.l  %d0,V_INC(%a6)\n'
            '        lea ss_active,%a0\n        tst.b (%a0,%d2.l)\n'

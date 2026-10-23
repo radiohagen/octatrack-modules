@@ -147,18 +147,20 @@ int ss_track_fill(uint32_t track, uint8_t *state, const uint16_t *fp,
     if (!n) return 1;
     unsigned active=0;
     for (unsigned v=0;v<4;++v) active |= pool[v*64+36];
+    int32_t mix[32];
     if (!state[80]) {
         ss_fill(track,state,fp,out,n);
         if (!active) return 1; /* No poly tail: the mono render is already complete. */
+        for (uint32_t i=0;i<n;++i) mix[i]=out[2*i]>>16;
     } else {
         *(uint16_t *)(state+38)=0;
         ss_samples[track]+=n;
-        for (uint32_t i=0;i<n;++i) out[2*i]=out[2*i+1]=0;
+        /* Accumulate directly; no zero stereo pass followed by a copy. */
+        for (uint32_t i=0;i<n;++i) mix[i]=0;
     }
-    int32_t mix[32];
-    for (uint32_t i=0;i<n;++i) mix[i]=out[2*i]>>16;
     struct ss_params params = {0,(fp[1]>>8)&127,(fp[2]>>8)&127,
                                  (fp[4]>>8)&127,(fp[5]>>8)&127};
+    const struct ss_filter_params f={(fp[3]>>8)&127,ss_setup[track][1],ss_setup[track][2],ss_setup[track][3],ss_setup[track][4]};
     for (unsigned v=0;v<4;++v) {
         uint8_t *native=pool+v*64;
         if (!native[36]) continue;
@@ -171,7 +173,6 @@ int ss_track_fill(uint32_t track, uint8_t *state, const uint16_t *fp,
         params.increment=*(uint32_t *)(native+12);
         int16_t audio[32];
         ss_render(&ss_poly_voices[track][v],&params,audio,n);
-        struct ss_filter_params f={(fp[3]>>8)&127,ss_setup[track][1],ss_setup[track][2],ss_setup[track][3],ss_setup[track][4]};
         if(f.type || ss_filters[track][v].wet) {
             ss_filter_run(&ss_filters[track][v],&f,*(uint32_t *)(native+48),audio,n);
             ss_filter_samples[track]+=n;
@@ -240,10 +241,12 @@ uint8_t *ss_page(uint8_t *original, uint32_t track) {
     }
     *(uint32_t *)(ss_descriptor+0xca+24)=(uint32_t)(uintptr_t)ss_fine_fmt;
     *(uint32_t *)(ss_descriptor+0xca+40)=(uint32_t)(uintptr_t)ss_type_fmt;
+    /* Native four-position select, matching TYPE's four stored values. */
+    *(uint32_t *)(ss_descriptor+0xfa+40)=0x40046c28u;
     *(uint32_t *)(ss_descriptor+0x18a)=0x00000000;
     *(uint32_t *)(ss_descriptor+0x18e)=0x55555555;
     /* Nibbles 6..10 live; nibble 11 disabled (across the two words). */
-    *(uint32_t *)(ss_descriptor+0x18a)=0x00000555;
+    *(uint32_t *)(ss_descriptor+0x18a)=0x00000155;
     return ss_descriptor;
 }
 

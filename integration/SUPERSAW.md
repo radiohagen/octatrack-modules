@@ -25,11 +25,11 @@ Sophie, Post Fader or other experimental engine is added.
 Commands, from Octabam:
 
 ```sh
-make check REMIX=supersaw BUILD=S7
-make rmx REMIX=supersaw-inserts BUILD=S7 RMX='SAW INSERTS S7'
-OT_PROJECT=/path/to/local/project REMIX=supersaw-inserts BUILD=S7 \
-  RMXNAME='SAW INSERTS S7' .venv/bin/python tools/verify/verify_supersaw_image.py
-make check REMIX=supersaw-inserts BUILD=S7
+make check REMIX=supersaw BUILD=S8
+make rmx REMIX=supersaw-inserts BUILD=S8 RMX='SAW INSERTS S8'
+OT_PROJECT=/path/to/local/project REMIX=supersaw-inserts BUILD=S8 \
+  RMXNAME='SAW INSERTS S8' .venv/bin/python tools/verify/verify_supersaw_image.py
+make check REMIX=supersaw-inserts BUILD=S8
 ```
 
 Firmware/card images and private project fixtures stay in ignored local output.
@@ -88,3 +88,37 @@ and silent endings. The first audio launch stopped before rendering because the
 Spectrum reference build replaced shared runtime symbols; the runner now restores
 the candidate afterward. Initial failure logs remain beside corrected passes.
 These are source/emulator results; physical hardware remains unverified.
+
+
+## S8 control, level and CPU update
+
+TYPE is the native four-position OFF / LOW / BP / HP switch; pressed encoder
+input also advances one position. A single note keeps its mono level at VOIC
+1..4 instead of the inherited -3.01/-4.77/-6.02 dB reduction. Notes retain
+independent AMP release and filter state, and both FX slots remain available.
+The chord sum saturates at full scale; dense/driven chords can reach that limit.
+
+The CPU audit preserves oscillator interpolation, sample rates and exact filter
+sample/state arithmetic. Four-note steady render counts fall by 6.6-11.7% with
+filter OFF and 23.3-27.6% with LOW/BP/HP across the plain/rich fixtures. A 280-probe
+profile covers mono and one to four poly voices, all types, cold/warm calls,
+cutoff and pitch changes, attack, release and silent tails. 279 probes improve;
+the rich mono OFF attack increases from 1,119 to 1,123 instructions (+0.36%).
+These are executed ColdFire instructions, not measured hardware cycles or CPU
+headroom. The filter oracle checks 100,000 modulation blocks bit-for-bit.
+
+
+S8 passes the standalone `make check REMIX=supersaw BUILD=S8` (project cases
+separate), module source checks (24 tests), and all 11 project-backed cases on
+the exact named `SAW INSERTS S8` image: mono/sequencer, mixed FM and occupied FX,
+eight-track DETU/MORF panel edits, four-note MIDI, live mono/poly transition,
+filter controls, native save/cold reload, VOIC level/TYPE switch and filtered
+four-note MIDI. The native descriptor and linked arithmetic gates also pass.
+One-note levels at VOIC 1..4 differ by less than 0.003 dB. The rendered native
+TYPE widget was visually inspected. Three LOW/BP/HP example captures have
+verified releases, silent endings and unused FX slots.
+
+Image SHA-256: `00d68934661a16d503e633b0021499259035eb155ed342db1b05c29eaf9176ad`.
+These are source/emulator checks; physical playback and CPU headroom remain
+unverified. This does not replace the broader Inserts suite's retained fixture
+exceptions or extend the one-track filtered-polyphony qualification.

@@ -21,9 +21,15 @@ pulse at MORF 127. SUB adds a sine one octave below. DRIV adds bounded saturatio
 bypasses it. AMP supplies the note envelope. The existing Synth Machine owns
 MIDI, sequencer, pitch and voice lifecycle; ordinary FM remains selectable.
 
+S8 makes TYPE a native four-position **OFF / LOW / BP / HP** switch, one
+position per encoder event including when pressed. Changing VOIC only changes
+the available note count: a note keeps its mono level at VOIC 2, 3 and 4.
+Chord notes add at their independent AMP levels; the final sum saturates safely
+at full scale. Dense, driven or resonant chords can still reach that limit.
+
 ## Implementation and limits
 
-S6/S7 follow the op1r Supersaw topology: a fixed pair plus sub per note, limited
+S6 and later follow the op1r Supersaw topology: a fixed pair plus sub per note, limited
 here to four voices. It does not redistribute oscillators or stack voices in
 a separate unison mode. MORF replaces the earlier MIX control in the same knob
 position; existing experimental patches keep their numbers but sound different.
@@ -178,7 +184,7 @@ rerun passed. These are emulator results; hardware remains unverified.
 
 ## Per-note SEM filter (S7)
 
-TYPE selects OFF, LP, BP or HP. CUT is the base cutoff (about 60 Hz–14.4 kHz);
+TYPE selects OFF, LOW (LP), BP or HP. CUT is the base cutoff (about 60 Hz–14.4 kHz);
 RES adds resonance. ENV opens the filter at each note-on, then DEC returns it
 toward CUT (roughly 20 ms–3.5 s to 1%). This is a separate note envelope, not
 Spectrum's audio envelope follower. Each voice retains its own filter history,
@@ -228,3 +234,71 @@ and silent endings. The first audio launch stopped before rendering because the
 Spectrum reference build replaced shared runtime symbols; the runner now restores
 the candidate afterward. Initial failure logs remain beside corrected passes.
 These are source/emulator results; physical hardware remains unverified.
+
+## S8 control, level and CPU changes
+
+The S7 native allocator applied `32768/sqrt(VOIC)` to every note, even when
+only one note sounded. S8 changes that ceiling only for selected Supersaw
+tracks, to 32767, preserving the native attack/release and voice-stealing
+lifecycle. Ordinary FM retains its original scaling. An emulator A/B gate
+measures the old -3.01/-4.77/-6.02 dB reduction and verifies matched levels for
+VOIC 1..4 in S8, then plays 1..4-note chords and verifies their releases.
+The same gate drives the TYPE encoder through all four positions, its endpoints
+and pressed state, and captures the actual rendered four-position widget.
+
+The CPU audit covers oscillator preparation, interpolation, AMP/mixing,
+filter modes and coefficient changes, fine/Part refresh and the inherited
+per-track FM parameter preparation. Retained optimizations are:
+
+- One aligned, alias-safe control-word read for the oscillator cache guard.
+- Direct accumulation into the polyphonic mix, with shared filter controls.
+- Cached unchanged filter coefficients and a generated integer damping table.
+- Specialized fully wet filter loops; register-local integrators and envelope.
+- Exact Q14 split multiplication with one fewer shift per filter multiply.
+- Unrolled six-byte setup refresh and omission of unused poly FM preparation.
+- Measured `-O3` generation; sanitizer and linked-arithmetic checks stay enabled.
+
+A scalar S7 filter with independent 64-bit multiplication remains a test oracle.
+Randomized modulation and steady OFF/LOW/BP/HP/bypass transitions compare every
+sample and state bit. Interpolation, oscillator count, sample rates, filter
+response and envelope laws have not been reduced to obtain the savings.
+
+For a 16-sample held block, the expanded ColdFire profile measures four voices:
+
+| Patch | S7 | S8 |
+|---|---:|---:|
+| Plain, filter OFF | 3,075 | 2,715 |
+| Rich, filter OFF | 3,948 | 3,688 |
+| Plain, LOW | 10,991 | 8,131 |
+| Rich, LOW | 11,868 | 9,108 |
+| Rich, BP | 11,667 | 8,791 |
+| Rich, HP | 11,731 | 8,859 |
+
+The settled filtered four-note block removes 20 divide instructions.
+Fine/Part refresh falls from 117 to 94 instructions, and the isolated native
+parameter-preparation span falls from 34 to 11 (including one removed divide).
+All 40 profiled mono/poly/mode/patch combinations improve in cold, warm and
+cutoff-change calls. Across all 280 probes (also pitch changes, attack, release
+and silent tails), 279 improve. The rich mono OFF attack costs four more
+instructions, 1,119 to 1,123 (+0.36%); it is retained as the measured tradeoff.
+These are executed instruction counts, not physical
+cycles, CPU utilization or a new multi-track hardware guarantee. See
+`tools/verify/verify_supersaw_cpu.py` for the reproducible profiling fixture.
+The existing linked gate separately enforces budgets of 3,800 instructions
+filter OFF and 9,400 filtered for its four-note held fixture.
+
+
+S8 passes the standalone `make check REMIX=supersaw BUILD=S8` (project cases
+separate), module source checks (24 tests), and all 11 project-backed cases on
+the exact named `SAW INSERTS S8` image: mono/sequencer, mixed FM and occupied FX,
+eight-track DETU/MORF panel edits, four-note MIDI, live mono/poly transition,
+filter controls, native save/cold reload, VOIC level/TYPE switch and filtered
+four-note MIDI. The native descriptor and linked arithmetic gates also pass.
+One-note levels at VOIC 1..4 differ by less than 0.003 dB. The rendered native
+TYPE widget was visually inspected. Three LOW/BP/HP example captures have
+verified releases, silent endings and unused FX slots.
+
+Image SHA-256: `00d68934661a16d503e633b0021499259035eb155ed342db1b05c29eaf9176ad`.
+These are source/emulator checks; physical playback and CPU headroom remain
+unverified. This does not replace the broader Inserts suite's retained fixture
+exceptions or extend the one-track filtered-polyphony qualification.
