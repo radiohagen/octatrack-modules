@@ -31,6 +31,7 @@ void ss_config(unsigned track) {
         ss_store(part,0x30+30*track+3,127);
         *(volatile uint8_t *)(uintptr_t)(0x80000810u+72*track+3)=127;
     }
+    #pragma GCC unroll 6
     for(unsigned i=0;i<6;++i)ss_setup[track][i]=part[at+i]&127;
     /* MIDI/key polyphony only: no shape expansion or recorded chord locks. */
     *(volatile uint8_t *)(uintptr_t)(0x80000810u+72*track+11)=0;
@@ -46,7 +47,7 @@ void ss_fine_fmt(char *out,int value) {
     *out++=(char)('0'+v%10);*out++='c';*out=0;
 }
 void ss_type_fmt(char *out,int value) {
-    const char *name=value==1?"LP":value==2?"BP":value==3?"HP":"OFF";
+    const char *name=value==1?"LOW":value==2?"BP":value==3?"HP":"OFF";
     do { *out++=*name; } while(*name++);
 }
 unsigned ss_setup_row(unsigned row,unsigned track) {
@@ -60,7 +61,9 @@ int ss_setup_edit(unsigned slot,int delta) {
     if(*(volatile uint32_t *)0x460d5c30u!=1 || !ss_assigned(track))return 0;
     if(slot>=5)return slot==5;
     ss_config(track);
-    if(*(volatile uint32_t *)(uintptr_t)(0x46c7d8eeu+24*(slot+56)))delta*=7;
+    /* A selector advances one position even with the encoder held down. */
+    if(slot==4)delta=(delta>0)-(delta<0);
+    else if(*(volatile uint32_t *)(uintptr_t)(0x46c7d8eeu+24*(slot+56)))delta*=7;
     int value=ss_setup[track][slot]+delta,max=slot==4?3:127;
     if(value<0)value=0;
     if(value>max)value=max;

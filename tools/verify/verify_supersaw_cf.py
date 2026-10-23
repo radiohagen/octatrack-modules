@@ -105,9 +105,10 @@ def verify_poly(uc,call,sym):
         costs.append(dict(samples=n,target_gain=g,instructions=count))
     assert tuple(actual)==expected,'four-note native output differs from host'
     steady=call('ss_track_fill',2,0x24000,0x25000,0x26000,16,0x27000)
-    assert steady<4100, ('four-note steady instruction budget',steady)
+    assert steady<3800, ('four-note steady instruction budget',steady)
     uc.mem_write(sym['ss_setup']+12,bytes((64,64,80,64,1,83)))
     for _ in range(10): enabled=call('ss_track_fill',2,0x24000,0x25000,0x26000,16,0x27000)
+    assert enabled<9400, ('four-note filtered steady instruction budget',enabled)
     uc.mem_write(sym['ss_setup']+12,bytes(6))
     return dict(exact_values=len(actual),costs=costs,steady_16_instructions=steady,filtered_steady_16_instructions=enabled)
 

@@ -5,6 +5,7 @@
 #include <string.h>
 #define SS_HOST_TEST
 #include "adapter.c"
+#include "filter_reference.h"
 
 /* Scalar oracle for the chunked oscillator and resampler paths. */
 static void reference(struct ss_voice *v, const struct ss_params *p,
@@ -169,16 +170,38 @@ static void check_filter(void) {
     p.type=0;
     for(unsigned j=0;j<5;++j){memcpy(audio,copy,sizeof audio);ss_filter_run(&a,&p,2,audio,32);}
     assert(!memcmp(copy,audio,sizeof audio));assert(!a.wet);
+    struct ss_filter original=a;
     unsigned random=123456;
     for(unsigned j=0;j<100000;++j){
         random=random*1664525u+1013904223u;
         p=(struct ss_filter_params){random,random>>8,random>>16,random>>24,(random>>6)&3};
         for(unsigned k=0;k<32;++k)audio[k]=(int16_t)(random+k*3331);
+        memcpy(copy,audio,sizeof audio);
+        ss_filter_reference(&original,&p,j/13,copy,j%33);
         ss_filter_run(&a,&p,j/13,audio,j%33);
+        assert(!memcmp(copy,audio,sizeof audio));
+        assert(!memcmp(&original,&a,sizeof a));
         assert(a.s0>=-8388607 && a.s0<=8388607 && a.s1>=-8388607 && a.s1<=8388607);
         assert(a.envelope<=(1u<<24));
     }
-    puts("[ok] SEM bypass identity, independent retrigger/decay, bounded extreme modulation (100000 blocks)");
+    /* Exercise each specialized steady loop, including after the envelope
+     * reaches zero and after live switches/bypass fades, against S7 math. */
+    for(unsigned typ=1;typ<=3;++typ)for(unsigned cut=0;cut<128;cut+=21)
+    for(unsigned res=0;res<128;res+=63) {
+        ss_filter_reset(&a);ss_filter_reset(&original);
+        p=(struct ss_filter_params){cut,res,0,0,typ};
+        for(unsigned block=0;block<128;++block) {
+            if(block==80)p.type=0;
+            if(block==96)p.type=typ;
+            for(unsigned i=0;i<32;++i)audio[i]=(int16_t)(block*3191u+i*6713u);
+            memcpy(copy,audio,sizeof audio);
+            ss_filter_reference(&original,&p,1,copy,32);
+            ss_filter_run(&a,&p,1,audio,32);
+            assert(!memcmp(copy,audio,sizeof audio));
+            assert(!memcmp(&original,&a,sizeof a));
+        }
+    }
+    puts("[ok] SEM bit-exact S7 reference: steady modes, bypass, envelopes and 100000 extreme modulation blocks");
 }
 
 int main(int argc, char **argv) {
