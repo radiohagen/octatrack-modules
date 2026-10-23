@@ -30,12 +30,16 @@ int main(int argc,char **argv) {
     auto *cpu=m.getCpuState();
     constexpr uint32_t stack=0x47100000,stop=0x470ff000;
     unsigned peak=0,last_count=0;
+    unsigned last_divides=0;
+    bool count_divides=false;
     bool audio_reference=false;
     int64_t reference_remainder[24]={};
     auto run_to=[&](uint32_t pc,uint32_t end) {
         m68k_set_reg(cpu,M68K_REG_PC,pc);
         unsigned count=0;
+        last_divides=0;
         while(m.pc()!=end && count++<500000) {
+            if(count_divides && (m.read16(m.pc())&0xffc0)==0x4c40) ++last_divides;
             // Test-only oracle: feed the unchanged stock SQR trigger/wrap
             // consumer an independently calculated exact increment. No image
             // patch, no skipped trigger/output instructions. EUCL runs its
@@ -91,6 +95,29 @@ int main(int argc,char **argv) {
     std::ifstream symbol_file(std::string(argv[5])+"/symbols.txt");
     std::string name; uint32_t address;
     while(symbol_file>>name>>std::hex>>address) symbols[name]=address;
+    // Compare the optimized clock with the original linked reference using
+    // real ColdFire execution, including cache misses and carry reversals.
+    count_divides=true;
+    for(unsigned changed=0;changed<2;++changed) {
+        constexpr uint32_t carry=0x47017000,cache=0x47017010;
+        for(unsigned b=0;b<48;++b) m.write8(carry+b,0);
+        unsigned old_count=0,new_count=0,old_div=0,new_div=0;
+        for(unsigned frame=0;frame<128;++frame) {
+            int speed=changed?(frame&1?-(int)(16384+frame):(int)(16384+frame)):16384;
+            args(speed,2880); m.write32(stack+12,1); m.write32(stack+16,7); m.write32(stack+20,carry);
+            if(!run(symbols.at("eul_audio_clock"))) return 1;
+            unsigned expected=m68k_get_reg(cpu,M68K_REG_D0);
+            if(frame) { old_count+=last_count; old_div+=last_divides; }
+            args(cache,speed); m.write32(stack+12,2880); m.write32(stack+16,1);
+            m.write32(stack+20,7); m.write32(stack+24,carry+4);
+            if(!run(symbols.at("eul_audio_clock_cached"))) return 1;
+            if(m68k_get_reg(cpu,M68K_REG_D0)!=expected || m.read32(carry)!=m.read32(carry+4)) return 1;
+            if(frame) { new_count+=last_count; new_div+=last_divides; }
+        }
+        std::printf("COST: %s audio clock, 127 calls original/cached: %u/%u instructions, %u/%u long divisions\n",
+                    changed?"modulated":"steady",old_count,new_count,old_div,new_div);
+    }
+    count_divides=false;
     if(!symbols.count("eul_st_partsaved") || !symbols.count("eul_st_partclear") || !symbols.count("eul_ui_style")) return 2;
     if(!symbols.count("eul_label") || !symbols.count("eul_icon")) return 2;
     args(0x47015000,19); if(!run(0x4003be4c)) return 1;
@@ -492,6 +519,16 @@ int main(int argc,char **argv) {
     // Register the actual setup keymap; test the native dispatch path, not
     // merely the C setter. Held encoder-push state must not multiply delta.
     args(0x400bbd22); if(!run(0x40031494)) return 1;
+    // Stable before/after workload, including an already-clamped turn. No
+    // retained journal is initialized in this isolated UI probe.
+    args(0x34,1); if(!run(m.read32(0x400bbb22))) return 1;
+    m.write8(bank,16);
+    args(0,1); if(!run(0x40031944)) return 1;
+    unsigned limit_cost=last_count;
+    args(0,-4); if(!run(0x40031944)) return 1;
+    std::printf("COST: editor clamped +1 / changing -4: %u/%u instructions (journal uninitialized)\n",limit_cost,last_count);
+    args(0,0); if(!run(0x40031944)) return 1;
+    std::printf("COST: editor zero delta: %u instructions\n",last_count);
     for(unsigned midi=0;midi<2;++midi) {
         if(midi) {
             m.write32(0x80000012,1);
@@ -506,30 +543,35 @@ int main(int argc,char **argv) {
         eul_defaults(&p);
         for(unsigned b=0;b<sizeof(p);++b) m.write8(settings+b,((uint8_t *)&p)[b]);
         const unsigned page0[]={0,1,2,6,7,8},page1[]={3,4,5,9};
+        const unsigned counts0[]={4,4,4,4,4,1},counts1[]={8,1,1,2};
         for(unsigned enc=0;enc<6;++enc) {
             unsigned field=page0[enc],old=m.read8(settings+field);
             m.write32(0x46c7d8ee + (0x38+enc)*24,1);
+            for(unsigned tick=1;tick<counts0[enc];++tick) {
+                args(enc,1); if(!run(0x40031944)) return 1;
+                if(m.read8(settings+field)!=old || last_count>1000) return 1;
+            }
             args(enc,1); if(!run(0x40031944)) return 1;
             if(m.read8(settings+field)!=old+1) {
                 std::fprintf(stderr,"encoder %u midi=%u: +1 became %d\n",enc,midi,
                              (int)m.read8(settings+field)-(int)old); return 1;
             }
-            args(enc,-1); if(!run(0x40031944)) return 1;
+            args(enc,-counts0[enc]); if(!run(0x40031944)) return 1;
             if(m.read8(settings+field)!=old) return 1;
         }
         args(0x31,1); if(!run(m.read32(0x400bbb56))) return 1;
         for(unsigned enc=0;enc<4;++enc) {
             unsigned field=page1[enc],old=m.read8(settings+field);
-            args(enc,1); if(!run(0x40031944)) return 1;
+            args(enc,counts1[enc]); if(!run(0x40031944)) return 1;
             if(m.read8(settings+field)!=old+1) return 1;
         }
         args(6,127); if(!run(0x40031944)) return 1;
         if(m.read8(settings)!=8) return 1;
-        args(4,1); if(!run(0x40031944)) return 1;
+        args(4,8); if(!run(0x40031944)) return 1;
         if(m.read8(settings+3)!=(EUL_GATE|EUL_NEGATIVE)) return 1;
         args(4,1); if(!run(0x40031944)) return 1;
         if(m.read8(settings+3)!=(EUL_GATE|EUL_NEGATIVE)) return 1;
-        args(4,-1); if(!run(0x40031944)) return 1;
+        args(4,-8); if(!run(0x40031944)) return 1;
         if(m.read8(settings+3)!=EUL_GATE) return 1;
         // RATE's native descriptor/Part writer needs a complete boot. Its
         // preset/STOP/pushed controls are covered by the panel gate.
@@ -548,11 +590,22 @@ int main(int argc,char **argv) {
             if(m.read8(settings+5)!=old) return 1;
         }
         m.write8(settings+3,EUL_GATE);
+        // Partial turns must not carry between pages or across editor exit.
+        args(0x34,1); if(!run(m.read32(0x400bbb22))) return 1;
+        unsigned old_steps=m.read8(settings);
+        args(0,3); if(!run(0x40031944) || m.read8(settings)!=old_steps) return 1;
+        args(0x31,1); if(!run(m.read32(0x400bbb56))) return 1;
+        args(0,1); if(!run(0x40031944) || m.read8(settings+3)!=EUL_GATE) return 1;
+        args(0x31,1); if(!run(m.read32(0x400bbb56))) return 1;
+        args(0,1); if(!run(0x40031944) || m.read8(settings)!=old_steps) return 1;
+        args(0x32,1); if(!run(m.read32(0x400bbb70))) return 1;
+        args(0x31,1); if(!run(m.read32(0x400bbb56))) return 1;
+        args(0,3); if(!run(0x40031944) || m.read8(settings)!=old_steps) return 1;
         // NO returns to native setup without discarding edits.
         args(0x32,1); if(!run(m.read32(0x400bbb70))) return 1;
         if(m.read8(settings+9)!=1 || m.read8(settings+3)!=EUL_GATE) return 1;
     }
-    puts("PASS: native keymap and encoder dispatch: audio/MIDI, 11 pattern controls, signed unit steps, held pushes, DIR end stops, inactive controls inert, NO retains edits; RATE uses the full-boot panel gate");
+    puts("PASS: native keymap and encoder dispatch: audio/MIDI, 11 pattern controls, slow/coalesced resistant steps, held pushes, DIR end stops, inactive controls inert, NO retains edits; RATE uses the full-boot panel gate");
     // STORE's actual client ABI, then Part Reload's installed copy adapter.
     // No file I/O is replaced or claimed by this direct-memory probe.
     for(unsigned part=0;part<4;++part) {
@@ -616,5 +669,57 @@ int main(int argc,char **argv) {
     args(dest_part); if(!run(0x40029b78)) return 1;
     for(unsigned b=0;b<480;++b) if(m.read8(dest_part_data+b)) return 1;
     puts("PASS: native Part copy/paste across banks, immutable clipboard snapshot, undo mirror restore, and clipboard-kind rejection");
+    // Native path formatter and linked retention code, without filesystem
+    // calls. Compare one edit's old all-lane work with the scoped record.
+    const char set_name[]="SET",project_name[]="PROJECT",suffix[]="work";
+    for(unsigned b=0;b<sizeof(set_name);++b) m.write8(0x100f8480+b,set_name[b]);
+    for(unsigned b=0;b<sizeof(project_name);++b) m.write8(0x100f8378+b,project_name[b]);
+    for(unsigned b=0;b<sizeof(suffix);++b) m.write8(0x47015100+b,suffix[b]);
+    args(0x47015000,0); m.write32(stack+12,0x47015100);
+    if(!run(symbols.at("eul_io_path")) || m68k_get_reg(cpu,M68K_REG_D0)!=1) return 1;
+    std::vector<uint8_t> path;
+    for(unsigned b=0;b<260 && m.read8(0x47015000+b);++b) path.push_back(m.read8(0x47015000+b));
+    if(path.empty() || path.size()>=260) return 1;
+    constexpr uint32_t nv=0x100f8600;
+    args(0x47015000,path.size()); m.write32(stack+12,0);
+    if(!run(symbols.at("eul_crc32"))) return 1;
+    m.write32(nv,0x45554e31); m.write32(nv+4,m68k_get_reg(cpu,M68K_REG_D0)); m.write32(nv+8,0);
+    m.write8(0x80000002,0);
+    m.write32(symbols.at("eul_nv_ready"),1); m.write32(symbols.at("eul_nv_suspended"),0);
+    eul_defaults(&p);
+    for(unsigned lane=0;lane<48;++lane) for(unsigned b=0;b<sizeof(p);++b)
+        m.write8(bank+lane*sizeof(p)+b,((uint8_t *)&p)[b]);
+    args(0,0); if(!run(symbols.at("eul_nv_touch_part"))) return 1;
+    unsigned part_cost=last_count;
+    std::vector<uint8_t> journal;
+    for(unsigned b=0;b<16+16*384;++b) journal.push_back(m.read8(nv+b));
+    m.write8(bank+8,65);
+    args(0,0); m.write32(stack+12,0);
+    if(!run(symbols.at("eul_nv_touch_lane"))) return 1;
+    unsigned lane_cost=last_count;
+    for(unsigned b=0;b<journal.size();++b)
+        if((b<16 || b>=32) && m.read8(nv+b)!=journal[b]) return 1;
+    if(m.read8(nv+16+4+8)!=65 || lane_cost>=part_cost) return 1;
+    std::printf("COST: retained edit all-48-lanes/single-lane: %u/%u instructions; unchanged neighbouring records\n",part_cost,lane_cost);
+    // Integration assertion: publishing a whole Part must still retain ALL
+    // records, whereas the actual encoder route must use only one record.
+    p.boost=66;
+    for(unsigned lane=0;lane<48;++lane) for(unsigned b=0;b<sizeof(p);++b)
+        m.write8(decoded+lane*sizeof(p)+b,((uint8_t *)&p)[b]);
+    args(0,0); m.write32(stack+12,decoded);
+    if(!run(symbols.at("eul_publish_part"))) return 1;
+    for(unsigned lane=0;lane<48;++lane)
+        if(m.read8(nv+16+16*lane+4+8)!=66) return 1;
+    m.write32(0x80000012,0); m.write32(0x460d1a32,0);
+    m.write8(0x100b14cc,0); m.write8(0x100b14cf,0);
+    m.write8(0x400e21e0+0x8ed80+0x2f5,19);
+    m.write32(symbols.at("eul_editing"),0);
+    args(0x31,1); if(!run(m.read32(0x400bbb56))) return 1;
+    args(5,1); if(!run(0x40031944)) return 1;
+    if(m.read8(bank+8)!=67 || m.read8(nv+16+4+8)!=67 || last_count>=60000) return 1;
+    for(unsigned lane=1;lane<48;++lane)
+        if(m.read8(nv+16+16*lane+4+8)!=66) return 1;
+    std::printf("COST: complete native encoder edit with live retained journal: %u instructions\n",last_count);
+    puts("PASS: whole-Part publication retains all 48 records; actual encoder edit retains only its lane");
     return 0;
 }

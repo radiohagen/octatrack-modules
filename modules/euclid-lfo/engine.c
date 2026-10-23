@@ -30,6 +30,34 @@ int32_t eul_audio_clock(int speed, unsigned tempo, unsigned mult,
     return result+extra;
 }
 
+int32_t eul_audio_clock_cached(EulAudioClock *c,int speed,unsigned tempo,
+                              unsigned mult,unsigned steps,int32_t *remainder) {
+    if(c->speed!=speed || c->tempo!=tempo || c->mult!=mult || c->steps!=steps) {
+        /* Same split as the uncached reference above, but separate the
+         * invariant dividend from the per-frame residue before dividing. */
+        int32_t base=speed*(int32_t)(tempo*8);
+        int32_t whole=base/496125,fraction=base-whole*496125;
+        int32_t scale=16<<mult,scaled=whole*scale;
+        c->result=scaled/(int32_t)steps;
+        int32_t numerator=(scaled-c->result*(int32_t)steps)*496125+fraction*scale;
+        c->denominator=496125*(int32_t)steps;
+        c->quotient=numerator/c->denominator;
+        c->fraction=numerator-c->quotient*c->denominator;
+        c->speed=speed; c->tempo=tempo; c->mult=mult; c->steps=steps;
+    }
+    int32_t residual=c->fraction+*remainder,extra=c->quotient;
+    /* C division truncates toward zero. When modulation changes direction,
+     * the old carry can have the opposite sign: borrow from the quotient,
+     * not just from a residue that exceeds the denominator. |sum|<2*den. */
+    if(residual>=c->denominator || (residual>0 && extra<0)) {
+        ++extra; residual-=c->denominator;
+    } else if(residual<=-c->denominator || (residual<0 && extra>0)) {
+        --extra; residual+=c->denominator;
+    }
+    *remainder=residual;
+    return c->result+extra;
+}
+
 _Static_assert(sizeof(EulParams) == 10, "version 1 settings payload");
 static unsigned min_u(unsigned a, unsigned b) { return a < b ? a : b; }
 static uint32_t random_value(uint32_t *state) {

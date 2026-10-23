@@ -21,6 +21,23 @@ The default candidate follows native LFO SETUP's split pane. The development
 probe also renders a full-width six-control alternative for comparison;
 it is not another saved setting or a hidden panel gesture.
 
+Encoder resistance is field-specific, with no velocity or held-push multiplier:
+
+| Controls | Range | Raw panel counts per value |
+|---|---|---:|
+| STPS / PULS / ROT | 1–16 / 0–STPS / 0–STPS−1 | 4 |
+| ACNT / AROT | 0–PULS / 0–PULS−1 (0 with no pulses) | 4 |
+| BST / ATK, EDGE, SLEW / DEC, LEN | 0–127; DEC/LEN inactive in RAND/LOOP | 1 |
+| OUT / DIR | ENV, GATE, RAND, LOOP / POS, NEG | 8 |
+| SWNG | 50–80 | 2 |
+| RATE | 13 divisions, 1/1 through 64T | 4 |
+
+Small turns accumulate independently per knob. Reversing discards unfinished
+motion in the previous direction; limits, page changes and reopening the editor
+clear unused motion. Changing STPS/PULS also clears their dependent controls'
+motion. Unchanged turns do not redraw or save. These counts describe panel
+events, not physical detents or a measured number of degrees on the device.
+
 One LFO cycle is one pattern, and **RATE sets each step's duration**, not a
 division of a fixed bar. At RATE 1/16, seven steps take seven sixteenths:
 0.875 seconds at 120 BPM. The pattern runs across bar lines unless native
@@ -44,9 +61,12 @@ is 0–127; reverse runtime increments from modulation are still supported.
 Custom native speeds display VAR; zero displays STOP, and turning RATE
 from STOP selects 1/16. Native SPD/MULT can still be edited normally, and
 selecting EUCL does not overwrite them. No extra rate field is persisted.
+VAR outside the preset range enters the nearest endpoint without skipping it.
 SPD 64 + MULT 2x gives 1/16; SPD 64 + MULT 1x gives 1/8.
 The audio clock uses exact tempo/SPD/MULT arithmetic with fractional carry;
 MIDI scales its native tick increment by 16/STPS. Both feed stock cycle handling.
+Audio caches its division coefficients while SPD/tempo/MULT/STPS are unchanged;
+modulation invalidates the cache immediately, retaining the exact signed carry.
 TRIG restarts the whole pattern,
 HOLD retains its native latch behavior, and FREE continues while stopped.
 ONE plays one complete pattern; HALF plays half a pattern (3.5 steps at STPS 7).

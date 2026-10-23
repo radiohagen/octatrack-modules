@@ -2253,7 +2253,7 @@
       "repository": "https://github.com/radiohagen/octatrack-modules",
       "path": "modules/euclid-lfo/DECISIONS.md",
       "sha256": "8f6c3e464956daaed93265cafefd10f4e63f6de6761322457189719e350d19b1",
-      "published_sha256": "03db33db1d06e690efa810d74a29af2a2839e56793614b7e9622ced8f844e80c",
+      "published_sha256": "93101b2418cf55388ce41195ac576708beb183202b3b9b3871cce53d8f77cf7d",
       "source_mode": "100644",
       "stage": false,
       "update_note": "Shared sequencer event integration and optional sidecar-only LFO retention, 2026-10-22; original source hash preserved."
@@ -2282,7 +2282,7 @@
       "repository": "https://github.com/radiohagen/octatrack-modules",
       "path": "modules/euclid-lfo/retention.h",
       "sha256": "d1385d048643b5503222781d58289478ce908f8a22fedcecb5562b1d9928ed85",
-      "published_sha256": "d1385d048643b5503222781d58289478ce908f8a22fedcecb5562b1d9928ed85",
+      "published_sha256": "72fd078bae120689f70bb60279346d63dc47824cac759b6058cb4d3c5e583f88",
       "source_mode": "100644",
       "stage": false
     },
@@ -2309,7 +2309,7 @@
       "repository": "https://github.com/radiohagen/octatrack-modules",
       "path": "modules/euclid-lfo/test_lifecycle.c",
       "sha256": "3c470c4f9a3efa0b52fb62cbfcf6d2f10cd9986e4cecfc75e94cdac3c9e7e2d6",
-      "published_sha256": "0a780f066a9b12fce263cb595c46c9c149ea793f79b9211af3ca597513942c98",
+      "published_sha256": "a786415a744d0963d7353acf89d44f2eb1f8d17ccef0cd9db60ab33a0cc0308d",
       "source_mode": "100644",
       "stage": false,
       "update_note": "Shared sequencer event integration and optional sidecar-only LFO retention, 2026-10-22; original source hash preserved."
@@ -2328,7 +2328,7 @@
       "repository": "https://github.com/radiohagen/octatrack-modules",
       "path": "modules/euclid-lfo/engine.c",
       "sha256": "9988f3ad3dce9df05c31f24c326ca0f9afcf030cd1ad13c2459f2601a253d4bd",
-      "published_sha256": "c5a17bdd05d7759808244da6d53b084f334a381da27f0081fe3bf61d6dece735",
+      "published_sha256": "8c7ca987c7f0b6065eec6b94bab1d48e70539d0f56bce953881d946301f58b49",
       "source_mode": "100644",
       "stage": false
     },
@@ -2337,7 +2337,7 @@
       "repository": "https://github.com/radiohagen/octatrack-modules",
       "path": "modules/euclid-lfo/README.md",
       "sha256": "fa8551404bbc6ca77547e71e267a8673704722f51e74c9cc954a56d5b2673306",
-      "published_sha256": "fe83bf913beebe15e5fb790d65a6529f2f88b352972e4c43e3c60462579850a3",
+      "published_sha256": "b7826132cc0e64a18b15c5cf7fa5e3746c6b083d4032c992115f2c4b289788dc",
       "source_mode": "100644",
       "stage": false,
       "update_note": "Shared sequencer event integration and optional sidecar-only LFO retention, 2026-10-22; original source hash preserved."
@@ -2374,7 +2374,7 @@
       "repository": "https://github.com/radiohagen/octatrack-modules",
       "path": "modules/euclid-lfo/probe.cpp",
       "sha256": "b2a67d78df5d0fc4943abc5640be4f408abf7cad7f6b6bd6dfe57f0cedaf4679",
-      "published_sha256": "efae7999459fb26c71ff0ad13022ff9c483adc7650aee654d9a1c7a352f4ecc8",
+      "published_sha256": "2038f73f5a6ceebdb2db69fff64511f2679b60969da8a8dc45127ae8e794ef40",
       "source_mode": "100644",
       "stage": false
     },
@@ -2383,7 +2383,7 @@
       "repository": "https://github.com/radiohagen/octatrack-modules",
       "path": "modules/euclid-lfo/retention.c",
       "sha256": "2ef544e9a1e80c9e740660a663bdabbc27211b8b36783aca221767aa52b21bb9",
-      "published_sha256": "5875dcc35c150fbf656a3f4d5b887684d4240b280875aeea4103837a5dd0fe30",
+      "published_sha256": "f4daebb57e1818c25a4dcfe1a2b5a1bb71b4421381dc136f07c3ca85a1faaa35",
       "source_mode": "100644",
       "stage": false,
       "update_note": "Shared sequencer event integration and optional sidecar-only LFO retention, 2026-10-22; original source hash preserved."
@@ -2421,7 +2421,7 @@
       "repository": "https://github.com/radiohagen/octatrack-modules",
       "path": "modules/euclid-lfo/hooks.s",
       "sha256": "73feae4bea716b5a23a6ab2265c510de2299ef4a49b10746df94f9aafcc6b4cd",
-      "published_sha256": "8b161a2d2fe411d43c550fad90a38c5c1c3bb0886478f83450b800bace97e995",
+      "published_sha256": "9a9987a224de3d71e492d20da6187d099712029673eac709970a48eb7353038e",
       "source_mode": "100644",
       "stage": false,
       "update_note": "Shared sequencer event integration and optional sidecar-only LFO retention, 2026-10-22; original source hash preserved."
@@ -2431,7 +2431,7 @@
       "repository": "https://github.com/radiohagen/octatrack-modules",
       "path": "modules/euclid-lfo/runtime.c",
       "sha256": "dbdd146ba4e615c576b92e1e6b2e17682ab8f82d156349325bb7000a99288819",
-      "published_sha256": "6b46c58f1543b68037da574e663526cf8db24582fa4ada8d6a07fa2121610d48",
+      "published_sha256": "d08a62f3e5af547e95cc8176e954d3b3826e573a5cd2ae03a6aa64b0a0ce5a53",
       "source_mode": "100644",
       "stage": false,
       "update_note": "Shared sequencer event integration and optional sidecar-only LFO retention, 2026-10-22; original source hash preserved."
@@ -2441,7 +2441,7 @@
       "repository": "https://github.com/radiohagen/octatrack-modules",
       "path": "modules/euclid-lfo/engine.h",
       "sha256": "399f3c6682210edd7d762d6e8e7f0b1a1141f55e53e743d87f104bda1f293013",
-      "published_sha256": "65938b52d82622a73b2cca0827cfed727854431fa1cd4cc85e860080a1b2c5f9",
+      "published_sha256": "433a8bffcd1fe75fd8ba2e24ece03df993c4c3bda5a44b28e7498196a8192aaa",
       "source_mode": "100644",
       "stage": false
     },
@@ -2450,7 +2450,7 @@
       "repository": "https://github.com/radiohagen/octatrack-modules",
       "path": "modules/euclid-lfo/control.s",
       "sha256": "3adb703aa7235e887283b7ebe34c0521ac27d06560f745e1b2330cddf0e5f773",
-      "published_sha256": "bdd563a1a4cb9f963bcfebc1ee658fed308ec6fea4a63dbf248bbb7dcd9c0138",
+      "published_sha256": "bc2ece94cff0a4bb219d82f5be4666b3a223558c30eaa32b97a95536997a434b",
       "source_mode": "100644",
       "stage": false,
       "update_note": "Shared sequencer event integration and optional sidecar-only LFO retention, 2026-10-22; original source hash preserved."
@@ -2460,7 +2460,7 @@
       "repository": "https://github.com/radiohagen/octatrack-modules",
       "path": "modules/euclid-lfo/test_engine.c",
       "sha256": "f8dbd0ffaf51ae369be32697f61c038f078194e1ff5609a3c41134e31f84a602",
-      "published_sha256": "c6e2e33882108240fe5ee5273d3eb1f97d4fb0672f6a9c05d3663098f53e10af",
+      "published_sha256": "f55f6dc2b5316b74a34aa96d392da7faa05c1d7a217a40f3772f512c5d5c4ae0",
       "source_mode": "100644",
       "stage": false
     },
@@ -2487,7 +2487,7 @@
       "repository": "https://github.com/radiohagen/octatrack-modules",
       "path": "tools/verify/verify_euclid_lfo_ui.py",
       "sha256": "1102a42608de5987bdbbb29ab69ecabd9b1a54d6d54da7fe0e49881a10968353",
-      "published_sha256": "1102a42608de5987bdbbb29ab69ecabd9b1a54d6d54da7fe0e49881a10968353",
+      "published_sha256": "05983be07e986589aded9a996c64fa26a1e9adb6e71534541245d655d03d2feb",
       "source_mode": "100644",
       "stage": false
     },
@@ -2513,7 +2513,8 @@
       "commit": "33ba0c90533e925af29929fd761c5dc8f48eab4a",
       "path": ".gitmodules",
       "sha256": "96ca497c23890275295f63596efae718530d07a2761c4de120e644be20e59e02",
-      "source_mode": "100644"
+      "source_mode": "100644",
+      "published_sha256": "96ca497c23890275295f63596efae718530d07a2761c4de120e644be20e59e02"
     },
     "modules/sophie/README.md": {
       "commit": "33ba0c90533e925af29929fd761c5dc8f48eab4a",
@@ -2526,85 +2527,108 @@
       "commit": "33ba0c90533e925af29929fd761c5dc8f48eab4a",
       "path": "modules/sophie/adapter.c",
       "sha256": "dffc37cc5a82428191962fc99f39f373ad2e4524df811d335d1e3db2e8d27e0a",
-      "source_mode": "100644"
+      "source_mode": "100644",
+      "published_sha256": "dffc37cc5a82428191962fc99f39f373ad2e4524df811d335d1e3db2e8d27e0a"
     },
     "modules/sophie/adapter.s": {
       "commit": "33ba0c90533e925af29929fd761c5dc8f48eab4a",
       "path": "modules/sophie/adapter.s",
       "sha256": "b860e5fd76e45fa6a89be7fc98d2a05048bf16dd301ebc7ef0ef032606de4997",
-      "source_mode": "100644"
+      "source_mode": "100644",
+      "published_sha256": "b860e5fd76e45fa6a89be7fc98d2a05048bf16dd301ebc7ef0ef032606de4997"
     },
     "modules/sophie/bridge.py": {
       "commit": "33ba0c90533e925af29929fd761c5dc8f48eab4a",
       "path": "modules/sophie/bridge.py",
       "sha256": "db9b15bd9fca5fcb3fc5da35b9074b698252d66c2aaac8772852a028ff49f0bb",
-      "source_mode": "100644"
+      "source_mode": "100644",
+      "published_sha256": "db9b15bd9fca5fcb3fc5da35b9074b698252d66c2aaac8772852a028ff49f0bb"
     },
     "modules/sophie/generate.py": {
       "commit": "33ba0c90533e925af29929fd761c5dc8f48eab4a",
       "path": "modules/sophie/generate.py",
       "sha256": "a3996981a94f77700c81c7d51e2ec4b7114f22b87d8c15715526fbba46595c1a",
-      "source_mode": "100644"
+      "source_mode": "100644",
+      "published_sha256": "a3996981a94f77700c81c7d51e2ec4b7114f22b87d8c15715526fbba46595c1a"
     },
     "modules/sophie/hooks.s": {
       "commit": "33ba0c90533e925af29929fd761c5dc8f48eab4a",
       "path": "modules/sophie/hooks.s",
       "sha256": "0d8c9f00b6f06daec10056217f53e90f6d740935031af570cb1087b327bb3f95",
-      "source_mode": "100644"
+      "source_mode": "100644",
+      "published_sha256": "0d8c9f00b6f06daec10056217f53e90f6d740935031af570cb1087b327bb3f95"
     },
     "modules/sophie/manifest.py": {
       "commit": "33ba0c90533e925af29929fd761c5dc8f48eab4a",
       "path": "modules/sophie/manifest.py",
       "sha256": "5bb80f43a68efbf988034eb3b788e1aba42c091f18f3a6c4d92c16c4833d315a",
-      "source_mode": "100644"
+      "source_mode": "100644",
+      "published_sha256": "5bb80f43a68efbf988034eb3b788e1aba42c091f18f3a6c4d92c16c4833d315a"
     },
     "modules/sophie/marker.py": {
       "commit": "33ba0c90533e925af29929fd761c5dc8f48eab4a",
       "path": "modules/sophie/marker.py",
       "sha256": "3482032ee6952deb07c43423218e6e9576f4cf109fef731195b692794e6604c5",
-      "source_mode": "100644"
+      "source_mode": "100644",
+      "published_sha256": "3482032ee6952deb07c43423218e6e9576f4cf109fef731195b692794e6604c5"
     },
     "modules/sophie/test_adapter.c": {
       "commit": "33ba0c90533e925af29929fd761c5dc8f48eab4a",
       "path": "modules/sophie/test_adapter.c",
       "sha256": "6d64eea8bb7937f0a1f04bd1c4095d70f464c04a275e9099b0a5eca00f7bafa4",
-      "source_mode": "100644"
+      "source_mode": "100644",
+      "published_sha256": "6d64eea8bb7937f0a1f04bd1c4095d70f464c04a275e9099b0a5eca00f7bafa4"
     },
     "tools/verify/verify_sophie.py": {
       "commit": "33ba0c90533e925af29929fd761c5dc8f48eab4a",
       "path": "tools/verify/verify_sophie.py",
       "sha256": "9f81ee5dfe71090d9f378d52f0f77d31a7f0d2eff47afab36e274123858dabcb",
-      "source_mode": "100644"
+      "source_mode": "100644",
+      "published_sha256": "9f81ee5dfe71090d9f378d52f0f77d31a7f0d2eff47afab36e274123858dabcb"
     },
     "tools/verify/verify_sophie_image.py": {
       "commit": "33ba0c90533e925af29929fd761c5dc8f48eab4a",
       "path": "tools/verify/verify_sophie_image.py",
       "sha256": "cc6113ae1eb16d2ca858832eee4609d03837e99a3810c29e5e78510e61e9a82f",
-      "source_mode": "100644"
+      "source_mode": "100644",
+      "published_sha256": "cc6113ae1eb16d2ca858832eee4609d03837e99a3810c29e5e78510e61e9a82f"
     },
     "tools/verify/verify_sophie_page.py": {
       "commit": "33ba0c90533e925af29929fd761c5dc8f48eab4a",
       "path": "tools/verify/verify_sophie_page.py",
       "sha256": "7ad7bfd30c73a508d960edc7eaec8a3d22c784386dd8c0d942fef6ced6fc6488",
-      "source_mode": "100644"
+      "source_mode": "100644",
+      "published_sha256": "7ad7bfd30c73a508d960edc7eaec8a3d22c784386dd8c0d942fef6ced6fc6488"
     },
     "tools/verify/verify_sophie_port.py": {
       "commit": "33ba0c90533e925af29929fd761c5dc8f48eab4a",
       "path": "tools/verify/verify_sophie_port.py",
       "sha256": "2939380651830b80cd2dade1fb581e199b526c19ce9cba681066e00ac0920fb3",
-      "source_mode": "100644"
+      "source_mode": "100644",
+      "published_sha256": "2939380651830b80cd2dade1fb581e199b526c19ce9cba681066e00ac0920fb3"
     },
     "modules/euclid-lfo/control-sidecar.s": {
       "path": "modules/euclid-lfo/control-sidecar.s",
       "sha256": "a679a2a74fe7a99b1e97f92c57b90c2fa8f1b2787339a8cac3c7620c16616612",
       "source_mode": "100644",
-      "origin": "Authored for bus-events integration on 2026-10-22; derived from EUCLID LFO source in this repository."
+      "origin": "Authored for bus-events integration on 2026-10-22; derived from EUCLID LFO source in this repository.",
+      "published_sha256": "cf94be17816061dbf2e092e81084fe9b2f9dc334f06b32bf1662a3a72752817b"
     },
     "modules/euclid-lfo/brain.lock": {
       "path": "modules/euclid-lfo/brain.lock",
       "sha256": "f370482507b9ed51ab33b990ae800a3326c5fb2511bb2bf896bc1924b757f3e4",
       "source_mode": "100644",
-      "origin": "Authored for bus-events integration on 2026-10-22; derived from EUCLID LFO source in this repository."
+      "origin": "Authored for bus-events integration on 2026-10-22; derived from EUCLID LFO source in this repository.",
+      "published_sha256": "f370482507b9ed51ab33b990ae800a3326c5fb2511bb2bf896bc1924b757f3e4"
+    },
+    "modules/euclid-lfo/encoder.h": {
+      "origin": "authored",
+      "repository": "https://github.com/radiohagen/octatrack-modules",
+      "path": "modules/euclid-lfo/encoder.h",
+      "sha256": "8c5adc6d8da253bdacc3ef6cbcf4514453cb152cbe2f23d99346c974194d0eb1",
+      "published_sha256": "8c5adc6d8da253bdacc3ef6cbcf4514453cb152cbe2f23d99346c974194d0eb1",
+      "source_mode": "100644",
+      "stage": false
     }
   },
   "submodules": {},

@@ -13,5 +13,8 @@ void eul_nv_boot(unsigned bank);
 unsigned eul_nv_checkpoint(unsigned bank);
 unsigned eul_nv_restore(unsigned bank);
 void eul_nv_touch_part(unsigned bank,unsigned part);
+/* UI edits touch one record; Part lifecycle operations still touch all lanes.
+ * Both paths retain save-as re-keying and ticket/revision commit guards. */
+void eul_nv_touch_lane(unsigned bank,unsigned part,unsigned lane);
 void eul_load_post(void);
 #endif

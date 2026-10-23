@@ -1,5 +1,6 @@
 /* Independent boundary/count oracles; also run under address/UB sanitizers. */
 #include "engine.h"
+#include "encoder.h"
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
@@ -12,6 +13,65 @@ static unsigned phase(unsigned step,unsigned n) {
     return (step*EUL_PHASE+n-1)/n;
 }
 int main(void) {
+    const unsigned resistance[]={4,4,4,8,1,1,4,4,1,2,8,4};
+    for(unsigned field=0;field<12;++field) {
+        unsigned counts=resistance[field];
+        assert(eul_encoder_counts(field)==counts);
+        for(int sign=-1;sign<=1;sign+=2) for(unsigned total=1;total<=127;++total) {
+            int slow=0,burst=0,a=0,b=0;
+            for(unsigned i=0;i<total;++i) slow+=eul_encoder_turn(field,sign,64,0,127,&a);
+            burst=eul_encoder_turn(field,sign*(int)total,64,0,127,&b);
+            assert(slow==sign*(int)(total/counts) && slow==burst);
+            /* Values here are deliberately fixed, not actual end-stop tests. */
+            if(total/counts<63) assert(a==b);
+        }
+        int residue=(int)counts-1;
+        assert(eul_encoder_turn(field,-(int)counts,64,0,127,&residue)==-1 && !residue);
+        residue=-(int)counts+1;
+        assert(eul_encoder_turn(field,(int)counts,64,0,127,&residue)==1 && !residue);
+        residue=1;
+        assert(!eul_encoder_turn(field,127,127,0,127,&residue) && !residue);
+        assert(eul_encoder_turn(field,-(int)counts,127,0,127,&residue)==-1);
+        residue=-1;
+        assert(!eul_encoder_turn(field,-127,0,0,127,&residue) && !residue);
+        assert(eul_encoder_turn(field,(int)counts,0,0,127,&residue)==1);
+        residue=0;
+        for(unsigned tick=1;tick<counts;++tick)
+            assert(!eul_encoder_turn(field,1,0,0,127,&residue));
+        assert(eul_encoder_turn(field,1,0,0,127,&residue)==1 && !residue);
+        for(unsigned tick=1;tick<counts;++tick)
+            assert(!eul_encoder_turn(field,-1,127,0,127,&residue));
+        assert(eul_encoder_turn(field,-1,127,0,127,&residue)==-1 && !residue);
+        residue=0;
+        assert(!eul_encoder_turn(field,127,0,0,0,&residue) && !residue);
+    }
+    puts("PASS: all 12 editor resistances, signed slow/coalesced motion, direction reversal and non-sticky end stops");
+    EulAudioClock clock={0};
+    unsigned cached_cases=0;
+    for(unsigned steps=1;steps<=16;++steps) for(unsigned mult=0;mult<=6;++mult) {
+        int32_t a=0,b=0;
+        for(unsigned frame=0;frame<20000;++frame) {
+            /* Stable runs plus moving tempo/speed/shift, stops, signed
+             * extrema and opposite-sign residue after modulation reversals. */
+            int speed=frame<10000?16384:frame%7==0?-32768:frame%7==1?32767:
+                frame%7==2?0:(int)(frame*31%65536)-32768;
+            unsigned tempo=frame<10000?2880:frame%8192;
+            unsigned shift=frame<10000?mult:frame%7;
+            int32_t reference=eul_audio_clock(speed,tempo,shift,steps,&a);
+            assert(eul_audio_clock_cached(&clock,speed,tempo,shift,steps,&b)==reference && a==b);
+            ++cached_cases;
+        }
+        for(int sign=-1;sign<=1;sign+=2) {
+            a=b=sign*(int32_t)(496125*steps-1);
+            for(unsigned frame=0;frame<100;++frame) {
+                int speed=-sign*(int)(frame+1);
+                int32_t reference=eul_audio_clock(speed,8191,mult,steps,&a);
+                assert(eul_audio_clock_cached(&clock,speed,8191,mult,steps,&b)==reference && a==b);
+                ++cached_cases;
+            }
+        }
+    }
+    printf("PASS: %u cached-clock calls bit-exact against original uncached clock, including modulation and opposite-sign carries\n",cached_cases);
     for(unsigned steps=1;steps<=16;++steps) for(int sign=-1;sign<=1;++sign) {
         int32_t remainder=0;
         int64_t input=0,output=0;
