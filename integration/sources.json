@@ -2251,7 +2251,7 @@
       "repository": "https://github.com/radiohagen/octatrack-modules",
       "path": "modules/euclid-lfo/DECISIONS.md",
       "sha256": "8f6c3e464956daaed93265cafefd10f4e63f6de6761322457189719e350d19b1",
-      "published_sha256": "04568b69a055bb33e4295ef9514e1b86b76d326fa7267ef07aab9683b00dc4ea",
+      "published_sha256": "bb7b754bd0d806279d1565aa39db79dc6b23f2ba1ff7b63811d4cba8c2ded59e",
       "source_mode": "100644",
       "stage": false
     },
@@ -2278,7 +2278,7 @@
       "repository": "https://github.com/radiohagen/octatrack-modules",
       "path": "modules/euclid-lfo/retention.h",
       "sha256": "d1385d048643b5503222781d58289478ce908f8a22fedcecb5562b1d9928ed85",
-      "published_sha256": "d1385d048643b5503222781d58289478ce908f8a22fedcecb5562b1d9928ed85",
+      "published_sha256": "72fd078bae120689f70bb60279346d63dc47824cac759b6058cb4d3c5e583f88",
       "source_mode": "100644",
       "stage": false
     },
@@ -2305,7 +2305,7 @@
       "repository": "https://github.com/radiohagen/octatrack-modules",
       "path": "modules/euclid-lfo/test_lifecycle.c",
       "sha256": "3c470c4f9a3efa0b52fb62cbfcf6d2f10cd9986e4cecfc75e94cdac3c9e7e2d6",
-      "published_sha256": "3c470c4f9a3efa0b52fb62cbfcf6d2f10cd9986e4cecfc75e94cdac3c9e7e2d6",
+      "published_sha256": "8ca2002c14aba5a555916aa32b9dbcf5372392d7772aaeffd48de67311c543eb",
       "source_mode": "100644",
       "stage": false
     },
@@ -2323,7 +2323,7 @@
       "repository": "https://github.com/radiohagen/octatrack-modules",
       "path": "modules/euclid-lfo/engine.c",
       "sha256": "9988f3ad3dce9df05c31f24c326ca0f9afcf030cd1ad13c2459f2601a253d4bd",
-      "published_sha256": "c5a17bdd05d7759808244da6d53b084f334a381da27f0081fe3bf61d6dece735",
+      "published_sha256": "8c7ca987c7f0b6065eec6b94bab1d48e70539d0f56bce953881d946301f58b49",
       "source_mode": "100644",
       "stage": false
     },
@@ -2332,7 +2332,7 @@
       "repository": "https://github.com/radiohagen/octatrack-modules",
       "path": "modules/euclid-lfo/README.md",
       "sha256": "fa8551404bbc6ca77547e71e267a8673704722f51e74c9cc954a56d5b2673306",
-      "published_sha256": "817f03edbd2b71a6b6218077862d321666ed0b1bd8667a21fd62d0c9120ed8b8",
+      "published_sha256": "9236278cc59c083c765d9e32cb6868ad5aac4afd32d1d02f73b1429ac634936d",
       "source_mode": "100644",
       "stage": false
     },
@@ -2368,7 +2368,7 @@
       "repository": "https://github.com/radiohagen/octatrack-modules",
       "path": "modules/euclid-lfo/probe.cpp",
       "sha256": "b2a67d78df5d0fc4943abc5640be4f408abf7cad7f6b6bd6dfe57f0cedaf4679",
-      "published_sha256": "efae7999459fb26c71ff0ad13022ff9c483adc7650aee654d9a1c7a352f4ecc8",
+      "published_sha256": "2038f73f5a6ceebdb2db69fff64511f2679b60969da8a8dc45127ae8e794ef40",
       "source_mode": "100644",
       "stage": false
     },
@@ -2377,7 +2377,7 @@
       "repository": "https://github.com/radiohagen/octatrack-modules",
       "path": "modules/euclid-lfo/retention.c",
       "sha256": "2ef544e9a1e80c9e740660a663bdabbc27211b8b36783aca221767aa52b21bb9",
-      "published_sha256": "2ef544e9a1e80c9e740660a663bdabbc27211b8b36783aca221767aa52b21bb9",
+      "published_sha256": "3d90c108e1e25e4e4a077f10796c7cba2b6899916b709faacadf421349f3bd93",
       "source_mode": "100644",
       "stage": false
     },
@@ -2422,7 +2422,16 @@
       "repository": "https://github.com/radiohagen/octatrack-modules",
       "path": "modules/euclid-lfo/runtime.c",
       "sha256": "dbdd146ba4e615c576b92e1e6b2e17682ab8f82d156349325bb7000a99288819",
-      "published_sha256": "00b6e79ec447e4e5d92b719e5a7c2432549f8fd8a75dd7cdef68b535c9411490",
+      "published_sha256": "dfaf84b003897073ab92151b526e37f4298ff974c5cb83325697324c8b15010e",
+      "source_mode": "100644",
+      "stage": false
+    },
+    "modules/euclid-lfo/encoder.h": {
+      "origin": "authored",
+      "repository": "https://github.com/radiohagen/octatrack-modules",
+      "path": "modules/euclid-lfo/encoder.h",
+      "sha256": "8c5adc6d8da253bdacc3ef6cbcf4514453cb152cbe2f23d99346c974194d0eb1",
+      "published_sha256": "8c5adc6d8da253bdacc3ef6cbcf4514453cb152cbe2f23d99346c974194d0eb1",
       "source_mode": "100644",
       "stage": false
     },
@@ -2431,7 +2440,7 @@
       "repository": "https://github.com/radiohagen/octatrack-modules",
       "path": "modules/euclid-lfo/engine.h",
       "sha256": "399f3c6682210edd7d762d6e8e7f0b1a1141f55e53e743d87f104bda1f293013",
-      "published_sha256": "65938b52d82622a73b2cca0827cfed727854431fa1cd4cc85e860080a1b2c5f9",
+      "published_sha256": "433a8bffcd1fe75fd8ba2e24ece03df993c4c3bda5a44b28e7498196a8192aaa",
       "source_mode": "100644",
       "stage": false
     },
@@ -2440,7 +2449,7 @@
       "repository": "https://github.com/radiohagen/octatrack-modules",
       "path": "modules/euclid-lfo/control.s",
       "sha256": "3adb703aa7235e887283b7ebe34c0521ac27d06560f745e1b2330cddf0e5f773",
-      "published_sha256": "0b8e6956494ad1d5a5d8a089cfe7b9b453552fcb3948c52f04534d818a3a99b7",
+      "published_sha256": "2243dbe3304fc6b9b57873e2a5f0035283b9c5b245e69e59dcb4e2cd2cce69b2",
       "source_mode": "100644",
       "stage": false
     },
@@ -2449,7 +2458,7 @@
       "repository": "https://github.com/radiohagen/octatrack-modules",
       "path": "modules/euclid-lfo/test_engine.c",
       "sha256": "f8dbd0ffaf51ae369be32697f61c038f078194e1ff5609a3c41134e31f84a602",
-      "published_sha256": "c6e2e33882108240fe5ee5273d3eb1f97d4fb0672f6a9c05d3663098f53e10af",
+      "published_sha256": "f55f6dc2b5316b74a34aa96d392da7faa05c1d7a217a40f3772f512c5d5c4ae0",
       "source_mode": "100644",
       "stage": false
     },
@@ -2476,7 +2485,7 @@
       "repository": "https://github.com/radiohagen/octatrack-modules",
       "path": "tools/verify/verify_euclid_lfo_ui.py",
       "sha256": "1102a42608de5987bdbbb29ab69ecabd9b1a54d6d54da7fe0e49881a10968353",
-      "published_sha256": "1102a42608de5987bdbbb29ab69ecabd9b1a54d6d54da7fe0e49881a10968353",
+      "published_sha256": "05983be07e986589aded9a996c64fa26a1e9adb6e71534541245d655d03d2feb",
       "source_mode": "100644",
       "stage": false
     },

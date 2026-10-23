@@ -38,6 +38,16 @@ class Panel:
     def encoder(self,index,delta,gap=400):
         self.send(f'enc {index} {delta}',gap)
 
+    def edit(self,index,steps=1,page=0,gap=400):
+        """Logical UI steps, sent as real signed-byte UART encoder counts."""
+        counts=((4,4,4,4,4,1),(8,1,1,2,8,4))[page][index]
+        raw=steps*counts
+        while abs(raw)>127:
+            chunk=127 if raw>0 else -127
+            self.encoder(index,chunk,gap)
+            raw-=chunk
+        if raw: self.encoder(index,raw,gap)
+
     def hold(self,key,other,gap=700):
         self.send(f'key {key:#x} down',40)
         self.tap(other,100)
@@ -56,7 +66,8 @@ def main():
     known.update('part-'+operation for operation in part_cases)
     known.update(('audio-burst','midi-burst'))
     known.update(('audio-setup','midi-setup'))
-    rates=((8,0),(16,0),(24,0),(32,0),(48,0),(64,0),(96,0),(64,1),(96,1),(64,2),(96,2),(64,3),(96,3),(64,1))
+    rates=((8,0),(16,0),(24,0),(32,0),(48,0),(64,0),(96,0),(64,1),(96,1),(64,2),(96,2),(64,3),(96,3),
+           (64,1),(96,3),(8,0))  # STOP, VAR above maximum, VAR below minimum.
     known.update(f'{kind}-rate-{i}' for kind in ('audio','midi') for i in range(len(rates)))
     known.update(f'{kind}-free-{duration}' for kind in ('audio','midi') for duration in ('short','long'))
     if selected and not selected<=known: ap.error(f'unknown cases: {sorted(selected-known)}')
@@ -111,11 +122,14 @@ def main():
             p.encoder(6,-127); p.encoder(1,127)
             # Saved native SPD clamps at zero; index 13 tests leaving STOP.
             p.encoder(4,-127 if index==13 else 127)
+            if index==14: p.encoder(2,127)  # SPD127/MULT64 exceeds the preset range.
+            if index==15:
+                p.encoder(2,-127); p.encoder(4,-127); p.encoder(4,1)
             p.tap(0x31); p.tap(0x31)
-            if index==13: p.encoder(5,1)
+            if index>=13: p.edit(5,-1 if index==14 else 1,page=1)
             else:
                 p.encoder(5,-127)
-                if index: p.encoder(5,index)
+                if index: p.edit(5,index,page=1)
             add_case(('midi' if midi else 'audio')+f'-rate-{index}',p)
     for midi in (False,True):
         p=Panel(); p.tap(0x32); p.tap(0x10)
@@ -131,27 +145,27 @@ def main():
             p.encoder(6,-127)               # Select first native LFO lane.
             p.encoder(1,127)                # WAVE clamps to appended EUCLID.
             p.tap(0x31,700)                 # Open our editor, no direct call.
-            # Each control receives exactly one count; no injected settings.
-            for encoder in range(6): p.encoder(encoder,1)
+            # One logical increment through real resisted panel counts.
+            for encoder in range(6): p.edit(encoder)
             if page:
                 p.tap(0x31,700)
-                p.encoder(4,1)              # DIR: POS -> NEG, one native count.
+                p.edit(4,page=1)            # DIR: POS -> NEG, eight raw counts.
                 p.encoder(5,-127)           # RATE minimum, independent of fixture SPD.
-                p.encoder(5,7)              # Whole -> sixteenth (including triplets).
+                p.edit(5,7,page=1)          # Whole -> sixteenth (including triplets).
                 p.send('key 0x3d down',40)  # Hold F: no native push acceleration.
-                p.encoder(5,1)
+                p.edit(5,1,page=1)
                 p.send('key 0x3d up',40)
-                p.encoder(5,-1)
+                p.edit(5,-1,page=1)
             add_case(name,p)
     for midi in (False,True):
         p=Panel(); p.tap(0x32); p.tap(0x10)
         if midi: p.tap(0x35)
         p.tap(0x24,80); p.tap(0x24,700)
         p.encoder(6,-127); p.encoder(1,127); p.tap(0x31,700)
-        p.encoder(0,-127)  # Start at one step; eight fast counts must make nine.
-        for _ in range(8): p.encoder(0,1,15)
-        p.send('key 0x38 down',40)  # A push held during five reverse counts.
-        for _ in range(5): p.encoder(0,-1,15)
+        p.encoder(0,-127)  # Start at one step; 32 fast counts must make nine.
+        for _ in range(32): p.encoder(0,1,15)
+        p.send('key 0x38 down',40)  # Held push must not accelerate 20 reverse counts.
+        for _ in range(20): p.encoder(0,-1,15)
         p.send('key 0x38 up',700)
         add_case(('midi' if midi else 'audio')+'-burst',p)
     for midi in (False,True):
@@ -173,9 +187,9 @@ def main():
             if midi: p.tap(0x35)
             p.tap(0x24,80); p.tap(0x24,700)
             p.encoder(6,-127); p.encoder(1,127); p.tap(0x31,700)
-            for encoder in range(6): p.encoder(encoder,1)
-            if midi: p.encoder(0,1)
-            p.tap(0x31); p.encoder(4,1)  # NEG is retained with the Part too.
+            for encoder in range(6): p.edit(encoder)
+            if midi: p.edit(0)
+            p.tap(0x31); p.edit(4,page=1)  # NEG is retained with the Part too.
             p.tap(0x32); p.tap(0x32)
         if operation in ('save','reload'):
             if a.panel_model=='mkii': p.hold(0x2d,0x1d)
@@ -186,7 +200,7 @@ def main():
             p.tap(0x32); p.tap(0x32)
             if operation=='reload':
                 p.tap(0x24,80); p.tap(0x24,700); p.tap(0x31)
-                p.encoder(0,3); p.tap(0x32); p.tap(0x32)
+                p.edit(0,3); p.tap(0x32); p.tap(0x32)
                 p.hold(0x2d,0x2a,1300)  # FUNC+CUE -> saved Part (PANEL.md's measured map).
         if operation in ('paste','undo','clear','switch'):
             if a.panel_model=='mkii': p.tap(0x1d,700)
@@ -199,7 +213,7 @@ def main():
             elif operation=='switch':
                 p.tap(0x31,900)  # Link Part 2, then edit just its MIDI lane.
                 p.tap(0x24,80); p.tap(0x24,700); p.tap(0x31)
-                p.encoder(0,1); p.tap(0x32); p.tap(0x32)
+                p.edit(0); p.tap(0x32); p.tap(0x32)
         add_case('part-'+operation,p)
     run(common+scenarios,out/'boot.log')
     results={}

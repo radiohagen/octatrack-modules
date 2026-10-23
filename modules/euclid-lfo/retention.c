@@ -89,7 +89,7 @@ unsigned eul_nv_checkpoint(unsigned bank) {
     }
     return 0; /* Invalid header, so boot falls back to the validated sidecar. */
 }
-void eul_nv_touch_part(unsigned bank,unsigned part) {
+static void nv_touch(unsigned bank,unsigned part,unsigned first,unsigned end) {
     if(bank>=16 || bank!=eul_current_bank() || part>=EUL_PARTS || !eul_nv_ready || eul_nv_suspended) return;
     volatile uint8_t *nv=eul_nv_memory();
     uint32_t key;
@@ -100,7 +100,7 @@ void eul_nv_touch_part(unsigned bank,unsigned part) {
     if(nv_read(nv)!=EUL_NV_MAGIC || nv_read(nv+4)!=key || nv_read(nv+8)!=bank) {
         eul_nv_checkpoint(bank); return;
     }
-    for(unsigned lane=0;lane<EUL_LANES;++lane) {
+    for(unsigned lane=first;lane<end;++lane) {
         uint16_t sr=eul_nv_lock();
         if(nv_read(nv)!=EUL_NV_MAGIC || nv_read(nv+8)!=bank) {
             eul_nv_unlock(sr); return;
@@ -117,6 +117,12 @@ void eul_nv_touch_part(unsigned bank,unsigned part) {
             nv_record(nv+16+16*index,&p,crc);
         eul_nv_unlock(sr);
     }
+}
+void eul_nv_touch_part(unsigned bank,unsigned part) {
+    nv_touch(bank,part,0,EUL_LANES);
+}
+void eul_nv_touch_lane(unsigned bank,unsigned part,unsigned lane) {
+    if(lane<EUL_LANES) nv_touch(bank,part,lane,lane+1);
 }
 unsigned eul_nv_restore(unsigned bank) {
     if(bank>=16 || eul_refused[bank]) return 0;

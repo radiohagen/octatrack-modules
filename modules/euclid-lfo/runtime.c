@@ -1,6 +1,7 @@
 /* Native LFO adapters and editor. Card/Part lifecycle lives in storage.c. */
 #include "lifecycle.h"
 #include "retention.h"
+#include "encoder.h"
 #define U8(a) (*(volatile uint8_t *)(uintptr_t)(a))
 #define U32(a) (*(volatile uint32_t *)(uintptr_t)(a))
 #define BANK_BASE 0x400e21e0u
@@ -13,15 +14,20 @@ static EulState eul_states[EUL_LANES] __attribute__((section(".data"))) = {0};
 static unsigned eul_context[EUL_LANES] __attribute__((section(".data"))) = {0};
 static unsigned eul_clock_context[EUL_LANES] __attribute__((section(".data"))) = {0};
 static int32_t eul_remainder[EUL_LANES] __attribute__((section(".data"))) = {0};
+static EulAudioClock eul_audio_clocks[24] __attribute__((section(".data"))) = {{0}};
 unsigned eul_editing=0, eul_page=0;
 /* Design comparison only: 0 = native SETUP split, 1 = full-width grid.
  * No panel control or persisted setting is assigned to this test selector. */
 unsigned eul_ui_style=0;
 static unsigned edit_bank=0, edit_part=0, edit_lane=0;
+static int edit_residue[6]={0};
+static void reset_encoders(void) {
+    for(unsigned i=0;i<6;++i) edit_residue[i]=0;
+}
 static volatile unsigned eul_loading=0;
 static EulParams eul_clips[2][EUL_LANES] __attribute__((section(".data")))={{{0}}};
 static unsigned eul_clip_valid[2] __attribute__((section(".data")))={0};
-void eul_changed(unsigned bank,unsigned part);
+static void changed(unsigned bank,unsigned part,unsigned lane);
 extern void eul_stock_draw(void);
 
 static unsigned clock_steps(unsigned index,unsigned midi) {
@@ -48,7 +54,7 @@ int32_t eul_scale_audio(int32_t increment,unsigned index,int speed,unsigned mult
     /* Defensive overflow boundary, above the native 300 BPM maximum.
      * Invalid live data must not enter either clock with a stale residue. */
     if(tempo>8191 || mult>6) { eul_remainder[index]=0; return increment; }
-    return eul_audio_clock(speed,tempo,mult,steps,&eul_remainder[index]);
+    return eul_audio_clock_cached(&eul_audio_clocks[index],speed,tempo,mult,steps,&eul_remainder[index]);
 }
 
 void eul_wave(uint32_t *native,unsigned index,unsigned midi,unsigned reset) {
@@ -98,6 +104,7 @@ static const uint8_t eul_fields[2][6]={{0,1,2,6,7,8},{3,4,5,9,EUL_DIRECTION_FIEL
 static const uint8_t rate_speeds[EUL_RATES]={8,16,24,32,48,64,96,64,96,64,96,64,96};
 static const uint8_t rate_mults[EUL_RATES]={0,0,0,0,0,0,0,1,1,2,2,3,3};
 static const char *const rate_labels[EUL_RATES]={"1/1","1/2","2T","1/4","4T","1/8","8T","1/16","16T","1/32","32T","1/64","64T"};
+static unsigned rate_writing=0;
 static unsigned rate_product(void) {
     unsigned midi=edit_lane>=24, track=edit_lane%24/3, lane=edit_lane%3;
     unsigned part=BANK_BASE+BANK_STRIDE*edit_bank+0x8ed80+PART_STRIDE*edit_part;
@@ -112,16 +119,22 @@ static unsigned rate_index(unsigned product) {
 }
 extern void eul_rate_mult(unsigned value,unsigned lane,unsigned part_address,
                           unsigned sram_base,unsigned live_base);
-static void rate_edit(int delta) {
-    if(!delta) return;
+static unsigned rate_edit(int delta) {
+    if(!delta) return 0;
     unsigned product=rate_product(), i=rate_index(product);
     /* VAR rounds to the next division in the direction turned. STOP starts
      * at 1/16. Native saved SPD is 0-127; subsequent native SPD/MULT edits
      * remain possible and are reflected here without a second saved rate. */
-    int next=product?(int)i+delta-(product<((unsigned)rate_speeds[i]<<rate_mults[i]) && delta>0):7;
+    unsigned preset=(unsigned)rate_speeds[i]<<rate_mults[i];
+    int next=product?(int)i+delta-(product<preset && delta>0)
+        +(product>preset && delta<0):7;
     if(next<0) next=0; else if(next>=EUL_RATES) next=EUL_RATES-1;
+    if(product==((unsigned)rate_speeds[next]<<rate_mults[next])) return 0;
     unsigned midi=edit_lane>=24,track=edit_lane%24/3,lane=edit_lane%3;
     unsigned part=BANK_BASE+BANK_STRIDE*edit_bank+0x8ed80+PART_STRIDE*edit_part;
+    /* Both native writers refresh their caller. Present one final frame,
+     * not the transient old-SPD/new-MULT combination and then another draw. */
+    rate_writing=1;
     ((void (*)(void))0x40027e00u)();
     eul_rate_mult(rate_mults[next],lane,
         part+(midi?0x500+36*track:0x30a+30*track)+lane,
@@ -129,6 +142,8 @@ static void rate_edit(int delta) {
         midi?0x46c76dc0u+68*track+0x3e:0x8000084eu+72*track);
     ((int (*)(unsigned,unsigned,int))0x40054cd8u)(track+(midi?8:0),6+lane,
         rate_speeds[next]);
+    rate_writing=0;
+    return 1;
 }
 static unsigned display_value=0;
 static const char *display_word=0;
@@ -149,6 +164,7 @@ static void centered(void *surface,int x,int y,const char *str) {
     text(surface,x-width/2,y,str);
 }
 void eul_ui_draw(void) {
+    if(rate_writing) return;
     EulParams *raw=editing();
     if (!raw) { eul_stock_draw(); return; }
     uint32_t window=U32(0x400bc038u);
@@ -186,7 +202,7 @@ void eul_ui_draw(void) {
         if(field==5 && mode>=EUL_RAND) {
             centered(surface,x+9,y+19,labels[field]); centered(surface,x+9,y+1,"--"); continue;
         }
-        unsigned product=rate_product(),rate=rate_index(product);
+        unsigned product=field==EUL_RATE_FIELD?rate_product():0,rate=rate_index(product);
         unsigned value=field==EUL_RATE_FIELD?rate:field==EUL_DIRECTION_FIELD?!!(p.mode&EUL_NEGATIVE)
             :field==3?mode:((const uint8_t *)&p)[field],limit=limits[field];
         display_word=field==3?modes[mode]:field==EUL_DIRECTION_FIELD?(value?"NEG":"POS"):0;
@@ -208,7 +224,7 @@ void eul_ui_yes(unsigned key,unsigned edge) {
          * newly selected lane, not toggle a stale editor and then close it. */
         if (!editing()) { edit_bank=b; edit_part=p; edit_lane=id; eul_page=0; }
         else eul_page^=1;
-        eul_editing=1; eul_ui_draw();
+        reset_encoders(); eul_editing=1; eul_ui_draw();
     } else ((void (*)(unsigned,unsigned))0x4005cbc8u)(key,edge);
 }
 void eul_ui_no(unsigned key,unsigned edge) {
@@ -216,7 +232,10 @@ void eul_ui_no(unsigned key,unsigned edge) {
     else ((void (*)(unsigned,unsigned))0x4005b99cu)(key,edge);
 }
 void eul_ui_arrow(unsigned key,unsigned edge) {
-    if (editing()) { eul_page=key==0x21 || key==0x20; eul_ui_draw(); }
+    if (editing()) {
+        unsigned page=key==0x21 || key==0x20;
+        if(page!=eul_page) { eul_page=page; reset_encoders(); eul_ui_draw(); }
+    }
     else ((void (*)(unsigned,unsigned))(uintptr_t)
         ((key==0x20 || key==0x33)?0x4003a3b4u:0x400321d0u))(key,edge);
 }
@@ -227,9 +246,26 @@ void eul_ui_encoder(unsigned encoder,int delta) {
     if (encoder==6) return; /* LEVEL must not unexpectedly change a pattern. */
     if(encoder>=6) return;
     unsigned field=eul_fields[eul_page&1][encoder];
-    if(field==EUL_RATE_FIELD) { rate_edit(delta); eul_ui_draw(); return; }
-    if (field>EUL_DIRECTION_FIELD || (field==5 && (p->mode&EUL_SHAPE_MASK)>=EUL_RAND)) return;
-    EulParams next=*p;
+    if(field==EUL_RATE_FIELD) {
+        unsigned product=rate_product(),i=rate_index(product);
+        /* VAR outside the presets and STOP must still be able to enter the
+         * preset range in either direction. Only exact endpoints clamp. */
+        unsigned exact=product==((unsigned)rate_speeds[i]<<rate_mults[i]);
+        delta=eul_encoder_turn(field,delta,exact?i+1:1,exact?1:0,
+                               exact?EUL_RATES:EUL_RATES+1,&edit_residue[encoder]);
+        if(delta && rate_edit(delta)) eul_ui_draw();
+        return;
+    }
+    if (field>EUL_DIRECTION_FIELD || (field==5 && (p->mode&EUL_SHAPE_MASK)>=EUL_RAND)) {
+        edit_residue[encoder]=0; return;
+    }
+    EulParams next=*p; eul_normalize(&next);
+    unsigned limits[]={16,next.steps,next.steps-1,3,127,127,next.pulses,
+                       next.pulses?next.pulses-1:0,127,30,1};
+    unsigned value=field==EUL_DIRECTION_FIELD?!!(next.mode&EUL_NEGATIVE):
+        field==3?next.mode&EUL_SHAPE_MASK:((const uint8_t *)&next)[field];
+    delta=eul_encoder_turn(field,delta,value,field==0?1:0,limits[field],&edit_residue[encoder]);
+    if(!delta) return;
     if (eul_edit(&next,field,delta)) {
         /* Publish ten bytes together: the audio callback must never see
          * STEPS changed but its dependent PULSE/ACCNT values still old.
@@ -239,9 +275,12 @@ void eul_ui_encoder(unsigned encoder,int delta) {
         *p=next;
         ++eul_revision[edit_bank];
         __asm__ volatile("move.w %0,%%sr" :: "d"(sr) : "memory");
-        eul_changed(edit_bank,edit_part);
+        changed(edit_bank,edit_part,edit_lane);
+        if(field==0) { edit_residue[1]=0; edit_residue[2]=0; }
+        if(field==0 || field==1) { edit_residue[3]=0; edit_residue[4]=0; }
+        if(field==3) { edit_residue[1]=0; edit_residue[2]=0; }
+        eul_ui_draw();
     }
-    eul_ui_draw();
 }
 
 unsigned eul_current_bank(void) { return U8(0x80000002u); }
@@ -369,10 +408,16 @@ void *eul_part_copy(void *dst,const void *src,unsigned size) {
     return result;
 }
 /* Mark native Part and bank dirty so the usual background save includes it. */
-void eul_changed(unsigned bank,unsigned part) {
+static void changed(unsigned bank,unsigned part,unsigned lane) {
     U8(BANK_BASE+BANK_STRIDE*bank+0x95048u)|=(uint8_t)(1u<<part);
     U8(0x100b145eu)|=(uint8_t)(1u<<part);
     eul_dirty[bank]=1;
-    eul_nv_touch_part(bank,part);
+    if(lane<EUL_LANES) eul_nv_touch_lane(bank,part,lane);
+    else eul_nv_touch_part(bank,part);
     eul_schedule(bank);
+}
+/* Bulk update entry, also exercised by the power-up/card verifier. A caller
+ * that changes several lanes must retain the entire Part, not the UI lane. */
+void eul_changed(unsigned bank,unsigned part) {
+    changed(bank,part,EUL_LANES);
 }
