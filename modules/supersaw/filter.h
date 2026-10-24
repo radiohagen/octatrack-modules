@@ -17,7 +17,6 @@ static void ss_filter_reset(struct ss_filter *s) {
     s->envelope=s->stamp=0;s->wet=0;s->type=s->ready=0;
 }
 static int32_t ss_limit(int32_t x) { return x>8388607?8388607:x< -8388607?-8388607:x; }
-static int32_t ss_mul(int32_t a,int32_t b) { return (a*b)>>14; }
 /* Exact floor of a*b/16384 for the wider HP intermediate, without int64. */
 static int32_t ss_wide_mul(int32_t a,int32_t b) {
     /* b is nonnegative and < 65536: the low product stays below 2^30.
@@ -49,6 +48,14 @@ static __attribute__((always_inline)) inline void ss_filter_block(
     }
     s->s0=s0;s->s1=s1;s->wet=(uint16_t)wet;
 }
+/* Signed division truncates toward zero. Native blocks are 16 samples;
+ * keep split/short calls exact and avoid three hardware divides per voice. */
+static int32_t ss_filter_step(int32_t delta,unsigned n) {
+    if(n==16)return delta<0 ? -((-delta)>>4) : delta>>4;
+    if(n==32)return delta<0 ? -((-delta)>>5) : delta>>5;
+    if(n==1)return delta;
+    return delta/(int)n;
+}
 void ss_filter_run(struct ss_filter *s,const struct ss_filter_params *p,
                           uint32_t stamp,int16_t *audio,unsigned n) {
     if (!n) return;
@@ -66,10 +73,9 @@ void ss_filter_run(struct ss_filter *s,const struct ss_filter_params *p,
     int32_t a1=s->a1,a2=g,a3=k+g;
     int32_t d1=0,d2=0,d3=0;
     if(!s->wet || g!=s->a2 || k!=s->damping) {
-        int32_t den=16384+ss_mul(k,g)+ss_mul(g,g);
-        a1=268435456/den;
+        a1=ss_filter_a1[p->resonance&127][cutoff];
         if(s->wet) {
-            d1=(a1-s->a1)/(int)n;d2=(a2-s->a2)/(int)n;d3=(a3-s->a3)/(int)n;
+            d1=ss_filter_step(a1-s->a1,n);d2=ss_filter_step(a2-s->a2,n);d3=ss_filter_step(a3-s->a3,n);
         } else { s->a1=a1;s->a2=a2;s->a3=a3; }
     }
     if(type)s->type=(uint8_t)type;

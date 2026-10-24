@@ -102,6 +102,10 @@ def main():
                     ramps[phase]=call('ss_track_fill',0,0x24000,0x25000,0x26000,16,0x27000)
                 cases.append(dict(voices=voices, type=typ, setting=setting,
                                   cold=cold, warm=warm, cutoff_change=changed,pitch_change=pitch,**ramps))
+    # Knob/envelope updates at the native 16-sample size must not reintroduce
+    # coefficient/ramp divides. Pitch/AMP still have their own unrelated math.
+    for case in cases:
+        assert case['cutoff_change']['divides']==0, ('filter update divides',case)
     # Control work outside the audio renderer: fine/Part refresh and the
     # native per-track parameter preparation up to the AMP release branch.
     uc.mem_map(0x10000000,0x200000);uc.mem_map(0x46000000,0x1100000)

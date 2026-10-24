@@ -20,13 +20,13 @@ def main():
     for hook in ('begin','fill','page','carry'):
         assert src.count('jsr ss_'+hook+'_hook') == 1
     module = registry.modules()['SUPERSAW']
-    assert len(module.detours)==4 and not (module.pokes or module.symbol_refs or module.cf_patches)
+    assert len(module.detours)==5 and not (module.pokes or module.symbol_refs or module.cf_patches)
     with tempfile.TemporaryDirectory() as temp:
         exe, raw = Path(temp)/'test', Path(temp)/'neutral.pcm'
         obj = Path(temp)/'adapter.o'
         subprocess.run(['m68k-elf-as','-mcpu=54455','modules/supersaw/adapter.s','-o',str(obj)],cwd=ROOT,check=True)
         symbols = subprocess.check_output(['m68k-elf-nm',str(obj)],text=True)
-        for name in ('ss_active','ss_samples','ss_unsupported','ss_voices','ss_poly_voices','ss_poly_samples','ss_descriptor'):
+        for name in ('ss_active','ss_samples','ss_unsupported','ss_voices','ss_poly_voices','ss_poly_samples','ss_descriptor','ss_lfo_descriptor','ss_page_built','ss_lfo_built'):
             rows = [line.split() for line in symbols.splitlines() if line.split()[-1] == name]
             assert len(rows) == 1 and rows[0][1] in ('d','D'), (name,rows,'loader does not clear .bss')
         subprocess.run(['cc','-std=c99','-O2','-Wall','-Wextra','-Werror',

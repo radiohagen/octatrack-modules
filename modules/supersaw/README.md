@@ -302,3 +302,65 @@ Image SHA-256: `00d68934661a16d503e633b0021499259035eb155ed342db1b05c29eaf9176ad
 These are source/emulator checks; physical playback and CPU headroom remain
 unverified. This does not replace the broader Inserts suite's retained fixture
 exceptions or extend the one-track filtered-polyphony qualification.
+
+### VOIC control correction
+
+VOIC advances one position per detent, bounded to 1..4. Its four dial positions
+span the full arc (0/42/84/127). An inherited stock SPD3 value such as 32
+uses the same effective value of 1 for both the number and dial, without
+changing stored settings. Native hidden-value sentinels remain supported.
+
+The compiled gate checks signed detents and 32 drawer/formatter ABI cases.
+`verify_supersaw_voic_port.py` checks single steps, endpoints and independent
+edits on two tracks. A separate live-assignment fixture checks four distinct
+dial positions, adding a second Supersaw while the first plays, four MIDI
+notes per track, filter edits and releases.
+
+A reported MKII exception during filter editing with two Supersaws remains
+unresolved. Synthetic emulator fixtures have not reproduced it; neither
+these UI corrections nor the filter optimization below are a confirmed
+hardware crash fix. Physical timing and playback acceptance remain open.
+
+### Filter updates and UI initialization (24 October 2026)
+
+The SEM normalization coefficient is now an exact generated lookup for all
+128 cutoff and 128 resonance values (32 KiB read-only data). The 16/32-sample
+coefficient ramps use shifts with signed truncation; shorter/split calls keep
+the original division. This preserves the existing sound, independent filter
+envelopes and OFF bypass. No voice capacity, FX slot or project format changes.
+The four-voice, 16-sample cutoff-change probe executes zero divisions instead
+of 16. In the rich LOW case, total instructions change from 10,959 to 11,007;
+held output changes from 9,108 to 9,124. The removal trades division for a
+small instruction-count increase and table reads. Hardware cycle savings
+and CPU headroom are unmeasured; cache effects and the rest of the OS are
+outside the probe.
+
+SRC and LFO descriptors are built once and then remain unchanged across
+tracks. SRC SETUP resolves through the same Synth PLAYBACK descriptor even
+when opened first, preserving the correct pitch bounds, formatter and handler.
+Persistent conversion of old FINE settings runs on the UI path; the audio
+path reads legacy defaults until then without writing the Part or its saved
+shadow. Existing tagged settings and save format remain unchanged.
+LFO SETUP's PLAYBACK destinations now read PTCH, DETU, MORF, CUT, SUB, DRIV
+on Supersaw tracks; other tracks retain their native destination lookup.
+The separate LFO naming seam and build-once descriptor pattern were compared
+with upstream OCTA303 v7.1. No OCTA303 oscillator or filter code is imported.
+
+Regression checks cover all 16,384 coefficient pairs, signed ramp division,
+100,000 modulation blocks against the scalar filter reference, compiled
+ColdFire/host agreement, audio-first legacy initialization, SETUP-first page
+resolution, stable descriptors, and 24 native LFO formatter calls across two
+Supersaw tracks and stock FLEX. Full-image panel/save checks are recorded
+separately. These changes do not establish a cause or fix for the reported
+hardware exception.
+
+Local verification of this change: author `make check` (24 tests), shared
+combined-image checks plus selected Supersaw gates via
+`make check-remix REMIX=radio-bus MODULES=SUPERSAW BUILD=79`, and separate
+project fixtures for live T4 addition beside T3, four MIDI notes per track,
+filter/VOIC edits, independent releases, unchanged FX assignments and native
+save/cold reload all pass. Whole-project gates inside the scoped command skip
+without `OT_PROJECT`; the full unscoped suite was not run. LFO SETUP's CUT
+label was also visually checked in the emulator.
+Tested image SHA-256: `7fdef4ae00e63f080612d741650d98db534ba2837b0826d2a84b0dce496b2c7f`.
+This source qualification does not include an installation package or flashing.

@@ -146,7 +146,22 @@ def verify_migration(uc,call,sym):
     part=0x42000000+0x8ed80+6322*2
     track=3;row=0x1ec+30*track;fine=0x33+30*track
     uc.mem_write(part+fine,bytes((76,)))
+    # Rendering a legacy track before its UI is opened must not migrate the
+    # Part, saved shadow, live CUT or dirty flags. FINE still works immediately.
+    regions=((part,6322),(0x100a4ece+6322*2,6322),(0x100f8598,4))
+    before=[bytes(uc.mem_read(a,n)) for a,n in regions]
+    uc.mem_write(0x800049d8+0xa8*track+8,struct.pack('>I',0x100b14f0))
+    uc.mem_write(0x100b14f0,b'/AUDIO/FMSYNTH-SUPERSAW.wav\0')
+    uc.mem_write(0x24000,bytes(128))
+    call('ss_begin',track,0x24000)
+    uc.mem_write(sym['ss_active']+track,b'\x01')
     call('ss_config',track)
+    call('ss_fine',track,76<<8)
+    assert uc.reg_read(UC_M68K_REG_D0)==76<<8
+    assert [bytes(uc.mem_read(a,n)) for a,n in regions]==before, 'audio wrote persistent settings'
+    assert bytes(uc.mem_read(sym['ss_setup']+6*track,6))==bytes((76,0,0,64,0,0))
+    assert bytes(uc.mem_read(0x80000813+72*track,1))==b'\0'
+    call('ss_prepare_setup',track)
     expected=bytes((76,0,0,64,0,83))
     assert bytes(uc.mem_read(part+row,6))==expected
     assert bytes(uc.mem_read(0x100a4ece+6322*2+row,6))==expected
@@ -163,7 +178,99 @@ def verify_migration(uc,call,sym):
     uc.mem_write(sym['ss_active']+track,b'\x00')
     call('ss_fine',track,31<<8)
     assert uc.reg_read(UC_M68K_REG_D0)==31<<8
-    return dict(legacy_fine_preserved=True,default_off=True,one_time_migration=True,native_fine_fallback=True)
+    # A shared descriptor is immutable after its first publication. Build from
+    # a distinctive donor and use another marker track with another donor:
+    # no donor fields or callback pointers may change on the second hand-out.
+    uc.mem_write(part+0x22+track,b'\x01')
+    uc.mem_write(part+0x2cb+5*track,b'\0')
+    uc.mem_write(0x100b14f0,b'/AUDIO/FMSYNTH-SUPERSAW.wav\0')
+    donor=bytes((i*7+11)&255 for i in range(402))
+    uc.mem_write(0x29000,donor)
+    call('ss_page',0x29000,track)
+    page=bytes(uc.mem_read(sym['ss_descriptor'],402))
+    uc.mem_write(0x29000,bytes([0xa5])*402)
+    call('ss_page',0x29000,track)
+    assert bytes(uc.mem_read(sym['ss_descriptor'],402))==page
+    assert uc.reg_read(UC_M68K_REG_D0)==sym['ss_descriptor']
+    uc.mem_write(0x29000,donor)
+    call('ss_lfo_page',0x29000,track)
+    page=bytes(uc.mem_read(sym['ss_lfo_descriptor'],402))
+    uc.mem_write(0x29000,bytes([0xa5])*402)
+    call('ss_lfo_page',0x29000,track)
+    assert bytes(uc.mem_read(sym['ss_lfo_descriptor'],402))==page
+    # Non-Supersaw pages still return the caller's original descriptor.
+    call('ss_page',0x29000,7)
+    assert uc.reg_read(UC_M68K_REG_D0)==0x29000
+    return dict(legacy_fine_preserved=True,default_off=True,one_time_migration=True,
+                native_fine_fallback=True,audio_no_persistent_writes=True,immutable_descriptors=True)
+
+
+def verify_native_ui(uc,call,sym):
+    """Execute the composed image's real resolver and LFO name formatter.
+
+    Open SETUP first, then SRC, alternate two marker tracks and stock FLEX,
+    and prove all six LFO names through the installed hook, not a mock.
+    """
+    image=(ROOT/'out/mainos_bus.bin').read_bytes()
+    mapped=list(uc.mem_regions())
+    for address in range(0x40000000,(0x40000400+len(image)+4095)&~4095,4096):
+        if not any(lo<=address<=hi for lo,hi,_ in mapped):uc.mem_map(address,4096)
+    uc.mem_write(0x40000400,image)
+    for name in ('ss_page_built','ss_lfo_built','po_pg_built','po_lfo_built'):
+        uc.mem_write(sym[name],b'\0')
+    sym['stock_lfo_formatter']=0x4003bf64
+    sym['stock_page_resolver']=0x40031da4
+    part=0x42000000+0x8ed80+6322*2
+    uc.mem_write(0x80000003,b'\x02')
+    for t in (2,3,5):
+        uc.mem_write(part+0x22+t,b'\x01')
+        uc.mem_write(part+0x2cb+5*t,bytes((1 if t==5 else 0,)))
+    uc.mem_write(0x100b14f0+0x448,b'/AUDIO/KICK.wav\0')
+    call('ss_setup_page',0x400d31ae,3,1)
+    assert uc.reg_read(UC_M68K_REG_D0)==sym['ss_descriptor'],'SETUP did not use canonical SRC'
+    descriptor=bytes(uc.mem_read(sym['ss_descriptor'],402))
+    assert descriptor[9:18]==b'SUPERSAW\0'
+    assert int.from_bytes(descriptor[0x6a:0x6e],'big')==0,'inherited FLEX pitch minimum'
+    assert int.from_bytes(descriptor[0x9a:0x9e],'big')==128,'inherited FLEX pitch count'
+    assert int.from_bytes(descriptor[0x12a:0x12e],'big')==sym['po_knob']
+    names=('PTCH','DETU','MORF','CUT','SUB','DRIV')
+    for track in (3,2,5,3):
+        uc.mem_write(0x80000000,bytes((track,)))
+        wanted=('PTCH','STRT','LEN','RATE','RTRG','RTIM') if track==5 else names
+        for slot,name in enumerate(wanted):
+            uc.mem_write(0x29000,bytes([0xa5])*32)
+            call('stock_lfo_formatter',0x29000,slot)
+            actual=bytes(uc.mem_read(0x29000,32)).split(b'\0')[0].decode()
+            assert actual==name,(track,slot,actual,name)
+            assert bytes(uc.mem_read(0x29010,16))==bytes([0xa5])*16,'formatter overrun'
+        call('stock_page_resolver',track,0)
+        assert uc.reg_read(UC_M68K_REG_D0)==(0x400d31ae if track==5 else sym['ss_descriptor'])
+        assert bytes(uc.mem_read(sym['ss_descriptor'],402))==descriptor,'published page mutated'
+    return dict(setup_first=True,canonical_pitch_controls=True,native_lfo_label_cases=24,
+                stock_flex_fallback=True,stable_across_tracks=True)
+
+
+def verify_voic_dial(uc,call,sym):
+    """Check the compiled seven-argument stock drawer ABI and text bounds."""
+    drawer=0x400479b4
+    uc.mem_map(drawer & ~4095,4096)
+    uc.mem_write(drawer,bytes.fromhex('4e75'))  # observe the stock call, then RTS
+    calls=[]
+    def observe(u,*_):
+        sp=u.reg_read(UC_M68K_REG_A7)
+        calls.append(struct.unpack('>7I',bytes(u.mem_read(sp+4,28))))
+    hook=uc.hook_add(UC_HOOK_CODE,observe,begin=drawer,end=drawer)
+    cases=((0xffffffff,0xffffffff,'1'),(0,0,'1'),(1,0,'1'),(2,42,'2'),(3,84,'3'),(4,127,'4'),
+           (32,0,'1'),(255,0,'1'))
+    for raw,position,label in cases:
+        for flags in (0,1,8,128):
+            call('ss_voic_dial',93,3,2,raw,flags,0x12345678,0x26000)
+            assert calls[-1]==(93,3,2,position,flags,sym['ss_voic_dial_fmt'],0x26000)
+            uc.mem_write(0x28000,bytes([0xa5])*16)
+            call('ss_voic_dial_fmt',0x28000,position)
+            assert bytes(uc.mem_read(0x28000,16))==label.encode()+b'\0'+bytes([0xa5])*14
+    uc.hook_del(hook)
+    return dict(cases=len(calls),positions=[0,42,84,127],inherited_value_32_displays_one=True)
 
 
 def main():
@@ -184,7 +291,7 @@ def main():
     uc.mem_write(base,data)
     uc.mem_map(0x10000,0x20000)
     uc.reg_write(UC_M68K_REG_SR,0x2000)
-    for name,n in [('ss_active',8),('ss_samples',32),('ss_unsupported',32),('ss_voices',size),('ss_poly_voices',4*size),('ss_poly_samples',128),('ss_descriptor',402),('ss_lfo_descriptor',402),('ss_filters',1440),('ss_setup',48),('ss_note_stamp',32),('ss_filter_samples',32)]:
+    for name,n in [('ss_page_built',1),('ss_lfo_built',1),('ss_active',8),('ss_samples',32),('ss_unsupported',32),('ss_voices',size),('ss_poly_voices',4*size),('ss_poly_samples',128),('ss_descriptor',402),('ss_lfo_descriptor',402),('ss_filters',1440),('ss_setup',48),('ss_note_stamp',32),('ss_filter_samples',32)]:
         assert base <= sym[name] and sym[name]+n <= base+len(data), (name,'not initialized by loader')
         assert bytes(uc.mem_read(sym[name],n)) == bytes(n), (name,'not zero at boot')
     instructions = [0]
@@ -198,6 +305,14 @@ def main():
         assert uc.reg_read(UC_M68K_REG_PC)==0x10000, (name,'did not return')
         assert uc.reg_read(UC_M68K_REG_A7)==0x20004, (name,'stack imbalance')
         return instructions[0]
+    # Signed detents and untouched stock SPD3 values use the native stack ABI.
+    # The caller's final descriptor clamp is checked in the live panel gate.
+    for value in (0,1,2,3,4,32,255):
+        for delta in (-127,-1,0,1,127):
+            call('ss_voic_knob',2,delta & 0xffffffff,value)
+            expected=((value if 1<=value<=4 else 1)+delta)&0xffffffff
+            assert uc.reg_read(UC_M68K_REG_D0)==expected,('VOIC step',value,delta)
+    voic_dial=verify_voic_dial(uc,call,sym)
     source = '#include <stdio.h>\n#include "modules/supersaw/engine.c"\nint main(void) {\n'
     source += 'struct ss_voice v; int16_t out[65];\n'
     for case in CASES:
@@ -249,8 +364,9 @@ def main():
     assert bytes(uc.mem_read(sym['ss_filters']+(2*5+1)*36,36))==filter_history[:28]+struct.pack('>I',123)+filter_history[32:]
     poly['carry_hook_registers_and_history']=True
     migration=verify_migration(uc,call,sym)
+    ui=verify_native_ui(uc,call,sym)
     (out/'receipt.json').write_text(json.dumps(dict(image_sha256=hashlib.sha256((ROOT/'out/mainos_bus.bin').read_bytes()).hexdigest(),
-        exact_samples=len(actual),initialized_bytes=8+32+32+5*size+128+402+402+1440+48+32+32,costs=costs,adapter=adapter,poly=poly,filter=sem,migration=migration,hardware_tested=False),indent=2)+'\n')
+        exact_samples=len(actual),initialized_bytes=2+8+32+32+5*size+128+402+402+1440+48+32+32,costs=costs,adapter=adapter,poly=poly,filter=sem,migration=migration,ui=ui,voic_dial=voic_dial,hardware_tested=False),indent=2)+'\n')
     print(f'[ok] linked ColdFire: initialized state, {len(actual)} exact host samples, split-call sizes, native AMP/stereo adapter, instruction budgets, phase wrap and extreme pitches')
 
 if __name__=='__main__': main()

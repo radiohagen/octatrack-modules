@@ -156,6 +156,14 @@ static void check_poly(void) {
 }
 
 static void check_filter(void) {
+    /* Exhaustive generated-table equivalence to the original runtime division. */
+    for(unsigned r=0;r<128;++r)for(unsigned c=0;c<128;++c) {
+        int32_t g=ss_filter_g[c],k=ss_filter_damping[r];
+        int32_t den=16384+ss_reference_mul(k,g)+ss_reference_mul(g,g);
+        assert(ss_filter_a1[r][c]==268435456/den);
+    }
+    for(int delta=-100000;delta<=100000;delta+=13)
+        for(unsigned n=1;n<=32;++n)assert(ss_filter_step(delta,n)==delta/(int)n);
     struct ss_filter a={0},b={0};
     struct ss_filter_params p={64,64,80,64,0};
     int16_t audio[32],copy[32];
