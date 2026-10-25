@@ -1798,7 +1798,7 @@
       "repository": "https://github.com/radiohagen/octatrack-modules",
       "path": "tools/verify/verify_midi_follow_gravity_port.py",
       "sha256": "14915a26e6a547d8937d93c060d945cb47f99e43c06b992ed8a64ba27376dce3",
-      "published_sha256": "14915a26e6a547d8937d93c060d945cb47f99e43c06b992ed8a64ba27376dce3",
+      "published_sha256": "844ad76fd9974cc8ff0839d8e32ba0021befae20c7337cee477a1121722e0a2b",
       "source_mode": "100644"
     },
     "tools/verify/midi_loopback_port.py": {
