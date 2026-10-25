@@ -2509,19 +2509,21 @@
       "path": "modules/sophie/README.md",
       "sha256": "0125f81700b71a3d3cc0889e5225cbc89291e59355eb28e29c9f458de1077cb4",
       "source_mode": "100644",
-      "published_sha256": "d3818319bbaf4851569e00ab4fa08e9071e3dc40f76d39947790caf058f609ee"
+      "published_sha256": "c51097a5b9babf9e2ebd4d5f9999e7999f216368f0cb93813aadffa3e7dd44af"
     },
     "modules/sophie/adapter.c": {
       "commit": "33ba0c90533e925af29929fd761c5dc8f48eab4a",
       "path": "modules/sophie/adapter.c",
       "sha256": "dffc37cc5a82428191962fc99f39f373ad2e4524df811d335d1e3db2e8d27e0a",
-      "source_mode": "100644"
+      "source_mode": "100644",
+      "published_sha256": "5c1b354a226841ce383e56f6f8468df5ada98ecca76d202363e997dcd11db0a3"
     },
     "modules/sophie/adapter.s": {
       "commit": "33ba0c90533e925af29929fd761c5dc8f48eab4a",
       "path": "modules/sophie/adapter.s",
       "sha256": "b860e5fd76e45fa6a89be7fc98d2a05048bf16dd301ebc7ef0ef032606de4997",
-      "source_mode": "100644"
+      "source_mode": "100644",
+      "published_sha256": "c3753d08d184c32cac8567368d4ef30b9d666b060c4589f1949a4386420fd7ad"
     },
     "modules/sophie/bridge.py": {
       "commit": "33ba0c90533e925af29929fd761c5dc8f48eab4a",
@@ -2533,7 +2535,8 @@
       "commit": "33ba0c90533e925af29929fd761c5dc8f48eab4a",
       "path": "modules/sophie/generate.py",
       "sha256": "a3996981a94f77700c81c7d51e2ec4b7114f22b87d8c15715526fbba46595c1a",
-      "source_mode": "100644"
+      "source_mode": "100644",
+      "published_sha256": "dc427982550b87a9a7a0a37e83045f8740c5e301ae47645f4b80394b2bb33325"
     },
     "modules/sophie/hooks.s": {
       "commit": "33ba0c90533e925af29929fd761c5dc8f48eab4a",
@@ -2557,7 +2560,8 @@
       "commit": "33ba0c90533e925af29929fd761c5dc8f48eab4a",
       "path": "modules/sophie/test_adapter.c",
       "sha256": "6d64eea8bb7937f0a1f04bd1c4095d70f464c04a275e9099b0a5eca00f7bafa4",
-      "source_mode": "100644"
+      "source_mode": "100644",
+      "published_sha256": "cabe007f219b6eb432860a3ff6409704bb410988c66c7dd04b8a641af7df47a5"
     },
     "tools/verify/verify_sophie.py": {
       "commit": "33ba0c90533e925af29929fd761c5dc8f48eab4a",

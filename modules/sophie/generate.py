@@ -5,7 +5,7 @@ import subprocess
 import sys
 import tempfile
 HERE=Path(__file__).resolve().parent
-FLAGS="-mcpu=54455 -O2 -ffreestanding -fno-builtin -fno-common -fno-jump-tables -fno-asynchronous-unwind-tables -fno-ident -fomit-frame-pointer -fno-zero-initialized-in-bss -Wall -Wextra -Werror".split()
+FLAGS="-mcpu=54455 -O3 -ffreestanding -fno-builtin -fno-common -fno-jump-tables -fno-asynchronous-unwind-tables -fno-ident -fomit-frame-pointer -fno-zero-initialized-in-bss -Wall -Wextra -Werror".split()
 def main():
     with tempfile.TemporaryDirectory() as tmp:
         target=Path(tmp)/"adapter.s"
