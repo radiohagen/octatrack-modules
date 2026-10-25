@@ -20,6 +20,7 @@ def main():
     remix = registry.remix(os.environ.get('REMIX','supersaw'))
     subprocess.run(['make','bus',f'REMIX={remix.name}'],cwd=ROOT,check=True)
     subprocess.run([sys.executable,'tools/verify/verify_supersaw_cf.py'],cwd=ROOT,check=True)
+    subprocess.run([sys.executable,'tools/verify/verify_supersaw_cpu.py'],cwd=ROOT,check=True)
     project = os.environ.get('OT_PROJECT')
     if not project:
         print('[SKIP] Supersaw full firmware: set OT_PROJECT to a local fixture')
@@ -53,7 +54,7 @@ def main():
             *(['--rich'] if mode=='midi' else []),
             *(['--fx'] if mode=='midi' and pair=='SPECTRUM,CHARACTER' else [])],cwd=ROOT,check=True)
         receipts.append(str(ROOT/'out/supersaw-port'/name/'receipt.json'))
-    for kind in ('filter_port','save'):
+    for kind in ('filter_port','save','level','voic_port'):
         name=prefix+'-'+kind
         subprocess.run([sys.executable,f'tools/verify/verify_supersaw_{kind}.py',
             '--project',project,'--name',name],cwd=ROOT,check=True)

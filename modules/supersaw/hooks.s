@@ -128,3 +128,24 @@ ss_lfo_page_hook:
         movem.l (%sp),%d1/%a0-%a1
         lea 12(%sp),%sp
         rts
+
+| LFO PMTR's PLAYBACK lookup: d1 = track, a0 = its Part machine byte.
+| Preserve the formatter's live registers. Only the Supersaw path replaces
+| a2 (the page); all other tracks replay the original lookup unchanged.
+        .global ss_lfo_names_hook
+ss_lfo_names_hook:
+        lea -20(%sp),%sp
+        movem.l %d1-%d3/%a0-%a1,(%sp)
+        move.l %d1,-(%sp)
+        jsr ss_lfo_names
+        addq.l #4,%sp
+        movem.l (%sp),%d1-%d3/%a0-%a1
+        lea 20(%sp),%sp
+        tst.l %d0
+        beq ss_lfo_names_stock
+        move.l %d0,%a2
+        jmp 0x4003c058
+ss_lfo_names_stock:
+        mvs.b (%a0),%d0
+        lea 0x400d5f38,%a0
+        jmp 0x4003c054

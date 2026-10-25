@@ -25,13 +25,18 @@ void ss_init(struct ss_voice *voice) {
  * control products into every source call, even on a warm cache. */
 static __attribute__((noinline)) void ss_prepare(struct ss_voice *voice, const struct ss_params *params) {
     uint32_t base = params->increment;
-    unsigned detune = params->detune & 127, morph = params->morph & 127;
-    unsigned sub = params->sub & 127, drive = params->drive & 127;
+    /* The native-order word is only a cache key, never serialized. A
+     * fixed-size builtin copy is alias-safe and becomes one aligned load;
+     * do not unpack four knobs on the overwhelmingly common cache hit. */
+    uint32_t controls;
+    __builtin_memcpy(&controls, &params->detune, sizeof controls);
+    controls &= 0x7f7f7f7fu;
     if (base < 1024) base = 1024;
     if (base > 0x7d000000u) base = 0x7d000000u;
-    uint32_t controls = detune | (morph << 8) | (sub << 16) | (drive << 24);
     if (voice->base == base && voice->controls == controls) return;
     voice->base = base; voice->controls = controls;
+    unsigned detune = params->detune & 127, morph = params->morph & 127;
+    unsigned sub = params->sub & 127, drive = params->drive & 127;
     uint32_t maximum = 0;
     for (unsigned i = 0; i < 2; ++i) {
         /* Split the Q20 ratio around unity: bounded signed 32-bit products,

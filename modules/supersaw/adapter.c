@@ -17,10 +17,12 @@ struct ss_filter ss_filters[8][5] = {{{0}}};
 uint8_t ss_setup[8][6] = {{0}};
 uint32_t ss_note_stamp[8] = {0};
 uint32_t ss_filter_samples[8] = {0};
+static uint8_t ss_page_built = 0, ss_lfo_built = 0;
 static uint8_t ss_descriptor[0x192] = {0};
 static uint8_t ss_lfo_descriptor[0x192] = {0};
 
 void ss_config(unsigned track);
+void ss_prepare_setup(unsigned track);
 static int ss_assigned(uint32_t track);
 uint8_t *ss_page(uint8_t *original,uint32_t track);
 void ss_type_fmt(char *out,int value);
@@ -147,18 +149,20 @@ int ss_track_fill(uint32_t track, uint8_t *state, const uint16_t *fp,
     if (!n) return 1;
     unsigned active=0;
     for (unsigned v=0;v<4;++v) active |= pool[v*64+36];
+    int32_t mix[32];
     if (!state[80]) {
         ss_fill(track,state,fp,out,n);
         if (!active) return 1; /* No poly tail: the mono render is already complete. */
+        for (uint32_t i=0;i<n;++i) mix[i]=out[2*i]>>16;
     } else {
         *(uint16_t *)(state+38)=0;
         ss_samples[track]+=n;
-        for (uint32_t i=0;i<n;++i) out[2*i]=out[2*i+1]=0;
+        /* Accumulate directly; no zero stereo pass followed by a copy. */
+        for (uint32_t i=0;i<n;++i) mix[i]=0;
     }
-    int32_t mix[32];
-    for (uint32_t i=0;i<n;++i) mix[i]=out[2*i]>>16;
     struct ss_params params = {0,(fp[1]>>8)&127,(fp[2]>>8)&127,
                                  (fp[4]>>8)&127,(fp[5]>>8)&127};
+    const struct ss_filter_params f={(fp[3]>>8)&127,ss_setup[track][1],ss_setup[track][2],ss_setup[track][3],ss_setup[track][4]};
     for (unsigned v=0;v<4;++v) {
         uint8_t *native=pool+v*64;
         if (!native[36]) continue;
@@ -171,7 +175,6 @@ int ss_track_fill(uint32_t track, uint8_t *state, const uint16_t *fp,
         params.increment=*(uint32_t *)(native+12);
         int16_t audio[32];
         ss_render(&ss_poly_voices[track][v],&params,audio,n);
-        struct ss_filter_params f={(fp[3]>>8)&127,ss_setup[track][1],ss_setup[track][2],ss_setup[track][3],ss_setup[track][4]};
         if(f.type || ss_filters[track][v].wet) {
             ss_filter_run(&ss_filters[track][v],&f,*(uint32_t *)(native+48),audio,n);
             ss_filter_samples[track]+=n;
@@ -215,7 +218,8 @@ static int ss_assigned(uint32_t track) {
 
 uint8_t *ss_page(uint8_t *original, uint32_t track) {
     if (!ss_assigned(track)) return original;
-    ss_config(track);
+    ss_prepare_setup(track);
+    if(ss_page_built)return ss_descriptor;
     for (unsigned i=0; i<sizeof(ss_descriptor); ++i) ss_descriptor[i]=original[i];
     const char title[9] = "SUPERSAW";
     for (unsigned i=0; i<9; ++i) ss_descriptor[9+i]=(uint8_t)title[i];
@@ -240,20 +244,54 @@ uint8_t *ss_page(uint8_t *original, uint32_t track) {
     }
     *(uint32_t *)(ss_descriptor+0xca+24)=(uint32_t)(uintptr_t)ss_fine_fmt;
     *(uint32_t *)(ss_descriptor+0xca+40)=(uint32_t)(uintptr_t)ss_type_fmt;
+    /* Native four-position select, matching TYPE's four stored values. */
+    *(uint32_t *)(ss_descriptor+0xfa+40)=0x40046c28u;
     *(uint32_t *)(ss_descriptor+0x18a)=0x00000000;
     *(uint32_t *)(ss_descriptor+0x18e)=0x55555555;
     /* Nibbles 6..10 live; nibble 11 disabled (across the two words). */
-    *(uint32_t *)(ss_descriptor+0x18a)=0x00000555;
+    *(uint32_t *)(ss_descriptor+0x18a)=0x00000155;
+    ss_page_built=1; /* Publish only after all fields are ready. UI task only. */
     return ss_descriptor;
+}
+
+/* The stock handler scales detents through the encoder's range accumulator.
+ * VOIC has only four positions: use one position per detent, on this page only.
+ * Normalize an untouched stock SPD3 byte exactly as the voice engine does;
+ * the native caller applies the descriptor's 1..4 clamp after this handler. */
+static int ss_voic_knob(unsigned slot,int detents,int value) {
+    (void)slot;
+    if(value<1 || value>4)value=1;
+    return value+detents;
+}
+
+/* The stock rotary draws a raw 0..127 position, independently of the
+ * descriptor's range and text formatter. Spread our four positions over
+ * that arc without changing the stored byte or the engine's interpretation. */
+static void ss_voic_dial_fmt(char *out,int position) {
+    *out++=(char)('1'+(position>=127?3:position>=84?2:position>=42?1:0));
+    *out=0;
+}
+static void ss_voic_dial(int x,int y,unsigned slot,int value,unsigned flags,
+                         void (*formatter)(char *,int),void *surface) {
+    (void)formatter;
+    /* Negative values are the native drawer's hidden-value sentinel. */
+    if(value==0 || value>4)value=1;
+    int position=value<0?value:value==4?127:(value-1)*42;
+    typedef void (*draw_fn)(int,int,unsigned,int,unsigned,void (*)(char *,int),void *);
+    ((draw_fn)(uintptr_t)0x400479b4u)(x,y,slot,position,flags,ss_voic_dial_fmt,surface);
 }
 
 uint8_t *ss_lfo_page(uint8_t *original,unsigned track) {
     if(!ss_assigned(track))return original;
+    if(ss_lfo_built)return ss_lfo_descriptor;
     for(unsigned i=0;i<sizeof(ss_lfo_descriptor);++i)ss_lfo_descriptor[i]=original[i];
+    *(uint32_t *)(ss_lfo_descriptor+0x12a+8)=(uint32_t)(uintptr_t)ss_voic_knob;
+    *(uint32_t *)(ss_lfo_descriptor+0xfa+8)=(uint32_t)(uintptr_t)ss_voic_dial;
     for(unsigned i=0;i<6;++i)ss_lfo_descriptor[0x16+30+i]=0;
     *(uint32_t *)(ss_lfo_descriptor+0x18e)&=0xff0fffff;
     *(uint32_t *)(ss_lfo_descriptor+0x6a+20)=0;
     *(uint32_t *)(ss_lfo_descriptor+0x9a+20)=1;
+    ss_lfo_built=1;
     return ss_lfo_descriptor;
 }
 #include "ui.h"

@@ -17,10 +17,44 @@ static void ss_filter_reset(struct ss_filter *s) {
     s->envelope=s->stamp=0;s->wet=0;s->type=s->ready=0;
 }
 static int32_t ss_limit(int32_t x) { return x>8388607?8388607:x< -8388607?-8388607:x; }
-static int32_t ss_mul(int32_t a,int32_t b) { return (a*b)>>14; }
 /* Exact floor of a*b/16384 for the wider HP intermediate, without int64. */
 static int32_t ss_wide_mul(int32_t a,int32_t b) {
-    return (((a>>10)*b)+(((a&1023)*b)>>10))>>4;
+    /* b is nonnegative and < 65536: the low product stays below 2^30.
+     * Splitting at the final Q14 boundary removes a shift from every MAC. */
+    return (a>>14)*b+(((a&16383)*b)>>14);
+}
+/* Specialize the fully wet, fixed-coefficient loops at compile time. The
+ * changing-coefficient/bypass path keeps the same sample-wise arithmetic.
+ * Keep integrator state in locals rather than writing DRAM every sample. */
+static __attribute__((always_inline)) inline void ss_filter_block(
+        struct ss_filter *s,int16_t *audio,unsigned n,unsigned shape,unsigned steady,
+        unsigned enabled,int32_t d1,int32_t d2,int32_t d3) {
+    int32_t s0=s->s0,s1=s->s1,a1=s->a1,a2=s->a2,a3=s->a3;
+    unsigned wet=s->wet;
+    for(unsigned i=0;i<n;++i) {
+        if(!steady) { a1+=d1;a2+=d2;a3+=d3; }
+        int32_t x=(int32_t)audio[i]*256;
+        int32_t hp=ss_limit(ss_wide_mul(x-ss_wide_mul(s0,a3)-s1,a1));
+        int32_t v=ss_wide_mul(hp,a2),bp=ss_limit(s0+v);
+        s0=ss_limit(s0+2*v);
+        int32_t q=ss_wide_mul(bp,a2),lp=ss_limit(s1+q);
+        s1=ss_limit(s1+2*q);
+        int32_t y=shape==1?lp:shape==2?bp:hp;
+        if(steady) audio[i]=(int16_t)(y>>8);
+        else {
+            if(enabled) { if(wet<128)++wet; } else if(wet)--wet;
+            audio[i]=(int16_t)((wet==128?y:x+((y-x)*(int32_t)wet)/128)>>8);
+        }
+    }
+    s->s0=s0;s->s1=s1;s->wet=(uint16_t)wet;
+}
+/* Signed division truncates toward zero. Native blocks are 16 samples;
+ * keep split/short calls exact and avoid three hardware divides per voice. */
+static int32_t ss_filter_step(int32_t delta,unsigned n) {
+    if(n==16)return delta<0 ? -((-delta)>>4) : delta>>4;
+    if(n==32)return delta<0 ? -((-delta)>>5) : delta>>5;
+    if(n==1)return delta;
+    return delta/(int)n;
 }
 void ss_filter_run(struct ss_filter *s,const struct ss_filter_params *p,
                           uint32_t stamp,int16_t *audio,unsigned n) {
@@ -35,29 +69,32 @@ void ss_filter_run(struct ss_filter *s,const struct ss_filter_params *p,
     if(cutoff>127)cutoff=127;
     int32_t g=ss_filter_g[cutoff];
     /* Spectrum: damping=(0.998 - (RES/128)*0.587)^4. */
-    int32_t b=16351-((p->resonance&127)*9617)/128;
-    int32_t k=ss_mul(b,b);k=ss_mul(k,k);
-    int32_t den=16384+ss_mul(k,g)+ss_mul(g,g);
-    int32_t a1=268435456/den,a2=g,a3=k+g;
-    int32_t d1=(a1-s->a1)/(int)n,d2=(a2-s->a2)/(int)n;
-    int32_t d3=(a3-s->a3)/(int)n,dk=(k-s->damping)/(int)n;
-    if (!s->wet) { s->a1=a1;s->a2=a2;s->a3=a3;s->damping=k;d1=d2=d3=dk=0; }
-    if(type)s->type=(uint8_t)type;
-    unsigned fall=ss_filter_decay[p->decay&127];
-    for(unsigned i=0;i<n;++i) {
-        s->a1+=d1;s->a2+=d2;s->a3+=d3;s->damping+=dk;
-        int32_t x=(int32_t)audio[i]*256;
-        int32_t hp=ss_limit(ss_wide_mul(x-ss_wide_mul(s->s0,s->a3)-s->s1,s->a1));
-        int32_t v=ss_wide_mul(hp,s->a2),bp=ss_limit(s->s0+v);
-        s->s0=ss_limit(s->s0+2*v);
-        int32_t q=ss_wide_mul(bp,s->a2),lp=ss_limit(s->s1+q);
-        s->s1=ss_limit(s->s1+2*q);
-        int32_t y=s->type==1?lp:s->type==2?bp:hp;
-        if(type) { if(s->wet<128)++s->wet; } else if(s->wet)--s->wet;
-        audio[i]=(int16_t)((s->wet==128?y:x+((y-x)*(int32_t)s->wet)/128)>>8);
-        uint32_t drop=((s->envelope>>8)*fall)>>8;
-        if(s->envelope) s->envelope-=drop?drop:1;
+    int32_t k=ss_filter_damping[p->resonance&127];
+    int32_t a1=s->a1,a2=g,a3=k+g;
+    int32_t d1=0,d2=0,d3=0;
+    if(!s->wet || g!=s->a2 || k!=s->damping) {
+        a1=ss_filter_a1[p->resonance&127][cutoff];
+        if(s->wet) {
+            d1=ss_filter_step(a1-s->a1,n);d2=ss_filter_step(a2-s->a2,n);d3=ss_filter_step(a3-s->a3,n);
+        } else { s->a1=a1;s->a2=a2;s->a3=a3; }
     }
+    if(type)s->type=(uint8_t)type;
+    if(type && s->wet==128 && !(d1|d2|d3)) {
+        if(type==1)ss_filter_block(s,audio,n,1,1,1,0,0,0);
+        else if(type==2)ss_filter_block(s,audio,n,2,1,1,0,0,0);
+        else ss_filter_block(s,audio,n,3,1,1,0,0,0);
+    } else ss_filter_block(s,audio,n,s->type,0,type,d1,d2,d3);
+    /* Envelope only affects the next block's coefficients. Updating this
+     * local separately is bit-identical and avoids inner-loop state spills. */
+    uint32_t envelope=s->envelope;
+    if(envelope) {
+        unsigned fall=ss_filter_decay[p->decay&127];
+        for(unsigned i=0;i<n && envelope;++i) {
+            uint32_t drop=((envelope>>8)*fall)>>8;
+            envelope-=drop?drop:1;
+        }
+    }
+    s->envelope=envelope;
     s->a1=a1;s->a2=a2;s->a3=a3;s->damping=k;
 }
 #endif
