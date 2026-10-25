@@ -32,3 +32,23 @@ The page verifier uses the frozen candidate and T2 fixture from the preceding ru
 In a Sophie-enabled Octabam integration, `make check REMIX=sophie` runs the
 host gate and, with `OT_PROJECT` set, the Sophie image gate. This source
 repository's `make check` only validates the published source and metadata.
+
+## CPU profile (25 October 2026)
+
+The adapter caches pitch conversion until PTCH/FINE changes and replaces its
+per-output-sample division by 147 with a Q16 interpolation table. The generated
+ColdFire source now uses `-O3`. The pinned Digisophie engine and FUSE controls
+are unchanged. Against the previous adapter, a 44,100-frame host render differs
+by at most 2 PCM units after the 6 dB output gain (0.223 PCM RMS). Exhaustive
+interpolation checks bound the pre-gain error to 1 PCM unit.
+
+The standalone ColdFire profile reports 3,840 to 3,644 executed instructions
+per 16-frame metallic call, and 19.25 to 2.25 long divisions on average. Two
+active Sophie tracks total 7,681 to 7,288 instructions and 38.5 to 4.5 long
+divisions per 16-frame pair. Instruction counts do not capture division
+latency, and hardware cycles have not been measured. Linked adapter text and
+tables grow from 7,964 to 9,484 bytes; the composed image builds within its
+placement.
+Run `tools/verify/verify_sophie_cpu.py` with Python's Unicorn package and the
+ColdFire toolchain to reproduce the instruction counts. Its JSON receipt is
+written under ignored `out/`.

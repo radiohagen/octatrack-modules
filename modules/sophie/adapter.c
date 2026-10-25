@@ -19,6 +19,34 @@ struct sf_voice {
 static struct sf_voice sf_voices[8];
 static uint8_t sf_descriptor[0x192];
 
+/* Q16 interpolation weights for source positions 0..146 of 147. The
+ * maximum product is 65535 * 65090, which fits in uint32_t. This replaces
+ * one long division per output sample with a multiply and shift. */
+static const uint16_t sf_interp_q16[147] = {
+    0, 446, 892, 1337, 1783, 2229, 2675, 3121, 3567, 4012,
+    4458, 4904, 5350, 5796, 6242, 6687, 7133, 7579, 8025, 8471,
+    8916, 9362, 9808, 10254, 10700, 11146, 11591, 12037, 12483, 12929,
+    13375, 13821, 14266, 14712, 15158, 15604, 16050, 16495, 16941, 17387,
+    17833, 18279, 18725, 19170, 19616, 20062, 20508, 20954, 21400, 21845,
+    22291, 22737, 23183, 23629, 24074, 24520, 24966, 25412, 25858, 26304,
+    26749, 27195, 27641, 28087, 28533, 28979, 29424, 29870, 30316, 30762,
+    31208, 31653, 32099, 32545, 32991, 33437, 33883, 34328, 34774, 35220,
+    35666, 36112, 36557, 37003, 37449, 37895, 38341, 38787, 39232, 39678,
+    40124, 40570, 41016, 41462, 41907, 42353, 42799, 43245, 43691, 44136,
+    44582, 45028, 45474, 45920, 46366, 46811, 47257, 47703, 48149, 48595,
+    49041, 49486, 49932, 50378, 50824, 51270, 51715, 52161, 52607, 53053,
+    53499, 53945, 54390, 54836, 55282, 55728, 56174, 56620, 57065, 57511,
+    57957, 58403, 58849, 59294, 59740, 60186, 60632, 61078, 61524, 61969,
+    62415, 62861, 63307, 63753, 64199, 64644, 65090
+};
+
+static int32_t sf_interpolate(int32_t difference, uint32_t fraction) {
+    uint32_t magnitude = difference < 0 ? 0u - (uint32_t)difference
+                                      : (uint32_t)difference;
+    uint32_t part = (magnitude * sf_interp_q16[fraction]) >> 16;
+    return difference < 0 ? -(int32_t)part : (int32_t)part;
+}
+
 int sf_marker(const char *path) {
     const char *base = path;
     unsigned i;
@@ -51,6 +79,7 @@ void sf_begin(uint32_t track) {
     v->pos = 32;
     v->fraction = 0;
     v->pitch_inc = 0;
+    v->resample_step = 0;
 }
 
 static int32_t sf_next(struct sf_voice *v) {
@@ -77,16 +106,16 @@ int sf_fill(uint32_t track, uint8_t *state, const uint16_t *fp,
     }
     struct sf_voice *v = &sf_voices[track];
     uint32_t inc = *(uint32_t *)(state+12);
-    uint32_t raw_phase = (inc >> 8)*147u/40960u;
-    uint32_t phase = raw_phase;
-    if (phase < 8) phase = 8;
-    if (phase > 24576) phase = 24576;
-    v->params.phase_inc = (uint16_t)phase;
     /* The upstream oscillator accepts only an integer phase increment.
      * At low notes that rounds many adjacent FINE values to the same pitch.
      * Keep that oscillator unchanged and carry the lost fraction in the
      * 48 kHz -> 44.1 kHz source step. 147 * 65536 is one source frame. */
-    if (inc != v->pitch_inc) {
+    if (inc != v->pitch_inc || !v->resample_step) {
+        uint32_t raw_phase = (inc >> 8)*147u/40960u;
+        uint32_t phase = raw_phase;
+        if (phase < 8) phase = 8;
+        if (phase > 24576) phase = 24576;
+        v->params.phase_inc = (uint16_t)phase;
         v->pitch_inc = inc;
         if (raw_phase < 8 || raw_phase > 24576) {
             v->resample_step = 160u * 65536u;
@@ -109,7 +138,8 @@ int sf_fill(uint32_t track, uint8_t *state, const uint16_t *fp,
         v->left = sf_next(v); v->right = sf_next(v); v->primed = 1;
     }
     for (uint32_t i=0; i<n; ++i) {
-        int32_t sample = v->left+(v->right-v->left)*(int32_t)(v->fraction >> 16)/147;
+        int32_t sample = v->left+sf_interpolate(v->right-v->left,
+                                                v->fraction >> 16);
         gain += step;
         int32_t g = gain > 0 ? gain/32768 : 0;
         if (g > 32768) g=32768;
