@@ -75,14 +75,14 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-follow/README.md",
       "sha256": "b984d044ef4eb3bec749dd2752d07d004c137dc95d51cab13aca4bf8aa5e4b2c",
-      "published_sha256": "841196aefa1bc99aeacbbf7ff33e1f11c1ba338a19924a84a6c19bdc8b02de75",
+      "published_sha256": "ba4cde9766936672dc27a8d2fdc23f586045beb01b67b4c5acb4381e144c441a",
       "source_mode": "100644"
     },
     "modules/midi-follow/manifest.py": {
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-follow/manifest.py",
       "sha256": "808bfa85b9c5a366c455bff56f5e38d6e625243348a260b3fc8211c5f8ac24d6",
-      "published_sha256": "93212bc87e77af4d228caeeb36ca7d7c3b10e11c5bffbcd5723f886533ce6272",
+      "published_sha256": "0aa954ef08d9069816f80eb104cd4f78899e438253cdccdc74d180d224e9f0cb",
       "source_mode": "100644",
       "migration_note": "Operational author URL updated; original author name/credit preserved."
     },
@@ -580,14 +580,14 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "remixes/test/midi-follow/README.md",
       "sha256": "89656abfdb4588fc8000b9965d84f19e0b5b57ee1dd105a5d67fbe42c8fb286d",
-      "published_sha256": "ad0b3be5e7a09f174d0257d67f0cbfc921e43136b0380c9b31c9573c01c20ce2",
+      "published_sha256": "92136277bc83b09077852c9e3a3ff32f02a3258434a57a791ca821d562519d5b",
       "source_mode": "100644"
     },
     "remixes/test/midi-follow/remix.py": {
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "remixes/test/midi-follow/remix.py",
       "sha256": "89270f69d4ed891a5c779796de6ae718f67e4c4dff87fdafb2f5e5a220167007",
-      "published_sha256": "1f4e6c8514b1776a1d99ab86882711c52fb764839743c0922dd1d8a05a2ca264",
+      "published_sha256": "af65d7939a3575e378361df31b988c27ccd6e335aedfce28e0da732644c11ebe",
       "source_mode": "100644"
     },
     "remixes/test/midi-harmony/README.md": {
@@ -1197,7 +1197,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "tools/verify/verify_midi_part_settings.py",
       "sha256": "2519dac6a64eb2d25489d08df2919986d3c2a0cbea5906723ce3f345f134fded",
-      "published_sha256": "3ecd9cd9608533efd2262c64ce23a809b4e395ff5b3407cb195c517587171d2d",
+      "published_sha256": "984fc9fd38a3469868767e6d04a3b8cdc2d035740b82e3ae956360be64f49ceb",
       "source_mode": "100644"
     },
     "tools/verify/verify_midi_scales.py": {
@@ -1282,7 +1282,7 @@
     "modules/midi-follow/DEVELOPMENT.md": {
       "path": "modules/midi-follow/DEVELOPMENT.md",
       "sha256": "b984d044ef4eb3bec749dd2752d07d004c137dc95d51cab13aca4bf8aa5e4b2c",
-      "published_sha256": "123d3a0d3ffc6b40d9411509facf34d19856c8540c5215533d7a7eab5b8a6ee0",
+      "published_sha256": "9295218debca407d77a6106cb984739fd088f4bde562ae60d6b75b673a19cfd1",
       "source_mode": "100644",
       "origin": "Split from adjacent README in this repository; historical evidence is retained in the text."
     },
@@ -1357,7 +1357,7 @@
     "remixes/test/midi-follow/DEVELOPMENT.md": {
       "path": "remixes/test/midi-follow/DEVELOPMENT.md",
       "sha256": "89656abfdb4588fc8000b9965d84f19e0b5b57ee1dd105a5d67fbe42c8fb286d",
-      "published_sha256": "c0bed2b9a8d9b3d2eb2707c0cdfd63795467f47fb8171275b72d206c63836fc3",
+      "published_sha256": "bb238c7643dc2f6a3424265530ca3a58a16b55171b13a9867f0db29c69f875d0",
       "source_mode": "100644",
       "origin": "Split from adjacent README in this repository; historical evidence is retained in the text."
     },
@@ -1790,7 +1790,7 @@
       "repository": "https://github.com/radiohagen/octatrack-modules",
       "path": "tools/verify/verify_midi_follow_gravity.py",
       "sha256": "197fd0c3d8464a6377347dd477379dae135b2d3711aac72918ecc002e4700f36",
-      "published_sha256": "ab22db7b4ce5824be302c3007e0aa76e1905378577efd27455ee94cb7072dfe8",
+      "published_sha256": "8135695919a6936531b83d0ede74fb6631a1524001437efcf853d3dd001292e4",
       "source_mode": "100644"
     },
     "tools/verify/verify_midi_follow_gravity_port.py": {
@@ -1932,7 +1932,7 @@
       "repository": "https://github.com/radiohagen/octatrack-modules",
       "path": "modules/midi-follow/events.s",
       "sha256": "227bcc18a819e8934e1f2aacb74a0685a55290464858cab43ff87e4dd35f2ce8",
-      "published_sha256": "227bcc18a819e8934e1f2aacb74a0685a55290464858cab43ff87e4dd35f2ce8",
+      "published_sha256": "036ff49f73685395417e4de184b97bb5107306c3ff3e4faca1483e0a09bbf2a8",
       "source_mode": "100644"
     }
   },

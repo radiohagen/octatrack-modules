@@ -54,9 +54,8 @@ ordinary pattern changes alone retain it.
 ## Storage and stock firmware
 
 RFOL, REG, all three remembered values and UPDT are native Part settings per track.
-Runtime roots and held notes are not saved. Requires **MIDI Part State**;
-Scales and KITS are optional. MIDI Follow cannot currently be combined
-with **EUCLID**.
+Runtime roots and held notes are not saved. Requires **MIDI Part State** and **EVENTS**.
+Scales and KITS are optional.
 
 Stock 1.40C preserves the source-track number but resets the mode, response
 and octave fields. After saving that bank on stock, Follow returns as **FIXED,
