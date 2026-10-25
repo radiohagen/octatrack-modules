@@ -15,7 +15,7 @@ from remix import registry
 def main():
     # Earlier image-stage gates may build their own reference remix. Restore
     # this carrier before reading its image and linked symbols.
-    # Spectrum's reference build also replaces the shared runtime symbols.
+    # Check the production source-rate filter response before linked tests.
     subprocess.run([sys.executable,'tools/verify/verify_supersaw_filter.py'],cwd=ROOT,check=True)
     remix = registry.remix(os.environ.get('REMIX','supersaw'))
     subprocess.run(['make','bus',f'REMIX={remix.name}'],cwd=ROOT,check=True)

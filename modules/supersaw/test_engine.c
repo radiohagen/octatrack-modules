@@ -34,6 +34,8 @@ static void reference(struct ss_voice *v, const struct ss_params *p,
             int32_t x = (value * v->drive_gain) >> 8;
             if (x > 32767) x = 32767;
             if (x < -32767) x = -32767;
+            x=((x+32772)>>3)*8-32768;
+            if(x>32767)x=32767;if(x< -32767)x= -32767;
             value = x - (((((x*x) >> 15)*x >> 15)*10923) >> 15);
         }
         *out++ = (int16_t)((9*((int32_t)v->last + v->previous) - v->older - value) >> 4);
@@ -63,6 +65,7 @@ static void check_gain(void) {
                 int16_t source[32]; int32_t output[68];
                 for (unsigned i=0;i<68;++i) output[i]=123456;
                 reference(&oracle,&p,source,n);
+                if(n && !levels[k][0] && !levels[k][1])ss_init(&oracle);
                 assert(ss_fill(7,(uint8_t *)state,fp,output,n));
                 int64_t gain=(int64_t)levels[k][0]*32768;
                 int64_t step=((int64_t)levels[k][1]*32768-gain)/16;
@@ -212,6 +215,123 @@ static void check_filter(void) {
     puts("[ok] SEM bit-exact S7 reference: steady modes, bypass, envelopes and 100000 extreme modulation blocks");
 }
 
+/* Independent 64-bit scalar filter oracle at the production source rate.
+ * Extreme random blocks cover interpolation coefficients, all modes/fades,
+ * every split size, and ENV/DEC edits on already-running notes. */
+static void check_half_filter(void) {
+    struct ss_filter a={0},b={0};
+    uint32_t random=93573;
+    for(unsigned r=0;r<128;++r)for(unsigned c=0;c<128;++c) {
+        int64_t g=ss_filter_half_g[c],k=ss_filter_damping[r];
+        assert(ss_filter_half_a1[r][c]==268435456/(16384+((k*g)>>14)+((g*g)>>14)));
+    }
+    for(unsigned j=0;j<100000;++j) {
+        random=random*1664525u+1013904223u;
+        struct ss_filter_params p={random,random>>8,random>>16,random>>24,(random>>6)&3};
+        int16_t actual[16],expected[16];
+        for(unsigned i=0;i<16;++i)actual[i]=(int16_t)(random+i*3331);
+        memcpy(expected,actual,sizeof actual);
+        ss_filter_half(&a,&p,j/13,actual,j%17);
+        ss_filter_reference_rate(&b,&p,j/13,expected,j%17,2);
+        assert(!memcmp(actual,expected,sizeof actual));
+        assert(!memcmp(&a,&b,sizeof a));
+    }
+    /* Filtered render can saturate at high resonance but cannot wrap the
+     * upsampler peak. Cross-check every sample against explicit stages. */
+    for(unsigned type=0;type<=3;++type)for(unsigned cut=0;cut<128;cut+=17) {
+        struct ss_voice v,oracle;ss_init(&v);ss_init(&oracle);
+        struct ss_filter filter={0},scalar={0};
+        struct ss_params p={21426141,127,0,127,127};
+        struct ss_filter_params fp={cut,127,127,0,type};
+        int16_t history[3]={0};
+        for(unsigned block=0;block<100;++block) {
+            int16_t actual[32],source[16],expected[32];
+            struct ss_params core=p;core.increment*=2;ss_prepare(&oracle,&core);
+            for(unsigned i=0;i<16;++i) {
+                int32_t x=(lookup(ss_saws[oracle.bank],oracle.phase[0])*oracle.saw_weight
+                          +lookup(ss_saws[oracle.bank],oracle.phase[1])*oracle.morph_weight
+                          +lookup(ss_sine,oracle.sub_phase)*oracle.sub_gain)>>15;
+                oracle.phase[0]+=oracle.increments[0];oracle.phase[1]+=oracle.increments[1];
+                oracle.sub_phase+=oracle.base/2;
+                x=(x*oracle.drive_gain)>>8;if(x>32767)x=32767;if(x< -32767)x= -32767;
+                x=((x+32772)>>3)*8-32768;
+                if(x>32767)x=32767;if(x< -32767)x= -32767;
+                source[i]=x-(((((x*x)>>15)*x>>15)*10923)>>15);
+            }
+            ss_filter_reference_rate(&scalar,&fp,1,source,16,2);
+            for(unsigned i=0;i<16;++i) {
+                int32_t x=(9*((int32_t)history[0]+history[1])-history[2]-source[i])>>4;
+                if(x>32767)x=32767;if(x< -32768)x= -32768;
+                expected[2*i]=x;expected[2*i+1]=history[0];
+                history[2]=history[1];history[1]=history[0];history[0]=source[i];
+            }
+            ss_render_filtered(&v,&p,actual,32,&filter,&fp,1);
+            assert(!memcmp(actual,expected,sizeof actual));
+        }
+    }
+    /* At fixed controls, arbitrary output splits must preserve the filtered
+     * source stream, including odd pending samples and the in-place scratch. */
+    for(unsigned type=0;type<=3;++type) {
+        struct ss_voice whole_voice,split_voice;ss_init(&whole_voice);
+        struct ss_filter whole_filter={0},split_filter;
+        struct ss_params p={21426141,96,40,32,64};
+        struct ss_filter_params fp={80,96,0,64,type};
+        int16_t whole[257],split[257];
+        ss_render_filtered(&whole_voice,&p,whole,128,&whole_filter,&fp,1);
+        split_voice=whole_voice;split_filter=whole_filter;
+        ss_render_filtered(&whole_voice,&p,whole,257,&whole_filter,&fp,1);
+        for(unsigned i=0;i<257;) {
+            unsigned n=i%31+1;if(n>257-i)n=257-i;
+            ss_render_filtered(&split_voice,&p,split+i,n,&split_filter,&fp,1);i+=n;
+        }
+        assert(!memcmp(whole,split,sizeof whole));
+        assert(!memcmp(&whole_voice,&split_voice,sizeof whole_voice));
+        assert(whole_filter.s0==split_filter.s0 && whole_filter.s1==split_filter.s1);
+    }
+    /* A zero-gain poly voice remains silent without consuming render work;
+     * its next attack starts from the same reset history as before. */
+    uint32_t state[32]={0},pool[4][16]={{0}};int32_t out[64];
+    uint16_t controls[6]={0x4000,96<<8,0,64<<8,0,0};
+    ((uint8_t *)state)[80]=1;ss_active[6]=1;ss_setup[6][4]=1;
+    for(unsigned v=0;v<4;++v) { ((uint8_t *)pool[v])[36]=1;pool[v][3]=21426141*(v+1); }
+    ss_track_fill(6,(uint8_t *)state,controls,out,32,(uint8_t *)pool);
+    for(unsigned i=0;i<64;++i)assert(!out[i]);
+    assert(!ss_filter_samples[6]);
+    for(unsigned v=0;v<4;++v)assert(ss_poly_samples[6][v]==32);
+    /* Neutral LOW is genuinely transparent, and resumes filtering when
+     * CUT closes. After reopening, its filter work must stop after the fade. */
+    uint32_t dry_state[32]={0};
+    memset(state,0,sizeof(state));memset(ss_setup[5],0,6);memset(ss_setup[4],0,6);
+    ss_active[4]=ss_active[5]=1;ss_init(&ss_voices[4]);ss_init(&ss_voices[5]);
+    ss_filter_reset(&ss_filters[4][4]);ss_filter_reset(&ss_filters[5][4]);
+    ss_setup[5][4]=1;controls[3]=127<<8;
+    state[3]=dry_state[3]=21426141;state[6]=dry_state[6]=32768;
+    *(uint16_t *)((uint8_t *)state+38)=*(uint16_t *)((uint8_t *)dry_state+38)=32768;
+    int32_t dry[64];
+    for(unsigned block=0;block<20;++block) {
+        ss_fill(4,(uint8_t *)dry_state,controls,dry,32);
+        ss_fill(5,(uint8_t *)state,controls,out,32);
+        assert(!memcmp(dry,out,sizeof dry));
+    }
+    assert(!ss_filter_samples[5]);controls[3]=64<<8;
+    for(unsigned block=0;block<20;++block)ss_fill(5,(uint8_t *)state,controls,out,32);
+    assert(ss_filter_samples[5] && ss_filters[5][4].wet==128);
+    controls[3]=127<<8;
+    for(unsigned block=0;block<20;++block)ss_fill(5,(uint8_t *)state,controls,out,32);
+    uint32_t done=ss_filter_samples[5];assert(!ss_filters[5][4].wet);
+    for(unsigned block=0;block<20;++block)ss_fill(5,(uint8_t *)state,controls,out,32);
+    assert(ss_filter_samples[5]==done);
+    /* ENV=0 still advances elapsed envelope time with O(1) work. */
+    struct ss_filter timed={0};struct ss_filter_params no_env={64,64,0,64,1};
+    int16_t silent[8]={0};
+    ss_filter_half(&timed,&no_env,1,silent,8);uint32_t early=timed.envelope;
+    for(unsigned block=0;block<100;++block)ss_filter_half(&timed,&no_env,1,silent,8);
+    assert(timed.envelope<early);early=timed.envelope;no_env.amount=127;
+    ss_filter_half(&timed,&no_env,1,silent,8);assert(timed.envelope<early);
+    ss_filter_half(&timed,&no_env,2,silent,8);assert(timed.envelope>early);
+    puts("[ok] half-rate SEM scalar oracle: 100000 extreme blocks, resonant resampling, silent skip, neutral bypass, live ENV");
+}
+
 int main(int argc, char **argv) {
     assert(ss_marker("../AUDIO/FMSYNTH-SUPERSAW.wav"));
     assert(ss_marker("FMSYNTH-SUPERSAW-pad.wav"));
@@ -311,7 +431,11 @@ int main(int argc, char **argv) {
     assert(a.morph_weight==-a.saw_weight);
     assert(a.phase[0]==phases[0]+a.increments[0]);
     assert(a.phase[1]==phases[1]+a.increments[1]);
-    check_filter();
+    for(int x=-32767;x<=32767;++x) {
+        int exact=x-(((((x*x)>>15)*x>>15)*10923)>>15);
+        assert(abs(ss_drive_curve[(x+32772)>>3]-exact)<=5);
+    }
+    check_filter();check_half_filter();
     check_gain();
     check_poly();
     if (argc == 2) {

@@ -4,7 +4,6 @@
  */
 #include <stdint.h>
 #include "engine.c"
-#include "filter.h"
 
 /* The firmware loader copies .data but does not clear .bss. Explicit
  * initializers plus -fno-zero-initialized-in-bss put these in the image. */
@@ -77,18 +76,28 @@ int ss_fill(uint32_t track, uint8_t *state, const uint16_t *fp,
         for (uint32_t i = 0; i < n; ++i) out[2*i] = out[2*i+1] = 0;
         return 1;
     }
+    /* The native mono lifecycle treats zero previous gain as a cold note.
+     * Keep that reset state and zero output without running a silent synth. */
+    if(n && !*(uint16_t *)(state+38) && !*(uint32_t *)(state+24)) {
+        ss_init(&ss_voices[track]);ss_filter_reset(&ss_filters[track][4]);
+        for(uint32_t i=0;i<n;++i)out[2*i]=out[2*i+1]=0;
+        ss_samples[track]+=n;return 1;
+    }
     struct ss_params params = {
         .increment = *(uint32_t *)(state+12),
         .detune = (fp[1] >> 8) & 127, .morph = (fp[2] >> 8) & 127,
         .sub = (fp[4] >> 8) & 127, .drive = (fp[5] >> 8) & 127
     };
     int16_t audio[32];
-    ss_render(&ss_voices[track], &params, audio, n);
     struct ss_filter_params f={(fp[3]>>8)&127,ss_setup[track][1],ss_setup[track][2],ss_setup[track][3],ss_setup[track][4]};
+    /* A fully open, unresonant LOW with no envelope is transparent by
+     * design. Crossfade out once, then stop spending CPU on the filter. */
+    if(f.type==1 && f.cutoff==127 && !f.resonance && !f.amount)f.type=0;
     if(f.type || ss_filters[track][4].wet) {
-        ss_filter_run(&ss_filters[track][4],&f,ss_note_stamp[track],audio,n);
+        ss_render_filtered(&ss_voices[track],&params,audio,n,&ss_filters[track][4],&f,ss_note_stamp[track]);
         ss_filter_samples[track]+=n;
     }
+    else ss_render(&ss_voices[track],&params,audio,n);
     /* A held AMP level needs no per-sample ramp arithmetic. */
     uint32_t previous = *(uint16_t *)(state+38);
     if (*(uint32_t *)(state+24) == previous) {
@@ -162,30 +171,35 @@ int ss_track_fill(uint32_t track, uint8_t *state, const uint16_t *fp,
     }
     struct ss_params params = {0,(fp[1]>>8)&127,(fp[2]>>8)&127,
                                  (fp[4]>>8)&127,(fp[5]>>8)&127};
-    const struct ss_filter_params f={(fp[3]>>8)&127,ss_setup[track][1],ss_setup[track][2],ss_setup[track][3],ss_setup[track][4]};
+    struct ss_filter_params f={(fp[3]>>8)&127,ss_setup[track][1],ss_setup[track][2],ss_setup[track][3],ss_setup[track][4]};
+    if(f.type==1 && f.cutoff==127 && !f.resonance && !f.amount)f.type=0;
     for (unsigned v=0;v<4;++v) {
         uint8_t *native=pool+v*64;
         if (!native[36]) continue;
         uint32_t previous=*(uint16_t *)(native+60);
         uint32_t target=*(uint32_t *)(native+24);
         if (!previous) { ss_init(&ss_poly_voices[track][v]);ss_filter_reset(&ss_filters[track][v]); }
+        /* Zero-to-zero contributes no sound, and the native zero-previous
+         * lifecycle resets oscillator/filter history on its next audible call.
+         * Preserve counters but do not synthesize an inaudible block. */
+        if (!previous && !target) { ss_poly_samples[track][v]+=n; continue; }
         /* Native poly gains are <=32767; bound malformed state as well. */
         if (previous>32767) previous=32767;
         if (target>32767) target=32767;
         params.increment=*(uint32_t *)(native+12);
         int16_t audio[32];
-        ss_render(&ss_poly_voices[track][v],&params,audio,n);
         if(f.type || ss_filters[track][v].wet) {
-            ss_filter_run(&ss_filters[track][v],&f,*(uint32_t *)(native+48),audio,n);
+            ss_render_filtered(&ss_poly_voices[track][v],&params,audio,n,&ss_filters[track][v],&f,*(uint32_t *)(native+48));
             ss_filter_samples[track]+=n;
         }
+        else ss_render(&ss_poly_voices[track][v],&params,audio,n);
         if (previous==target) {
             for (uint32_t i=0;i<n;++i) mix[i]+=(audio[i]*(int32_t)target)>>15;
         } else {
             /* Match native po_fill: reach the target over this call, Q16.
              * +/-32767 bounds keep the step and accumulator in int32. */
             int32_t gain=(int32_t)previous*65536;
-            int32_t step=((int32_t)target-(int32_t)previous)*65536/(int32_t)n;
+            int32_t step=ss_filter_step(((int32_t)target-(int32_t)previous)*65536,n);
             for (uint32_t i=0;i<n;++i) {
                 gain+=step;
                 mix[i]+=(audio[i]*(gain>>16))>>15;

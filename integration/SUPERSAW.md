@@ -122,3 +122,14 @@ Image SHA-256: `00d68934661a16d503e633b0021499259035eb155ed342db1b05c29eaf9176ad
 These are source/emulator checks; physical playback and CPU headroom remain
 unverified. This does not replace the broader Inserts suite's retained fixture
 exceptions or extend the one-track filtered-polyphony qualification.
+
+
+## S9 adaptive CPU candidate
+
+The current source moves the per-voice filter before the 2x interpolator,
+with a 9 kHz ceiling. Neutral fully open LOW automatically bypasses; zero-gain
+blocks skip synthesis; optional sub/drive work is selected once per block.
+Drive uses a bounded five-PCM-unit approximation, and the filter envelope
+advances at block rate. Four voices, separate releases, all filter modes and
+both FX slots remain. See the module README for audible compatibility changes.
+The previous S8 sample-exact/filter-response claims do not apply to S9.

@@ -118,7 +118,7 @@ def verify_filter(uc,call,sym):
     cases=[(typ,cut,res,env,dec) for typ in (0,1,2,3,0) for cut,res,env,dec in ((16,0,0,0),(64,64,80,64),(127,127,127,127))]
     for j,(typ,cut,res,env,dec) in enumerate(cases):
         source+='for(unsigned k=0;k<20;++k){for(unsigned i=0;i<16;++i)a[i]=(int16_t)(i*1793+k*313);'
-        source+=f'struct ss_filter_params p={{{cut},{res},{env},{dec},{typ}}};ss_filter_run(&f,&p,{j//3+1},a,16);fwrite(a,2,16,stdout);}}\n'
+        source+=f'struct ss_filter_params p={{{cut},{res},{env},{dec},{typ}}};ss_filter_half(&f,&p,{j//3+1},a,16);fwrite(a,2,16,stdout);}}\n'
     source+='}\n'
     with tempfile.TemporaryDirectory() as tmp:
         c,e=Path(tmp)/'filter.c',Path(tmp)/'filter';c.write_text(source)
@@ -130,7 +130,7 @@ def verify_filter(uc,call,sym):
         for k in range(20):
             a=[((i*1793+k*313+32768)%65536)-32768 for i in range(16)]
             uc.mem_write(0x28200,struct.pack('>16h',*a))
-            n=call('ss_filter_run',0x28000,0x28100,j//3+1,0x28200,16)
+            n=call('ss_filter_half',0x28000,0x28100,j//3+1,0x28200,16)
             actual.extend(struct.unpack('>16h',bytes(uc.mem_read(0x28200,32))))
         costs.append(dict(type=typ,cutoff=cut,resonance=res,env=env,decay=dec,held_16_instructions=n))
     assert tuple(actual)==expected,'SEM host/ColdFire mismatch'

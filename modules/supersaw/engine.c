@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: MIT */
 #include "engine.h"
 #include "tables.h"
+#include "filter.h"
 
 #if (-1 >> 1) != -1
 #error Supersaw fixed-point arithmetic requires arithmetic signed right shift
@@ -56,34 +57,30 @@ static __attribute__((noinline)) void ss_prepare(struct ss_voice *voice, const s
      * bounded even at the endpoints, with a separate fixed sub budget. */
     int32_t sub_gain = (int32_t)sub * 64;
     int32_t saw_gain = 32768 - sub_gain;
-    int32_t polarity = 32768 - (int32_t)morph * 65536 / 127;
+    int32_t polarity = ss_morph_polarity[morph];
     voice->drive_gain = 256 + (int32_t)drive * 6;
     voice->saw_weight = saw_gain / 2;
     voice->morph_weight = (voice->saw_weight * polarity) >> 15;
     voice->sub_gain = sub_gain;
 }
-static void ss_core_render(struct ss_voice *voice, const struct ss_params *params,
-               int16_t *output, uint32_t output_count) {
-    /* ss_render bounds each chunk to 32 output / 16 source samples. */
-    uint32_t count = (output_count + 1) / 2;
-    uint32_t pairs = output_count / 2;
-    ss_prepare(voice, params);
+/* Dispatch optional sub/drive once per block. Compile away their sample
+ * branches and table accesses when those controls are zero. */
+static __attribute__((always_inline)) inline void ss_source_render(
+        struct ss_voice *voice,int16_t *source,unsigned count,unsigned has_sub,unsigned drive) {
     uint32_t base = voice->base;
     const int16_t *table = ss_saws[voice->bank];
     int32_t saw_weight = voice->saw_weight, morph_weight = voice->morph_weight;
     int32_t sub_gain = voice->sub_gain, drive_gain = voice->drive_gain;
-    unsigned drive = params->drive & 127;
     /* Both phases always advance, including where MORF nearly cancels the
      * second saw. No oscillator reallocation when another note is played. */
     uint32_t first = voice->phase[0], second = voice->phase[1];
     uint32_t step1 = voice->increments[0], step2 = voice->increments[1];
     uint32_t sub_phase = voice->sub_phase;
-    int32_t previous = voice->last, previous2 = voice->previous, previous3 = voice->older;
     for (uint32_t n = 0; n < count; ++n) {
         int32_t value = lookup(table, first) * saw_weight
                       + lookup(table, second) * morph_weight;
         first += step1; second += step2;
-        if (sub_gain) value += lookup(ss_sine, sub_phase) * sub_gain;
+        if (has_sub) value += lookup(ss_sine, sub_phase) * sub_gain;
         sub_phase += base / 2;
         int32_t sample = value >> 15;
         /* Symmetric bounded cubic drive. Zero bypasses it exactly. */
@@ -91,31 +88,65 @@ static void ss_core_render(struct ss_voice *voice, const struct ss_params *param
             int32_t x = (sample * drive_gain) >> 8;
             if (x > 32767) x = 32767;
             if (x < -32767) x = -32767;
-            int32_t square = (x * x) >> 15;
-            int32_t cube = (square * x) >> 15;
-            sample = x - ((cube * 10923) >> 15);
+            /* Eight-unit input grid bounds the waveshaper error to five
+             * PCM units. One read replaces three multiplies; DRIV=0
+             * still bypasses the waveshaper without quantization. */
+            sample=ss_drive_curve[(x+32772)>>3];
         }
-        int32_t current = (int16_t)sample;
+        source[n]=(int16_t)sample;
+    }
+    voice->phase[0]=first;voice->phase[1]=second;voice->sub_phase=sub_phase;
+}
+static void ss_core_render(struct ss_voice *voice, const struct ss_params *params,
+               int16_t *output, uint32_t output_count,
+               struct ss_filter *filter,const struct ss_filter_params *fp,uint32_t stamp) {
+    /* ss_render bounds each chunk to 32 output / 16 source samples. */
+    uint32_t count = (output_count + 1) / 2;
+    uint32_t pairs = output_count / 2;
+    ss_prepare(voice, params);
+    /* Stage source samples in the upper half of the caller's output.
+     * Forward interpolation only overwrites source samples already read,
+     * including the final odd sample. No extra per-voice scratch buffer. */
+    int16_t *source=output+pairs;
+    unsigned drive=params->drive&127;
+    if(voice->sub_gain) {
+        if(drive)ss_source_render(voice,source,count,1,1);
+        else ss_source_render(voice,source,count,1,0);
+    } else {
+        if(drive)ss_source_render(voice,source,count,0,1);
+        else ss_source_render(voice,source,count,0,0);
+    }
+    int32_t previous=voice->last,previous2=voice->previous,previous3=voice->older;
+    if(filter)ss_filter_half(filter,fp,stamp,source,count);
+    for(uint32_t n=0;n<count;++n) {
+        int32_t current=source[n];
         /* Four-point half-sample interpolation: (-1,9,9,-1)/16. The
          * causal history adds two output samples of latency versus linear,
          * with less high-band droop and weaker interpolation images. The
-         * source is bounded to 21846; the filter peak stays below 27308. */
-        *output++ = (int16_t)((9*(previous + previous2) - previous3 - current) >> 4);
+         * unfiltered source stays below 21847; filtered peaks need the
+         * explicit saturation below. */
+        int32_t interpolated=(9*(previous + previous2) - previous3 - current) >> 4;
+        /* Resonance can reach full scale; bound interpolation overshoot
+         * before converting to 16 bits instead of wrapping its polarity. */
+        if(filter) {
+            if(interpolated>32767)interpolated=32767;
+            if(interpolated< -32768)interpolated= -32768;
+        }
+        *output++ = (int16_t)interpolated;
         if (n < pairs) *output++ = (int16_t)previous;
         else voice->pending = 1;
         previous3 = previous2; previous2 = previous; previous = current;
     }
     voice->last = (int16_t)previous;
     voice->previous = (int16_t)previous2; voice->older = (int16_t)previous3;
-    voice->phase[0] = first; voice->phase[1] = second;
-    voice->sub_phase = sub_phase;
 }
 
 /* Half-rate synthesis leaves headroom for the standard remix. Four-point
  * interpolation has three output samples of latency. Pending preserves the
  * resampler across arbitrary native sub-frame call boundaries. */
-void ss_render(struct ss_voice *voice, const struct ss_params *params,
-               int16_t *output, uint32_t count) {
+static __attribute__((aligned(16))) void ss_render_impl(struct ss_voice *voice,const struct ss_params *params,
+               int16_t *output,uint32_t count,struct ss_filter *filter,
+               const struct ss_filter_params *fp,uint32_t stamp) {
     struct ss_params core = *params;
     if (core.increment < 512) core.increment = 512;
     if (core.increment > 0x3e800000u) core.increment = 0x3e800000u;
@@ -126,8 +157,18 @@ void ss_render(struct ss_voice *voice, const struct ss_params *params,
     }
     while (count) {
         uint32_t chunk = count > 32 ? 32 : count;
-        ss_core_render(voice, &core, output, chunk);
+        ss_core_render(voice, &core, output, chunk,filter,fp,stamp);
         output += chunk;
         count -= chunk;
     }
+}
+
+void ss_render(struct ss_voice *voice,const struct ss_params *params,
+               int16_t *output,uint32_t count) {
+    ss_render_impl(voice,params,output,count,0,0,0);
+}
+static void ss_render_filtered(struct ss_voice *voice,const struct ss_params *params,
+               int16_t *output,uint32_t count,struct ss_filter *filter,
+               const struct ss_filter_params *fp,uint32_t stamp) {
+    ss_render_impl(voice,params,output,count,filter,fp,stamp);
 }

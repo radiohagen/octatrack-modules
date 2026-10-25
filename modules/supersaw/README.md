@@ -27,6 +27,72 @@ the available note count: a note keeps its mono level at VOIC 2, 3 and 4.
 Chord notes add at their independent AMP levels; the final sum saturates safely
 at full scale. Dense, driven or resonant chords can still reach that limit.
 
+## Adaptive CPU path (S9)
+
+Four voices per track, independent AMP releases and per-note filters remain.
+No FX slot is reserved. The parameter layout and saved Part format are unchanged.
+
+- The filter now runs at 22.05 kHz **before** four-point interpolation. CUT
+  retains its frequency law up to a **9 kHz ceiling**. This changes the sound
+  of existing filtered patches, particularly at high cutoff; it is not a
+  sample-exact replacement for the historical full-rate filter.
+- LOW at CUT=127, RES=0 and ENV=0 is transparent: it fades to bypass, then
+  stops filtering. Closing CUT, raising RES or enabling ENV resumes the filter
+  with its normal activation fade and a fresh filter envelope.
+- TYPE OFF skips filter work after the fade. SUB=0 and DRIV=0 select loops
+  with no sub lookup or drive arithmetic. Sub phase still advances, so turning
+  SUB back up does not restart it. Silent zero-to-zero AMP blocks skip synthesis;
+  audible attacks/releases are still rendered independently.
+- Filter decay advances once per block using elapsed sample time, including
+  while ENV=0. Its final inaudible tail is discarded when no ENV value can move
+  integer CUT. This is an approximation of the old sample-wise decay.
+- Drive uses a 16 KiB lookup with a maximum error of **five signed 16-bit PCM
+  units** relative to the original cubic, verified exhaustively. DRIV=0 avoids
+  this approximation. Filtered interpolation peaks saturate instead of wrapping.
+- Fully enabled filters use dedicated LOW/BP/HP coefficient-ramp loops. Normal
+  16-sample audio calls need no divisions, including pitch changes and AMP ramps.
+
+S9's linked ColdFire benchmark compares against module main `f6910d5` using
+two independent four-note tracks, 16 output samples per call, and 256 measured
+blocks after 16 warm-up blocks. These are **executed instructions, not hardware
+cycles or whole-device CPU percentages**; caches and bus contention are not modeled.
+
+| Scenario | Before (both tracks) | S9 | Instruction reduction |
+| --- | ---: | ---: | ---: |
+| Filter OFF, sub/drive enabled | 7358.7 | 6732.7 | 8.5% |
+| LOW cutoff sweep | 20860.1 | 12657.4 | 39.3% |
+| BP cutoff sweep | 19783.9 | 12372.1 | 37.5% |
+| HP cutoff sweep | 19733.6 | 12397.9 | 37.2% |
+| Fully open neutral LOW | 16294.0 | 5388.0 | 66.9% |
+
+A four-voice zero-to-zero gain call falls from 11,819 to 525 instructions
+(95.6%). This is an active-but-inaudible voice case, not a whole-device idle
+measurement. The plain dry mono warm case increases from 738 to 747 instructions;
+this change is chiefly for filtered polyphony and avoiding unused processing.
+The sampled renderer stack peak is 540 bytes versus 468 before (plus caller/OS
+stack outside this probe); the nested filter path uses more stack despite
+reusing the output buffer. Hardware stack headroom and cache effects are unmeasured.
+
+S9 validation: `make check` passes all 24 source tests, including the scalar
+filter oracles and filtered odd/split-call coverage. The composed `radio-bus`
+BUILD=80 image passes scoped common/Supersaw gates and separate project-backed
+fixtures for two four-note MIDI tracks, filtered mono/poly transitions, native
+filter controls, and live T4 assignment beside T3 with independent releases.
+The live-add fixture includes T1/T2/T5 THRU and a T6 kick, but no external THRU
+audio or reproduction of unknown MIDI routing. The full unscoped suite was not
+run. These checks do not establish hardware timing or resolution of the MKII crash.
+
+Image SHA-256: `fdc09df35e727cdacf27b13095b7f0b962e2886885b430fdf4d2a3d202fa621a`.
+The qualified layout aligns hot render/filter functions to 16 bytes. This also
+avoids an unrelated BRAIN string-pointer fragment matching the builder's raw
+staging-address scan in one intermediate layout. The guard was kept intact;
+this is not a general fix to the builder, so other compositions must be checked.
+
+The older S1-S8 measurements below describe their own implementations, not S9.
+S9's production response check uses a 22.05 kHz TPT analytical reference instead
+of claiming the former full-rate Spectrum response. Hardware timing, cache/bus
+costs and the reported physical-device crash still require device validation.
+
 ## Implementation and limits
 
 S6 and later follow the op1r Supersaw topology: a fixed pair plus sub per note, limited

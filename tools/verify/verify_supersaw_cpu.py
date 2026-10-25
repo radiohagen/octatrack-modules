@@ -25,6 +25,7 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument('--runtime', type=Path, default=ROOT/'out/platform/runtime')
     ap.add_argument('--output', type=Path, default=ROOT/'out/supersaw-cpu.json')
+    ap.add_argument('--baseline',action='store_true',help='Measure an older runtime without enforcing new optimization budgets')
     args = ap.parse_args()
     elf = args.runtime/'runtime.elf'
     symbols = subprocess.check_output(['m68k-elf-nm', '-S', str(elf)], text=True)
@@ -106,6 +107,42 @@ def main():
     # coefficient/ramp divides. Pitch/AMP still have their own unrelated math.
     for case in cases:
         assert case['cutoff_change']['divides']==0, ('filter update divides',case)
+    if not args.baseline:
+        for case in cases:
+            for phase in ('cold','attack','release','pitch_change'):
+                assert case[phase]['divides']==0, ('normal block divides',case,phase)
+            if case['voices']:
+                assert case['silent_tail']['instructions']<600, ('silent voice regression',case)
+    # Two independent four-note tracks, sustained modulation rather than a
+    # single convenient block. The same harness can profile a frozen baseline.
+    scenarios=[]
+    for label,typ,env,sub,drive,neutral in (
+            ('dry',0,0,96,80,False),('low_sweep',1,80,96,80,False),
+            ('bp_sweep',2,80,96,80,False),('hp_sweep',3,80,96,80,False),
+            ('neutral_low',1,0,0,0,True)):
+        uc.mem_write(base,data)
+        for track in (2,3):
+            uc.mem_write(sym['ss_active']+track,b'\x01')
+            uc.mem_write(sym['ss_setup']+track*6,bytes((64,0 if neutral else 64,env,64,typ,83)))
+            state=bytearray(128);state[80]=1
+            uc.mem_write(0x24000+track*256,bytes(state))
+            pool=bytearray(256)
+            for voice in range(4):
+                struct.pack_into('>I',pool,voice*64+12,21426141*(voice+1)+track*1973)
+                struct.pack_into('>I',pool,voice*64+24,24000)
+                struct.pack_into('>I',pool,voice*64+48,voice+1)
+                struct.pack_into('>H',pool,voice*64+60,24000);pool[voice*64+36]=1
+            uc.mem_write(0x27000+track*256,bytes(pool))
+        costs=[]
+        for frame in range(272):
+            total=0
+            for track in (2,3):
+                cut=127 if neutral else 24+(frame*7+track*13)%104
+                uc.mem_write(0x25000,struct.pack('>6H',16384,96<<8,64<<8,cut<<8,sub<<8,drive<<8))
+                total+=call('ss_track_fill',track,0x24000+track*256,0x25000,0x26000,16,0x27000+track*256)['instructions']
+            if frame>=16:costs.append(total)
+        scenarios.append(dict(scenario=label,tracks=[3,4],voices_per_track=4,blocks=len(costs),
+                              mean_instructions=sum(costs)/len(costs),max_instructions=max(costs)))
     # Control work outside the audio renderer: fine/Part refresh and the
     # native per-track parameter preparation up to the AMP release branch.
     uc.mem_map(0x10000000,0x200000);uc.mem_map(0x46000000,0x1100000)
@@ -125,7 +162,7 @@ def main():
                 multiplies=sum(v for k,v in counts.items() if k.startswith('mul')),
                 divides=sum(v for k,v in counts.items() if k.startswith(('div','rem'))))
     receipt = dict(runtime_sha256=hashlib.sha256(data).hexdigest(), samples_per_call=16,
-                   hardware_cycles=False, cases=cases, fine_control=fine, native_poly_parameters=native)
+                   hardware_cycles=False, two_tracks=scenarios, cases=cases, fine_control=fine, native_poly_parameters=native)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(receipt, indent=2)+'\n')
     for c in cases:

@@ -3,8 +3,8 @@
 static int32_t ss_reference_mul(int32_t a,int32_t b) {
     return (int32_t)(((int64_t)a*b)>>14);
 }
-static void ss_filter_reference(struct ss_filter *s,const struct ss_filter_params *p,
-                          uint32_t stamp,int16_t *audio,unsigned n) {
+static void ss_filter_reference_rate(struct ss_filter *s,const struct ss_filter_params *p,
+                          uint32_t stamp,int16_t *audio,unsigned n,unsigned rate) {
     if (!n) return;
     unsigned type=p->type<=3?p->type:0;
     if (!type && !s->wet) { s->ready=0; s->stamp=stamp; return; }
@@ -14,7 +14,7 @@ static void ss_filter_reference(struct ss_filter *s,const struct ss_filter_param
     if (s->stamp!=stamp) { s->envelope=1u<<24;s->stamp=stamp; }
     unsigned cutoff=(p->cutoff&127)+(((s->envelope>>12)*(p->amount&127))>>12);
     if(cutoff>127)cutoff=127;
-    int32_t g=ss_filter_g[cutoff];
+    int32_t g=rate==2?ss_filter_half_g[cutoff]:ss_filter_g[cutoff];
     /* Spectrum: damping=(0.998 - (RES/128)*0.587)^4. */
     int32_t b=16351-((p->resonance&127)*9617)/128;
     int32_t k=ss_reference_mul(b,b);k=ss_reference_mul(k,k);
@@ -34,10 +34,21 @@ static void ss_filter_reference(struct ss_filter *s,const struct ss_filter_param
         int32_t q=ss_reference_mul(bp,s->a2),lp=ss_limit(s->s1+q);
         s->s1=ss_limit(s->s1+2*q);
         int32_t y=s->type==1?lp:s->type==2?bp:hp;
-        if(type) { if(s->wet<128)++s->wet; } else if(s->wet)--s->wet;
+        if(type) { if(s->wet<128)s->wet=s->wet+rate>128?128:s->wet+rate; } else if(s->wet)s->wet=s->wet>rate?s->wet-rate:0;
         audio[i]=(int16_t)((s->wet==128?y:x+((y-x)*(int32_t)s->wet)/128)>>8);
-        uint32_t drop=((s->envelope>>8)*fall)>>8;
-        if(s->envelope) s->envelope-=drop?drop:1;
+        if(rate==1) {
+            uint32_t drop=((s->envelope>>8)*fall)>>8;
+            if(s->envelope) s->envelope-=drop?drop:1;
+        }
+    }
+    if(rate==2 && s->envelope) {
+        uint32_t drop=(uint32_t)(((uint64_t)(s->envelope & ~255u)*ss_filter_half_decay[n][p->decay&127])>>16);
+        s->envelope-=drop?drop:1;
+        if(s->envelope<33u*4096)s->envelope=0;
     }
     s->a1=a1;s->a2=a2;s->a3=a3;s->damping=k;
+}
+static void ss_filter_reference(struct ss_filter *s,const struct ss_filter_params *p,
+                               uint32_t stamp,int16_t *audio,unsigned n) {
+    ss_filter_reference_rate(s,p,stamp,audio,n,1);
 }
