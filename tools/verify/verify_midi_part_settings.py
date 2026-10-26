@@ -21,7 +21,7 @@ def main():
     def ui(bank,part):
         u.mem_write(0x46c82456,(B+bank*BS).to_bytes(4,'big'));byte(0x100b14cf,part)
     def at(bank,part,track,field):return B+bank*BS+0x8ed80+part*PS+0x4e2+track*36+field
-    def play(track,bank,part):byte(0x8000182a+track,bank);byte(0x80001832+track,part)
+    def play(track,bank,part):byte(0x8000666e+track,bank);byte(0x80006676+track,part)
     for bank in range(2):
         for part in range(4):
             for track in range(8):

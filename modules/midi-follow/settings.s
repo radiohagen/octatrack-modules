@@ -12,7 +12,7 @@ bf_\name\()_get:
 bf_\name\()_play:
     move.l %d1,-(%sp)
     move.l %d0,-(%sp)
-    jsr store_part_play_context
+    jsr store_part_midi_context
 .L\name\()_context:
     move.l %d0,%d1
     move.l (%sp)+,%d0
@@ -113,7 +113,7 @@ bf_\name\()_set:
 bf_source_resolve:
     move.l %d1,-(%sp)
     move.l %d0,-(%sp)
-    jsr store_part_play_context
+    jsr store_part_midi_context
     move.l %d0,%d1
     move.l (%sp)+,%d0
     bsr.w bf_source_resolve_at

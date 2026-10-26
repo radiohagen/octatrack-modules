@@ -34,7 +34,7 @@ ms_raw_ui:
     jsr store_part_ui_context
     bra.s .ui_context
 .ui_followed:
-    jsr store_part_play_context
+    jsr store_part_midi_context
 .ui_context:
     move.l %d0,%d1
     move.l %d3,%d0

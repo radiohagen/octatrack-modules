@@ -11,7 +11,7 @@
 mh_scale_record:
     move.l %d1,-(%sp)
     move.l %d0,-(%sp)
-    jsr store_part_play_context
+    jsr store_part_midi_context
     move.l %d0,%d1
     move.l (%sp)+,%d0
     bsr.w mh_scale_record_at
@@ -31,7 +31,7 @@ mh_raw_key_at:
     cmp.l %d2,%d0
     beq.s .record_own_context
     move.l %d0,-(%sp)
-    jsr store_part_play_context
+    jsr store_part_midi_context
     move.l %d0,%d3
     move.l (%sp)+,%d0
 .record_own_context:
@@ -65,7 +65,7 @@ mh_active:
     /* KEY OFF disables snapping, not the selected Harmony operation. */
     move.l %d1,-(%sp)
     move.l %d0,-(%sp)
-    jsr store_part_play_context
+    jsr store_part_midi_context
     move.l %d0,%d1
     move.l (%sp)+,%d0
     jsr mh_get_at
@@ -80,7 +80,7 @@ mh_active:
 mh_chord_scale:
     move.l %d2,-(%sp)
     move.l %d0,-(%sp)
-    jsr store_part_play_context
+    jsr store_part_midi_context
     move.l %d0,%d2
     move.l (%sp)+,%d0
     bsr.w mh_chord_scale_at
@@ -140,7 +140,7 @@ mh_quant:
     move.l %d2,-(%sp)
     move.l %d0,-(%sp)
     move.l %d1,%d0
-    jsr store_part_play_context
+    jsr store_part_midi_context
     move.l %d0,%d2
     move.l (%sp)+,%d0
     bsr.w mh_quant_at
@@ -233,7 +233,7 @@ mh_generate:
     lea -40(%sp),%sp
     movem.l %d1-%d7/%a0-%a1,(%sp)
     move.l %d0,%d7
-    jsr store_part_play_context
+    jsr store_part_midi_context
     move.l %d0,36(%sp)
     moveq #1,%d5
     bra.s .gen_start

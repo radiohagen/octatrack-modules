@@ -97,7 +97,7 @@ def machine():
         u.mem_write(source,bytes(u.mem_read(part0,PS)))
         if operation=='switch':
             u.mem_write(part0+PS,bytes(u.mem_read(part0,PS)))
-            u.mem_write(0x80001832+1,b'\x01')
+            u.mem_write(0x80006676+1,b'\x01')
         else:
             dest=part0+(3*PS if operation=='unrelated' else 0)
             u.mem_write(m.stack+4,b''.join(v.to_bytes(4,'big') for v in (dest,source,PS)))

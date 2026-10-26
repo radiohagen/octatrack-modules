@@ -29,7 +29,7 @@ mh_voice_clear:
 mh_voice:
     lea -92(%sp),%sp
     movem.l %d0-%d7/%a0-%a4,(%sp)
-    jsr store_part_play_context
+    jsr store_part_midi_context
     bra.s .voice_context
 mh_voice_ui:
     lea -92(%sp),%sp

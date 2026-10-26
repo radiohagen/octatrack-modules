@@ -17,7 +17,7 @@ hd_ui_context_c:
     jmp store_part_ui_context
 hd_play_context_c:
     move.l 4(%sp),%d0
-    jmp store_part_play_context
+    jmp store_part_midi_context
 hd_part_key_c:
     move.l 4(%sp),%d0
     move.l 8(%sp),%d1

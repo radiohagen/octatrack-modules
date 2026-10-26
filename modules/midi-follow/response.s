@@ -26,7 +26,7 @@ bf_response_set:
     tst.l %d0
     beq.s .set_done
     move.l (%sp),%d0
-    jsr store_part_play_context
+    jsr store_part_midi_context
     move.l %d0,%d2
     jsr store_part_ui_context
     cmp.l %d2,%d0
@@ -183,7 +183,7 @@ bf_response_sync:
     movem.l %d0-%d3/%a0,(%sp)
     cmpi.l #7,%d0
     bhi.s .sync_done
-    jsr store_part_play_context
+    jsr store_part_midi_context
     move.l %d0,%d1
     jsr store_part_epoch
     move.l %d0,%d2

@@ -39,12 +39,12 @@ def main():
     put(0x80001828, 2); put(0x80001829, 1)
     for track in range(8):
         put(0x8000182a+track, track); put(0x80001832+track, track % 4)
-        assert call('store_part_play_context', track) == track*4+track % 4
+        assert call('store_part_midi_context', track) == track*4+track % 4
         put(0x8000182a+track, 255)
-        assert call('store_part_play_context', track) == 9
-    assert call('store_part_play_context', 8) == 0xffffffff
+        assert call('store_part_midi_context', track) == 9
+    assert call('store_part_midi_context', 8) == 0xffffffff
     put(0x80001828, 255)
-    assert call('store_part_play_context', 0) == 0xffffffff
+    assert call('store_part_midi_context', 0) == 0xffffffff
     print('  [ok] UI and per-track engine contexts stay distinct; unlatched fallback and invalid inputs')
 
     writes = 0

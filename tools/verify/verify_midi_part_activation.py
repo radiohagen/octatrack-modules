@@ -26,7 +26,7 @@ def main():
     raw = (ROOT/'out/platform/runtime/runtime.bin').read_bytes()
     layout = json.loads((ROOT/'out/platform/layout.json').read_text())
     runtime = symbols(ROOT/'out/platform/runtime/runtime.elf')
-    resident = symbols(ROOT/'out/linked/midi-part-state/midipartentry/u.elf')
+    resident = symbols(ROOT/'out/linked/store/storepartentry/u.elf')
     start = resident['store_part_resident_activate']
     original = runtime['store_part_activate']
     assert image[0x40000512-BASE:0x40000518-BASE] == bytes.fromhex('4eb9')+start.to_bytes(4,'big')

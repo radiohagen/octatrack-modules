@@ -116,39 +116,7 @@ lb_part_sync:
  */
     .global lb_play_context
 lb_play_context:
-    lea -8(%sp),%sp
-    movem.l %d1/%a0,(%sp)
-    cmpi.l #7,%d0
-    bhi.s .play_invalid
-    lea 0x8000666e,%a0
-    moveq #0,%d1
-    move.b (%a0,%d0.l),%d1
-    lea 0x80006676,%a0
-    move.b (%a0,%d0.l),%d0
-    andi.l #255,%d0
-    cmpi.l #15,%d1
-    bhi.s .play_applied
-    cmpi.l #3,%d0
-    bls.s .play_pack
-.play_applied:
-    moveq #0,%d1
-    move.b 0x80001828,%d1
-    moveq #0,%d0
-    move.b 0x80001829,%d0
-    cmpi.l #15,%d1
-    bhi.s .play_invalid
-    cmpi.l #3,%d0
-    bhi.s .play_invalid
-.play_pack:
-    lsl.l #2,%d1
-    add.l %d1,%d0
-    bra.s .play_done
-.play_invalid:
-    moveq #-1,%d0
-.play_done:
-    movem.l (%sp),%d1/%a0
-    addq.l #8,%sp
-    rts
+    jmp store_part_midi_context
     .balign 4
 lb_contexts: .fill 8,4,-1
 lb_epochs: .fill 8,4,-1

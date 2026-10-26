@@ -6,7 +6,7 @@
     move.l 4(%sp),%d0
     jmp \target
     .endm
-    READER bf_context_c,store_part_play_context
+    READER bf_context_c,store_part_midi_context
     READER bf_epoch_c,store_part_epoch
     READER bf_mode_c,bf_mode_play
     READER bf_home_c,bf_home_play
@@ -47,7 +47,7 @@ bf_gravity:
 bf_register_edited:
     lea -20(%sp),%sp
     movem.l %d0-%d2/%a0-%a1,(%sp)
-    jsr store_part_play_context
+    jsr store_part_midi_context
     move.l %d0,%d2
     jsr store_part_ui_context
     cmp.l %d2,%d0

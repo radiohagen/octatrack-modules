@@ -86,7 +86,7 @@ mh_set_native:
     beq.s .L\prefix\()_write_done
     /* Only reset the sounding context's history, not another Part's. */
     move.l %d4,%d0
-    jsr store_part_play_context
+    jsr store_part_midi_context
     cmp.l %d1,%d0
     bne.s .L\prefix\()_write_ok
     lea mh_voice_history,%a0

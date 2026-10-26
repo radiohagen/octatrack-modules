@@ -8,6 +8,7 @@ This is a component gate, not the later UI/file/port acceptance gate.
 import json
 import pathlib
 import re
+import runpy
 import subprocess
 import sys
 import tempfile
@@ -29,7 +30,9 @@ def main():
     with tempfile.TemporaryDirectory(prefix='harmony-degree-core-') as tmp:
         out = pathlib.Path(tmp)
         scales = '--without-scales' not in sys.argv
-        (out/'remix.inc').write_text(f'.set MP_DEFINE,1\n.set HD_FOLLOW,1\n.set HD_SCENES,0\n.set HD_SCALES,{int(scales)}\n')
+        sys.path.insert(0,str(ROOT/'tools'))
+        part_inc=runpy.run_path(str(ROOT/'modules/store/parts.py'))['part_inc']
+        (out/'remix.inc').write_text(part_inc({'MIDI HARMONY','MIDI FOLLOW'}) + f'.set HD_FOLLOW,1\n.set HD_SCENES,0\n.set HD_SCALES,{int(scales)}\n')
         (out/'stub.s').write_text("""
 .data
 .global ch_lock_table,ch_nv_bank,ch_lock_status
@@ -50,7 +53,7 @@ store_part_epochs: .space 256
                              ('roots', ROOT/'modules/midi-harmony/roots.s'),
                              ('core', ROOT/'modules/midi-harmony/core.s'),
                              ('access', ROOT/'modules/midi-harmony/part-access.s'),
-                             ('part', ROOT/'modules/midi-part-state/part.s'),
+                             ('part', ROOT/'modules/store/part.s'),
                              ('events', ROOT/'modules/midi-harmony/events.s'),
                              ('scenes', ROOT/'modules/midi-harmony/scenes.s'),
                              ('ui', ROOT/'modules/midi-harmony/ui.s'),
