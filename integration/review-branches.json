@@ -305,7 +305,7 @@
       "current_pr": "https://github.com/sambanks/octabam/pull/824",
       "current_integration_guide": "integration/midi-follow.md",
       "current_dependencies": [
-        "MIDI PART STATE",
+        "STORE (native Part extension in #824)",
         "EVENTS (merged upstream in #871)"
       ]
     }
