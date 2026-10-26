@@ -10,6 +10,58 @@ The bus remix explicitly selects SIDECAR. It leaves PLOCKS P2, MIDI Scenes,
 KITS and Harmony retained allocations unchanged. Unsaved LFO edits are not
 restored after power-off. The existing file codec and STORE refusal handling
 remain in use; no second file format or journal is introduced.
+
+## Blank LFO SETUP after startup (23 October 2026)
+
+RADBUSR1 was reported to show a blank LFO details page. The released image
+`9ec04860bc0098f9a7723c6483b7aad27947ebc23ee102dd51fffd44b421831e`
+reproduces blank native SETUP and Euclid editor pages on both audio and MIDI
+when its redraw guard, `rate_writing` at `0x4114528c`, is preloaded nonzero
+before boot. The same image draws them with that word initially zero; NO
+still exits in the failing test. This demonstrates a real defect, not a
+readback of the reported device's memory.
+
+The loader deliberately does not clear BSS. C's explicit zero initializers
+were therefore insufficient for several small state variables. In particular,
+the new redraw guard suppressed the entire native/Euclid drawer from startup.
+Previous tests started on zero-filled emulator RAM and asserted settings
+while only recording, not rejecting, blank panel screenshots.
+
+Both retention variants now use `-fno-zero-initialized-in-bss`, matching the
+existing generated-module convention. Generation rejects remaining BSS/COMMON
+symbols. The sidecar build moves 84 bytes from BSS to loaded data, with the
+same text size and total module storage; no rhythm, encoder, native field or
+sidecar-format change. A negative source test restores the old compiler
+behavior and requires rejection in both variants.
+
+The panel gate gains stock-wave SETUP cases, visible-popup assertions and
+`--dirty-start`: all 35 writable variables (83,524 bytes in the sidecar
+build) are dirtied before the actual loader executes, not reset by the test
+after boot. The original RADBUSR1 fails this gate with zero popup ink.
+The fixed combined image passes 12 selected audio/MIDI scenarios under both
+clean and dirty starts (24 cases): stock SETUP, EUCL-selected SETUP, editor
+pages 1/2, rapid/held encoder bursts and above-maximum RATE correction.
+All 12 clean/dirty rendered PNGs and result records match exactly.
+
+Author source checks pass all 26 tests, provenance and both generated variants.
+The direct `verify_euclid_lfo.py radio-bus` gate passes on this exact candidate:
+sanitized engine/clock/codec/lifecycle checks, installed audio/MIDI timing and
+routing, native Part operations, sidecar no-SRAM-write checks and all 69
+unchanged LCD pixel regressions.
+The broader `make check REMIX=radio-bus BUILD=R1 MODULES='EUCLID LFO'`
+run was deliberately interrupted after over 25 minutes in the unrelated
+Harmony SIZE matrix. Completed gates had no failures, including boot/runtime
+readback, DSP dirty-state/init, remix switching, USB and multiple MIDI/Part
+checks; project-backed gates were explicitly skipped without OT_PROJECT.
+That interrupted run is not a complete package qualification.
+
+Candidate MAIN OS SHA-256:
+`f070bbe950bcce8b6206c70fde196bb862e2683cecab26aa89d3771dad2ac17e`.
+Runtime SHA-256:
+`e62168b185fb0af730dbf9f505fe3fb45393865538e67b1a5a3e993223b9d78a`.
+This is a local candidate based on the RADBUSR1 composition, not a replacement
+published package or a device installation. Physical acceptance remains open.
+
 ## Encoder response and bounded CPU work (23 October 2026)
 
 The user reported overly fast, possibly laggy/inconsistent controls. The

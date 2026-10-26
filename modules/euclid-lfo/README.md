@@ -91,9 +91,17 @@ make bus REMIX=euclid-lfo
 python3 tools/verify/verify_euclid_lfo.py
 python3 tools/verify/verify_euclid_lfo_card.py --project PATH_TO_TEST_PROJECT
 python3 tools/verify/verify_euclid_lfo_ui.py --project PATH_TO_TEST_PROJECT
+python3 tools/verify/verify_euclid_lfo_ui.py --project PATH_TO_TEST_PROJECT --dirty-start
 python3 tools/verify/verify_euclid_lfo_load.py --project PATH_TO_TEST_PROJECT
 python3 tools/verify/verify_euclid_lfo_audio.py --project PATH_TO_TEST_PROJECT
 ```
+
+The generated module keeps all writable state in loader-initialized data.
+The loader does not clear BSS: relying on C zero initialization can leave the
+redraw guard nonzero and blank both native and Euclid LFO SETUP. Generation
+rejects BSS/COMMON state in both retention variants. The dirty-start panel
+check seeds all Euclid state before the real loader runs and checks visible
+popup content, including ordinary stock-wave SETUP, as well as edited values.
 
 The focused check runs mathematical boundary/count tests with sanitizers,
 checks sidecar byte order, CRC and refusal of malformed data (including

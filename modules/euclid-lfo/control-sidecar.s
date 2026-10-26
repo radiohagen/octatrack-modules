@@ -5924,12 +5924,22 @@ modes.0:
 	.long	.LC31
 	.long	.LC32
 	.long	.LC33
-	.local	display_word
-	.comm	display_word,4,2
-	.local	display_value
-	.comm	display_value,4,2
-	.local	rate_writing
-	.comm	rate_writing,4,2
+	.data
+	.align	2
+	.type	display_word, @object
+	.size	display_word, 4
+display_word:
+	.zero	4
+	.align	2
+	.type	display_value, @object
+	.size	display_value, 4
+display_value:
+	.zero	4
+	.align	2
+	.type	rate_writing, @object
+	.size	rate_writing, 4
+rate_writing:
+	.zero	4
 	.section	.rodata.str1.1
 .LC34:
 	.string	"1/1"
@@ -5998,18 +6008,33 @@ eul_clip_valid:
 	.size	eul_clips, 960
 eul_clips:
 	.zero	960
-	.local	eul_loading
-	.comm	eul_loading,4,2
-	.local	edit_residue
-	.comm	edit_residue,24,2
-	.local	edit_lane
-	.comm	edit_lane,4,2
-	.local	edit_part
-	.comm	edit_part,4,2
-	.local	edit_bank
-	.comm	edit_bank,4,2
+	.data
+	.align	2
+	.type	eul_loading, @object
+	.size	eul_loading, 4
+eul_loading:
+	.zero	4
+	.align	2
+	.type	edit_residue, @object
+	.size	edit_residue, 24
+edit_residue:
+	.zero	24
+	.align	2
+	.type	edit_lane, @object
+	.size	edit_lane, 4
+edit_lane:
+	.zero	4
+	.align	2
+	.type	edit_part, @object
+	.size	edit_part, 4
+edit_part:
+	.zero	4
+	.align	2
+	.type	edit_bank, @object
+	.size	edit_bank, 4
+edit_bank:
+	.zero	4
 	.globl	eul_ui_style
-	.section	.bss
 	.align	2
 	.type	eul_ui_style, @object
 	.size	eul_ui_style, 4
@@ -6089,7 +6114,7 @@ eul_file:
 eul_stage:
 	.zero	3840
 	.globl	eul_io_errors
-	.section	.bss
+	.data
 	.align	2
 	.type	eul_io_errors, @object
 	.size	eul_io_errors, 4
@@ -6118,7 +6143,7 @@ eul_refused:
 eul_revision:
 	.zero	64
 	.globl	eul_nv_bad_records
-	.section	.bss
+	.data
 	.align	2
 	.type	eul_nv_bad_records, @object
 	.size	eul_nv_bad_records, 4
