@@ -132,6 +132,139 @@ static void check_mix16(void) {
     puts("[ok] fused native-frame mix matches staged audio and all voice/filter state for 20000 blocks");
 }
 
+static void check_adapter_lifecycle(void) {
+    /* A different synth must not pay to clear Supersaw history. A later
+     * Supersaw selection still clears phases/filters and every poly voice. */
+    for(unsigned was_active=0;was_active<2;++was_active)
+    for(unsigned gain=0;gain<=32768;gain+=32768) {
+        const unsigned track=6;
+        memset(&ss_voices[track],0xa5,sizeof ss_voices[track]);
+        memset(ss_poly_voices[track],0x5a,sizeof ss_poly_voices[track]);
+        memset(ss_filters[track],0x3c,sizeof ss_filters[track]);
+        struct ss_voice mono=ss_voices[track],poly[4];
+        struct ss_filter filters[5],empty={0};
+        memcpy(poly,ss_poly_voices[track],sizeof poly);
+        memcpy(filters,ss_filters[track],sizeof filters);
+        ss_active[track]=(uint8_t)was_active;
+        ss_activate(track,0,(uint16_t)gain);
+        assert(!ss_active[track]);
+        assert(!memcmp(&mono,&ss_voices[track],sizeof mono));
+        assert(!memcmp(poly,ss_poly_voices[track],sizeof poly));
+        assert(!memcmp(filters,ss_filters[track],sizeof filters));
+        ss_activate(track,1,(uint16_t)gain);
+        assert(ss_active[track]==1);
+        ss_restart(&mono);
+        assert(!memcmp(&mono,&ss_voices[track],sizeof mono));
+        for(unsigned v=0;v<4;++v) {
+            ss_init(&poly[v]);
+            assert(!memcmp(&poly[v],&ss_poly_voices[track][v],sizeof poly[v]));
+        }
+        for(unsigned v=0;v<5;++v)
+            assert(!memcmp(&empty,&ss_filters[track][v],sizeof empty));
+    }
+    /* Exercise every source/destination, odd resampler history and filter
+     * envelope. The only changed filter field is its native voice stamp. */
+    for(unsigned track=0;track<8;++track)for(unsigned voice=0;voice<4;++voice) {
+        struct ss_params p={21426141u+track*123456u,96,110,40,30};
+        struct ss_filter_params fp={64,64,80,64,1};
+        int16_t audio[3];
+        ss_init(&ss_voices[track]);ss_filter_reset(&ss_filters[track][4]);
+        ss_render_filtered(&ss_voices[track],&p,audio,3,&ss_filters[track][4],&fp,5);
+        assert(ss_voices[track].pending);
+        struct ss_voice expected[8][4];struct ss_filter filters[8][5];
+        memcpy(expected,ss_poly_voices,sizeof expected);
+        memcpy(filters,ss_filters,sizeof filters);
+        ss_active[track]=0;ss_carry(track,voice,91);
+        assert(!memcmp(expected,ss_poly_voices,sizeof expected));
+        assert(!memcmp(filters,ss_filters,sizeof filters));
+        ss_active[track]=1;
+        expected[track][voice]=ss_voices[track];
+        filters[track][voice]=ss_filters[track][4];
+        filters[track][voice].stamp=91;
+        ss_carry(track,voice,91);
+        assert(!memcmp(expected,ss_poly_voices,sizeof expected));
+        assert(!memcmp(filters,ss_filters,sizeof filters));
+        ss_carry(8,voice,92);ss_carry(track,4,92);
+        assert(!memcmp(expected,ss_poly_voices,sizeof expected));
+        assert(!memcmp(filters,ss_filters,sizeof filters));
+    }
+    puts("[ok] unrelated synth selection leaves dormant state untouched; reactivation and all carry targets preserve lifecycle");
+}
+
+static void check_single_poly(void) {
+    /* Staged rendering plus the old wide gain/mix arithmetic is the oracle.
+     * Native state, not the selected polyphony capacity, chooses this path. */
+    const uint32_t gains[][2]={{0,0},{0,32767},{32767,0},{32767,32767},
+        {12345,23456},{23456,12345},{1,1},{65535,0},{0,UINT32_MAX},
+        {65535,UINT32_MAX}};
+    const unsigned track=5;
+    uint32_t random=1234567;
+    for(unsigned slot=0;slot<4;++slot) {
+        for(unsigned v=0;v<4;++v)ss_init(&ss_poly_voices[track][v]);
+        for(unsigned v=0;v<5;++v)ss_filter_reset(&ss_filters[track][v]);
+        ss_active[track]=1;
+        for(unsigned block=0;block<1000;++block) {
+            random=random*1664525u+1013904223u;
+            struct ss_params p={random,(uint8_t)(random>>8)&127,
+                (uint8_t)(random>>16)&127,(uint8_t)(random>>24)&127,(uint8_t)random&127};
+            struct ss_filter_params f={32+(block%96),block%128,
+                (block*7)%128,(block*11)%128,(block/5)%4};
+            if(block%13==0)f=(struct ss_filter_params){127,0,0,64,1};
+            ss_setup[track][1]=f.resonance;ss_setup[track][2]=f.amount;
+            ss_setup[track][3]=f.decay;ss_setup[track][4]=f.type;
+            uint16_t fp[6]={0x4000,(uint16_t)p.detune<<8,(uint16_t)p.morph<<8,
+                (uint16_t)f.cutoff<<8,(uint16_t)p.sub<<8,(uint16_t)p.drive<<8};
+            uint32_t pool[4][16],state[32]={0};
+            memset(pool,0xa5,sizeof pool);
+            for(unsigned v=0;v<4;++v)((uint8_t *)pool[v])[36]=v==slot?1+block%3:0;
+            uint32_t previous=gains[block%10][0],target=gains[block%10][1];
+            uint8_t *native=(uint8_t *)pool[slot];
+            pool[slot][3]=p.increment;pool[slot][6]=target;pool[slot][12]=block/17;
+            *(uint16_t *)(native+60)=(uint16_t)previous;
+            ((uint8_t *)state)[80]=1;*(uint16_t *)((uint8_t *)state+38)=1234;
+            if(block%7==0) { /* A carried odd sample requires the existing fallback. */
+                int16_t warm[3];ss_render(&ss_poly_voices[track][slot],&p,warm,3);
+            }
+            struct ss_voice voices[4];struct ss_filter filters[5];
+            memcpy(voices,ss_poly_voices[track],sizeof voices);
+            memcpy(filters,ss_filters[track],sizeof filters);
+            uint32_t expected_pool[4][16];memcpy(expected_pool,pool,sizeof pool);
+            uint32_t samples=ss_samples[track],filtered=ss_filter_samples[track],counts[4];
+            memcpy(counts,ss_poly_samples[track],sizeof counts);counts[slot]+=16;
+            int32_t expected[34]={0},actual[34];expected[32]=expected[33]=123456;
+            for(unsigned i=0;i<34;++i)actual[i]=123456;
+            if(!previous) { ss_restart(&voices[slot]);ss_filter_reset(&filters[slot]); }
+            if(previous || target) {
+                if(previous>32767)previous=32767;
+                if(target>32767)target=32767;
+                if(f.type==1 && f.cutoff==127 && !f.resonance && !f.amount)f.type=0;
+                int16_t source[16];
+                if(f.type || filters[slot].wet) {
+                    ss_render_filtered(&voices[slot],&p,source,16,&filters[slot],&f,block/17);
+                    filtered+=16;
+                } else ss_render(&voices[slot],&p,source,16);
+                int64_t gain=(int64_t)previous*65536;
+                int64_t step=((int64_t)target-previous)*65536/16;
+                for(unsigned i=0;i<16;++i) {
+                    gain+=step;
+                    int32_t sample=(int32_t)((source[i]*(gain>>16))>>15);
+                    expected[2*i]=expected[2*i+1]=sample*65536;
+                }
+                *(uint16_t *)((uint8_t *)expected_pool[slot]+60)=(uint16_t)target;
+            }
+            assert(ss_track_fill(track,(uint8_t *)state,fp,actual,16,(uint8_t *)pool));
+            assert(!memcmp(expected,actual,sizeof actual));
+            assert(!memcmp(expected_pool,pool,sizeof pool));
+            assert(!memcmp(voices,ss_poly_voices[track],sizeof voices));
+            assert(!memcmp(filters,ss_filters[track],sizeof filters));
+            assert(!memcmp(counts,ss_poly_samples[track],sizeof counts));
+            assert(ss_samples[track]==samples+16 && ss_filter_samples[track]==filtered);
+            assert(!*(uint16_t *)((uint8_t *)state+38));
+        }
+    }
+    puts("[ok] single active poly voice matches staged mixing, all gains/slots/filter modes, sparse state and odd carries");
+}
+
 static void check_poly(void) {
     uint32_t pool[4][16]={{0}}, state[32]={0};
     uint16_t fp[6]={0x4000,96<<8,110<<8,0x4000,40<<8,30<<8};
@@ -402,6 +535,68 @@ static void check_restart(void) {
     }
 }
 
+/* Pre-optimization coefficient arithmetic, deliberately without production
+ * cache guards, symmetric-offset reuse or the leading-zero bank shortcut. */
+static void reference_prepare(struct ss_voice *v,const struct ss_params *p) {
+    uint32_t base=p->increment,maximum=0;
+    if(base<1024)base=1024;
+    if(base>0x7d000000u)base=0x7d000000u;
+    uint8_t controls[4]={p->detune&127,p->morph&127,p->sub&127,p->drive&127};
+    memcpy(&v->controls,controls,sizeof controls);v->base=base;
+    for(unsigned i=0;i<2;++i) {
+        int32_t delta=(int32_t)ss_ratios[controls[0]][i]-1048576;
+        int32_t offset=((int32_t)(base>>16)*delta+
+            (int32_t)(base&65535)*delta/65536)/16;
+        v->increments[i]=(uint32_t)((int32_t)base+offset);
+        if(v->increments[i]>maximum)maximum=v->increments[i];
+    }
+    unsigned bank=0;
+    while(bank<7 && maximum<=(0x7fffffffu>>(bank+1)))++bank;
+    v->bank=bank;
+    v->sub_gain=(int32_t)controls[2]*64;
+    v->saw_weight=(32768-v->sub_gain)/2;
+    v->morph_weight=(v->saw_weight*ss_morph_polarity[controls[1]])>>15;
+    v->drive_gain=256+(int32_t)controls[3]*6;
+}
+
+static void check_prepare_case(struct ss_voice *actual,struct ss_voice *expected,
+                               const struct ss_params *p) {
+    reference_prepare(expected,p);ss_prepare(actual,p);
+    assert(!memcmp(actual,expected,sizeof *actual));
+}
+
+static void check_prepare(void) {
+    unsigned cases=0;
+    const uint32_t edges[]={0,1023,1024,1025,0x7cffffffu,0x7d000000u,
+        0x7d000001u,UINT32_MAX};
+    for(unsigned detune=0;detune<128;++detune) {
+        assert(ss_ratios[detune][0]+ss_ratios[detune][1]==2*1048576);
+        for(unsigned boundary=0;boundary<40;++boundary)
+        for(int delta=-4;delta<=4;++delta) {
+            /* The highest oscillator crosses each power-of-two bank
+             * threshold near base = threshold / positive detune ratio. */
+            int64_t candidate=boundary<32 ?
+                (int64_t)(((uint64_t)1<<boundary)*1048576/ss_ratios[detune][1])+delta :
+                edges[boundary-32];
+            uint32_t base=candidate<0?0:candidate>UINT32_MAX?UINT32_MAX:(uint32_t)candidate;
+            struct ss_params p={base,detune,37,61,89};
+            struct ss_voice actual,expected;ss_init(&actual);ss_init(&expected);
+            check_prepare_case(&actual,&expected,&p);++cases; /* Cold. */
+            check_prepare_case(&actual,&expected,&p);++cases; /* Held cache hit. */
+            p.increment^=0x12345;
+            check_prepare_case(&actual,&expected,&p);++cases; /* Pitch only. */
+            p.morph^=127;p.sub^=127;p.drive^=127;
+            check_prepare_case(&actual,&expected,&p);++cases; /* Timbre only. */
+            p.detune^=128;p.morph^=128;p.sub^=128;p.drive^=128;
+            check_prepare_case(&actual,&expected,&p);++cases; /* High bits ignored. */
+            ss_restart(&actual);ss_restart(&expected);
+            p.detune^=127;
+            check_prepare_case(&actual,&expected,&p);++cases; /* Warm cache, cold phase. */
+        }
+    }
+    printf("[ok] independent two-ratio/threshold coefficient oracle: %u cold, cached and split-control cases\n",cases);
+}
+
 int main(int argc, char **argv) {
     assert(ss_marker("../AUDIO/FMSYNTH-SUPERSAW.wav"));
     assert(ss_marker("FMSYNTH-SUPERSAW-pad.wav"));
@@ -505,9 +700,9 @@ int main(int argc, char **argv) {
         int exact=x-(((((x*x)>>15)*x>>15)*10923)>>15);
         assert(abs(ss_drive_curve[(x+32772)>>3]-exact)<=5);
     }
-    check_restart();check_filter();check_half_filter();
+    check_restart();check_prepare();check_filter();check_half_filter();
     check_gain();
-    check_mix16();check_poly();
+    check_mix16();check_poly();check_adapter_lifecycle();check_single_poly();
     if (argc == 2) {
         FILE *f = fopen(argv[1], "wb"); assert(f);
         p = (struct ss_params){21426141,0,0,0,0};

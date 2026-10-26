@@ -4,6 +4,7 @@
 Reports executed instructions and multiply/divide counts. These are not
 hardware cycles: caches, bus contention and the surrounding OS are excluded.
 Pass --runtime to retain a reproducible baseline across rebuilds.
+Requires the repository's corrected Unicorn; the EMAC self-test fails closed.
 """
 import argparse
 from collections import Counter
@@ -13,13 +14,15 @@ from pathlib import Path
 import re
 import struct
 import subprocess
+import sys
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0,str(ROOT/'tools'))
+import toolpath
+from emu_bringup import emac_selftest
 from unicorn import Uc, UC_ARCH_M68K, UC_MODE_BIG_ENDIAN, UC_HOOK_CODE
 from unicorn.m68k_const import (UC_CPU_M68K_CFV4E, UC_M68K_REG_A7, UC_M68K_REG_PC,
                                UC_M68K_REG_SR, UC_M68K_REG_A4, UC_M68K_REG_A5,
                                UC_M68K_REG_D0, UC_M68K_REG_D2)
-
-ROOT = Path(__file__).resolve().parents[2]
-
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
@@ -27,10 +30,14 @@ def main():
     ap.add_argument('--output', type=Path, default=ROOT/'out/supersaw-cpu.json')
     ap.add_argument('--baseline',action='store_true',help='Measure an older runtime without enforcing new optimization budgets')
     args = ap.parse_args()
+    emac_ok,emac_detail=emac_selftest()
+    assert emac_ok,emac_detail
     elf = args.runtime/'runtime.elf'
     symbols = subprocess.check_output(['m68k-elf-nm', '-S', str(elf)], text=True)
     sym = {f[-1]: int(f[0], 16) for line in symbols.splitlines()
            if len(f := line.split()) in (3, 4)}
+    sizes = {f[-1]: int(f[1], 16) for line in symbols.splitlines()
+             if len(f := line.split()) == 4}
     dis = subprocess.check_output(['m68k-elf-objdump', '-d', str(elf)], text=True)
     op = {}; owner = {}; function = ''
     for line in dis.splitlines():
@@ -62,6 +69,7 @@ def main():
         assert uc.reg_read(UC_M68K_REG_A7) == 0x20004, 'stack imbalance'
         return dict(stack_bytes=0x20000-lowest[0],instructions=sum(counts.values()),
                     multiplies=sum(n for k,n in counts.items() if k.startswith('mul')),
+                    emac_operations=sum(n for k,n in counts.items() if k.startswith(('mac','msac','maaac','masac','msaac','mssac'))),
                     # binutils prints ColdFire long division as remsl when
                     # quotient/remainder register fields coincide.
                     divides=sum(n for k,n in counts.items() if k.startswith(('div','rem'))),
@@ -69,7 +77,8 @@ def main():
     cases = []
     for voices in (0, 1, 2, 3, 4):  # 0 = native mono path, 1 = one poly voice
         for typ in (0, 1, 2, 3):
-            for setting, sub, drive, amount in (('plain',0,0,0), ('rich',96,80,80)):
+            for setting, sub, drive, amount in (('plain',0,0,0), ('rich',96,80,80),
+                                               ('sub_only',96,0,0), ('drive_only',0,80,0)):
                 uc.mem_write(base, data)
                 uc.mem_write(sym['ss_active'], b'\x01'+bytes(7))
                 uc.mem_write(sym['ss_setup'], bytes((64,64,amount,64,typ,83)))
@@ -140,6 +149,30 @@ def main():
     retired=call('ss_track_fill',0,0x24000,0x25000,0x26000,16,0x27000)
     assert bytes(uc.mem_read(0x26000,128))==bytes(128)
     assert int.from_bytes(uc.mem_read(sym['ss_samples'],4),'big')==16
+    # Carry happens on the first mono-to-poly transition; its byte-copy
+    # overhead is invisible when measuring only steady ss_track_fill calls.
+    carry=[]
+    voice_size=sizes['ss_voices']//8;filter_size=sizes['ss_filters']//40
+    assert voice_size%4==filter_size%4==0
+    for slot in range(4):
+        uc.mem_write(base,data);uc.mem_write(sym['ss_active'],b'\x01')
+        voice=bytes((i*19+slot*31)&255 for i in range(voice_size))
+        filt=bytes((i*23+slot*41)&255 for i in range(filter_size))
+        uc.mem_write(sym['ss_voices'],voice)
+        uc.mem_write(sym['ss_filters']+4*filter_size,filt)
+        pool_before=bytes(uc.mem_read(sym['ss_poly_voices'],sizes['ss_poly_voices']))
+        filters_before=bytes(uc.mem_read(sym['ss_filters'],sizes['ss_filters']))
+        stamp=0x12345678+slot
+        cost=call('ss_carry',0,slot,stamp)
+        expected_pool=bytearray(pool_before)
+        expected_pool[slot*voice_size:(slot+1)*voice_size]=voice
+        expected_filters=bytearray(filters_before)
+        expected_filters[slot*filter_size:(slot+1)*filter_size]=filt
+        struct.pack_into('>I',expected_filters,slot*filter_size+28,stamp)
+        assert bytes(uc.mem_read(sym['ss_poly_voices'],len(expected_pool)))==expected_pool,('carry voice',slot)
+        assert bytes(uc.mem_read(sym['ss_filters'],len(expected_filters)))==expected_filters,('carry filter/stamp/guards',slot)
+        assert bytes(uc.mem_read(sym['ss_voices'],voice_size))==voice,('carry source changed',slot)
+        carry.append(dict(slot=slot,**cost))
     # Two independent four-note tracks, sustained modulation rather than a
     # single convenient block. The same harness can profile a frozen baseline.
     scenarios=[]
@@ -170,6 +203,66 @@ def main():
             if frame>=16:costs.append(total)
         scenarios.append(dict(scenario=label,tracks=[3,4],voices_per_track=4,blocks=len(costs),
                               mean_instructions=sum(costs)/len(costs),max_instructions=max(costs)))
+    # Keep realistic sustained paths distinct from per-call synthetic probes.
+    # Sparse pools and asynchronous gains prevent an optimization benefiting
+    # only all-four-held or all-four-attacking voices from looking universal.
+    mixed_scenarios=[]
+    for label,typ,sub,drive,lanes in (
+            ('mono_plus_triad_dry',0,96,80,((5,True,()),(6,False,(0,2,3)))),
+            ('sparse_sub_only',0,96,0,((3,False,(1,3)),)),
+            ('sparse_drive_only',0,0,80,((3,False,(1,3)),)),
+            ('dual_low',1,96,80,((2,False,(0,1,2,3)),(3,False,(0,1,2,3)))),
+            ('dual_bp',2,96,80,((2,False,(0,1,2,3)),(3,False,(0,1,2,3)))),
+            ('dual_hp',3,96,80,((2,False,(0,1,2,3)),(3,False,(0,1,2,3))))):
+        uc.mem_write(base,data)
+        for track,mono,slots in lanes:
+            uc.mem_write(sym['ss_active']+track,b'\x01')
+            state=bytearray(128);state[80]=int(not mono)
+            struct.pack_into('>I',state,12,21426141+track*1973)
+            uc.mem_write(0x24000+track*256,bytes(state))
+            pool=bytearray(256)
+            for v in slots:
+                pool[v*64+36]=1
+                struct.pack_into('>I',pool,v*64+12,21426141*(v+1)+track*1973)
+                struct.pack_into('>I',pool,v*64+48,v+1)
+            uc.mem_write(0x27000+track*256,bytes(pool))
+        phase_results=[]
+        for phase in ('attack_hold','one_lsb_gain','zero_gain','mixed_envelopes',
+                      'steady_filter','cutoff_ramp','neutral_open','filter_resume','retired'):
+            costs=[];stacks=[];muls=[];emacs=[];divs=[];owners=Counter()
+            for frame in range(32):
+                total=0;stack=0;multiplies=0;emac_operations=0;divides=0
+                for track,mono,slots in lanes:
+                    target=32768 if mono else 32767
+                    if phase=='one_lsb_gain':target=1
+                    elif phase in ('zero_gain','retired'):target=0
+                    uc.mem_write(0x24000+track*256+24,struct.pack('>I',target))
+                    for v in slots:
+                        gain=target
+                        if phase=='mixed_envelopes':
+                            gain=(20000,frame*700,max(0,20000-frame*1000),0)[v]
+                        uc.mem_write(0x27000+track*256+v*64+24,struct.pack('>I',gain))
+                        if phase=='retired':uc.mem_write(0x27000+track*256+v*64+36,b'\x00')
+                    cut=24+(frame*7+track*13)%104 if phase=='cutoff_ramp' else 127 if phase=='neutral_open' else 64
+                    res=0 if phase=='neutral_open' else 84
+                    uc.mem_write(sym['ss_setup']+track*6,bytes((64,res,0,64,typ,83)))
+                    uc.mem_write(0x25000,struct.pack('>6H',16384,96<<8,64<<8,cut<<8,sub<<8,drive<<8))
+                    result=call('ss_track_fill',track,0x24000+track*256,0x25000,0x26000,16,0x27000+track*256)
+                    total+=result['instructions'];stack=max(stack,result['stack_bytes'])
+                    multiplies+=result['multiplies'];divides+=result['divides']
+                    emac_operations+=result['emac_operations']
+                    owners.update(result['functions'])
+                costs.append(total);stacks.append(stack);muls.append(multiplies);emacs.append(emac_operations);divs.append(divides)
+            assert max(divs)==0,('deterministic native divide',label,phase)
+            phase_results.append(dict(phase=phase,frames=len(costs),first_instructions=costs[0],
+                                      mean_instructions=sum(costs)/len(costs),max_instructions=max(costs),
+                                      second_half_mean_instructions=sum(costs[16:])/16,
+                                      max_stack_bytes=max(stacks),mean_multiplies=sum(muls)/len(muls),
+                                      mean_emac_operations=sum(emacs)/len(emacs),
+                                      max_divides=max(divs),function_instructions=dict(owners)))
+        mixed_scenarios.append(dict(scenario=label,tracks=[t+1 for t,_,_ in lanes],
+                                   native_mono=[mono for _,mono,_ in lanes],
+                                   active_slots=[list(slots) for _,_,slots in lanes],phases=phase_results))
     # Control work outside the audio renderer: fine/Part refresh and the
     # native per-track parameter preparation up to the AMP release branch.
     uc.mem_map(0x10000000,0x200000);uc.mem_map(0x46000000,0x1100000)
@@ -189,7 +282,10 @@ def main():
                 multiplies=sum(v for k,v in counts.items() if k.startswith('mul')),
                 divides=sum(v for k,v in counts.items() if k.startswith(('div','rem'))))
     receipt = dict(runtime_sha256=hashlib.sha256(data).hexdigest(), samples_per_call=16,
-                   hardware_cycles=False, retired_poly=retired, two_tracks=scenarios, cases=cases, fine_control=fine, native_poly_parameters=native)
+                   hardware_cycles=False, emac_selftest=emac_detail,
+                   multiply_count_scope='multiplies counts scalar mul instructions; emac_operations counts MAC-family instructions separately',
+                   retired_poly=retired, mono_to_poly_carry=carry, two_tracks=scenarios, cases=cases,
+                   mixed_track_scenarios=mixed_scenarios, fine_control=fine, native_poly_parameters=native)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(receipt, indent=2)+'\n')
     for c in cases:

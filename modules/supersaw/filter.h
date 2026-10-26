@@ -18,11 +18,54 @@ static void ss_filter_reset(struct ss_filter *s) {
 }
 static int32_t ss_limit(int32_t x) { return x>8388607?8388607:x< -8388607?-8388607:x; }
 /* Exact floor of a*b/16384 for the wider HP intermediate, without int64. */
-static int32_t ss_wide_mul(int32_t a,int32_t b) {
+static inline int32_t ss_wide_mul(int32_t a,int32_t b) {
     /* b is nonnegative and < 131072: the low product stays below 2^31.
      * Splitting at the final Q14 boundary removes a shift from every MAC. */
     return (a>>14)*b+(((a&16383)*b)>>14);
 }
+/* ColdFire's fractional EMAC performs floor(a*b/2^31). Scale the signed
+ * input by 16 and each Q14 coefficient by 8192 to retain the exact Q14
+ * product. The widest half-rate HP input is bounded by 53,362,171 and
+ * the largest coefficient by 71,455, so both scaled operands fit int32.
+ * Keep scaled coefficients/deltas in loop locals, never persisted state. */
+static inline int32_t ss_filter_coefficient(int32_t b) {
+#ifdef __m68k__
+    return b*8192;
+#else
+    return b;
+#endif
+}
+static inline int32_t ss_filter_mul(int32_t a,int32_t b) {
+#ifdef __m68k__
+    int32_t result;
+    __asm__ volatile ("mac.l %1,%2,%%acc0\n\tmovclr.l %%acc0,%0"
+        : "=d"(result) : "d"(a*16), "d"(b) : "cc");
+    return result;
+#else
+    return ss_wide_mul(a,b);
+#endif
+}
+#ifdef __m68k__
+struct ss_emac_state { uint32_t status,accumulator,extension; };
+static inline struct ss_emac_state ss_filter_enter(void) {
+    struct ss_emac_state s;
+    /* Integer mode reads raw accumulator bits without fractional rounding
+     * or saturation, matching the stock frame ISR's save/restore idiom.
+     * ACCEXT01 includes acc1's extension too; it is restored unchanged. */
+    __asm__ volatile ("move.l %%macsr,%0\n\tmove.l #0,%%macsr\n\t"
+        "move.l %%acc0,%1\n\tmove.l %%accext01,%2\n\t"
+        "move.l #32,%%macsr\n\tmove.l #0,%%acc0"
+        : "=d"(s.status),"=d"(s.accumulator),"=d"(s.extension)
+        :: "memory","cc");
+    return s;
+}
+static inline void ss_filter_leave(struct ss_emac_state s) {
+    __asm__ volatile ("move.l #0,%%macsr\n\tmove.l %1,%%acc0\n\t"
+        "move.l %2,%%accext01\n\tmove.l %0,%%macsr"
+        :: "d"(s.status),"d"(s.accumulator),"d"(s.extension)
+        : "memory","cc");
+}
+#endif
 /* Specialize the fully wet, fixed-coefficient loops at compile time. The
  * changing-coefficient/bypass path keeps the same sample-wise arithmetic.
  * Keep integrator state in locals rather than writing DRAM every sample. */
@@ -30,14 +73,16 @@ static __attribute__((always_inline)) inline void ss_filter_block(
         struct ss_filter *s,int16_t *audio,unsigned n,unsigned shape,unsigned steady,
         unsigned enabled,unsigned rate,int32_t d1,int32_t d2,int32_t d3) {
     int32_t s0=s->s0,s1=s->s1,a1=s->a1,a2=s->a2,a3=s->a3;
+    a1=ss_filter_coefficient(a1);a2=ss_filter_coefficient(a2);a3=ss_filter_coefficient(a3);
+    d1=ss_filter_coefficient(d1);d2=ss_filter_coefficient(d2);d3=ss_filter_coefficient(d3);
     unsigned wet=s->wet;
     for(unsigned i=0;i<n;++i) {
         if(!steady) { a1+=d1;a2+=d2;a3+=d3; }
         int32_t x=(int32_t)audio[i]*256;
-        int32_t hp=ss_limit(ss_wide_mul(x-ss_wide_mul(s0,a3)-s1,a1));
-        int32_t v=ss_wide_mul(hp,a2),bp=ss_limit(s0+v);
+        int32_t hp=ss_limit(ss_filter_mul(x-ss_filter_mul(s0,a3)-s1,a1));
+        int32_t v=ss_filter_mul(hp,a2),bp=ss_limit(s0+v);
         s0=ss_limit(s0+2*v);
-        int32_t q=ss_wide_mul(bp,a2),lp=ss_limit(s1+q);
+        int32_t q=ss_filter_mul(bp,a2),lp=ss_limit(s1+q);
         s1=ss_limit(s1+2*q);
         int32_t y=shape==1?lp:shape==2?bp:hp;
         if(steady || enabled==4) audio[i]=(int16_t)(y>>8);
@@ -116,11 +161,27 @@ static __attribute__((always_inline)) inline void ss_filter_impl(struct ss_filte
 #ifdef SS_HOST_TEST
 void ss_filter_run(struct ss_filter *s,const struct ss_filter_params *p,
                    uint32_t stamp,int16_t *audio,unsigned n) {
+    if(!n)return;
+    if((p->type<1 || p->type>3) && !s->wet) { s->ready=0;s->stamp=stamp;return; }
+#ifdef __m68k__
+    struct ss_emac_state saved=ss_filter_enter();
+#endif
     ss_filter_impl(s,p,stamp,audio,n,1);
+#ifdef __m68k__
+    ss_filter_leave(saved);
+#endif
 }
 #endif
 static __attribute__((noinline,aligned(16))) void ss_filter_half(struct ss_filter *s,const struct ss_filter_params *p,
                            uint32_t stamp,int16_t *audio,unsigned n) {
+    if(!n)return;
+    if((p->type<1 || p->type>3) && !s->wet) { s->ready=0;s->stamp=stamp;return; }
+#ifdef __m68k__
+    struct ss_emac_state saved=ss_filter_enter();
+#endif
     ss_filter_impl(s,p,stamp,audio,n,2);
+#ifdef __m68k__
+    ss_filter_leave(saved);
+#endif
 }
 #endif

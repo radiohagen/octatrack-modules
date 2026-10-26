@@ -10,11 +10,15 @@ from pathlib import Path
 import struct
 import subprocess
 import tempfile
+import sys
 from unicorn import Uc, UC_ARCH_M68K, UC_MODE_BIG_ENDIAN, UC_HOOK_CODE
 from unicorn.m68k_const import (UC_CPU_M68K_CFV4E, UC_M68K_REG_A7,
                                UC_M68K_REG_PC, UC_M68K_REG_SR, UC_M68K_REG_D0, UC_M68K_REG_D1,
                                UC_M68K_REG_D2, UC_M68K_REG_A0, UC_M68K_REG_A1)
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT/'tools'))
+import toolpath
+from emu_bringup import emac_selftest
 CASES = ((21426141,0,0,0,0), (21426141,127,127,0,0),
          (21426141,96,110,40,30), (1024,127,127,127,127),
          (0xffffffff,127,127,127,127), (42726141,65,100,127,90))
@@ -274,6 +278,8 @@ def verify_voic_dial(uc,call,sym):
 
 
 def main():
+    ok, detail = emac_selftest()
+    if not ok: raise SystemExit('Corrected ColdFire EMAC is required: '+detail)
     runtime = ROOT/'out/platform/runtime'
     out = ROOT/'out/supersaw-cf'
     out.mkdir(parents=True,exist_ok=True)

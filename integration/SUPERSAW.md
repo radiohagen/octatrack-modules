@@ -164,3 +164,25 @@ Include `verify_supersaw_poly.py --mode mixed --tracks 6,7 --burst --rich`
 and dual filtered four-note playback in focused image qualification.
 Hardware acceptance still requires the guarded simultaneous-note replay;
 source/emulator improvements do not establish a hardware timing bound.
+
+
+### S12 scenario-aware optimization
+
+Copy the complete Supersaw source and all `verify_supersaw*.py` scripts from
+one author snapshot, including the new `verify_supersaw_emac.py`. Regenerate
+production assembly with `SS_DIAGNOSTICS` unset. No Synth bridge, native voice
+layout, FX allocation, parameter or persistence format changes are required.
+
+The filter now uses ColdFire EMAC while preserving the complete incoming state.
+The image gate includes its independent arithmetic/preservation probe; the
+linked arithmetic, CPU and equivalence gates require the corrected Unicorn
+self-test. Set `LIBUNICORN_PATH` to the already qualified corrected library
+before `make check-remix` and linked verifiers. Do not disable this check to use
+the standard wheel. Retain separate scalar-multiply and EMAC operation counts.
+
+Compare with the frozen S11 runtime using `verify_supersaw_equivalence.py`.
+Keep full native mono-plus-triad bursts, two filtered four-voice tracks,
+mono/poly transitions and live T4 assignment beside Thru/kick in image checks.
+These exercise allocation and release outside the isolated renderer profiler.
+Image qualification does not establish physical interrupt latency, bus/cache
+cost, the full real routing setup or resolution of the original hardware crash.

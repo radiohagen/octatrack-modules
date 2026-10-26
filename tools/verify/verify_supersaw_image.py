@@ -19,6 +19,7 @@ def main():
     subprocess.run([sys.executable,'tools/verify/verify_supersaw_filter.py'],cwd=ROOT,check=True)
     remix = registry.remix(os.environ.get('REMIX','supersaw'))
     subprocess.run(['make','bus',f'REMIX={remix.name}'],cwd=ROOT,check=True)
+    subprocess.run([sys.executable,'tools/verify/verify_supersaw_emac.py'],cwd=ROOT,check=True)
     subprocess.run([sys.executable,'tools/verify/verify_supersaw_cf.py'],cwd=ROOT,check=True)
     subprocess.run([sys.executable,'tools/verify/verify_supersaw_cpu.py'],cwd=ROOT,check=True)
     project = os.environ.get('OT_PROJECT')

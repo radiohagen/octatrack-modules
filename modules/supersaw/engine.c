@@ -40,33 +40,40 @@ static __attribute__((noinline)) void ss_prepare(struct ss_voice *voice, const s
     if (base < 1024) base = 1024;
     if (base > 0x7d000000u) base = 0x7d000000u;
     if (voice->base == base && voice->controls == controls) return;
-    voice->base = base; voice->controls = controls;
-    unsigned detune = params->detune & 127, morph = params->morph & 127;
-    unsigned sub = params->sub & 127, drive = params->drive & 127;
-    uint32_t maximum = 0;
-    for (unsigned i = 0; i < 2; ++i) {
-        /* Split the Q20 ratio around unity: bounded signed 32-bit products,
-         * avoiding a ColdFire 64-bit runtime helper. At most one phase LSB
-         * of rounding error, applied once per source call. */
-        int32_t delta = (int32_t)ss_ratios[detune][i] - 1048576;
-        int32_t offset = ((int32_t)(base >> 16) * delta
-                       + (int32_t)(base & 65535) * delta / 65536) / 16;
-        voice->increments[i] = (uint32_t)((int32_t)base + offset);
-        if (voice->increments[i] > maximum) maximum = voice->increments[i];
+    unsigned cold = !voice->base;
+    unsigned detune = params->detune & 127;
+    /* Pitch bends do not change timbre weights; timbre changes do not
+     * change oscillator steps or the anti-alias bank. Retain both caches. */
+    if (cold || voice->base != base ||
+        ((const uint8_t *)&voice->controls)[0] != detune) {
+        /* The generated +/- ratios are exact opposites around unity.
+         * Signed truncation is symmetric, so derive the positive offset once. */
+        int32_t delta = (int32_t)ss_ratios[detune][1] - 1048576;
+        uint32_t offset = (uint32_t)(((int32_t)(base >> 16) * delta
+                         + (int32_t)(base & 65535) * delta / 65536) / 16);
+        voice->increments[0] = base - offset;
+        voice->increments[1] = base + offset;
+        /* Three threshold steps replace up to seven loop iterations.
+         * Keep ordinary shifts/comparisons: the shared emulator does not
+         * implement FF1, so a CLZ shortcut could not be image-qualified. */
+        uint32_t maximum=base+offset;
+        unsigned bank=0;
+        if(maximum<=0x07ffffffu) { bank=4;maximum<<=4; }
+        if(maximum<=0x1fffffffu) { bank+=2;maximum<<=2; }
+        if(maximum<=0x3fffffffu)++bank;
+        voice->bank=bank;
     }
-    unsigned bank = 0;
-    while (bank < 7 && maximum <= (0x7fffffffu >> (bank + 1))) ++bank;
-    voice->bank = bank;
-    /* Equal saw pair. MORF continuously reverses the second saw's polarity:
-     * sum at 0, difference (pulse at zero detune) at 127. Weights stay
-     * bounded even at the endpoints, with a separate fixed sub budget. */
-    int32_t sub_gain = (int32_t)sub * 64;
-    int32_t saw_gain = 32768 - sub_gain;
-    int32_t polarity = ss_morph_polarity[morph];
-    voice->drive_gain = 256 + (int32_t)drive * 6;
-    voice->saw_weight = saw_gain / 2;
-    voice->morph_weight = (voice->saw_weight * polarity) >> 15;
-    voice->sub_gain = sub_gain;
+    if (cold || voice->controls != controls) {
+        unsigned morph = params->morph & 127;
+        unsigned sub = params->sub & 127, drive = params->drive & 127;
+        int32_t sub_gain = (int32_t)sub * 64;
+        int32_t saw_gain = 32768 - sub_gain;
+        voice->drive_gain = 256 + (int32_t)drive * 6;
+        voice->saw_weight = saw_gain / 2;
+        voice->morph_weight = (voice->saw_weight * ss_morph_polarity[morph]) >> 15;
+        voice->sub_gain = sub_gain;
+    }
+    voice->base = base; voice->controls = controls;
 }
 /* Dispatch optional sub/drive once per block. Compile away their sample
  * branches and table accesses when those controls are zero. */
@@ -74,7 +81,8 @@ static __attribute__((always_inline)) inline void ss_source_render(
         struct ss_voice *voice,int16_t *source,unsigned count,unsigned has_sub,unsigned drive) {
     uint32_t base = voice->base;
     const int16_t *table = ss_saws[voice->bank];
-    int32_t saw_weight = voice->saw_weight, morph_weight = voice->morph_weight;
+    int32_t saw_weight = has_sub ? voice->saw_weight : 16384;
+    int32_t morph_weight = voice->morph_weight;
     int32_t sub_gain = voice->sub_gain, drive_gain = voice->drive_gain;
     /* Both phases always advance, including where MORF nearly cancels the
      * second saw. No oscillator reallocation when another note is played. */
@@ -88,7 +96,7 @@ static __attribute__((always_inline)) inline void ss_source_render(
                       + lookup(table, second) * morph_weight;
         first += step1; second += step2;
         if (has_sub) value += lookup(ss_sine, sub_phase) * sub_gain;
-        sub_phase += base / 2;
+        if(has_sub)sub_phase += base / 2;
         int32_t sample = value >> 15;
         /* Symmetric bounded cubic drive. Zero bypasses it exactly. */
         if (drive) {
@@ -102,6 +110,8 @@ static __attribute__((always_inline)) inline void ss_source_render(
         }
         source[n]=(int16_t)sample;
     }
+    /* A disabled sub still keeps its phase, but needs one block update. */
+    if(!has_sub)sub_phase += count*(base/2);
     voice->phase[0]=first;voice->phase[1]=second;voice->sub_phase=sub_phase;
 }
 static void ss_core_render(struct ss_voice *voice, const struct ss_params *params,
@@ -180,6 +190,39 @@ static void ss_render_filtered(struct ss_voice *voice,const struct ss_params *pa
     ss_render_impl(voice,params,output,count,filter,fp,stamp);
 }
 
+/* Held AMP needs neither ramp accumulation nor per-sample gain shifts.
+ * Keep this dispatch after source/filter rendering, so only the small output
+ * loop is specialized. Mono unity also avoids its two gain multiplies. */
+static __attribute__((always_inline)) inline void ss_output16(struct ss_voice *voice,
+        const int16_t *source,int32_t *mix,unsigned previous_gain,unsigned target_gain,
+        unsigned filtered,unsigned stereo,unsigned steady,unsigned unity) {
+    int32_t p1=voice->last,p2=voice->previous,p3=voice->older;
+    int32_t gain=(int32_t)previous_gain*16;
+    int32_t step=(int32_t)target_gain-(int32_t)previous_gain;
+    #pragma GCC unroll 1
+    for(unsigned i=0;i<8;++i) {
+        int32_t current=source[i];
+        int32_t interpolated=(9*(p1+p2)-p3-current)>>4;
+        if(filtered) {
+            if(interpolated>32767)interpolated=32767;
+            if(interpolated< -32768)interpolated= -32768;
+        }
+        int32_t first,second;
+        if(steady) {
+            first=unity?interpolated:(interpolated*(int32_t)target_gain)>>15;
+            second=unity?p1:(p1*(int32_t)target_gain)>>15;
+        } else {
+            gain+=step;first=(interpolated*(gain>>4))>>15;
+            gain+=step;second=(p1*(gain>>4))>>15;
+        }
+        if(stereo) {
+            mix[4*i]=mix[4*i+1]=first*65536;
+            mix[4*i+2]=mix[4*i+3]=second*65536;
+        } else { mix[2*i]+=first;mix[2*i+1]+=second; }
+        p3=p2;p2=p1;p1=current;
+    }
+    voice->last=(int16_t)p1;voice->previous=(int16_t)p2;voice->older=(int16_t)p3;
+}
 /* Native frames consume interpolation directly into the mix or stereo sink. Keep
  * the general renderer for split/odd frames and for the independent oracle. */
 static __attribute__((always_inline)) inline void ss_native16(struct ss_voice *voice,
@@ -201,27 +244,13 @@ static __attribute__((always_inline)) inline void ss_native16(struct ss_voice *v
         else ss_source_render(voice,source,8,0,0);
     }
     if(filter)ss_filter_half(filter,fp,stamp,source,8);
-    int32_t p1=voice->last,p2=voice->previous,p3=voice->older;
-    int32_t gain=(int32_t)previous_gain*16;
-    int32_t step=(int32_t)target_gain-(int32_t)previous_gain;
-    #pragma GCC unroll 1
-    for(unsigned i=0;i<8;++i) {
-        int32_t current=source[i];
-        int32_t interpolated=(9*(p1+p2)-p3-current)>>4;
-        if(filter) {
-            if(interpolated>32767)interpolated=32767;
-            if(interpolated< -32768)interpolated= -32768;
-        }
-        gain+=step;int32_t first=(interpolated*(gain>>4))>>15;
-        gain+=step;int32_t second=(p1*(gain>>4))>>15;
-        if(stereo) {
-            mix[4*i]=mix[4*i+1]=first*65536;
-            mix[4*i+2]=mix[4*i+3]=second*65536;
-        } else { mix[2*i]+=first;mix[2*i+1]+=second; }
-        p3=p2;p2=p1;p1=current;
-    }
-    voice->last=(int16_t)p1;voice->previous=(int16_t)p2;voice->older=(int16_t)p3;
+    if(previous_gain==target_gain) {
+        if(stereo && target_gain==32768)
+            ss_output16(voice,source,mix,previous_gain,target_gain,filter!=0,stereo,1,1);
+        else ss_output16(voice,source,mix,previous_gain,target_gain,filter!=0,stereo,1,0);
+    } else ss_output16(voice,source,mix,previous_gain,target_gain,filter!=0,stereo,0,0);
 }
+
 static __attribute__((noinline)) void ss_mix16(struct ss_voice *voice,
         const struct ss_params *params, int32_t *mix, unsigned previous_gain,
         unsigned target_gain, struct ss_filter *filter,

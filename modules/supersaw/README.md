@@ -1,5 +1,70 @@
 # Supersaw
 
+## S12 scenario-aware CPU candidate
+
+S12 retains S11 samples, filter response, controls, four independent voices
+and both FX slots. It removes redundant work without reducing the sample rate,
+shortening releases or changing the patch format.
+
+- The per-voice SEM filter uses the **ColdFire CPU EMAC**, not either audio DSP.
+  Coefficients and ramps scale once per block; each wide Q14 multiplication
+  keeps its exact signed rounding. All caller EMAC state is preserved, including
+  MACSR, accumulator extensions and rounding flags. OFF/empty calls skip setup.
+- Held AMP blocks skip ramp arithmetic, and mono unity skips amplitude multiplies.
+- A polyphonic track currently playing one native voice writes stereo directly.
+  It still accepts up to four notes; multiple voices and carried release tails
+  use the ordinary saturating mixer.
+- Pitch and timbre preparation have separate dirty checks. Symmetric detune needs
+  one offset calculation, and bank selection takes three bounded comparisons.
+- SUB=0 uses the exact constant saw weight and advances the unused sub phase once
+  per block. Enabling SUB later resumes at the same phase.
+- Unrelated synth starts skip dormant Supersaw initialization. Mono-to-poly carry
+  uses aligned structure copies. Pure mono rendering skips the poly scratch frame.
+
+The reusable EMAC gate checks 10,000 products and 8,000 full/half-rate filter
+blocks against an independent scalar reference, with arbitrary incoming
+accumulators, extensions and MACSR flags. Linked comparison against frozen S11
+also covers sustained controls, sparse voices, mixed envelopes, feature toggles,
+filter bypass/resume and odd/split blocks. These are software arithmetic and
+state checks, not hardware timing or proof that the original crash is resolved.
+
+Run the linked gates with Octabam's corrected Unicorn library through
+`LIBUNICORN_PATH`. They fail closed when its EMAC arithmetic self-test fails.
+Production lifecycle diagnostics remain off. A source-qualified S12 candidate
+still needs guarded device timing and the real Thru/kick pattern replay.
+
+The linked S11/S12 comparison measures executed CPU instructions for the same
+16-sample calls. Two-track rows use four voices on each track and SUB/DRIV on;
+filter-sweep means cover 256 sustained frames. These are renderer costs, not
+whole-device CPU percentages or hardware cycles.
+
+| Case | S11 instructions | S12 instructions | Reduction |
+| --- | ---: | ---: | ---: |
+| Two tracks, filter OFF | 6242.75 | 6006.75 | 3.8% |
+| Two tracks, LOW sweep | 12062.72 | 10997.34 | 8.8% |
+| Two tracks, BP sweep | 11783.53 | 10381.10 | 11.9% |
+| Two tracks, HP sweep | 11852.47 | 10446.85 | 11.9% |
+| One active poly voice, held, OFF | 1093 | 855 | 21.8% |
+| Four-voice first attack, LOW | 7485 | 6502 | 13.1% |
+| Mono-to-poly history copy | 325 | 74 | 77.2% |
+
+Across 640 isolated render probes, 595 improve and 45 increase. The largest
+absolute increase is 62 instructions (2.5%) on a dry four-voice release; the
+largest audible relative increase is 28 instructions (4.2%) on a dry mono
+release. Retired poly calls increase from 124 to 136 instructions. Sustained mixed-gain tests retain
+the improvements on audible filtered paths; zero-gain/retired overhead does not
+render oscillators. Regular-frame stack peaks fall from 692 to 388 bytes for
+mono and 536 to 520 for poly. Separate odd/split probes fall from 708 to 404 for
+mono, 552 to 536 for poly, and 708 to 692 for mono with poly release tails.
+These stack measurements exclude surrounding OS callers and interrupts.
+
+The specialized paths grow linked Supersaw text from 31,934 to 36,312 bytes
+(+4,378 bytes); mutable state and tables are unchanged. Instruction-cache and
+bus effects of this tradeoff require hardware measurement. EMAC operations are
+counted separately from scalar multiplies; replacing a multiply sequence does
+not remove the underlying multiplication work.
+
+
 ## S10 lifecycle CPU candidate
 
 Hardware testing of S9 found burst-start pressure even with TYPE OFF: one
