@@ -26,8 +26,8 @@ applied-engine fallback, never UI fallback. `store_part_midi_read`, `store_part_
 playback and captured-event contexts deliberately.
 
 STORE owns boot-safe ROM gates for native memcpy/init. During an
-ordinary native working-Part replacement it publishes `mp_snapshot_bank`,
-`mp_snapshot_parts` and the outgoing SETUP snapshot, then calls
+ordinary native working-Part replacement it publishes `store_part_snapshot_bank`,
+`store_part_snapshot_parts` and the outgoing SETUP snapshot, then calls
 `hd_part_before(d0=aligned Part address)` once per affected Part. DEG detaches
 outgoing root/queued provenance and suppresses reattachment while the snapshot
 is active, including Follow dependencies. Native bulk copying remains
