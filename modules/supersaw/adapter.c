@@ -97,6 +97,14 @@ int ss_fill(uint32_t track, uint8_t *state, const uint16_t *fp,
     /* A fully open, unresonant LOW with no envelope is transparent by
      * design. Crossfade out once, then stop spending CPU on the filter. */
     if(f.type==1 && f.cutoff==127 && !f.resonance && !f.amount)f.type=0;
+    uint32_t native_previous=*(uint16_t *)(state+38),native_target=*(uint32_t *)(state+24);
+    if(n==16 && !ss_voices[track].pending && native_previous<=32768 && native_target<=32768) {
+        struct ss_filter *filter=(f.type || ss_filters[track][4].wet)?&ss_filters[track][4]:0;
+        ss_stereo16(&ss_voices[track],&params,out,native_previous,native_target,filter,&f,ss_note_stamp[track]);
+        if(filter)ss_filter_samples[track]+=n;
+        *(uint16_t *)(state+38)=(uint16_t)native_target;
+        ss_samples[track]+=n;return 1;
+    }
     if(f.type || ss_filters[track][4].wet) {
         ss_render_filtered(&ss_voices[track],&params,audio,n,&ss_filters[track][4],&f,ss_note_stamp[track]);
         ss_filter_samples[track]+=n;
@@ -197,6 +205,15 @@ int ss_track_fill(uint32_t track, uint8_t *state, const uint16_t *fp,
         if (previous>32767) previous=32767;
         if (target>32767) target=32767;
         params.increment=*(uint32_t *)(native+12);
+        if(n==16 && !ss_poly_voices[track][v].pending) {
+            struct ss_filter *filter=(f.type || ss_filters[track][v].wet)?&ss_filters[track][v]:0;
+            ss_mix16(&ss_poly_voices[track][v],&params,mix,previous,target,
+                     filter,&f,*(uint32_t *)(native+48));
+            if(filter)ss_filter_samples[track]+=n;
+            *(uint16_t *)(native+60)=(uint16_t)target;
+            ss_poly_samples[track][v]+=n;
+            continue;
+        }
         int16_t audio[32];
         if(f.type || ss_filters[track][v].wet) {
             ss_render_filtered(&ss_poly_voices[track][v],&params,audio,n,&ss_filters[track][v],&f,*(uint32_t *)(native+48));

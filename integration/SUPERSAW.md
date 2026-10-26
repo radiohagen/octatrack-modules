@@ -150,3 +150,17 @@ Python Unicorn wheel for native pitch arithmetic. `verify_supersaw_poly.py
 frame-stamped enqueue/allocation events and per-voice state in its receipt.
 Source/emulator results do not resolve the hardware burst-start overrun. See
 the module README for the bounded hardware replay and diagnostic layouts.
+
+
+### S11 native-frame optimization
+
+Stage the S11 `engine.c`, `adapter.c`, generated `adapter.s` and accompanying
+verifiers from the same author commit. The bridge and native record layouts
+are unchanged from S10. The fused output path preserves S10 samples/state,
+reduces native-frame attack and held rendering, and lowers regular-frame stack.
+Split/pending fallback paths add at most eight bytes in the measured cases. Compare exact linked runtimes with
+`verify_supersaw_equivalence.py --baseline-runtime <frozen-S10-runtime>`.
+Include `verify_supersaw_poly.py --mode mixed --tracks 6,7 --burst --rich`
+and dual filtered four-note playback in focused image qualification.
+Hardware acceptance still requires the guarded simultaneous-note replay;
+source/emulator improvements do not establish a hardware timing bound.

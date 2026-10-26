@@ -86,6 +86,52 @@ static void check_gain(void) {
     }
 }
 
+static void check_mix16(void) {
+    /* The established staged renderer is the oracle: exercise exact gain
+     * rounding, all filter modes/fades, extremes, retriggers and controls. */
+    struct ss_voice actual,reference_voice;
+    struct ss_filter filter={0},reference_filter={0};
+    ss_init(&actual);ss_init(&reference_voice);
+    uint32_t random=1234;
+    for(unsigned block=0;block<20000;++block) {
+        random=random*1664525u+1013904223u;
+        struct ss_params p={random,(uint8_t)(random>>8),(uint8_t)(random>>16),
+                            (uint8_t)(random>>24),(uint8_t)random};
+        struct ss_filter_params fp={random%128,(random>>8)%128,
+                                   (random>>16)%128,(random>>24)%128,block%4};
+        unsigned filtered=block%7!=0;
+        unsigned previous=(random>>5)%32768,target=(random>>17)%32768;
+        if(block%3==0)target=previous;
+        if(block%5==0)previous=0;
+        if(block%11==0)target=0;
+        if(block%13==0) { ss_restart(&actual);ss_restart(&reference_voice);
+            ss_filter_reset(&filter);ss_filter_reset(&reference_filter); }
+        struct ss_voice stereo_voice=actual;
+        struct ss_filter stereo_filter=filter;
+        int16_t audio[16];int32_t mix[18],expected[18],stereo[34];
+        for(unsigned i=0;i<34;++i)stereo[i]=123456;
+        for(unsigned i=0;i<18;++i)mix[i]=expected[i]=(int32_t)(i*701)-9000;
+        if(filtered)ss_render_filtered(&reference_voice,&p,audio,16,&reference_filter,&fp,block/9);
+        else ss_render(&reference_voice,&p,audio,16);
+        int64_t gain=(int64_t)previous*65536;
+        int64_t step=((int64_t)target-previous)*65536/16;
+        for(unsigned i=0;i<16;++i) { gain+=step;expected[i]+=(int32_t)((audio[i]*(gain>>16))>>15); }
+        ss_mix16(&actual,&p,mix,previous,target,filtered?&filter:0,&fp,block/9);
+        assert(!memcmp(mix,expected,sizeof mix));
+        ss_stereo16(&stereo_voice,&p,stereo,previous,target,filtered?&stereo_filter:0,&fp,block/9);
+        for(unsigned i=0;i<16;++i) {
+            int32_t sample=expected[i]-((int32_t)(i*701)-9000);
+            assert(stereo[2*i]==sample*65536 && stereo[2*i+1]==stereo[2*i]);
+        }
+        assert(stereo[32]==123456 && stereo[33]==123456);
+        assert(!memcmp(&stereo_voice,&reference_voice,sizeof actual));
+        assert(!memcmp(&stereo_filter,&reference_filter,sizeof filter));
+        assert(!memcmp(&actual,&reference_voice,sizeof actual));
+        assert(!memcmp(&filter,&reference_filter,sizeof filter));
+    }
+    puts("[ok] fused native-frame mix matches staged audio and all voice/filter state for 20000 blocks");
+}
+
 static void check_poly(void) {
     uint32_t pool[4][16]={{0}}, state[32]={0};
     uint16_t fp[6]={0x4000,96<<8,110<<8,0x4000,40<<8,30<<8};
@@ -461,7 +507,7 @@ int main(int argc, char **argv) {
     }
     check_restart();check_filter();check_half_filter();
     check_gain();
-    check_poly();
+    check_mix16();check_poly();
     if (argc == 2) {
         FILE *f = fopen(argv[1], "wb"); assert(f);
         p = (struct ss_params){21426141,0,0,0,0};

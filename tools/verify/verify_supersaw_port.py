@@ -25,7 +25,7 @@ from hw import ot_project as otp
 from remix import registry
 
 
-def fixture(source, work, tracks, rich, sequence=False, fx=False, mixed=False, fx_pair=('FILTER','DELAY'), voices=1, chord=0, hold=127, filter_type=0):
+def fixture(source, work, tracks, rich, sequence=False, fx=False, mixed=False, fx_pair=('FILTER','DELAY'), voices=1, chord=0, hold=127, filter_type=0, voice_caps=None):
     base = ab_fixture.prepare(source, work/'base')
     sample.SAMPLE_REL = 'AUDIO/FMSYNTH-SUPERSAW.wav'
     sample.LOOP_FRAMES = 4*44100
@@ -64,7 +64,7 @@ def fixture(source, work, tracks, rich, sequence=False, fx=False, mixed=False, f
                         data[setup:setup+6]=bytes((64,40,0,64,filter_type,83))
                     data[b+0x1da+30*t+6:b+0x1da+30*t+12] = bytes((1,0,0,0,0,0))
                     at = b+0x11a+24*t
-                    data[at:at+6] = bytes((0,0,voices,0,0,chord))
+                    data[at:at+6] = bytes((0,0,(voice_caps or {}).get(t,voices),0,0,chord))
                     data[at+6:at+12] = bytes((0,hold,10,64,64,127))
             for pattern in range(16):
                 for t in range(8):

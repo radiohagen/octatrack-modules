@@ -126,8 +126,8 @@ def main():
         for case in cases:
             for phase in ('cold','first_attack','attack','release','pitch_change'):
                 assert case[phase]['divides']==0, ('normal block divides',case,phase)
-                # Frozen S9 maxima: mono 692 B (nested adapter), poly 540 B.
-                limit=704 if case['voices']==0 else 560
+                # S11 native-frame maxima: mono 692 B, poly 536 B.
+                limit=704 if case['voices']==0 else 544
                 assert case[phase]['stack_bytes']<=limit, ('renderer stack regression',case,phase)
             if case['voices']:
                 assert case['silent_tail']['instructions']<600, ('silent voice regression',case)

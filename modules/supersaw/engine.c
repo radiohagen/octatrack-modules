@@ -81,6 +81,8 @@ static __attribute__((always_inline)) inline void ss_source_render(
     uint32_t first = voice->phase[0], second = voice->phase[1];
     uint32_t step1 = voice->increments[0], step2 = voice->increments[1];
     uint32_t sub_phase = voice->sub_phase;
+    /* Native eight-sample blocks otherwise expand into register spills. */
+    #pragma GCC unroll 1
     for (uint32_t n = 0; n < count; ++n) {
         int32_t value = lookup(table, first) * saw_weight
                       + lookup(table, second) * morph_weight;
@@ -176,4 +178,59 @@ static void ss_render_filtered(struct ss_voice *voice,const struct ss_params *pa
                int16_t *output,uint32_t count,struct ss_filter *filter,
                const struct ss_filter_params *fp,uint32_t stamp) {
     ss_render_impl(voice,params,output,count,filter,fp,stamp);
+}
+
+/* Native frames consume interpolation directly into the mix or stereo sink. Keep
+ * the general renderer for split/odd frames and for the independent oracle. */
+static __attribute__((always_inline)) inline void ss_native16(struct ss_voice *voice,
+        const struct ss_params *params, int32_t *mix, unsigned previous_gain,
+        unsigned target_gain, struct ss_filter *filter,
+        const struct ss_filter_params *fp, uint32_t stamp, unsigned stereo) {
+    struct ss_params core=*params;
+    if(core.increment<512)core.increment=512;
+    if(core.increment>0x3e800000u)core.increment=0x3e800000u;
+    core.increment*=2;
+    ss_prepare(voice,&core);
+    int16_t source[8];
+    unsigned drive=params->drive&127;
+    if(voice->sub_gain) {
+        if(drive)ss_source_render(voice,source,8,1,1);
+        else ss_source_render(voice,source,8,1,0);
+    } else {
+        if(drive)ss_source_render(voice,source,8,0,1);
+        else ss_source_render(voice,source,8,0,0);
+    }
+    if(filter)ss_filter_half(filter,fp,stamp,source,8);
+    int32_t p1=voice->last,p2=voice->previous,p3=voice->older;
+    int32_t gain=(int32_t)previous_gain*16;
+    int32_t step=(int32_t)target_gain-(int32_t)previous_gain;
+    #pragma GCC unroll 1
+    for(unsigned i=0;i<8;++i) {
+        int32_t current=source[i];
+        int32_t interpolated=(9*(p1+p2)-p3-current)>>4;
+        if(filter) {
+            if(interpolated>32767)interpolated=32767;
+            if(interpolated< -32768)interpolated= -32768;
+        }
+        gain+=step;int32_t first=(interpolated*(gain>>4))>>15;
+        gain+=step;int32_t second=(p1*(gain>>4))>>15;
+        if(stereo) {
+            mix[4*i]=mix[4*i+1]=first*65536;
+            mix[4*i+2]=mix[4*i+3]=second*65536;
+        } else { mix[2*i]+=first;mix[2*i+1]+=second; }
+        p3=p2;p2=p1;p1=current;
+    }
+    voice->last=(int16_t)p1;voice->previous=(int16_t)p2;voice->older=(int16_t)p3;
+}
+static __attribute__((noinline)) void ss_mix16(struct ss_voice *voice,
+        const struct ss_params *params, int32_t *mix, unsigned previous_gain,
+        unsigned target_gain, struct ss_filter *filter,
+        const struct ss_filter_params *fp, uint32_t stamp) {
+    ss_native16(voice,params,mix,previous_gain,target_gain,filter,fp,stamp,0);
+}
+static __attribute__((noinline)) void ss_stereo16(struct ss_voice *voice,
+        const struct ss_params *params, int32_t *out, unsigned previous_gain,
+        unsigned target_gain, struct ss_filter *filter,
+        const struct ss_filter_params *fp, uint32_t stamp) {
+    ss_native16(voice,params,out,previous_gain,target_gain,filter,fp,stamp,1);
 }

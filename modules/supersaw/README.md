@@ -532,3 +532,53 @@ without `OT_PROJECT`; the full unscoped suite was not run. LFO SETUP's CUT
 label was also visually checked in the emulator.
 Tested image SHA-256: `7fdef4ae00e63f080612d741650d98db534ba2837b0826d2a84b0dce496b2c7f`.
 This source qualification does not include an installation package or flashing.
+
+
+## S11 native-frame rendering
+
+Native 16-sample calls now interpolate directly into the poly mix or mono
+stereo output while applying the native AMP ramp. They avoid writing and
+rereading a separate full-rate per-voice buffer. The oscillator/filter body
+is specialized for each output layout; bounded source-loop unrolling avoids
+register spills. Odd/pending and non-native block sizes retain the staged
+renderer. Controls, four voices, independent releases, both FX slots and
+persistence are unchanged; no sound-quality reduction is introduced.
+
+Compared with S10, executed ColdFire instructions for a rich 16-sample call:
+
+| Case | S10 | S11 |
+|---|---:|---:|
+| Mono first attack, OFF | 1,145 | 920 |
+| Mono repeated attack, OFF | 1,059 | 834 |
+| Four-note first attack, OFF | 4,024 | 3,533 |
+| Four-note repeated attack, OFF | 3,688 | 3,197 |
+| Four-note held, OFF | 3,397 | 3,130 |
+| Four-note first attack, LOW | 8,020 | 7,485 |
+| Four-note repeated attack, LOW | 7,664 | 7,129 |
+| Four-note held, LOW | 6,217 | 5,890 |
+
+For regular 16-sample calls with no pending odd sample, maximum measured stack
+drops from 700 to 692 bytes for mono and 548 to 536 for poly. Separate probes
+of split/pending calls and mono-with-poly-tail transitions find maxima of
+708 bytes for mono (S10: 700) and 552 for poly (S10: 548). These figures exclude
+callers and the OS; no whole-interrupt stack bound is established. These are emulator
+instruction/stack measurements, not hardware cycles or a guarantee that the
+reported 436.7-us burst fits the hardware frame budget. A smaller shared-body
+experiment regressed held dry rendering and was rejected.
+
+Across 320 native-size profile probes, all 280 audible cold, held, control-change,
+attack and release cases improve. The 40 zero-to-zero cases retain synthesis
+skipping but add 4–20 instructions from adapter dispatch/register setup; a fully
+retired poly call moves from 123 to 124. No release is shortened to get savings.
+
+The source oracle compares 20,000 changing blocks against the staged renderer,
+including exact stereo/mix samples, oscillator/filter state, AMP rounding and
+output guards. `verify_supersaw_equivalence.py --baseline-runtime PATH`
+compares frozen S10 and candidate linked binaries over 1,600 mixed native,
+odd and split blocks, with changing pitch, controls, modes, gains and carries.
+`verify_supersaw_poly.py --mode mixed --tracks 6,7 --burst` exercises one mono
+note plus a three-note chord at a cap of four, independent note-offs and
+retrigger, matching the hardware workload's allocation pattern. This fixture
+uses controlled test settings, not a captured copy of the user's patch.
+The separate two-track four-note and transition gates remain applicable.
+S10's opt-in diagnostics and hardware-readout limitation remain unchanged.
