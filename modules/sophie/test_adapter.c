@@ -5,12 +5,74 @@
 #include <string.h>
 #include "adapter.c"
 
+static uint32_t random_state = 0x051706a5u;
+static uint32_t next_random(void) {
+    random_state ^= random_state << 13;
+    random_state ^= random_state >> 17;
+    random_state ^= random_state << 5;
+    return random_state;
+}
+
+static void test_specialized_engine(void) {
+    const uint16_t pitches[]={8,9,15,16,17,32,1024,8192,16383,16384,24575,24576};
+    const int8_t sweeps[]={-64,-63,-1,0,1,62,63};
+    struct sf_voice specialized;
+    struct ds_voice reference;
+    int32_t expected[32];
+    unsigned calls=0, saw_sleep=0, saw_wake=0;
+    memset(&specialized,0,sizeof(specialized));
+    memset(&reference,0,sizeof(reference));
+    ds_voice_init(&specialized.engine);ds_voice_init(&reference);
+    /* sf_fill fixes FUSE/full velocity before any refill. Expose only those
+     * existing constants to the compiler, then compare every sample and all
+     * engine history to the independently callable, generic upstream code. */
+    for(unsigned pitch=0;pitch<sizeof(pitches)/sizeof(*pitches);++pitch)
+    for(unsigned sweep=0;sweep<sizeof(sweeps)/sizeof(*sweeps);++sweep)
+    for(unsigned mode=0;mode<6;++mode)
+    for(unsigned block=0;block<128;++block) {
+        specialized.params=(struct ds_params){
+            .phase_inc=pitches[pitch],.sweep=sweeps[sweep],
+            .model=0,.velocity=127,.fold=0,
+            .color=mode==0?0:mode==1?127:next_random()%128,
+            .metal=mode==2?0:mode==3?127:next_random()%128,
+            .feedback=mode==4?0:mode==5?127:next_random()%128,
+        };
+        specialized.trigger=block==1 || block==2 || block==65 ||
+            (block>2 && block<80 && next_random()%23==0);
+        if(block>=80) {
+            int32_t level=block<121?0:0x200000;
+            int32_t phase=block<121?0:1;
+            saw_wake |= specialized.engine.sleeping && phase!=0;
+            ds_voice_gate(&specialized.engine,level,phase);
+            ds_voice_gate(&reference,level,phase);
+        }
+        struct ds_params original;
+        memcpy(&original,&specialized.params,sizeof(original));
+        sf_render(&specialized);
+        ds_voice_render(&reference,&original,specialized.trigger,expected,32);
+        assert(!memcmp(expected,specialized.block,sizeof(expected)));
+        assert(!memcmp(&reference,&specialized.engine,sizeof(reference)));
+        assert(!memcmp(&original,&specialized.params,sizeof(original)));
+        for(unsigned i=0;i<32;++i) {
+            /* This upstream invariant makes sf_next's signed >>16 exact,
+             * including negative samples that division truncates to zero. */
+            assert(((uint32_t)expected[i]&0xffffu)==0);
+            assert(expected[i]/65536==(expected[i]>>16));
+        }
+        saw_sleep |= specialized.engine.sleeping;
+        ++calls;
+    }
+    assert(saw_sleep && saw_wake);
+    printf("[ok] %u FUSE blocks match generic upstream PCM and complete engine state\n",calls);
+}
+
 static void reset(unsigned t) {
     memset(&sf_voices[t],0,sizeof(sf_voices[t]));
     ds_voice_init(&sf_voices[t].engine);
     sf_voices[t].trigger=1;sf_voices[t].pos=32;sf_active[t]=1;
 }
 int main(int argc, char **argv) {
+    test_specialized_engine();
     assert(sf_marker("../AUDIO/FMSYNTH-SOPHIE.wav"));
     assert(sf_marker("FMSYNTH-SOPHIE-test.wav"));
     assert(!sf_marker("FMSYNTH.wav"));

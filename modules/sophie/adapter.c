@@ -82,13 +82,25 @@ void sf_begin(uint32_t track) {
     v->resample_step = 0;
 }
 
-static int32_t sf_next(struct sf_voice *v) {
-    if (v->pos == 32) {
-        ds_voice_render(&v->engine, &v->params, v->trigger, v->block, 32);
+/* Let GCC specialize the unchanged upstream renderer for this adapter's
+ * fixed FUSE, full-velocity and 32-frame contract. The local parameters
+ * expose those constants without changing the upstream engine or state. */
+static __attribute__((noinline, flatten)) void sf_render(struct sf_voice *v) {
+    struct ds_params params = v->params;
+    params.model = 0;
+    params.velocity = 127;
+    ds_voice_render(&v->engine, &params, v->trigger, v->block, 32);
+}
+
+static int32_t sf_next(struct sf_voice *v, uint32_t *pos) {
+    if (*pos == 32) {
+        sf_render(v);
         v->trigger = 0;
-        v->pos = 0;
+        *pos = 0;
     }
-    return v->block[v->pos++] / 65536;
+    /* The engine writes integer PCM multiplied by 65536, so every low
+     * word is zero. The arithmetic shift is exact for negative PCM too. */
+    return v->block[(*pos)++] >> 16;
 }
 
 /* Native sy_state and parameter-record layouts, pinned by bridge.py.
@@ -134,28 +146,41 @@ int sf_fill(uint32_t track, uint8_t *state, const uint16_t *fp,
     v->params.fold = 0;
     int32_t gain = *(uint16_t *)(state+38)*32768;
     int32_t step = ((int32_t)*(uint32_t *)(state+24)*32768-gain)/16;
+    /* A settled unity envelope needs neither gain conversion nor a sample
+     * multiply. Moving envelopes retain the original per-frame rounding. */
+    int unity = !step && gain == 32768*32768;
+    /* Keep the resampler cursor in registers across output frames. Engine
+     * refills touch engine/block only; publish the cursor once per call. */
+    uint32_t pos = v->pos, fraction = v->fraction;
+    uint32_t resample_step = v->resample_step;
+    int32_t left = v->left, right = v->right;
     if (!v->primed) {
-        v->left = sf_next(v); v->right = sf_next(v); v->primed = 1;
+        left = sf_next(v, &pos); right = sf_next(v, &pos); v->primed = 1;
     }
     for (uint32_t i=0; i<n; ++i) {
-        int32_t sample = v->left+sf_interpolate(v->right-v->left,
-                                                v->fraction >> 16);
+        int32_t sample = left+sf_interpolate(right-left, fraction >> 16);
         gain += step;
-        int32_t g = gain > 0 ? gain/32768 : 0;
-        if (g > 32768) g=32768;
+        int32_t value = sample;
+        if (!unity) {
+            int32_t g = gain > 0 ? gain/32768 : 0;
+            if (g > 32768) g=32768;
+            value = sample*g/32768;
+        }
         /* Upstream's fixed conditioning peaks at about -12 dBFS for FUSE.
          * Restore 6 dB before the normal Octatrack AMP/mixer path. */
-        int32_t value = (sample*g/32768)*2;
+        value *= 2;
         if (value > 32767) value = 32767;
         if (value < -32768) value = -32768;
         value *= 65536;
         out[2*i] = out[2*i+1] = value;
-        v->fraction += v->resample_step;
-        while (v->fraction >= 147u * 65536u) {
-            v->fraction -= 147u * 65536u;
-            v->left = v->right; v->right = sf_next(v);
+        fraction += resample_step;
+        while (fraction >= 147u * 65536u) {
+            fraction -= 147u * 65536u;
+            left = right; right = sf_next(v, &pos);
         }
     }
+    v->left = left; v->right = right;
+    v->pos = pos; v->fraction = fraction;
     *(uint16_t *)(state+38) = (uint16_t)(gain > 0 ? gain/32768 : 0);
     sf_samples[track] += n;
     return 1;
