@@ -7,7 +7,7 @@ offset after its register choice. Scale Quantizer is not required.
 
 ## Composition and controls
 
-Select `MIDI FOLLOW` with `MIDI PART STATE`; neither Harmony, Scales nor KITS
+Select `MIDI FOLLOW` with `MIDI PART STATE` and `EVENTS`; neither Harmony, Scales nor KITS
 is required. RFOL is a persistent source choice, not a held modifier. Pressing
 D opens its editor; TRIG/LIVE is a per-receiver setting. Start with TRIG so
 roots change only at your programmed rhythm, then try LIVE for sustained bass.
@@ -107,8 +107,7 @@ Chains resolve to their final source: T3 → T2 → T1 follows T1's root.
   full-firmware emulator tests; unusual mute/plays-free modes remain untested
   on hardware.
 
-On its own, MIDI Follow copies native one to four note sets. MIDI Harmony optionally
-adds live keyboard chords and follower chords/arp, as described below. Audio
+On its own, MIDI Follow copies native one to four note sets. Optional Harmony integration adds live keyboard roots and follower chords/arp. Audio
 following and live transposition of a running pattern are outside its scope.
 Shared output channels have ownership stress coverage; physical MIDI timing
 requires instrument validation.
@@ -131,11 +130,15 @@ stock NOTE descriptor, drawer and encoder dispatch. No DSP code is added.
   effective interval or its Harmony root before
   stock note ownership and release bookkeeping (`0x4009fbbc` / `0x4009fd04`).
   Chained resolution has a defensive eight-hop bound.
-- `0x4009c3d4` / `0x4009c4d4`: reset the GRAV register on transport
-  start/resume through SEQUENCER EVENTS. The platform owns these spans and
-  notifies Follow and EUCLID independently.
-- `0x4009fbb2` / `0x4009fcfa`: commit GRAV after a successful sequenced
-  note-on while stock retains release bookkeeping.
+- EVENTS owns transport start/resume (`0x4009c3d4` / `0x4009c4d4`) and
+  accepted-note boundaries (`0x4009fbb2` / `0x4009fcfa`). Follow registers
+  `bf_seq_start`, `bf_seq_resume` and `bf_seq_note_accepted`. Transport
+  notifications reset GRAV after the native PLAYING write, before the native
+  continuation. Accepted-note notifications commit GRAV only for nonzero
+  velocity and pool kinds other than live keyboard arp (1).
+  Callbacks update Follow history only; native packet and release ownership
+  remain unchanged. Other subscribers, including EUCLID, receive their own
+  notification through the same dispatcher.
 - NOTE SETUP's unused D slot is labelled RFOL and enabled. Its encoder callback
   at `0x400bc64e` points to the module; its formatter prints OFF/T1–T8.
   The drawer detour at `0x40036674` reads RFOL from the selected native Part.
@@ -152,8 +155,6 @@ playback uses each MIDI track's playing Part through MIDI PART STATE.
 `bf_pitches[8]` retains full MIDI root pitches. `bf_intervals[8][3]` holds
 effective source N2–4 offsets from that root, with 0x80 for absent voices.
 These histories are runtime-only.
-Harmony calls `bf_register` before applying the receiver's TRAN; its adapter
-also publishes live keyboard root octaves into `bf_pitches`.
 Native Part operations own persistence, with or without KITS. The generic
 MIDI sender is not hooked. The existing DRAM platform reserves about 10 MB of sample RAM;
 this small module shares that reserve when composed with other DRAM modules.
@@ -172,7 +173,7 @@ context/Part epoch, configuration, previous root and a cached proposal.
 `bf_register_begin` invalidates the proposal at an ordinary receiver trig;
 source pitch-class changes invalidate it for LIVE response. Queries and arp
 repeats reuse the proposal, including after it has sounded. The shared
-MIDI Part State successful-note continuations commit it only for nonzero
+EVENTS accepted-note notifications commit it only for nonzero
 velocity sequenced output; the LIVE sender commits only actual note-ons.
 The remembered root precedes ACC, TRAN, quantization and chord voicing.
 Native transport start/resume resets all history. Playing Part/epoch and
@@ -236,6 +237,6 @@ This exercises linked ColdFire code, not physical outgoing-MIDI timing.
 Run `make check REMIX=midi-follow` for the standalone module. The manifest
 runs linked routing, register, response and graph stress checks. With a prepared
 project copy, `verify_midi_follow_response_port.py --project DIR` checks LIVE
-response through emulated panel events and MIDI output. Combined Harmony
-settings/persistence coverage lives in `verify_midi_harmony_port.py --settings-only`,
-and NOTE SETUP confirmation in `verify_midi_setup_port.py`.
+response through emulated panel events and captured MIDI output. Hardware
+validation of boot, controls, persistence, MIDI timing and note releases remains
+outstanding. Optional Harmony integration is verified separately.

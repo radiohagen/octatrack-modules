@@ -41,6 +41,9 @@ ordinary pattern changes alone retain it.
 - RFOL OFF uses native notes. Before a source root is available, playback is unchanged.
 - The source supplies its NOTE and NOT2–4 pitches. The follower plays that set in its selected register, with its own
   TRAN. Its stored NOT2–4 do not add notes.
+- Source pitches include the source track's TRAN and KEY/scale processing.
+  The follower applies its register and chromatic TRAN afterward; the scale
+  setting itself is not copied and there is no second scale correction.
 - LIVE shifts currently held notes when the source root moves. A change to
   native NOT2–4 with the same root takes effect at the follower's next trig.
 - Several tracks can follow one source. Chains use the ultimate source and
@@ -54,10 +57,8 @@ ordinary pattern changes alone retain it.
 ## Storage and stock firmware
 
 RFOL, REG, all three remembered values and UPDT are native Part settings per track.
-Runtime roots and held notes are not saved. Requires **MIDI Part State** and **SEQUENCER EVENTS**;
-Scales and KITS are optional. Follow and EUCLID register independently with
-SEQUENCER EVENTS and can be selected together. Re-enter register settings
-from an earlier Follow format; there is no migration.
+Runtime roots and held notes are not saved. Requires **MIDI Part State** and **EVENTS**.
+Scales and KITS are optional.
 
 Stock 1.40C preserves the source-track number but resets the mode, response
 and octave fields. After saving that bank on stock, Follow returns as **FIXED,
@@ -70,4 +71,5 @@ MIDI Follow has been tested in the emulator. **Hardware testing is still to
 be done**, including physical MIDI output, timing and note releases on an
 Octatrack MKI/MKII.
 
+[Build integration](../../integration/midi-follow.md) ·
 [Implementation and verification](DEVELOPMENT.md).

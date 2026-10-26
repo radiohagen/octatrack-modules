@@ -103,38 +103,15 @@ author history. The remaining feature stages above are planned boundaries,
 not yet submission-ready branches. Prepare them sequentially after predecessor
 review; validate their adapters and exact combinations before opening PRs.
 
-## MIDI Follow preparation, 20 October 2026
+## MIDI Follow status, 26 October 2026
 
-The approved Follow source is published on `codex/midi-follow-voices` at
-`e151238a6aef385c81083440afa1ffb255615b8d`. Source HARM OFF supplies N1–4;
-source HARM NOTE/CHORD supplies only its resolved degree:oct root. Follower
-HARM NOTE/CHORD generates its own voices. Harmony absent behaves as OFF.
+[Octabam PR #824](https://github.com/sambanks/octabam/pull/824) is a draft
+follow-up to merged EVENTS #871. Follow requires MIDI Part State and EVENTS;
+its transport and accepted-note callbacks share platform hooks with EUCLID.
+The previous include-callback prerequisite is also upstream.
 
-The Octabam candidate is published at `63caee8445f1bede786ef1666d109b9eebea578a`
-on [codex/pr/midi-follow-voices](https://github.com/radiohagen/octabam/tree/codex/pr/midi-follow-voices),
-based on upstream `8250be0c23ca0a0a953cb7e5721e3bdb98dadfe5`. The separate
-include-callback compatibility prerequisite `f4f208cd` is published on
-[codex/pr/midi-include-abi](https://github.com/radiohagen/octabam/tree/codex/pr/midi-include-abi).
-Remote commit IDs were verified after publication. No upstream PR is submitted. Exact checks and their snapshot are in
-[`integration/review-branches.json`](../integration/review-branches.json).
-
-Other-module work is explicit: Part State is required; Scales needs the
-composed-reference adapter in the candidate. Harmony's companion branch
-`codex/harmony-follow-integration` supplies its event ownership changes,
-HARMONY FOLLOW bridge and the SRAM branch-range fix for the larger image.
-That historical branch refused EUCLID. The shared-event migration replaces the bridges with platform callbacks; see SYSTEM_EVENTS.md.
-
-The Harmony companion and full-bus interaction checks are recorded in
-[the scoped validation receipt](../integration/harmony-follow-validation.json).
-The tested Octabam composition is published at `385f9d20`. Its larger package
-base is separate from the current-upstream standalone Follow PR stack.
-
-The 20 October rebase retains the identical standalone Follow firmware image.
-No new Follow engine or verifier changes were missing from the earlier pin.
-The source update states measured emulator behavior and unverified device
-behavior in Follow's README. Harmony bridge implementation documentation stays
-with Harmony and its bridge; Follow describes its own source-note behavior.
-The upstream PR descriptions now follow every section of the current template.
-Local reach, documentation and strict site checks passed; a hosted CI run link
-can only be added after PR creation. The callback prerequisite also passed its
-own independent reach run. No upstream PR has been opened.
+[The current integration guide](../integration/midi-follow.md) identifies the
+review branch and standalone/combined checks. The PR records the exact source
+pin, software results and hardware checklist. Hardware qualification is still
+outstanding. Historical checks in `integration/review-branches.json` apply
+only to their recorded commits and images.
