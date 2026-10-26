@@ -1,5 +1,40 @@
 # Supersaw
 
+## S13 final CPU pass
+
+S13 preserves S12 sound, four independent voices and both FX slots. Dry mono
+and single-voice playback skip unused filter-parameter setup once the wet fade
+has ended. Native stereo output combines Q15 gain truncation with 16.16 output
+formatting, and a retired poly track clears its fixed-size native buffer with
+less loop overhead. Short and split calls retain their original bounds.
+
+The output conversion keeps negative fractional rounding and uses unsigned
+formatting for a defined 32-bit result even when old filter history overshoots
+during bypass. Source checks cover all 81,920 values in the interpolation range at seven
+AMP gains (1,146,880 PCM/stereo comparisons), plus 2,048 extreme-history
+blocks, against an independent wide-arithmetic oracle. Retired-note tests
+check every supported buffer length, 0–32, including guards and counters.
+
+The final linked S12/S13 profile improves all 640 isolated cases and all 54
+sustained phase means/peaks. Rich dry mono uses 4.2–5.3% fewer instructions;
+a single active poly note uses 6.0–7.0% fewer. A fully retired poly call falls
+from 136 to 107 instructions (21.3%). Dense four-note playback gains only three
+instructions per track per call in this pass; its larger filter savings come
+from S9–S12. These are executed instructions, not hardware cycles or total CPU.
+
+Normal mono/multi-voice stack maxima stay at 388/520 bytes; singleton poly adds
+four bytes (328 to 332). Odd/split maxima remain 404 mono, 536 poly and 692 mono
+with poly tails. Supersaw function text grows 704 bytes to 37,016; mutable state and tables remain
+unchanged. Compared with S11, 542 of 560 audible cases improve; 18 dry multi-note
+attack/release cases still increase, by at most 59 instructions (2.4%).
+
+Exact linked comparison retains 140,916 stereo samples over 4,512 blocks,
+plus 7,200 paired calls in the extreme-history/bypass gate, including filter
+warm-up. The focused native
+suite exercises mono-plus-triad bursts, dual filtered four-note tracks,
+mono/poly transitions and adding/editing T4 beside synthetic Thru/kick tracks.
+Hardware timing and the original physical crash remain unverified.
+
 ## S12 scenario-aware CPU candidate
 
 S12 retains S11 samples, filter response, controls, four independent voices

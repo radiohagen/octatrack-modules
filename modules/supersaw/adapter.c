@@ -96,7 +96,13 @@ int ss_fill(uint32_t track, uint8_t *state, const uint16_t *fp,
         .sub = (fp[4] >> 8) & 127, .drive = (fp[5] >> 8) & 127
     };
     int16_t audio[32];
-    struct ss_filter_params f={(fp[3]>>8)&127,ss_setup[track][1],ss_setup[track][2],ss_setup[track][3],ss_setup[track][4]};
+    /* OFF with no wet tail never reads the remaining filter parameters. */
+    struct ss_filter_params f;
+    f.type=ss_setup[track][4];
+    if(f.type || ss_filters[track][4].wet) {
+        f.cutoff=(fp[3]>>8)&127;f.resonance=ss_setup[track][1];
+        f.amount=ss_setup[track][2];f.decay=ss_setup[track][3];
+    }
     /* A fully open, unresonant LOW with no envelope is transparent by
      * design. Crossfade out once, then stop spending CPU on the filter. */
     if(f.type==1 && f.cutoff==127 && !f.resonance && !f.amount)f.type=0;
@@ -183,8 +189,13 @@ static __attribute__((noinline)) int ss_poly_stereo16
     if(target>32767)target=32767;
     struct ss_params params={*(uint32_t *)(native+12),(fp[1]>>8)&127,
         (fp[2]>>8)&127,(fp[4]>>8)&127,(fp[5]>>8)&127};
-    struct ss_filter_params f={(fp[3]>>8)&127,ss_setup[track][1],ss_setup[track][2],
-        ss_setup[track][3],ss_setup[track][4]};
+    /* OFF with no wet tail never reads the remaining filter parameters. */
+    struct ss_filter_params f;
+    f.type=ss_setup[track][4];
+    if(f.type || filter->wet) {
+        f.cutoff=(fp[3]>>8)&127;f.resonance=ss_setup[track][1];
+        f.amount=ss_setup[track][2];f.decay=ss_setup[track][3];
+    }
     if(f.type==1 && f.cutoff==127 && !f.resonance && !f.amount)f.type=0;
     if(!(f.type || filter->wet))filter=0;
     ss_stereo16(voice,&params,out,previous,target,filter,&f,*(uint32_t *)(native+48));
@@ -298,7 +309,11 @@ int ss_track_fill(uint32_t track, uint8_t *state, const uint16_t *fp,
         if (!state[80]) return ss_fill(track,state,fp,out,n);
         /* Poly remains selected after its final native voice retires. */
         *(uint16_t *)(state+38)=0;ss_samples[track]+=n;
-        for(unsigned i=0;i<n;++i)out[2*i]=out[2*i+1]=0;
+        /* Native frames need a fixed clear; split calls retain their bounds. */
+        if(n==16) {
+            #pragma GCC unroll 8
+            for(unsigned i=0;i<32;++i)out[i]=0;
+        } else for(unsigned i=0;i<n;++i)out[2*i]=out[2*i+1]=0;
         return 1;
     }
     if(state[80] && n==16) {

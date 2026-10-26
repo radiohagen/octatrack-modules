@@ -86,6 +86,56 @@ static void check_gain(void) {
     }
 }
 
+/* Independent wide division oracle, including arbitrary four-point
+ * interpolation history beyond signed 16-bit and native modulo32 format. */
+static int64_t output_floor(int64_t value,int64_t divisor) {
+    int64_t result=value/divisor;
+    return result-(value<0 && value%divisor!=0);
+}
+static void check_output_scale(void) {
+    const int32_t gains[]={0,1,127,16383,16384,32767,32768};
+    for(int32_t sample=-40960;sample<=40959;++sample)
+    for(unsigned i=0;i<sizeof(gains)/sizeof(gains[0]);++i) {
+        int64_t floor=output_floor((int64_t)sample*gains[i],32768);
+        assert(ss_output_scale(sample,gains[i],0)==floor);
+        assert((uint32_t)ss_output_scale(sample,gains[i],1)==(uint32_t)(floor*65536));
+    }
+    /* Dry history can be extreme at internal caller boundaries. Preserve
+     * native wrapping as well as PCM output for every endpoint gain ramp. */
+    const unsigned levels[]={0,1,32767,32768};
+    for(unsigned bits=0;bits<32;++bits)
+    for(unsigned from=0;from<4;++from)
+    for(unsigned to=0;to<4;++to)
+    for(unsigned stereo=0;stereo<2;++stereo)
+    for(unsigned filtered=0;filtered<2;++filtered) {
+        struct ss_voice actual={0},expected={0};
+        actual.last=bits&1?32767:-32768;
+        actual.previous=bits&2?32767:-32768;
+        actual.older=bits&4?32767:-32768;expected=actual;
+        int16_t source[8];int32_t out[32]={0},oracle[32]={0};
+        for(unsigned i=0;i<8;++i)source[i]=((bits>>3)^(bits&16?i:0))&1?32767:-32768;
+        unsigned previous=levels[from],target=levels[to];
+        int64_t gain=(int64_t)previous*16,step=(int64_t)target-previous;
+        int32_t p1=expected.last,p2=expected.previous,p3=expected.older;
+        for(unsigned i=0;i<8;++i) {
+            int64_t interp=output_floor(9*((int64_t)p1+p2)-p3-source[i],16);
+            if(filtered) { if(interp>32767)interp=32767;if(interp< -32768)interp= -32768; }
+            gain+=step;int64_t first=output_floor(interp*(gain/16),32768);
+            gain+=step;int64_t second=output_floor((int64_t)p1*(gain/16),32768);
+            if(stereo) {
+                oracle[4*i]=oracle[4*i+1]=(int32_t)(uint32_t)(first*65536);
+                oracle[4*i+2]=oracle[4*i+3]=(int32_t)(uint32_t)(second*65536);
+            } else { oracle[2*i]=(int32_t)first;oracle[2*i+1]=(int32_t)second; }
+            p3=p2;p2=p1;p1=source[i];
+        }
+        expected.last=(int16_t)p1;expected.previous=(int16_t)p2;expected.older=(int16_t)p3;
+        ss_output16(&actual,source,out,previous,target,filtered,stereo,
+                    previous==target,stereo && previous==target && target==32768);
+        assert(!memcmp(out,oracle,sizeof out));assert(!memcmp(&actual,&expected,sizeof actual));
+    }
+    puts("[ok] native output scaling: full interpolation range, 7 gains, exact PCM/stereo floor and extreme histories");
+}
+
 static void check_mix16(void) {
     /* The established staged renderer is the oracle: exercise exact gain
      * rounding, all filter modes/fades, extremes, retriggers and controls. */
@@ -335,6 +385,56 @@ static void check_poly(void) {
     ss_fill(4,(uint8_t *)copy,fp,mono,16);
     ss_track_fill(3,(uint8_t *)state,fp,out,16,(uint8_t *)pool);
     assert(memcmp(out,mono,32*sizeof(*out)));assert(!*(uint16_t *)((uint8_t *)pool+60));
+}
+
+static void check_retired_poly(void) {
+    /* No native records are active, even though old gains and private
+     * histories remain. Only the output, track count and mono gain change. */
+    const unsigned track=7;
+    uint16_t fp[6]={0x4000,96<<8,110<<8,64<<8,40<<8,30<<8};
+    ss_active[track]=1;
+    ss_init(&ss_voices[track]);ss_voices[track].pending=1;
+    for(unsigned v=0;v<4;++v) {
+        ss_init(&ss_poly_voices[track][v]);
+        ss_poly_voices[track][v].phase[0]=1234567u*(v+1);
+        ss_poly_voices[track][v].pending=v&1;
+    }
+    for(unsigned v=0;v<5;++v) {
+        ss_filter_reset(&ss_filters[track][v]);
+        ss_filters[track][v].wet=128;ss_filters[track][v].stamp=100+v;
+    }
+    struct ss_voice mono[8],voices[8][4];struct ss_filter filters[8][5];
+    memcpy(mono,ss_voices,sizeof mono);memcpy(voices,ss_poly_voices,sizeof voices);
+    memcpy(filters,ss_filters,sizeof filters);
+    for(unsigned n=0;n<=32;++n) {
+        uint32_t state[32],expected_state[32],pool[4][16],expected_pool[4][16];
+        memset(state,0xa5,sizeof state);memset(pool,0x5a,sizeof pool);
+        ((uint8_t *)state)[80]=1;
+        for(unsigned v=0;v<4;++v)((uint8_t *)pool[v])[36]=0;
+        memcpy(expected_state,state,sizeof state);memcpy(expected_pool,pool,sizeof pool);
+        if(n)*(uint16_t *)((uint8_t *)expected_state+38)=0;
+        uint32_t samples[8],poly_samples[8][4],filtered[8],unsupported[8];
+        memcpy(samples,ss_samples,sizeof samples);samples[track]+=n;
+        memcpy(poly_samples,ss_poly_samples,sizeof poly_samples);
+        memcpy(filtered,ss_filter_samples,sizeof filtered);
+        memcpy(unsupported,ss_unsupported,sizeof unsupported);
+        int32_t guarded[66];
+        for(unsigned i=0;i<66;++i)guarded[i]=123456;
+        assert(ss_track_fill(track,(uint8_t *)state,fp,guarded+1,n,(uint8_t *)pool));
+        assert(guarded[0]==123456);
+        for(unsigned i=1;i<=2*n;++i)assert(!guarded[i]);
+        for(unsigned i=1+2*n;i<66;++i)assert(guarded[i]==123456);
+        assert(!memcmp(state,expected_state,sizeof state));
+        assert(!memcmp(pool,expected_pool,sizeof pool));
+        assert(!memcmp(samples,ss_samples,sizeof samples));
+        assert(!memcmp(poly_samples,ss_poly_samples,sizeof poly_samples));
+        assert(!memcmp(filtered,ss_filter_samples,sizeof filtered));
+        assert(!memcmp(unsupported,ss_unsupported,sizeof unsupported));
+        assert(!memcmp(mono,ss_voices,sizeof mono));
+        assert(!memcmp(voices,ss_poly_voices,sizeof voices));
+        assert(!memcmp(filters,ss_filters,sizeof filters));
+    }
+    puts("[ok] retired poly: all lengths 0-32, output guards, native state and unchanged voice/filter bookkeeping");
 }
 
 static void check_filter(void) {
@@ -701,8 +801,8 @@ int main(int argc, char **argv) {
         assert(abs(ss_drive_curve[(x+32772)>>3]-exact)<=5);
     }
     check_restart();check_prepare();check_filter();check_half_filter();
-    check_gain();
-    check_mix16();check_poly();check_adapter_lifecycle();check_single_poly();
+    check_gain();check_output_scale();
+    check_mix16();check_poly();check_adapter_lifecycle();check_single_poly();check_retired_poly();
     if (argc == 2) {
         FILE *f = fopen(argv[1], "wb"); assert(f);
         p = (struct ss_params){21426141,0,0,0,0};

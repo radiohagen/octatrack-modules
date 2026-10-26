@@ -186,3 +186,14 @@ mono/poly transitions and live T4 assignment beside Thru/kick in image checks.
 These exercise allocation and release outside the isolated renderer profiler.
 Image qualification does not establish physical interrupt latency, bus/cache
 cost, the full real routing setup or resolution of the original hardware crash.
+
+
+### S13 final CPU pass
+
+Stage the complete module and verifiers from one author snapshot; regenerate
+production assembly with diagnostics unset. The native layouts and interface
+remain unchanged. Compare linked samples and state with a frozen S12 runtime,
+including filter bypass/resume, sparse voices, gain ramps and odd/split calls.
+Retain the full native MIDI, transition and live T4 checks described above.
+This source publication does not update an existing firmware package or claim
+hardware timing or crash acceptance.

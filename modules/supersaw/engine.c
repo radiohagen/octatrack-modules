@@ -190,6 +190,15 @@ static void ss_render_filtered(struct ss_voice *voice,const struct ss_params *pa
     ss_render_impl(voice,params,output,count,filter,fp,stamp);
 }
 
+/* Keep the Q15 floor before formatting native 16.16 stereo. Clearing the
+ * product's low 15 bits then doubling preserves negative-fraction rounding.
+ * The four-point interpolator can reach [-40960,40959] from arbitrary
+ * signed-16-bit history. Gain <= 32768 keeps its product in signed int32;
+ * unsigned doubling also defines the native wrap bits for such overshoot. */
+static inline int32_t ss_output_scale(int32_t sample,int32_t gain,unsigned stereo) {
+    int32_t product=sample*gain;
+    return stereo?(int32_t)((uint32_t)(product & ~32767)*2u):product>>15;
+}
 /* Held AMP needs neither ramp accumulation nor per-sample gain shifts.
  * Keep this dispatch after source/filter rendering, so only the small output
  * loop is specialized. Mono unity also avoids its two gain multiplies. */
@@ -209,15 +218,15 @@ static __attribute__((always_inline)) inline void ss_output16(struct ss_voice *v
         }
         int32_t first,second;
         if(steady) {
-            first=unity?interpolated:(interpolated*(int32_t)target_gain)>>15;
-            second=unity?p1:(p1*(int32_t)target_gain)>>15;
+            first=unity?(stereo?(int32_t)((uint32_t)interpolated*65536u):interpolated):ss_output_scale(interpolated,(int32_t)target_gain,stereo);
+            second=unity?(stereo?(int32_t)((uint32_t)p1*65536u):p1):ss_output_scale(p1,(int32_t)target_gain,stereo);
         } else {
-            gain+=step;first=(interpolated*(gain>>4))>>15;
-            gain+=step;second=(p1*(gain>>4))>>15;
+            gain+=step;first=ss_output_scale(interpolated,gain>>4,stereo);
+            gain+=step;second=ss_output_scale(p1,gain>>4,stereo);
         }
         if(stereo) {
-            mix[4*i]=mix[4*i+1]=first*65536;
-            mix[4*i+2]=mix[4*i+3]=second*65536;
+            mix[4*i]=mix[4*i+1]=first;
+            mix[4*i+2]=mix[4*i+3]=second;
         } else { mix[2*i]+=first;mix[2*i+1]+=second; }
         p3=p2;p2=p1;p1=current;
     }
