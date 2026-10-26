@@ -8,12 +8,22 @@ def harmony_inc(modules, remix=None):
     return ('.set HAVE_HARMONY,1\n' if 'MIDI HARMONY' in modules else '') + ('.set HAVE_SCALES,1\n' if 'MIDI SCALES' in modules else '') + ('.set HAVE_LOOPBACK,1\n' if 'MIDI LOOPBACK' in modules else '')
 
 
+def select(modules):
+    if 'MIDI SCALES' in modules:
+        return {}
+    return {'detours': MODULE.detours + (
+        Detour(0x4003b79c, bytes.fromhex('242e000c48780064'), 'bassfollow',
+               'bf_key_format', 'native KEY display inherits Follow source', pad_to=8),
+        Detour(0x4007a3e2, bytes.fromhex('7205b280660000e4'), 'bassfollow',
+               'bf_key_encoder', 'inherited native KEY is read-only', pad_to=8),
+    )}
+
 MODULE = Module(
     name="midi-follow", key="MIDI FOLLOW", kind=Kind.CF_PATCH,
     category=Category.MIDI_USB, author='radiohagen', author_url="https://github.com/radiohagen/octatrack-modules",
     proof=Proof.PORT, proof_note='',
     doc="RFOL follows source notes; press D for FIXED/GRAV/SOURCE register, OCT/OFFS and TRIG/LIVE updates.",
-    requires=('STORE', 'EVENTS'),
+    requires=('STORE', 'EVENTS'), select=select,
     linked=(Linked("bassfollow", str(ROOT / "midi_follow.s"), dram=True, include=harmony_inc),
             Linked("followresponse", str(ROOT / "response.s"), dram=True, include=harmony_inc),
             Linked("followevents", str(ROOT / "events.s"), dram=True),
@@ -49,7 +59,8 @@ MODULE = Module(
              Detour(0x4009FB80, bytes.fromhex("12126d0001a6"),
                    "bassfollow", "bf_note",
                    "resolve root before the sequencer records the emitted note"),),
-    gates=(Gate('tools/verify/verify_midi_follow_notes.py', stage='image', venv=True),
+    gates=(Gate('tools/verify/verify_midi_follow_scale.py', stage='image', venv=True),
+           Gate('tools/verify/verify_midi_follow_notes.py', stage='image', venv=True),
            Gate('tools/verify/verify_midi_follow_gravity.py', stage='image', venv=True),
            Gate('tools/verify/verify_midi_follow_stress.py', stage='image', venv=True),
            Gate("tools/verify/verify_midi_follow_response.py", stage="image", venv=True),

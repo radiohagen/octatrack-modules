@@ -71,14 +71,14 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-follow/README.md",
       "sha256": "b984d044ef4eb3bec749dd2752d07d004c137dc95d51cab13aca4bf8aa5e4b2c",
-      "published_sha256": "891b22ddbdfacdf2375205f8decdc7a3e67e3f1b105bc17d27f2bd8a64da557b",
+      "published_sha256": "cf2e61d957b688a2956986a72fa56d090a97b1faac1d720a4140fa9e69252b82",
       "source_mode": "100644"
     },
     "modules/midi-follow/manifest.py": {
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-follow/manifest.py",
       "sha256": "808bfa85b9c5a366c455bff56f5e38d6e625243348a260b3fc8211c5f8ac24d6",
-      "published_sha256": "679d7b2bf3f058232cf81c7f4359cdbce33aa2f0827ca4ffd2f642bb01c3c26f",
+      "published_sha256": "baa23635cd93f67d63ad8304602dd400194865f3048c19c5b89f71b47872399a",
       "source_mode": "100644",
       "migration_note": "Operational author URL updated; original author name/credit preserved."
     },
@@ -86,7 +86,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-follow/midi_follow.s",
       "sha256": "79d5a4a8064e020c87735caebf5fc5e24cceed44dda3f41f28f3f75a74ec7356",
-      "published_sha256": "d2b173b526e836f6091dc0af61af243954b7b2c88acb1f578b3fb2e14d5d5a87",
+      "published_sha256": "f8dde01d993ec5e303c51e3703d9443304907b81661026c3daa2241cb220becb",
       "source_mode": "100644"
     },
     "modules/midi-follow/page.s": {
@@ -107,7 +107,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-follow/response.s",
       "sha256": "6e48b8479733d9de6128b9ec9d82fd45f397eef970f7fd8eacec99b90bbbae53",
-      "published_sha256": "b61a140ff791af00faac0db0a9664dcdd3c8a967d25d0b29e7742f1bb022dbf8",
+      "published_sha256": "5799eb8c4412e294a1e4970eaa566b4e47a12968a45a32c32641f9b56e349cef",
       "source_mode": "100644"
     },
     "modules/midi-follow/settings.s": {
@@ -987,7 +987,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "tools/verify/verify_midi_follow.py",
       "sha256": "8466618074bb75ecb9f6781620600e483a7d677f828a29cb058e38d3c47b93eb",
-      "published_sha256": "431221459113313ce9c5c073770896d4b932866267234364a2b09d660e45c4bc",
+      "published_sha256": "fd61d841a5a89b92a23a8f5b2adbd8ac2f5d935891e8974e7f9b3175e36573d7",
       "source_mode": "100644"
     },
     "tools/verify/verify_midi_follow_mute.py": {
@@ -1001,7 +1001,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "tools/verify/verify_midi_follow_register.py",
       "sha256": "b9bbb7467f39d1207fdc16510705879467c6f5df90edd4f7507bd6e173707893",
-      "published_sha256": "d74803f2e3ca403fcf91e1b75fb778e60a3906d85b901ae45b644bd3d7f4aa8e",
+      "published_sha256": "118a81662ed9a89040b91d05b4f9af843ce4c9cd0844863744a7c80d90056dd1",
       "source_mode": "100644"
     },
     "tools/verify/verify_midi_follow_register_port.py": {
@@ -1023,7 +1023,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "tools/verify/verify_midi_follow_response_port.py",
       "sha256": "49ef781e74eb42aed03dd1ba53ddf0f1a72c84d70aca407b5ee7277c418c586c",
-      "published_sha256": "cd8cf20babed32d04a1a63ce221627ddc0f918ff76e49e61dc16d0f6d47afc21",
+      "published_sha256": "428061410c5d54deca1d7b35066363a55effc8a909e76fad3f63ed623952d3ef",
       "source_mode": "100644",
       "note": "Current three-mode register packing and native N1-4 capture expectations; UI isolation and balanced releases retained."
     },
@@ -1031,7 +1031,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "tools/verify/verify_midi_follow_stress.py",
       "sha256": "ebc0a0df0305cd5ee15113922856174c42ec8daf460ffd1def3791f276ef7ebb",
-      "published_sha256": "c5bf2f593cecb6df806283f196fff58117b6da6e487ea24acf6a830e80fbb040",
+      "published_sha256": "0f0763973a526f142e92f86daf9e19079685d4f8837fa3fad258a2e942bb583b",
       "source_mode": "100644"
     },
     "tools/verify/verify_midi_harmony.py": {
@@ -1187,7 +1187,7 @@
     "modules/midi-follow/DEVELOPMENT.md": {
       "path": "modules/midi-follow/DEVELOPMENT.md",
       "sha256": "b984d044ef4eb3bec749dd2752d07d004c137dc95d51cab13aca4bf8aa5e4b2c",
-      "published_sha256": "bcf9defe59a88f522fa97d3156f98204165ebc7d5216375b0b169948ee38ac93",
+      "published_sha256": "887e621b70e1fc1bdd5be01a01347a2b6a65a84effd0a25cf1c440982c50187b",
       "source_mode": "100644",
       "origin": "Split from adjacent README in this repository; historical evidence is retained in the text."
     },

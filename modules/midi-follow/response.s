@@ -308,6 +308,27 @@ bf_response_tick:
     bne.s .release_next /* Never release another track or live key owner. */
     move.l %d2,%d0
     add.l %d6,%d0
+    .ifdef HAVE_HARMONY
+    move.l %d0,-(%sp)
+    move.l %d7,%d0
+    jsr mh_active
+    tst.l %d0
+    beq.s .release_native_pitch
+    move.l (%sp)+,%d0
+    bra.s .release_pitch_ready
+.release_native_pitch:
+    move.l (%sp)+,%d0
+    .endif
+    /* Undo only the previous KEY correction, move the raw voice, then
+     * reapply the inherited KEY. Harmony owns its generated chord path. */
+    lea bf_scale_offsets,%a0
+    moveq #0,%d1
+    move.b (%a0,%d3.l),%d1
+    extb.l %d1
+    add.l %d1,%d0
+    move.l %d7,%d1
+    jsr bf_quant_note
+.release_pitch_ready:
     move.l %d0,(%a4,%d4.l*4)
     moveq #-1,%d0
     move.b %d0,(%a5,%d5.l)
