@@ -106,7 +106,7 @@ review; validate their adapters and exact combinations before opening PRs.
 ## MIDI Follow status, 26 October 2026
 
 [Octabam PR #824](https://github.com/sambanks/octabam/pull/824) is a draft
-follow-up to merged EVENTS #871. Follow requires MIDI Part State and EVENTS;
+follow-up to merged EVENTS #871. Follow requires STORE native Part access and EVENTS;
 its transport and accepted-note callbacks share platform hooks with EUCLID.
 The previous include-callback prerequisite is also upstream.
 
@@ -115,3 +115,13 @@ review branch and standalone/combined checks. The PR records the exact source
 pin, software results and hardware checklist. Hardware qualification is still
 outstanding. Historical checks in `integration/review-branches.json` apply
 only to their recorded commits and images.
+
+## STORE native Part migration, 26 October 2026
+
+The current Follow PR also extends STORE and retires MIDI PART STATE. Current
+author clients use the STORE API; their saved native byte layouts are unchanged.
+The integration owns and tests the shared code, cold activation and native
+lifecycle. Historical source/integration receipts above still identify the old
+implementation; they must not be treated as tests of the STORE migration.
+Harmony and MIDI SRAM client source is migrated too; their complete firmware
+compositions remain separately qualified from the upstream Follow/Loopback PR.

@@ -6,7 +6,7 @@ import sys
 import subprocess
 from unicorn import UC_HOOK_CODE
 from midi_machine import Machine, ROOT
-from verify_midi_part_settings import symbols
+from verify_store_part_settings import symbols
 from verify_midi_follow import REGS
 from unicorn.m68k_const import UC_M68K_REG_D7, UC_M68K_REG_A7, UC_M68K_REG_PC
 

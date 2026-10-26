@@ -39,7 +39,7 @@ def machine():
     put(0x46c82456,B,4);put(0x80000012,1,4)
     put(0x800065b8,1,4);put(0x80001828,0);put(0x80001829,0)
     for t in range(8):
-        put(0x8000182a+t,0);put(0x80001832+t,0)
+        put(0x8000666e+t,0);put(0x80006676+t,0)
     m.c('hd_scene_ensure_c')
     m.call('hd_bank_loaded',0)
     return m

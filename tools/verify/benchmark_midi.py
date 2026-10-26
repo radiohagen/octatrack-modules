@@ -43,7 +43,7 @@ class CpuMachine(Machine):
             self.put(0x46c76df1+68*t,1)
             self.put(0x46c76fe0+32*t,60)
             self.put(0x46c76fec+32*t,64)
-            self.put(0x8000182a+t,0); self.put(0x80001832+t,0)
+            self.put(0x8000666e+t,0); self.put(0x80006676+t,0)
         self.put(0x80001828,0); self.put(0x80001829,0)
         self.call('hd_bank_loaded',0)
 

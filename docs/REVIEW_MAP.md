@@ -6,13 +6,13 @@ must be checked against its C sources and generators. Original credits remain.
 
 | Module | Files | Declared/selected dependencies |
 |---|---:|---|
-| [midi-scales](../modules/midi-scales/README.md) | 3 | None; optional interaction with Follow/Harmony |
-| [STORE native Parts](https://github.com/sambanks/octabam/tree/main/modules/store) | 6 | Shared native Part boundary, first consumed by Loopback |
-| [midi-loopback](../modules/midi-loopback/README.md) | 7 | MIDI Part State |
+| [midi-scales](../modules/midi-scales/README.md) | 4 | None; optional interaction with Follow/Harmony |
+| [STORE native Parts](https://github.com/sambanks/octabam/pull/824) | upstream-owned | Edited/playing Part access, native writes and replacement generations; replaces the retired helper |
+| [midi-loopback](../modules/midi-loopback/README.md) | 8 | STORE native Part access |
 | [midi-loopback-scenes](../modules/midi-loopback-scenes/README.md) | 3 | MIDI Loopback + upstream MIDI Scenes + USB MIDI |
-| [midi-follow](../modules/midi-follow/README.md) | 7 | MIDI Part State; optional Scales/Loopback/Harmony |
-| [midi-sram](../modules/midi-sram/README.md) | 5 | MIDI Part State; precise sparse SRAM claims |
-| [midi-harmony](../modules/midi-harmony/README.md) | 63 | MIDI Part State + STORE + MIDI SRAM |
+| [midi-follow](../modules/midi-follow/README.md) | 14 | STORE native Part access; optional Scales/Loopback/Harmony |
+| [midi-sram](../modules/midi-sram/README.md) | 7 | STORE native Part access; precise sparse SRAM claims |
+| [midi-harmony](../modules/midi-harmony/README.md) | 64 | STORE native Part access + MIDI SRAM |
 | [System-event clients](SYSTEM_EVENTS.md) | 3 | HARM/Follow callbacks into Octabam platform modules |
 | [pio-write-fix](../modules/pio-write-fix/README.md) | 3 | upstream MEMORY; conflicts with STEM REC owning same fix |
 | [quantizer-midi-drawer compatibility name](../modules/quantizer-midi-drawer/README.md) | upstream-owned | no additional hooks after #741 |

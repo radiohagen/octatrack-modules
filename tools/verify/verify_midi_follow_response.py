@@ -89,7 +89,7 @@ def machine():
     assert m.change(67)==[],'arp-only output cannot arm an unknown cached pool'
     # New Parts and same-slot native replacement must not retune old voices.
     # An unrelated Part replacement must leave this receiver's anchor intact.
-    from verify_midi_part_settings import symbols, B, PS
+    from verify_store_part_settings import symbols, B, PS
     for operation in ('switch','replace','unrelated'):
         m=fixture();m.sym.update(symbols());u=m.uc
         part0=B+0x8ed80

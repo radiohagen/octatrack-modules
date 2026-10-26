@@ -42,8 +42,8 @@ def main():
     put(at(2, 1, 0), 2)
     put(at(5, 2, 0), 5)
     put(at(7, 3, 0), 7)
-    put(0x8000182a, 5)
-    put(0x80001832, 2)
+    put(0x8000666e, 5)
+    put(0x80006676, 2)
     put(BANK+7*STRIDE+4*0x8ed8+0x8e57, 3)
     assert m.call('ch_base_get', 0) == 2
     assert m.call('ch_base_play', 0) == 5
@@ -86,8 +86,8 @@ def main():
     stage(6, 0)  # explicit quality 3
     stage(7, 1)  # inherit captured bank 7, Part 3
     put(at(7, 3, 0), 6)
-    put(0x8000182a, 1)
-    put(0x80001832, 0)
+    put(0x8000666e, 1)
+    put(0x80006676, 0)
     assert fire(0) == 3
     assert fire(1) == 6
     for name, track_reg, continuation in (('ch_stage_copy_a', UC_M68K_REG_D2, 0x4009b922),
@@ -171,8 +171,8 @@ def main():
             put(at(2, 1, track), quality)
             put(at(2, 1, track)-13, 2)  # native HARM CHORD
             put(at(5, 2, track), (quality+5) % 8)
-            put(0x8000182a+track, 5)
-            put(0x80001832+track, 2)
+            put(0x8000666e+track, 5)
+            put(0x80006676+track, 2)
             put(m.sym['ch_live']+track, latched)
             expected = latched if mode == 6 and not grid else quality
             assert m.call('ch_live_get', track) == expected

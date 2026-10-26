@@ -33,7 +33,7 @@ def symbols():
     if CANDIDATE_SYMBOLS is not None:
         return dict(CANDIDATE_SYMBOLS)
     raw = subprocess.check_output(['m68k-elf-nm', str(ROOT/'out/platform/runtime/runtime.elf')], text=True)
-    return {n: int(a, 16) for a, n in re.findall(r'^([0-9a-f]+) [Tt] ((?:mp|lb)_\w+)$', raw, re.M)}
+    return {n: int(a, 16) for a, n in re.findall(r'^([0-9a-f]+) [Tt] ((?:store_part|lb|bf)_\w+)$', raw, re.M)}
 
 
 

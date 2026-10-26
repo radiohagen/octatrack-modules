@@ -221,7 +221,7 @@ store_part_epochs: .space 256
         assert call('hd_degree_c',0,0,0,0)==37
         # Follow source uses that source track's playing context, never UI.
         put(field(0,0,1,3),1)
-        put(0x8000182a,7); put(0x80001832,3)
+        put(0x8000666e,7); put(0x80006676,3)
         put(key(7,3,0),6)
         put(key(0,0,0),10)
         assert call('hd_scale_c',0,0,1)==328
