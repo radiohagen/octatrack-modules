@@ -1,0 +1,4792 @@
+{
+  "title": "HARMONY CPU optimization validation",
+  "date": "2026-10-26",
+  "status": "passed_with_disclosed_limits",
+  "source": {
+    "repository": "radiohagen/octatrack-modules",
+    "baseline": "1f83beaa6778acb5a68e945940d1fcfcb9827d35",
+    "broad_candidate": "dce25eb5ff51d171193a109524448ecac8681369",
+    "final_runtime": "9bc44fec58e6b3fdcbdb5adbad6485a6c6ebc641",
+    "final_module_tree": "0c6deb3ee6f539cbf1677d219087b56fc75d6109",
+    "changed_runtime_file_sha256": {
+      "modules/midi-harmony/accumulator.c": "ecb379866022e6199bd574c8da4ab4d6ba083c635aebf4f444983538c789a105",
+      "modules/midi-harmony/accumulator.s": "defa367765d148bb238db99516961b95716defa6765cd207badba9f17a3478de",
+      "modules/midi-harmony/codec.s": "00a4b9341a3e635d62d10eda4c75487f8c2fb4fac5025d8e642968ce0c8804d9",
+      "modules/midi-harmony/core.c": "332e95ebbc6fdf343d91081b8ee537ca96d2656e1a009a401761d46d52ed2875",
+      "modules/midi-harmony/core.s": "45c38d8b0eb79b3a7fcd3c12c8d6fed5672e508c681e74b55a384e7d27aa9b5c",
+      "modules/midi-harmony/harmony.s": "529f958e1938805beda522fe305d6f4f11c1d75e8a8ccf9c07c0415edeba3812",
+      "modules/midi-harmony/packed.c": "bbdcf7e130c6098827381aea5dabad63e4629e3a50c52a1c8fa9e7c2850e89f9",
+      "modules/midi-harmony/packed.s": "a2c8d71ee5a5f28c88a6bf5b0be6a7210121d6e42a61e9d7a69d501366d14641",
+      "modules/midi-harmony/roots.c": "5d9ea49c1fe8383a3f1ab623114015920db8c5ef47b9ffe8260773ca6e953c46",
+      "modules/midi-harmony/roots.s": "37c311b748fbb4f706af3b4a3f2fe4cfe8e569857e0bae111bccb4b2c1bc66a7",
+      "modules/midi-harmony/size.c": "42f3d85748f2425d10dfbb5ca6794fb66e16166f6fb490c37145ecd40cedd9d7",
+      "modules/midi-harmony/size.s": "fd9f0e3bb2636dbf571bfb98bf5f5e3ccb9862d078922cbb9abc5bea70b7f1d5",
+      "modules/midi-harmony/storage.c": "69d3fe846b861d7bbfe4d877ec66c5b2f16ed8d89c82b94c19660bf793719885",
+      "modules/midi-harmony/storage.s": "34e3d95ba073307109eea810ceb7e2b7c32d35076f43c728c80b10f427b0a0b4",
+      "modules/midi-harmony/track-retention.c": "09dc9cf62eb7b204797f28361d717d79623d429b554c395092f1e2026ee2a932",
+      "modules/midi-harmony/track-retention.s": "22433285f417aa8066215c428c398b12eaf7b748d26a4a879f5ba183804308b8",
+      "modules/midi-harmony/voicing.s": "12e1754dac3993c6cfd955664169dba154e55c7160b72b8ef23bb69f9d69db9b"
+    }
+  },
+  "integration": {
+    "repository": "radiohagen/octabam",
+    "base": "e82dd17aba3a2235b739abeb7a567ca1b62ad91b",
+    "primary_remix": "harmony-follow-review",
+    "optional_controls": [
+      "harmony-review",
+      "harmony-follow-native-review"
+    ],
+    "frozen_artifact_sha256": {
+      "baseline": {
+        "mainos_bus.bin": "bf4cf547029c4266ed5fa180c39efd89fbb4b237f487f60e2eaa9947d35d3627",
+        "platform/layout.json": "9c06067c498df2704147fdbd98a8677c8990e5d3f6bfa681025644e3d5e10dc8",
+        "platform/runtime/runtime.elf": "66213776e3db588e56bc2a94b9fcb1124179a5ac861aa501f26ef547b18ae43e",
+        "platform/runtime/runtime.bin": "0a6f898f396a7d9518dadeb559120376b2379752228bf0e6b7680465b06a970d"
+      },
+      "broad": {
+        "mainos_bus.bin": "da212d36c0cbd4f6bcf8c579af9255ec83750fa59697a0bc4b4283feda977f48",
+        "platform/layout.json": "7e89320001679d021abee2d79b8630dca3cd6c026b08f8106e6b9ae7f404dbab",
+        "platform/runtime/runtime.elf": "49cbf7f6850e60d4e5e9793ee779c3c47db5c5b3363b592e1637839e033bb7d6",
+        "platform/runtime/runtime.bin": "e9d45eace0375564ab099a0d316799f5e1cdd577f187cbeeaeb06999f903414c"
+      },
+      "final": {
+        "mainos_bus.bin": "b596bc00f599352488e0ceee5896481a71bf3d2f5a3dd2503b8803afd550403d",
+        "platform/layout.json": "30010d46ca03707274eeefc7b496dd757ae99cf0b03fc16c8ed00dfbb308080a",
+        "platform/runtime/runtime.elf": "73ed7f629039a8a067c5f57de7f567c6e0f9f05846bed896f73e1358bf02d09d",
+        "platform/runtime/runtime.bin": "c4fb84b77d8096d58127ac823c28d8633e97b6317820931df86183dee85c3ef4"
+      }
+    },
+    "runtime_sizes_bytes": {
+      "baseline": {
+        "text": 77296,
+        "data": 396,
+        "bss": 541852
+      },
+      "final": {
+        "text": 80060,
+        "data": 396,
+        "bss": 541852
+      }
+    }
+  },
+  "evidence_stages": {
+    "broad": {
+      "runtime_source": "dce25eb5ff51d171193a109524448ecac8681369",
+      "attempted_gates": 28,
+      "eligible_passed_gates": 27,
+      "not_applicable_gates": 1,
+      "initial_invocation_errors": 1,
+      "gates": [
+        {
+          "gate": "harmony_degree_codec",
+          "exit_code": 0,
+          "seconds": 3.23,
+          "command": [
+            ".venv/bin/python3",
+            "tools/verify/verify_harmony_degree_codec.py"
+          ],
+          "log": "gates/harmony_degree_codec.log",
+          "log_sha256": "7fb2427aff53d4a7218759e9f7f2b4295322faf95aea7c80b477e1373fba7c0b",
+          "skips": [],
+          "working_directory": "${PRIMARY_INTEGRATION}",
+          "outcome": "passed"
+        },
+        {
+          "gate": "harmony_degree_roots",
+          "exit_code": 0,
+          "seconds": 13.54,
+          "command": [
+            ".venv/bin/python3",
+            "tools/verify/verify_harmony_degree_roots.py"
+          ],
+          "log": "gates/harmony_degree_roots.log",
+          "log_sha256": "a737f6d38d00af6ac5fb0c66f53d9a7004eb03f5c00cfa8cb245d7532013c054",
+          "skips": [],
+          "working_directory": "${PRIMARY_INTEGRATION}",
+          "outcome": "passed"
+        },
+        {
+          "gate": "harmony_degree_packed",
+          "exit_code": 0,
+          "seconds": 189.97,
+          "command": [
+            ".venv/bin/python3",
+            "tools/verify/verify_harmony_degree_packed.py"
+          ],
+          "log": "gates/harmony_degree_packed.log",
+          "log_sha256": "d62044c8eab6439c56e3a563ef845dd9dae8a57a3529b62ed56c7bc908d0b3f9",
+          "skips": [],
+          "working_directory": "${PRIMARY_INTEGRATION}",
+          "outcome": "passed"
+        },
+        {
+          "gate": "harmony_degree_core",
+          "exit_code": 0,
+          "seconds": 6.99,
+          "command": [
+            ".venv/bin/python3",
+            "tools/verify/verify_harmony_degree_core.py"
+          ],
+          "log": "gates/harmony_degree_core.log",
+          "log_sha256": "e7250292b2302905e3d7e56f343596a788958655bd6ef7e19b20b107c1e22790",
+          "skips": [],
+          "working_directory": "${PRIMARY_INTEGRATION}",
+          "outcome": "passed"
+        },
+        {
+          "gate": "harmony_degree_integration",
+          "exit_code": 0,
+          "seconds": 15.16,
+          "command": [
+            ".venv/bin/python3",
+            "tools/verify/verify_harmony_degree_integration.py"
+          ],
+          "log": "gates/harmony_degree_integration.log",
+          "log_sha256": "2f28d7d31d103edb2511fcf09a7b205745e025dab57d9862d868831e8e4aaf8e",
+          "skips": [],
+          "working_directory": "${PRIMARY_INTEGRATION}",
+          "outcome": "passed"
+        },
+        {
+          "gate": "harmony_degree_part_state",
+          "exit_code": 0,
+          "seconds": 10.04,
+          "command": [
+            ".venv/bin/python3",
+            "tools/verify/verify_harmony_degree_part_state.py"
+          ],
+          "log": "gates/harmony_degree_part_state.log",
+          "log_sha256": "965f5a42aa57697f0333387eb27bf12de1a4bc98d1a39736162bb1016dfe0608",
+          "skips": [],
+          "working_directory": "${PRIMARY_INTEGRATION}",
+          "outcome": "passed"
+        },
+        {
+          "gate": "harmony_degree_publication",
+          "exit_code": 0,
+          "seconds": 0.57,
+          "command": [
+            ".venv/bin/python3",
+            "tools/verify/verify_harmony_degree_publication.py"
+          ],
+          "log": "gates/harmony_degree_publication.log",
+          "log_sha256": "0269d4978849010c6b320cbd6e7b5c4ee58bbf0b3253e0bdb786afaeb8971221",
+          "skips": [],
+          "working_directory": "${PRIMARY_INTEGRATION}",
+          "outcome": "passed"
+        },
+        {
+          "gate": "harmony_degree_files",
+          "exit_code": 0,
+          "seconds": 11.15,
+          "command": [
+            ".venv/bin/python3",
+            "tools/verify/verify_harmony_degree_files.py"
+          ],
+          "log": "gates/harmony_degree_files.log",
+          "log_sha256": "5492832a54931c90fa682c25ff0148f580529de21d0e55c3c7939343a3f5ddec",
+          "skips": [],
+          "working_directory": "${PRIMARY_INTEGRATION}",
+          "outcome": "passed"
+        },
+        {
+          "gate": "harmony_track_retention",
+          "exit_code": 0,
+          "seconds": 133.82,
+          "command": [
+            ".venv/bin/python3",
+            "tools/verify/verify_harmony_track_retention.py"
+          ],
+          "log": "gates/harmony_track_retention.log",
+          "log_sha256": "d62044c8eab6439c56e3a563ef845dd9dae8a57a3529b62ed56c7bc908d0b3f9",
+          "skips": [],
+          "working_directory": "${PRIMARY_INTEGRATION}",
+          "outcome": "passed"
+        },
+        {
+          "gate": "harmony_accumulator",
+          "exit_code": 0,
+          "seconds": 32.52,
+          "command": [
+            ".venv/bin/python3",
+            "tools/verify/verify_harmony_accumulator.py"
+          ],
+          "log": "gates/harmony_accumulator.log",
+          "log_sha256": "17c8c54131b67e89dc2a2c287aa66800f17e141f0e2a3f1446c11fef1f5efcde",
+          "skips": [],
+          "working_directory": "${PRIMARY_INTEGRATION}",
+          "outcome": "passed"
+        },
+        {
+          "gate": "harmony_follow_live",
+          "exit_code": 0,
+          "seconds": 19.04,
+          "command": [
+            ".venv/bin/python3",
+            "tools/verify/verify_harmony_follow_live.py"
+          ],
+          "log": "gates/harmony_follow_live.log",
+          "log_sha256": "8446f8913402172b665cbddbfa43e4c3cc36d2ade1d06f9878a1be89e53bce8a",
+          "skips": [],
+          "working_directory": "${PRIMARY_INTEGRATION}",
+          "outcome": "passed"
+        },
+        {
+          "gate": "midi_harmony",
+          "exit_code": 0,
+          "seconds": 903.76,
+          "command": [
+            ".venv/bin/python3",
+            "tools/verify/verify_midi_harmony.py"
+          ],
+          "log": "gates/midi_harmony.log",
+          "log_sha256": "04431fda815f36a58a3a008aa78b920d4089a450130710ac07462cecce629f34",
+          "skips": [],
+          "working_directory": "${PRIMARY_INTEGRATION}",
+          "outcome": "passed"
+        },
+        {
+          "gate": "midi_harmony_stress",
+          "exit_code": 0,
+          "seconds": 244.91,
+          "command": [
+            ".venv/bin/python3",
+            "tools/verify/verify_midi_harmony_stress.py"
+          ],
+          "log": "gates/midi_harmony_stress.log",
+          "log_sha256": "747c3fd0c7e51d6ee315b58ea878a928961948eefce5093aaf3139a89248fe57",
+          "skips": [
+            "[SKIP] concert UART suite: supply --project DIR or OT_PROJECT"
+          ],
+          "working_directory": "${PRIMARY_INTEGRATION}",
+          "outcome": "passed"
+        },
+        {
+          "gate": "harmony_size",
+          "exit_code": 0,
+          "seconds": 564.27,
+          "command": [
+            ".venv/bin/python3",
+            "tools/verify/verify_harmony_size.py"
+          ],
+          "log": "gates/harmony_size.log",
+          "log_sha256": "36054108a7f7ffb94d3d011695425f151bfea35eb95ff86dde315e770f2e5a61",
+          "skips": [],
+          "working_directory": "${PRIMARY_INTEGRATION}",
+          "outcome": "passed"
+        },
+        {
+          "gate": "harmony_size_musical",
+          "exit_code": 0,
+          "seconds": 87.58,
+          "command": [
+            ".venv/bin/python3",
+            "tools/verify/verify_harmony_size_musical.py"
+          ],
+          "log": "gates/harmony_size_musical.log",
+          "log_sha256": "3f009e8f1697de135e87022f1a280110f8a663ca138dc071a744b85567927cb8",
+          "skips": [],
+          "working_directory": "${PRIMARY_INTEGRATION}",
+          "outcome": "passed"
+        },
+        {
+          "gate": "harmony_playability",
+          "exit_code": 0,
+          "seconds": 657.61,
+          "command": [
+            ".venv/bin/python3",
+            "tools/verify/verify_harmony_playability.py"
+          ],
+          "log": "gates/harmony_playability.log",
+          "log_sha256": "ae99828a37f38d9bec60ae3cbb392855d131f30d44b3a82b0e8be093b8d6f6fe",
+          "skips": [],
+          "working_directory": "${PRIMARY_INTEGRATION}",
+          "outcome": "passed"
+        },
+        {
+          "gate": "chord_play",
+          "exit_code": 0,
+          "seconds": 47.57,
+          "command": [
+            ".venv/bin/python3",
+            "tools/verify/verify_chord_play.py"
+          ],
+          "log": "gates/chord_play.log",
+          "log_sha256": "f49c612e90a7e6e467f49120727a83f15752a61d6db98f61952a433bc6880bb5",
+          "skips": [],
+          "working_directory": "${PRIMARY_INTEGRATION}",
+          "outcome": "passed"
+        },
+        {
+          "gate": "chord_display",
+          "exit_code": 0,
+          "seconds": 0.76,
+          "command": [
+            ".venv/bin/python3",
+            "tools/verify/verify_chord_display.py"
+          ],
+          "log": "gates/chord_display.log",
+          "log_sha256": "adba91a48bd1954d23995cc420a5b5e347cfb983c13f5c6be41729f20166d9c5",
+          "skips": [],
+          "working_directory": "${PRIMARY_INTEGRATION}",
+          "outcome": "passed"
+        },
+        {
+          "gate": "chord_storage",
+          "exit_code": 0,
+          "seconds": 6.05,
+          "command": [
+            ".venv/bin/python3",
+            "tools/verify/verify_chord_storage.py"
+          ],
+          "log": "gates/chord_storage.log",
+          "log_sha256": "dbce51c96cd279e7880819a9bb11dbcf3358453cc9d355368ff6fb7b3a95fa63",
+          "skips": [],
+          "working_directory": "${PRIMARY_INTEGRATION}",
+          "outcome": "passed"
+        },
+        {
+          "gate": "chord_part",
+          "exit_code": 0,
+          "seconds": 1.08,
+          "command": [
+            ".venv/bin/python3",
+            "tools/verify/verify_chord_part.py"
+          ],
+          "log": "gates/chord_part.log",
+          "log_sha256": "693b82e96b2aabe1c7e76736b06e74ede2754e194cb6e94379dced35f55117a1",
+          "skips": [],
+          "working_directory": "${PRIMARY_INTEGRATION}",
+          "outcome": "passed"
+        },
+        {
+          "gate": "harmony_degree_scenes",
+          "exit_code": 0,
+          "seconds": 0.14,
+          "command": [
+            ".venv/bin/python3",
+            "tools/verify/verify_harmony_degree_scenes.py"
+          ],
+          "log": "gates/harmony_degree_scenes.log",
+          "log_sha256": "7820285ab1b7d2df545effbcdf7ee50287c4f85e3794a5bfb5ce8452a5ee7e65",
+          "skips": [],
+          "working_directory": "${PRIMARY_INTEGRATION}",
+          "outcome": "passed"
+        },
+        {
+          "gate": "harmony_store",
+          "exit_code": 0,
+          "seconds": 0.2,
+          "command": [
+            ".venv/bin/python3",
+            "tools/verify/verify_harmony_store.py"
+          ],
+          "log": "gates/harmony_store.log",
+          "log_sha256": "d14477b54b15b79879bf259bacceb850b7fb66ca6172e234630034f20735e617",
+          "skips": [],
+          "working_directory": "${PRIMARY_INTEGRATION}",
+          "outcome": "passed"
+        },
+        {
+          "gate": "harmony_load_hooks",
+          "exit_code": 0,
+          "seconds": 2.55,
+          "command": [
+            ".venv/bin/python3",
+            "tools/verify/verify_harmony_load_hooks.py"
+          ],
+          "log": "gates/harmony_load_hooks.log",
+          "log_sha256": "57afbc95ca3a7a46a48539ba193c00e3c4cff746dc70401824c3b28d8a1eaf6c",
+          "skips": [],
+          "working_directory": "${PRIMARY_INTEGRATION}",
+          "outcome": "passed"
+        },
+        {
+          "gate": "harmony_plocks",
+          "exit_code": 1,
+          "seconds": 0.19,
+          "command": [
+            ".venv/bin/python3",
+            "tools/verify/verify_harmony_plocks.py"
+          ],
+          "log": "gates/harmony_plocks.log",
+          "log_sha256": "91e7d878775846f3c784f9c2b2a2f51107fa79beceb9830466c43d0986e72b8c",
+          "skips": [],
+          "working_directory": "${PRIMARY_INTEGRATION}",
+          "outcome": "initial_invocation_error",
+          "qualification": "skipped_not_tested",
+          "resolution": "gates/harmony_plocks-applicability.json",
+          "explanation": "The broad runner omitted the positional remix argument; the corrected invocation explicitly skipped this unselected composition. This original failure is preserved and is not a passing test."
+        },
+        {
+          "gate": "store_part",
+          "exit_code": 0,
+          "seconds": 0.31,
+          "command": [
+            ".venv/bin/python3",
+            "tools/verify/verify_store_part.py"
+          ],
+          "log": "gates/store_part.log",
+          "log_sha256": "baca9e7cf62f98876b57221fbb8341e6bcc9f1e8986fda4b4d28efaf7c6aa739",
+          "skips": [],
+          "working_directory": "${PRIMARY_INTEGRATION}",
+          "outcome": "passed"
+        },
+        {
+          "gate": "midi_sram",
+          "exit_code": 0,
+          "seconds": 27.32,
+          "command": [
+            ".venv/bin/python3",
+            "tools/verify/verify_midi_sram.py"
+          ],
+          "log": "gates/midi_sram.log",
+          "log_sha256": "6fb8cfd00df9d8ca1712d96734f54a1030b68280187484632616764dddccf59b",
+          "skips": [],
+          "working_directory": "${PRIMARY_INTEGRATION}",
+          "outcome": "passed"
+        },
+        {
+          "gate": "midi_follow_scale",
+          "exit_code": 0,
+          "seconds": 22.05,
+          "command": [
+            ".venv/bin/python3",
+            "tools/verify/verify_midi_follow_scale.py"
+          ],
+          "log": "gates/midi_follow_scale.log",
+          "log_sha256": "82ab692213fb4dbca1f98f17710692e4345d9f9a64bb8fe041adcf73f6690178",
+          "skips": [],
+          "working_directory": "${PRIMARY_INTEGRATION}",
+          "outcome": "passed"
+        },
+        {
+          "gate": "midi_follow_response",
+          "exit_code": 0,
+          "seconds": 6.52,
+          "command": [
+            ".venv/bin/python3",
+            "tools/verify/verify_midi_follow_response.py"
+          ],
+          "log": "gates/midi_follow_response.log",
+          "log_sha256": "3067242ad1639aa418fbbe28f908a53add188d4d7efa17cbb568446b2e55a9fd",
+          "skips": [],
+          "working_directory": "${PRIMARY_INTEGRATION}",
+          "outcome": "passed"
+        }
+      ],
+      "supplemental_applicability_rerun": {
+        "gate": "harmony_plocks",
+        "classification": "skipped_not_tested",
+        "initial_invocation": "Original broad runner omitted the positional remix argument and failed at missing plk_init before executing the combined store cases. The original row and log remain unchanged.",
+        "reason": "harmony-follow-review does not select PLOCKS P2; optional full composition remains outside this CPU run.",
+        "remix": "harmony-follow-review",
+        "modules": [
+          "STORE",
+          "MIDI SRAM",
+          "MIDI HARMONY",
+          "EVENTS",
+          "MIDI SCALES",
+          "MIDI FOLLOW",
+          "FILTER",
+          "EQUALIZER",
+          "DJ EQ",
+          "PHASER",
+          "FLANGER",
+          "CHORUS",
+          "SPATIALIZER",
+          "COMB FILTER",
+          "COMPRESSOR",
+          "LO-FI",
+          "DELAY",
+          "PLATE REV",
+          "SPRING REV",
+          "DARK REV",
+          "MEMORY"
+        ],
+        "image_sha256": "da212d36c0cbd4f6bcf8c579af9255ec83750fa59697a0bc4b4283feda977f48",
+        "image_unchanged": true,
+        "command": [
+          ".venv/bin/python3",
+          "tools/verify/verify_harmony_plocks.py",
+          "harmony-follow-review"
+        ],
+        "exit_code": 0,
+        "seconds": 0.32,
+        "log": "${PRIMARY_INTEGRATION}/out/harmony-cpu/gates/harmony_plocks-applicability.log",
+        "skips": [
+          "[SKIP] Harmony/PLOCKS composition: select both clients"
+        ],
+        "tool_sha256": "daf3a700c0a9821d29580fce2a65192f95b2e0b6df301c4ded9bc817d58fe708"
+      }
+    },
+    "final": {
+      "runtime_source": "9bc44fec58e6b3fdcbdb5adbad6485a6c6ebc641",
+      "delta_from_broad": "Accumulator reset folding only; accumulator.c and generated accumulator.s",
+      "gates": [
+        {
+          "gate": "dram_boot",
+          "exit_code": 0,
+          "seconds": 6.2,
+          "command": [
+            "${FINAL_INTEGRATION}/.venv/bin/python3",
+            "-u",
+            "${FINAL_INTEGRATION}/tools/verify/verify_dram_boot.py",
+            "--existing-image"
+          ],
+          "log": "final-gates/dram_boot.log",
+          "log_sha256": "fec5cc8b9380faa8ccf0319299de4cad49b9a8a0a9111a55e4b7267558d0200a",
+          "skips": [],
+          "working_directory": "${FINAL_INTEGRATION}",
+          "outcome": "passed",
+          "environment": {
+            "REMIX": "harmony-follow-review"
+          }
+        },
+        {
+          "gate": "harmony_accumulator",
+          "exit_code": 0,
+          "seconds": 125.83,
+          "command": [
+            "${FINAL_INTEGRATION}/.venv/bin/python3",
+            "-u",
+            "${FINAL_INTEGRATION}/tools/verify/verify_harmony_accumulator.py"
+          ],
+          "log": "final-gates/harmony_accumulator.log",
+          "log_sha256": "17c8c54131b67e89dc2a2c287aa66800f17e141f0e2a3f1446c11fef1f5efcde",
+          "skips": [],
+          "working_directory": "${FINAL_INTEGRATION}",
+          "outcome": "passed",
+          "environment": {
+            "REMIX": "harmony-follow-review"
+          }
+        },
+        {
+          "gate": "harmony_follow_matrix_port",
+          "exit_code": 0,
+          "seconds": 980.83,
+          "command": [
+            "${FINAL_INTEGRATION}/.venv/bin/python3",
+            "-u",
+            "${FINAL_INTEGRATION}/tools/verify/verify_harmony_follow_matrix_port.py",
+            "--project",
+            "${PROJECT_COPY}",
+            "--workers",
+            "3"
+          ],
+          "log": "final-gates/harmony_follow_matrix_port.log",
+          "log_sha256": "cd10b1564b1db86b7d03edc0be90701e139a301f1aaf5503a5d569a2099d1ef0",
+          "skips": [],
+          "working_directory": "${FINAL_INTEGRATION}",
+          "outcome": "passed",
+          "environment": {
+            "REMIX": "harmony-follow-review"
+          }
+        },
+        {
+          "gate": "harmony_degree_part_port",
+          "exit_code": 0,
+          "seconds": 209.61,
+          "command": [
+            "${FINAL_INTEGRATION}/.venv/bin/python3",
+            "-u",
+            "${FINAL_INTEGRATION}/tools/verify/verify_harmony_degree_part_port.py",
+            "--project",
+            "${PROJECT_COPY}"
+          ],
+          "log": "final-gates/harmony_degree_part_port.log",
+          "log_sha256": "806addb8fdbc44d59b9e58a49dea3a3fd5a44429f87097482e8522ab7bbbc3fd",
+          "skips": [],
+          "working_directory": "${FINAL_INTEGRATION}",
+          "outcome": "passed",
+          "environment": {
+            "REMIX": "harmony-follow-review"
+          }
+        },
+        {
+          "gate": "harmony_accumulator_port",
+          "exit_code": 0,
+          "seconds": 658.3,
+          "command": [
+            "${FINAL_INTEGRATION}/.venv/bin/python3",
+            "-u",
+            "${FINAL_INTEGRATION}/tools/verify/verify_harmony_accumulator_port.py",
+            "--project",
+            "${PROJECT_COPY}"
+          ],
+          "log": "final-gates/harmony_accumulator_port.log",
+          "log_sha256": "5060b27d4168378a519bfd4a5e19de30454804871428519ddee80fb3bd677453",
+          "skips": [],
+          "working_directory": "${FINAL_INTEGRATION}",
+          "outcome": "passed",
+          "environment": {
+            "REMIX": "harmony-follow-review"
+          }
+        },
+        {
+          "gate": "harmony_size_port",
+          "exit_code": 0,
+          "seconds": 355.71,
+          "command": [
+            "${FINAL_INTEGRATION}/.venv/bin/python3",
+            "-u",
+            "${FINAL_INTEGRATION}/tools/verify/verify_harmony_size_port.py",
+            "--project",
+            "${PROJECT_COPY}"
+          ],
+          "log": "final-gates/harmony_size_port.log",
+          "log_sha256": "23d782aba5f37bf629df51378d2e521c4da6282ec9699d216d855dc6df46ee36",
+          "skips": [],
+          "working_directory": "${FINAL_INTEGRATION}",
+          "outcome": "passed",
+          "environment": {
+            "REMIX": "harmony-follow-review"
+          }
+        }
+      ],
+      "project_receipts": {
+        "follow_matrix": {
+          "cases_or_groups": 108,
+          "receipt": "project-follow_matrix.json",
+          "sha256": "41ea8a492f81f3f2b7c62b59db62a41c241f9a11194830de80ed264a00f5da00",
+          "image_sha256": "b596bc00f599352488e0ceee5896481a71bf3d2f5a3dd2503b8803afd550403d",
+          "case_names": [
+            "s0-f0-k0-live0-arp0",
+            "s0-f0-k0-live0-arp1",
+            "s0-f0-k0-live1-arp0",
+            "s0-f0-k0-live1-arp1",
+            "s0-f0-k1-live0-arp0",
+            "s0-f0-k1-live0-arp1",
+            "s0-f0-k1-live1-arp0",
+            "s0-f0-k1-live1-arp1",
+            "s0-f0-k25-live0-arp0",
+            "s0-f0-k25-live0-arp1",
+            "s0-f0-k25-live1-arp0",
+            "s0-f0-k25-live1-arp1",
+            "s0-f1-k0-live0-arp0",
+            "s0-f1-k0-live0-arp1",
+            "s0-f1-k0-live1-arp0",
+            "s0-f1-k0-live1-arp1",
+            "s0-f1-k1-live0-arp0",
+            "s0-f1-k1-live0-arp1",
+            "s0-f1-k1-live1-arp0",
+            "s0-f1-k1-live1-arp1",
+            "s0-f1-k25-live0-arp0",
+            "s0-f1-k25-live0-arp1",
+            "s0-f1-k25-live1-arp0",
+            "s0-f1-k25-live1-arp1",
+            "s0-f2-k0-live0-arp0",
+            "s0-f2-k0-live0-arp1",
+            "s0-f2-k0-live1-arp0",
+            "s0-f2-k0-live1-arp1",
+            "s0-f2-k1-live0-arp0",
+            "s0-f2-k1-live0-arp1",
+            "s0-f2-k1-live1-arp0",
+            "s0-f2-k1-live1-arp1",
+            "s0-f2-k25-live0-arp0",
+            "s0-f2-k25-live0-arp1",
+            "s0-f2-k25-live1-arp0",
+            "s0-f2-k25-live1-arp1",
+            "s1-f0-k0-live0-arp0",
+            "s1-f0-k0-live0-arp1",
+            "s1-f0-k0-live1-arp0",
+            "s1-f0-k0-live1-arp1",
+            "s1-f0-k1-live0-arp0",
+            "s1-f0-k1-live0-arp1",
+            "s1-f0-k1-live1-arp0",
+            "s1-f0-k1-live1-arp1",
+            "s1-f0-k25-live0-arp0",
+            "s1-f0-k25-live0-arp1",
+            "s1-f0-k25-live1-arp0",
+            "s1-f0-k25-live1-arp1",
+            "s1-f1-k0-live0-arp0",
+            "s1-f1-k0-live0-arp1",
+            "s1-f1-k0-live1-arp0",
+            "s1-f1-k0-live1-arp1",
+            "s1-f1-k1-live0-arp0",
+            "s1-f1-k1-live0-arp1",
+            "s1-f1-k1-live1-arp0",
+            "s1-f1-k1-live1-arp1",
+            "s1-f1-k25-live0-arp0",
+            "s1-f1-k25-live0-arp1",
+            "s1-f1-k25-live1-arp0",
+            "s1-f1-k25-live1-arp1",
+            "s1-f2-k0-live0-arp0",
+            "s1-f2-k0-live0-arp1",
+            "s1-f2-k0-live1-arp0",
+            "s1-f2-k0-live1-arp1",
+            "s1-f2-k1-live0-arp0",
+            "s1-f2-k1-live0-arp1",
+            "s1-f2-k1-live1-arp0",
+            "s1-f2-k1-live1-arp1",
+            "s1-f2-k25-live0-arp0",
+            "s1-f2-k25-live0-arp1",
+            "s1-f2-k25-live1-arp0",
+            "s1-f2-k25-live1-arp1",
+            "s2-f0-k0-live0-arp0",
+            "s2-f0-k0-live0-arp1",
+            "s2-f0-k0-live1-arp0",
+            "s2-f0-k0-live1-arp1",
+            "s2-f0-k1-live0-arp0",
+            "s2-f0-k1-live0-arp1",
+            "s2-f0-k1-live1-arp0",
+            "s2-f0-k1-live1-arp1",
+            "s2-f0-k25-live0-arp0",
+            "s2-f0-k25-live0-arp1",
+            "s2-f0-k25-live1-arp0",
+            "s2-f0-k25-live1-arp1",
+            "s2-f1-k0-live0-arp0",
+            "s2-f1-k0-live0-arp1",
+            "s2-f1-k0-live1-arp0",
+            "s2-f1-k0-live1-arp1",
+            "s2-f1-k1-live0-arp0",
+            "s2-f1-k1-live0-arp1",
+            "s2-f1-k1-live1-arp0",
+            "s2-f1-k1-live1-arp1",
+            "s2-f1-k25-live0-arp0",
+            "s2-f1-k25-live0-arp1",
+            "s2-f1-k25-live1-arp0",
+            "s2-f1-k25-live1-arp1",
+            "s2-f2-k0-live0-arp0",
+            "s2-f2-k0-live0-arp1",
+            "s2-f2-k0-live1-arp0",
+            "s2-f2-k0-live1-arp1",
+            "s2-f2-k1-live0-arp0",
+            "s2-f2-k1-live0-arp1",
+            "s2-f2-k1-live1-arp0",
+            "s2-f2-k1-live1-arp1",
+            "s2-f2-k25-live0-arp0",
+            "s2-f2-k25-live0-arp1",
+            "s2-f2-k25-live1-arp0",
+            "s2-f2-k25-live1-arp1"
+          ]
+        },
+        "native_part": {
+          "cases_or_groups": 9,
+          "receipt": "project-native_part.json",
+          "sha256": "f498fe1bc39b97afb0ae85245fa2948530c9fabdada741c07fa9e930d59a4563",
+          "image_sha256": "b596bc00f599352488e0ceee5896481a71bf3d2f5a3dd2503b8803afd550403d",
+          "case_names": [
+            "0-0",
+            "0-1",
+            "0-2",
+            "1-0",
+            "1-1",
+            "1-2",
+            "2-0",
+            "2-1",
+            "2-2"
+          ]
+        },
+        "accumulator": {
+          "cases_or_groups": 13,
+          "receipt": "project-accumulator.json",
+          "sha256": "0a6322363a5b4ce80a501518a9976eb95de34cbd8b37d9c60bda9b8faef72a34",
+          "image_sha256": "b596bc00f599352488e0ceee5896481a71bf3d2f5a3dd2503b8803afd550403d",
+          "case_names": [
+            "arp",
+            "chord",
+            "follow",
+            "gravity",
+            "native_project_save_reload",
+            "native_transport_reset",
+            "panel_defaults_and_locks",
+            "pixel_layout",
+            "position_to_encoder_mapping",
+            "sequence",
+            "setup_navigation",
+            "standard_controls",
+            "unsaved_retained_restart"
+          ]
+        },
+        "size": {
+          "cases_or_groups": 15,
+          "receipt": "project-size.json",
+          "sha256": "5dfeaebabc17025debcdb302b9ff58aada953e4681b2071e8277f7a6bf7e1f96",
+          "image_sha256": "b596bc00f599352488e0ceee5896481a71bf3d2f5a3dd2503b8803afd550403d",
+          "case_names": [
+            "bass-size4",
+            "follow",
+            "live-drop",
+            "low-size2",
+            "persistence",
+            "rootless-add9",
+            "size2-arp",
+            "size2-live-auto",
+            "size2-sequence",
+            "size3-arp",
+            "size3-live-auto",
+            "size3-sequence",
+            "size4-arp",
+            "size4-live-auto",
+            "size4-sequence"
+          ]
+        }
+      }
+    },
+    "controls": {
+      "runtime_source": "9bc44fec58e6b3fdcbdb5adbad6485a6c6ebc641",
+      "rows": [
+        {
+          "remix": "harmony-review",
+          "gate": "build",
+          "exit_code": 0,
+          "image_sha256": "c27532a6b9ed33a072bc65f206b49a93d27c0a15537b0539bc2ad923d858c795",
+          "seconds": 8.13,
+          "command": [
+            "make",
+            "bus",
+            "REMIX=harmony-review"
+          ],
+          "log": "controls/harmony-review-build.log",
+          "log_sha256": "815254e5658b8ddd6fa26183fd7a3d38656f8dbe8d66d4889a073029c98cbbc1",
+          "skips": [],
+          "working_directory": "${PRIMARY_INTEGRATION}",
+          "outcome": "passed",
+          "environment": {
+            "REMIX": "harmony-review"
+          }
+        },
+        {
+          "remix": "harmony-review",
+          "gate": "dram_boot",
+          "exit_code": 0,
+          "image_sha256": "c27532a6b9ed33a072bc65f206b49a93d27c0a15537b0539bc2ad923d858c795",
+          "seconds": 1.39,
+          "command": [
+            "${PRIMARY_INTEGRATION}/.venv/bin/python3",
+            "-u",
+            "${PRIMARY_INTEGRATION}/tools/verify/verify_dram_boot.py",
+            "--existing-image"
+          ],
+          "log": "controls/harmony-review-dram_boot.log",
+          "log_sha256": "2cb110cc4b2592703035e9b4c0725e629d0ddc04ba18ace03fc2a65984d327e8",
+          "skips": [],
+          "working_directory": "${PRIMARY_INTEGRATION}",
+          "outcome": "passed",
+          "environment": {
+            "REMIX": "harmony-review"
+          }
+        },
+        {
+          "remix": "harmony-review",
+          "gate": "harmony_degree_core",
+          "exit_code": 0,
+          "image_sha256": "c27532a6b9ed33a072bc65f206b49a93d27c0a15537b0539bc2ad923d858c795",
+          "seconds": 3.2,
+          "command": [
+            "${PRIMARY_INTEGRATION}/.venv/bin/python3",
+            "-u",
+            "${PRIMARY_INTEGRATION}/tools/verify/verify_harmony_degree_core.py",
+            "--without-scales"
+          ],
+          "log": "controls/harmony-review-harmony_degree_core.log",
+          "log_sha256": "d89c55ce3df78519844764728a984bd669257f0341e92cce973e069ccbf79b95",
+          "skips": [],
+          "working_directory": "${PRIMARY_INTEGRATION}",
+          "outcome": "passed",
+          "environment": {
+            "REMIX": "harmony-review"
+          }
+        },
+        {
+          "remix": "harmony-review",
+          "gate": "harmony_degree_integration",
+          "exit_code": 0,
+          "image_sha256": "c27532a6b9ed33a072bc65f206b49a93d27c0a15537b0539bc2ad923d858c795",
+          "seconds": 8.24,
+          "command": [
+            "${PRIMARY_INTEGRATION}/.venv/bin/python3",
+            "-u",
+            "${PRIMARY_INTEGRATION}/tools/verify/verify_harmony_degree_integration.py"
+          ],
+          "log": "controls/harmony-review-harmony_degree_integration.log",
+          "log_sha256": "2f28d7d31d103edb2511fcf09a7b205745e025dab57d9862d868831e8e4aaf8e",
+          "skips": [],
+          "working_directory": "${PRIMARY_INTEGRATION}",
+          "outcome": "passed",
+          "environment": {
+            "REMIX": "harmony-review"
+          }
+        },
+        {
+          "remix": "harmony-review",
+          "gate": "harmony_playability",
+          "exit_code": 0,
+          "image_sha256": "c27532a6b9ed33a072bc65f206b49a93d27c0a15537b0539bc2ad923d858c795",
+          "seconds": 124.38,
+          "command": [
+            "${PRIMARY_INTEGRATION}/.venv/bin/python3",
+            "-u",
+            "${PRIMARY_INTEGRATION}/tools/verify/verify_harmony_playability.py"
+          ],
+          "log": "controls/harmony-review-harmony_playability.log",
+          "log_sha256": "4bd73e14ba8a22c364c7b275a82b41304f7a68de7357dd2bce29062cc26e7f00",
+          "skips": [],
+          "working_directory": "${PRIMARY_INTEGRATION}",
+          "outcome": "passed",
+          "environment": {
+            "REMIX": "harmony-review"
+          }
+        },
+        {
+          "remix": "harmony-review",
+          "gate": "harmony_size_musical",
+          "exit_code": 0,
+          "image_sha256": "c27532a6b9ed33a072bc65f206b49a93d27c0a15537b0539bc2ad923d858c795",
+          "seconds": 40.28,
+          "command": [
+            "${PRIMARY_INTEGRATION}/.venv/bin/python3",
+            "-u",
+            "${PRIMARY_INTEGRATION}/tools/verify/verify_harmony_size_musical.py"
+          ],
+          "log": "controls/harmony-review-harmony_size_musical.log",
+          "log_sha256": "3f009e8f1697de135e87022f1a280110f8a663ca138dc071a744b85567927cb8",
+          "skips": [],
+          "working_directory": "${PRIMARY_INTEGRATION}",
+          "outcome": "passed",
+          "environment": {
+            "REMIX": "harmony-review"
+          }
+        },
+        {
+          "remix": "harmony-follow-native-review",
+          "gate": "build",
+          "exit_code": 0,
+          "image_sha256": "47069b8ef102958cc0ac55daa5dd3a1732867524dabe1201fdb1badf0fa48dfc",
+          "seconds": 9.09,
+          "command": [
+            "make",
+            "bus",
+            "REMIX=harmony-follow-native-review"
+          ],
+          "log": "controls/harmony-follow-native-review-build.log",
+          "log_sha256": "9f65824c7fcdc794bbf56156300be8ed0e49fe1c82b52d6312c78bb94cc5c9d3",
+          "skips": [],
+          "working_directory": "${PRIMARY_INTEGRATION}",
+          "outcome": "passed",
+          "environment": {
+            "REMIX": "harmony-follow-native-review"
+          }
+        },
+        {
+          "remix": "harmony-follow-native-review",
+          "gate": "dram_boot",
+          "exit_code": 0,
+          "image_sha256": "47069b8ef102958cc0ac55daa5dd3a1732867524dabe1201fdb1badf0fa48dfc",
+          "seconds": 1.37,
+          "command": [
+            "${PRIMARY_INTEGRATION}/.venv/bin/python3",
+            "-u",
+            "${PRIMARY_INTEGRATION}/tools/verify/verify_dram_boot.py",
+            "--existing-image"
+          ],
+          "log": "controls/harmony-follow-native-review-dram_boot.log",
+          "log_sha256": "42ecf777b70e15c6553fcf356490e0a0921d454b84e10f014e1c2e83639d8f82",
+          "skips": [],
+          "working_directory": "${PRIMARY_INTEGRATION}",
+          "outcome": "passed",
+          "environment": {
+            "REMIX": "harmony-follow-native-review"
+          }
+        },
+        {
+          "remix": "harmony-follow-native-review",
+          "gate": "harmony_follow_live",
+          "exit_code": 0,
+          "image_sha256": "47069b8ef102958cc0ac55daa5dd3a1732867524dabe1201fdb1badf0fa48dfc",
+          "seconds": 4.48,
+          "command": [
+            "${PRIMARY_INTEGRATION}/.venv/bin/python3",
+            "-u",
+            "${PRIMARY_INTEGRATION}/tools/verify/verify_harmony_follow_live.py"
+          ],
+          "log": "controls/harmony-follow-native-review-harmony_follow_live.log",
+          "log_sha256": "68606e5fdd03c34163c5e280052683bf6f35d09465b77c822ee226686252252d",
+          "skips": [],
+          "working_directory": "${PRIMARY_INTEGRATION}",
+          "outcome": "passed",
+          "environment": {
+            "REMIX": "harmony-follow-native-review"
+          }
+        },
+        {
+          "remix": "harmony-follow-native-review",
+          "gate": "midi_follow_scale",
+          "exit_code": 0,
+          "image_sha256": "47069b8ef102958cc0ac55daa5dd3a1732867524dabe1201fdb1badf0fa48dfc",
+          "seconds": 15.21,
+          "command": [
+            "${PRIMARY_INTEGRATION}/.venv/bin/python3",
+            "-u",
+            "${PRIMARY_INTEGRATION}/tools/verify/verify_midi_follow_scale.py"
+          ],
+          "log": "controls/harmony-follow-native-review-midi_follow_scale.log",
+          "log_sha256": "e1cd5b3294d2159513a9dc9423d0fb5c1aa404ab6c3a9702df5b6df180d845c5",
+          "skips": [],
+          "working_directory": "${PRIMARY_INTEGRATION}",
+          "outcome": "passed",
+          "environment": {
+            "REMIX": "harmony-follow-native-review"
+          }
+        }
+      ]
+    }
+  },
+  "source_check": {
+    "command": [
+      "make",
+      "check"
+    ],
+    "working_directory": "${AUTHOR}",
+    "log": "source-check.log",
+    "log_sha256": "e8cccd1f76fe937a2570c1d4ea70a95c131eba4a5c36fcc8d92c506633f7b71b",
+    "tests": 25,
+    "scope": "Source/provenance/unit tests as recorded in this log; this does not claim the subsequently generated receipt was included."
+  },
+  "cpu_benchmark": {
+    "measurement": "Executed ColdFire instructions; not chip cycles, wall-clock latency, device CPU-meter percentage or overall remix load",
+    "fixture_sha256": "02ccf9cb04238b6fc79d48a34147a9852e364c7749ccc3e618bf7c6066783003",
+    "cases": 59,
+    "repeats": 2,
+    "matching_result_digests": true,
+    "measured_case_regressions": 0,
+    "masked_span_regressions": 0,
+    "restore_validation": "Before each timed restore, host-only setup overwrites the entire DEG/CHRD/ACC/status destinations with 0xcc. The measured restore must reconstruct the exact saved bank; its success return alone is insufficient. A forged successful no-op restore is rejected by the matching fixture.",
+    "restore_negative_control": "restore-noop-negative-control.json",
+    "restore_fixture_rerun": "restore-benchmark-rerun.json",
+    "results": {
+      "harmony/decode_0_84_degrees": {
+        "instructions": 2529,
+        "max_masked": 0,
+        "result_sha256": "56f318057b008aa251a10a8dd8c7567e80c0e9853df8017d90a410e18a16586d",
+        "hotspots": [
+          [
+            "hd_decode",
+            1092
+          ],
+          [
+            ".scale",
+            1092
+          ],
+          [
+            ".decode_done",
+            252
+          ],
+          [
+            ".scale_done",
+            84
+          ],
+          [
+            ".decode_bad",
+            9
+          ]
+        ],
+        "baseline_instructions": 3621,
+        "ratio": 0.6984258492129246,
+        "reduction_percent": 30.16
+      },
+      "harmony/encode_0_128_notes": {
+        "instructions": 3966,
+        "max_masked": 0,
+        "result_sha256": "549de46172e4e72969ff63261fe22fc9378910b6f837fbc3241280449fa05b34",
+        "hotspots": [
+          [
+            "hd_encode",
+            1785
+          ],
+          [
+            ".scale",
+            1664
+          ],
+          [
+            ".encode_done",
+            384
+          ],
+          [
+            ".scale_done",
+            128
+          ],
+          [
+            ".encode_minimum",
+            5
+          ]
+        ],
+        "baseline_instructions": 15574,
+        "ratio": 0.2546551945550276,
+        "reduction_percent": 74.53
+      },
+      "harmony/decode_320_84_degrees": {
+        "instructions": 2529,
+        "max_masked": 0,
+        "result_sha256": "e2f9d01a3e63621dfec97b310d461f794b241b05a1232dc94f2566ad1eb053ac",
+        "hotspots": [
+          [
+            "hd_decode",
+            1092
+          ],
+          [
+            ".scale",
+            1092
+          ],
+          [
+            ".decode_done",
+            252
+          ],
+          [
+            ".scale_done",
+            84
+          ],
+          [
+            ".decode_bad",
+            9
+          ]
+        ],
+        "baseline_instructions": 3621,
+        "ratio": 0.6984258492129246,
+        "reduction_percent": 30.16
+      },
+      "harmony/encode_320_128_notes": {
+        "instructions": 3966,
+        "max_masked": 0,
+        "result_sha256": "35af0c6c53a0c27f74f5b60064f6602e3b195e72fb35a1bd2ac785be8ca77200",
+        "hotspots": [
+          [
+            "hd_encode",
+            1785
+          ],
+          [
+            ".scale",
+            1664
+          ],
+          [
+            ".encode_done",
+            384
+          ],
+          [
+            ".scale_done",
+            128
+          ],
+          [
+            ".encode_minimum",
+            5
+          ]
+        ],
+        "baseline_instructions": 15605,
+        "ratio": 0.25414931111823136,
+        "reduction_percent": 74.59
+      },
+      "harmony/decode_428_84_degrees": {
+        "instructions": 2529,
+        "max_masked": 0,
+        "result_sha256": "7edf2871684d47658f03a64089da01ea3f83fa12d908baa8f3b49a25582695c6",
+        "hotspots": [
+          [
+            "hd_decode",
+            1092
+          ],
+          [
+            ".scale",
+            1092
+          ],
+          [
+            ".decode_done",
+            252
+          ],
+          [
+            ".scale_done",
+            84
+          ],
+          [
+            ".decode_bad",
+            9
+          ]
+        ],
+        "baseline_instructions": 3621,
+        "ratio": 0.6984258492129246,
+        "reduction_percent": 30.16
+      },
+      "harmony/encode_428_128_notes": {
+        "instructions": 3966,
+        "max_masked": 0,
+        "result_sha256": "553d786b5c65d4bc010011fdec5b4a524fa87825ad5a52e1fcb80e12161b7242",
+        "hotspots": [
+          [
+            "hd_encode",
+            1785
+          ],
+          [
+            ".scale",
+            1664
+          ],
+          [
+            ".encode_done",
+            384
+          ],
+          [
+            ".scale_done",
+            128
+          ],
+          [
+            ".encode_minimum",
+            5
+          ]
+        ],
+        "baseline_instructions": 15043,
+        "ratio": 0.2636442199029449,
+        "reduction_percent": 73.64
+      },
+      "harmony/stage_mode_0_8_tracks": {
+        "instructions": 3872,
+        "max_masked": 16,
+        "result_sha256": "d23946125294038f62c6e51e4adcc611768352292a80642da59c82725dd86490",
+        "hotspots": [
+          [
+            "hd_event_stage_c",
+            1288
+          ],
+          [
+            ".address",
+            552
+          ],
+          [
+            "hd_sync_c",
+            464
+          ],
+          [
+            "hd_scale_c.part.0",
+            384
+          ],
+          [
+            "store_part_midi_read",
+            264
+          ],
+          [
+            "hd_pattern_context_c",
+            208
+          ],
+          [
+            "store_part_read",
+            192
+          ],
+          [
+            "hd_part_read_c",
+            112
+          ]
+        ],
+        "baseline_instructions": 5448,
+        "ratio": 0.71071953010279,
+        "reduction_percent": 28.93
+      },
+      "harmony/ui_observe_mode_0": {
+        "instructions": 1086,
+        "max_masked": 0,
+        "result_sha256": "a44dab0a82ccf4c40384145b9ae7e59fd9b0aeffa701373d4de9ed6e333bd750",
+        "hotspots": [
+          [
+            "hd_sync_c",
+            464
+          ],
+          [
+            ".address",
+            184
+          ],
+          [
+            "hd_ui_observe_c",
+            159
+          ],
+          [
+            "store_part_midi_read",
+            88
+          ],
+          [
+            "store_part_read",
+            64
+          ],
+          [
+            "hd_part_read_c",
+            56
+          ],
+          [
+            ".read_done",
+            24
+          ],
+          [
+            "store_part_ui_context",
+            19
+          ]
+        ],
+        "baseline_instructions": 2614,
+        "ratio": 0.41545524100994646,
+        "reduction_percent": 58.45
+      },
+      "harmony/tick_mode_0_8_tracks": {
+        "instructions": 3168,
+        "max_masked": 348,
+        "result_sha256": "206bd8c8330a74268922ff7c84a13863d308108eadaff65eeac0441da7e88b71",
+        "hotspots": [
+          [
+            "hd_event_tick_c",
+            560
+          ],
+          [
+            ".address",
+            552
+          ],
+          [
+            "hd_scale_c.part.0",
+            384
+          ],
+          [
+            "convert.part.0",
+            296
+          ],
+          [
+            "store_part_midi_read",
+            264
+          ],
+          [
+            "hd_part_type_c",
+            224
+          ],
+          [
+            "store_part_read",
+            192
+          ],
+          [
+            "hd_part_read_c",
+            112
+          ]
+        ],
+        "baseline_instructions": 3216,
+        "ratio": 0.9850746268656716,
+        "reduction_percent": 1.49
+      },
+      "harmony/prepare_mode_0_8_tracks": {
+        "instructions": 2952,
+        "max_masked": 249,
+        "result_sha256": "f0b0f493cdb9092d040b7e598ac0250d4633ae1bac8e415e78285eefa83a5a8a",
+        "hotspots": [
+          [
+            ".address",
+            552
+          ],
+          [
+            "hd_prepare_c",
+            520
+          ],
+          [
+            "hd_scale_c.part.0",
+            384
+          ],
+          [
+            "convert.part.0",
+            296
+          ],
+          [
+            "store_part_midi_read",
+            264
+          ],
+          [
+            "hd_part_type_c",
+            224
+          ],
+          [
+            "store_part_read",
+            192
+          ],
+          [
+            "hd_part_read_c",
+            112
+          ]
+        ],
+        "baseline_instructions": 3000,
+        "ratio": 0.984,
+        "reduction_percent": 1.6
+      },
+      "harmony/generate_mode_0_8_tracks": {
+        "instructions": 776,
+        "max_masked": 0,
+        "result_sha256": "45fc578a5a3bbdaebf1588973ad7c1224f1ba3244c29cbbc59cff1e4d7034bbc",
+        "hotspots": [
+          [
+            ".address",
+            184
+          ],
+          [
+            "mh_get_at",
+            104
+          ],
+          [
+            ".play_read",
+            88
+          ],
+          [
+            "store_part_midi_read",
+            88
+          ],
+          [
+            "store_part_read",
+            64
+          ],
+          [
+            "mh_generate",
+            56
+          ],
+          [
+            ".gen_start",
+            48
+          ],
+          [
+            "store_part_midi_context",
+            24
+          ]
+        ],
+        "baseline_instructions": 776,
+        "ratio": 1.0,
+        "reduction_percent": 0.0
+      },
+      "harmony/stage_mode_1_8_tracks": {
+        "instructions": 8656,
+        "max_masked": 36,
+        "result_sha256": "cdf986578c863b93f04dc7bcb51a825e5eaad2c77840cdfb9cbecc64aa8cfc47",
+        "hotspots": [
+          [
+            ".address",
+            1472
+          ],
+          [
+            "hd_event_stage_c",
+            1336
+          ],
+          [
+            "hd_scale_c.part.0",
+            1152
+          ],
+          [
+            "hd_sync_c",
+            912
+          ],
+          [
+            "store_part_midi_read",
+            704
+          ],
+          [
+            "sync_context",
+            656
+          ],
+          [
+            "store_part_read",
+            512
+          ],
+          [
+            "lock_synced",
+            424
+          ]
+        ],
+        "baseline_instructions": 8656,
+        "ratio": 1.0,
+        "reduction_percent": 0.0
+      },
+      "harmony/ui_observe_mode_1": {
+        "instructions": 2694,
+        "max_masked": 0,
+        "result_sha256": "a293afcec766c8271b410c856d4daed94346a251664aa5b07784d50e4882ea3c",
+        "hotspots": [
+          [
+            ".address",
+            552
+          ],
+          [
+            "hd_sync_c",
+            456
+          ],
+          [
+            "hd_scale_c.part.0",
+            384
+          ],
+          [
+            "sync_context",
+            328
+          ],
+          [
+            "store_part_midi_read",
+            264
+          ],
+          [
+            "store_part_read",
+            192
+          ],
+          [
+            "hd_ui_observe_c",
+            159
+          ],
+          [
+            "hd_part_read_c",
+            112
+          ]
+        ],
+        "baseline_instructions": 2726,
+        "ratio": 0.9882611885546588,
+        "reduction_percent": 1.17
+      },
+      "harmony/tick_mode_1_8_tracks": {
+        "instructions": 4424,
+        "max_masked": 505,
+        "result_sha256": "422c7efddbb7e85046ac2c478b4290905cb8067a97ae415eeb4915266c098a04",
+        "hotspots": [
+          [
+            "hd_event_tick_c",
+            784
+          ],
+          [
+            ".address",
+            736
+          ],
+          [
+            "hd_scale_c.part.0",
+            384
+          ],
+          [
+            "store_part_midi_read",
+            352
+          ],
+          [
+            "convert.part.0",
+            296
+          ],
+          [
+            "store_part_read",
+            256
+          ],
+          [
+            "hd_part_type_c",
+            224
+          ],
+          [
+            "hd_base_c",
+            224
+          ]
+        ],
+        "baseline_instructions": 4576,
+        "ratio": 0.9667832167832168,
+        "reduction_percent": 3.32
+      },
+      "harmony/prepare_mode_1_8_tracks": {
+        "instructions": 4176,
+        "max_masked": 401,
+        "result_sha256": "f0b0f493cdb9092d040b7e598ac0250d4633ae1bac8e415e78285eefa83a5a8a",
+        "hotspots": [
+          [
+            ".address",
+            736
+          ],
+          [
+            "hd_prepare_c",
+            712
+          ],
+          [
+            "hd_scale_c.part.0",
+            384
+          ],
+          [
+            "store_part_midi_read",
+            352
+          ],
+          [
+            "convert.part.0",
+            296
+          ],
+          [
+            "store_part_read",
+            256
+          ],
+          [
+            "hd_part_type_c",
+            224
+          ],
+          [
+            "hd_base_c",
+            224
+          ]
+        ],
+        "baseline_instructions": 4328,
+        "ratio": 0.9648798521256932,
+        "reduction_percent": 3.51
+      },
+      "harmony/generate_mode_1_8_tracks": {
+        "instructions": 3960,
+        "max_masked": 0,
+        "result_sha256": "b39373d470ccae8b3717bd255a1e0a219914d4f6e7d0aa323edba79c8e625923",
+        "hotspots": [
+          [
+            ".address",
+            920
+          ],
+          [
+            "store_part_midi_read",
+            440
+          ],
+          [
+            "store_part_read",
+            320
+          ],
+          [
+            "ha_shift_c",
+            232
+          ],
+          [
+            "mh_get_at",
+            208
+          ],
+          [
+            "mh_quant_at",
+            208
+          ],
+          [
+            "bf_source_at",
+            176
+          ],
+          [
+            ".gen_start",
+            120
+          ]
+        ],
+        "baseline_instructions": 6136,
+        "ratio": 0.6453715775749674,
+        "reduction_percent": 35.46
+      },
+      "harmony/stage_mode_2_8_tracks": {
+        "instructions": 8656,
+        "max_masked": 36,
+        "result_sha256": "422c7efddbb7e85046ac2c478b4290905cb8067a97ae415eeb4915266c098a04",
+        "hotspots": [
+          [
+            ".address",
+            1472
+          ],
+          [
+            "hd_event_stage_c",
+            1336
+          ],
+          [
+            "hd_scale_c.part.0",
+            1152
+          ],
+          [
+            "hd_sync_c",
+            912
+          ],
+          [
+            "store_part_midi_read",
+            704
+          ],
+          [
+            "sync_context",
+            656
+          ],
+          [
+            "store_part_read",
+            512
+          ],
+          [
+            "lock_synced",
+            424
+          ]
+        ],
+        "baseline_instructions": 8656,
+        "ratio": 1.0,
+        "reduction_percent": 0.0
+      },
+      "harmony/ui_observe_mode_2": {
+        "instructions": 2694,
+        "max_masked": 0,
+        "result_sha256": "84fbc462c8027a99a8a3d8c1e01030eb7185b926607e7a1ab0a9b11f709ecf37",
+        "hotspots": [
+          [
+            ".address",
+            552
+          ],
+          [
+            "hd_sync_c",
+            456
+          ],
+          [
+            "hd_scale_c.part.0",
+            384
+          ],
+          [
+            "sync_context",
+            328
+          ],
+          [
+            "store_part_midi_read",
+            264
+          ],
+          [
+            "store_part_read",
+            192
+          ],
+          [
+            "hd_ui_observe_c",
+            159
+          ],
+          [
+            "hd_part_read_c",
+            112
+          ]
+        ],
+        "baseline_instructions": 2726,
+        "ratio": 0.9882611885546588,
+        "reduction_percent": 1.17
+      },
+      "harmony/tick_mode_2_8_tracks": {
+        "instructions": 4424,
+        "max_masked": 505,
+        "result_sha256": "422c7efddbb7e85046ac2c478b4290905cb8067a97ae415eeb4915266c098a04",
+        "hotspots": [
+          [
+            "hd_event_tick_c",
+            784
+          ],
+          [
+            ".address",
+            736
+          ],
+          [
+            "hd_scale_c.part.0",
+            384
+          ],
+          [
+            "store_part_midi_read",
+            352
+          ],
+          [
+            "convert.part.0",
+            296
+          ],
+          [
+            "store_part_read",
+            256
+          ],
+          [
+            "hd_part_type_c",
+            224
+          ],
+          [
+            "hd_base_c",
+            224
+          ]
+        ],
+        "baseline_instructions": 4576,
+        "ratio": 0.9667832167832168,
+        "reduction_percent": 3.32
+      },
+      "harmony/prepare_mode_2_8_tracks": {
+        "instructions": 4176,
+        "max_masked": 401,
+        "result_sha256": "f0b0f493cdb9092d040b7e598ac0250d4633ae1bac8e415e78285eefa83a5a8a",
+        "hotspots": [
+          [
+            ".address",
+            736
+          ],
+          [
+            "hd_prepare_c",
+            712
+          ],
+          [
+            "hd_scale_c.part.0",
+            384
+          ],
+          [
+            "store_part_midi_read",
+            352
+          ],
+          [
+            "convert.part.0",
+            296
+          ],
+          [
+            "store_part_read",
+            256
+          ],
+          [
+            "hd_part_type_c",
+            224
+          ],
+          [
+            "hd_base_c",
+            224
+          ]
+        ],
+        "baseline_instructions": 4328,
+        "ratio": 0.9648798521256932,
+        "reduction_percent": 3.51
+      },
+      "harmony/generate_mode_2_8_tracks": {
+        "instructions": 8528,
+        "max_masked": 0,
+        "result_sha256": "9db6b973ea4cbb0b38fb5fb0c69efec5dd50e56801e9284c0c097aacabf6b4df",
+        "hotspots": [
+          [
+            ".build_mod",
+            1936
+          ],
+          [
+            ".address",
+            1288
+          ],
+          [
+            "store_part_midi_read",
+            616
+          ],
+          [
+            ".build_degree",
+            528
+          ],
+          [
+            "store_part_read",
+            448
+          ],
+          [
+            ".gen_bounds",
+            296
+          ],
+          [
+            ".build_test",
+            288
+          ],
+          [
+            "bf_source_at",
+            264
+          ]
+        ],
+        "baseline_instructions": 9336,
+        "ratio": 0.9134532990574121,
+        "reduction_percent": 8.65
+      },
+      "harmony/voicing_0_4_chords": {
+        "instructions": 3000,
+        "max_masked": 0,
+        "result_sha256": "8560028c2ab91754d1a8df03e05e3056f8652ed99ab521878b0d2d7e7563c90d",
+        "hotspots": [
+          [
+            ".address",
+            828
+          ],
+          [
+            "store_part_midi_read",
+            396
+          ],
+          [
+            "store_part_read",
+            288
+          ],
+          [
+            ".voice_validate",
+            136
+          ],
+          [
+            ".voice_epoch_ready",
+            112
+          ],
+          [
+            ".read_done",
+            108
+          ],
+          [
+            ".voice_scale_token",
+            104
+          ],
+          [
+            "bf_source_at",
+            88
+          ]
+        ],
+        "baseline_instructions": 3160,
+        "ratio": 0.9493670886075949,
+        "reduction_percent": 5.06
+      },
+      "harmony/voicing_1_4_chords": {
+        "instructions": 6684,
+        "max_masked": 0,
+        "result_sha256": "f0e31d5515c43fa093360ed966485d1a6d9d7ae0dcc4f23d038e57cb6f3f6813",
+        "hotspots": [
+          [
+            ".address",
+            828
+          ],
+          [
+            ".voice_unwrapped",
+            498
+          ],
+          [
+            ".voice_distance",
+            441
+          ],
+          [
+            "store_part_midi_read",
+            396
+          ],
+          [
+            ".voice_pitch",
+            381
+          ],
+          [
+            ".candidate_range",
+            366
+          ],
+          [
+            ".voice_root_find",
+            363
+          ],
+          [
+            "store_part_read",
+            288
+          ]
+        ],
+        "baseline_instructions": 7737,
+        "ratio": 0.8639007367196588,
+        "reduction_percent": 13.61
+      },
+      "harmony/quant_key_0_128_notes": {
+        "instructions": 28672,
+        "max_masked": 0,
+        "result_sha256": "4497d32c822ad4ae57132a3462f6a0630d5d4a7863915c4ee08634841c4fee9f",
+        "hotspots": [
+          [
+            ".address",
+            8832
+          ],
+          [
+            "store_part_midi_read",
+            4224
+          ],
+          [
+            "store_part_read",
+            3072
+          ],
+          [
+            "mh_quant_at",
+            1920
+          ],
+          [
+            "mh_get_at",
+            1664
+          ],
+          [
+            "bf_source_at",
+            1408
+          ],
+          [
+            ".read_done",
+            1152
+          ],
+          [
+            "mh_raw_key_at",
+            896
+          ]
+        ],
+        "baseline_instructions": 28800,
+        "ratio": 0.9955555555555555,
+        "reduction_percent": 0.44
+      },
+      "harmony/quant_key_1_128_notes": {
+        "instructions": 32305,
+        "max_masked": 0,
+        "result_sha256": "3409e66c87be8cac3c8b4b4455fd8caf675cc442b53a4a1f1e9b37e0a3c79fc8",
+        "hotspots": [
+          [
+            ".address",
+            8832
+          ],
+          [
+            "store_part_midi_read",
+            4224
+          ],
+          [
+            "mh_quant_at",
+            3381
+          ],
+          [
+            "store_part_read",
+            3072
+          ],
+          [
+            "mh_get_at",
+            1664
+          ],
+          [
+            "bf_source_at",
+            1408
+          ],
+          [
+            "ms_decode",
+            1280
+          ],
+          [
+            ".read_done",
+            1152
+          ]
+        ],
+        "baseline_instructions": 38260,
+        "ratio": 0.8443544171458442,
+        "reduction_percent": 15.56
+      },
+      "harmony/quant_key_2_128_notes": {
+        "instructions": 32305,
+        "max_masked": 0,
+        "result_sha256": "ae38c323be15ed09d187207dfbd40a6bad85a515b6c020ad22ac0d8d3f256f5d",
+        "hotspots": [
+          [
+            ".address",
+            8832
+          ],
+          [
+            "store_part_midi_read",
+            4224
+          ],
+          [
+            "mh_quant_at",
+            3381
+          ],
+          [
+            "store_part_read",
+            3072
+          ],
+          [
+            "mh_get_at",
+            1664
+          ],
+          [
+            "bf_source_at",
+            1408
+          ],
+          [
+            "ms_decode",
+            1280
+          ],
+          [
+            ".read_done",
+            1152
+          ]
+        ],
+        "baseline_instructions": 38260,
+        "ratio": 0.8443544171458442,
+        "reduction_percent": 15.56
+      },
+      "harmony/quant_key_25_128_notes": {
+        "instructions": 32305,
+        "max_masked": 0,
+        "result_sha256": "f506d513562dc70b86763f43af58ac36e029aa597880538dfb863dc3cba8729c",
+        "hotspots": [
+          [
+            ".address",
+            8832
+          ],
+          [
+            "store_part_midi_read",
+            4224
+          ],
+          [
+            "mh_quant_at",
+            3381
+          ],
+          [
+            "store_part_read",
+            3072
+          ],
+          [
+            "mh_get_at",
+            1664
+          ],
+          [
+            "bf_source_at",
+            1408
+          ],
+          [
+            "ms_decode",
+            1280
+          ],
+          [
+            ".read_done",
+            1152
+          ]
+        ],
+        "baseline_instructions": 38260,
+        "ratio": 0.8443544171458442,
+        "reduction_percent": 15.56
+      },
+      "harmony/quant_key_84_128_notes": {
+        "instructions": 32476,
+        "max_masked": 0,
+        "result_sha256": "3409e66c87be8cac3c8b4b4455fd8caf675cc442b53a4a1f1e9b37e0a3c79fc8",
+        "hotspots": [
+          [
+            ".address",
+            8832
+          ],
+          [
+            "store_part_midi_read",
+            4224
+          ],
+          [
+            "mh_quant_at",
+            3381
+          ],
+          [
+            "store_part_read",
+            3072
+          ],
+          [
+            "mh_get_at",
+            1664
+          ],
+          [
+            "bf_source_at",
+            1408
+          ],
+          [
+            "ms_decode",
+            1280
+          ],
+          [
+            ".read_done",
+            1152
+          ]
+        ],
+        "baseline_instructions": 37469,
+        "ratio": 0.8667431743574688,
+        "reduction_percent": 13.33
+      },
+      "harmony/spread_0_3_chords": {
+        "instructions": 12,
+        "max_masked": 0,
+        "result_sha256": "893da6cca6d59bcf665552747cb15555f22dacfce56577eae473b5b5d7cfb322",
+        "hotspots": [
+          [
+            "mh_spread",
+            12
+          ]
+        ],
+        "baseline_instructions": 141,
+        "ratio": 0.0851063829787234,
+        "reduction_percent": 91.49
+      },
+      "harmony/spread_1_3_chords": {
+        "instructions": 149,
+        "max_masked": 0,
+        "result_sha256": "e68888e940a3243a83d6c25ff8b760fda33ca832589ef275c3bbba896fd6b8c6",
+        "hotspots": [
+          [
+            ".spread_change",
+            35
+          ],
+          [
+            ".sort_pair",
+            30
+          ],
+          [
+            ".spread_rotate",
+            19
+          ],
+          [
+            ".sort_next",
+            19
+          ],
+          [
+            ".spread_return",
+            9
+          ],
+          [
+            ".spread_ok",
+            8
+          ],
+          [
+            "mh_spread",
+            6
+          ],
+          [
+            "mh_sort_chord",
+            6
+          ]
+        ],
+        "baseline_instructions": 149,
+        "ratio": 1.0,
+        "reduction_percent": 0.0
+      },
+      "harmony/spread_2_3_chords": {
+        "instructions": 95,
+        "max_masked": 0,
+        "result_sha256": "152683609ed7dc3853a7c494a28c653c38279631f5e8d1c4b80eea84895e622a",
+        "hotspots": [
+          [
+            ".spread_upper",
+            52
+          ],
+          [
+            ".spread_change",
+            18
+          ],
+          [
+            ".spread_return",
+            9
+          ],
+          [
+            "mh_spread",
+            6
+          ],
+          [
+            ".spread_publish",
+            6
+          ],
+          [
+            ".spread_wide",
+            3
+          ],
+          [
+            ".spread_fail",
+            1
+          ]
+        ],
+        "baseline_instructions": 166,
+        "ratio": 0.572289156626506,
+        "reduction_percent": 42.77
+      },
+      "harmony/accumulator_boundary_0_24_events": {
+        "instructions": 33248,
+        "max_masked": 0,
+        "result_sha256": "7e7a8fce63ca6c63a04d8eb7741aef16c4631363b614418de2adbd4286f84207",
+        "hotspots": [
+          [
+            "ha_bank_reset_c",
+            14857
+          ],
+          [
+            "ha_shift_c",
+            3872
+          ],
+          [
+            "ha_sounded_c",
+            2804
+          ],
+          [
+            "hd_scale_c.part.0",
+            1920
+          ],
+          [
+            ".address",
+            1840
+          ],
+          [
+            "ha_fire_c",
+            1416
+          ],
+          [
+            ".scale",
+            1040
+          ],
+          [
+            "store_part_midi_read",
+            880
+          ]
+        ],
+        "baseline_instructions": 38901,
+        "ratio": 0.8546823989100537,
+        "reduction_percent": 14.53
+      },
+      "harmony/accumulator_boundary_1_24_events": {
+        "instructions": 30430,
+        "max_masked": 0,
+        "result_sha256": "237ef2269fb61bcdc52fb5bfdea4c2c759626eab7614cc7e4a366077aa170a89",
+        "hotspots": [
+          [
+            "ha_bank_reset_c",
+            14359
+          ],
+          [
+            "ha_shift_c",
+            3376
+          ],
+          [
+            "ha_sounded_c",
+            2916
+          ],
+          [
+            "hd_scale_c.part.0",
+            1536
+          ],
+          [
+            ".address",
+            1472
+          ],
+          [
+            "ha_fire_c",
+            1416
+          ],
+          [
+            ".scale",
+            832
+          ],
+          [
+            "store_part_midi_read",
+            704
+          ]
+        ],
+        "baseline_instructions": 35926,
+        "ratio": 0.8470188721260369,
+        "reduction_percent": 15.3
+      },
+      "harmony/accumulator_boundary_2_24_events": {
+        "instructions": 34710,
+        "max_masked": 0,
+        "result_sha256": "0c133b4223d3bedfce0ebe76d0648e4010e8a1e0013bb723d4d84b5de82ce217",
+        "hotspots": [
+          [
+            "ha_bank_reset_c",
+            14359
+          ],
+          [
+            "ha_shift_c",
+            4244
+          ],
+          [
+            "ha_sounded_c",
+            2940
+          ],
+          [
+            "hd_scale_c.part.0",
+            2208
+          ],
+          [
+            ".address",
+            2116
+          ],
+          [
+            "ha_fire_c",
+            1416
+          ],
+          [
+            ".scale",
+            1196
+          ],
+          [
+            "store_part_midi_read",
+            1012
+          ]
+        ],
+        "baseline_instructions": 40543,
+        "ratio": 0.8561280615642651,
+        "reduction_percent": 14.39
+      },
+      "harmony/accumulator_boundary_3_24_events": {
+        "instructions": 27914,
+        "max_masked": 0,
+        "result_sha256": "44473dffceb4b45855b23aeac831e71c3253837a15d2496af376085a002443c8",
+        "hotspots": [
+          [
+            "ha_bank_reset_c",
+            14359
+          ],
+          [
+            "ha_shift_c",
+            2880
+          ],
+          [
+            "ha_sounded_c",
+            2832
+          ],
+          [
+            "ha_fire_c",
+            1416
+          ],
+          [
+            "hd_scale_c.part.0",
+            1152
+          ],
+          [
+            ".address",
+            1104
+          ],
+          [
+            ".scale",
+            624
+          ],
+          [
+            "ha_runtime_reset_c",
+            619
+          ]
+        ],
+        "baseline_instructions": 33218,
+        "ratio": 0.8403275332650972,
+        "reduction_percent": 15.97
+      },
+      "harmony/size_1_voice_0_spread_0": {
+        "instructions": 9469,
+        "max_masked": 0,
+        "result_sha256": "2fc76395d70478d7990210e0a22354aef9371eff36ee1bbe15948da246c0417d",
+        "hotspots": [
+          [
+            ".address",
+            1656
+          ],
+          [
+            "mh_size_voice_c",
+            1007
+          ],
+          [
+            ".build_mod",
+            920
+          ],
+          [
+            "store_part_midi_read",
+            792
+          ],
+          [
+            "store_part_read",
+            576
+          ],
+          [
+            "ha_shift_c",
+            364
+          ],
+          [
+            ".build_degree",
+            240
+          ],
+          [
+            "candidate.part.0",
+            236
+          ]
+        ],
+        "baseline_instructions": 10605,
+        "ratio": 0.8928807166430929,
+        "reduction_percent": 10.71
+      },
+      "harmony/size_1_voice_0_spread_1": {
+        "instructions": 9681,
+        "max_masked": 0,
+        "result_sha256": "c28ac19fa5d0306b92d2333a3d39160e50bb0f0eb3bb8dc72a645cd1b34cecc8",
+        "hotspots": [
+          [
+            ".address",
+            1656
+          ],
+          [
+            "mh_size_voice_c",
+            1007
+          ],
+          [
+            ".build_mod",
+            920
+          ],
+          [
+            "store_part_midi_read",
+            792
+          ],
+          [
+            "store_part_read",
+            576
+          ],
+          [
+            "ha_shift_c",
+            364
+          ],
+          [
+            "candidate.part.0",
+            344
+          ],
+          [
+            ".build_degree",
+            240
+          ]
+        ],
+        "baseline_instructions": 10713,
+        "ratio": 0.9036684402128256,
+        "reduction_percent": 9.63
+      },
+      "harmony/size_1_voice_0_spread_2": {
+        "instructions": 9533,
+        "max_masked": 0,
+        "result_sha256": "c28ac19fa5d0306b92d2333a3d39160e50bb0f0eb3bb8dc72a645cd1b34cecc8",
+        "hotspots": [
+          [
+            ".address",
+            1656
+          ],
+          [
+            "mh_size_voice_c",
+            1007
+          ],
+          [
+            ".build_mod",
+            920
+          ],
+          [
+            "store_part_midi_read",
+            792
+          ],
+          [
+            "store_part_read",
+            576
+          ],
+          [
+            "ha_shift_c",
+            364
+          ],
+          [
+            "candidate.part.0",
+            300
+          ],
+          [
+            ".build_degree",
+            240
+          ]
+        ],
+        "baseline_instructions": 10641,
+        "ratio": 0.8958744478902358,
+        "reduction_percent": 10.41
+      },
+      "harmony/size_1_voice_1_spread_0": {
+        "instructions": 13240,
+        "max_masked": 0,
+        "result_sha256": "5c9c8f32aa5c6e3bcbb3f1925e1ef1696f33dfb5aa676b8fbcf46d069a5aed71",
+        "hotspots": [
+          [
+            "mh_size_voice_c",
+            2352
+          ],
+          [
+            ".address",
+            1656
+          ],
+          [
+            "candidate.part.0",
+            1442
+          ],
+          [
+            "clarify",
+            941
+          ],
+          [
+            ".build_mod",
+            920
+          ],
+          [
+            "store_part_midi_read",
+            792
+          ],
+          [
+            "store_part_read",
+            576
+          ],
+          [
+            "sort",
+            383
+          ]
+        ],
+        "baseline_instructions": 16538,
+        "ratio": 0.8005804813157577,
+        "reduction_percent": 19.94
+      },
+      "harmony/size_1_voice_1_spread_1": {
+        "instructions": 14296,
+        "max_masked": 0,
+        "result_sha256": "c28ac19fa5d0306b92d2333a3d39160e50bb0f0eb3bb8dc72a645cd1b34cecc8",
+        "hotspots": [
+          [
+            "mh_size_voice_c",
+            2242
+          ],
+          [
+            "candidate.part.0",
+            2036
+          ],
+          [
+            ".address",
+            1656
+          ],
+          [
+            "sort",
+            955
+          ],
+          [
+            "clarify",
+            941
+          ],
+          [
+            ".build_mod",
+            920
+          ],
+          [
+            "store_part_midi_read",
+            792
+          ],
+          [
+            "store_part_read",
+            576
+          ]
+        ],
+        "baseline_instructions": 16994,
+        "ratio": 0.8412380840296575,
+        "reduction_percent": 15.88
+      },
+      "harmony/size_1_voice_1_spread_2": {
+        "instructions": 13482,
+        "max_masked": 0,
+        "result_sha256": "c28ac19fa5d0306b92d2333a3d39160e50bb0f0eb3bb8dc72a645cd1b34cecc8",
+        "hotspots": [
+          [
+            "mh_size_voice_c",
+            2242
+          ],
+          [
+            "candidate.part.0",
+            1794
+          ],
+          [
+            ".address",
+            1656
+          ],
+          [
+            "clarify",
+            941
+          ],
+          [
+            ".build_mod",
+            920
+          ],
+          [
+            "store_part_midi_read",
+            792
+          ],
+          [
+            "store_part_read",
+            576
+          ],
+          [
+            "sort",
+            383
+          ]
+        ],
+        "baseline_instructions": 16598,
+        "ratio": 0.8122665381371249,
+        "reduction_percent": 18.77
+      },
+      "harmony/size_2_voice_0_spread_0": {
+        "instructions": 9748,
+        "max_masked": 0,
+        "result_sha256": "3fe4b5d1d8417f812407fa693be945819c47edfe0446952dbe11297a4f481559",
+        "hotspots": [
+          [
+            ".address",
+            1656
+          ],
+          [
+            "mh_size_voice_c",
+            1173
+          ],
+          [
+            ".build_mod",
+            920
+          ],
+          [
+            "store_part_midi_read",
+            792
+          ],
+          [
+            "store_part_read",
+            576
+          ],
+          [
+            "ha_shift_c",
+            364
+          ],
+          [
+            "candidate.part.0",
+            288
+          ],
+          [
+            ".build_degree",
+            240
+          ]
+        ],
+        "baseline_instructions": 11104,
+        "ratio": 0.8778818443804035,
+        "reduction_percent": 12.21
+      },
+      "harmony/size_2_voice_0_spread_1": {
+        "instructions": 10068,
+        "max_masked": 0,
+        "result_sha256": "4e761af96bf3a895822062dcf8ce0f9feb20503bd7bc07ad20362441e56fa52d",
+        "hotspots": [
+          [
+            ".address",
+            1656
+          ],
+          [
+            "mh_size_voice_c",
+            1173
+          ],
+          [
+            ".build_mod",
+            920
+          ],
+          [
+            "store_part_midi_read",
+            792
+          ],
+          [
+            "store_part_read",
+            576
+          ],
+          [
+            "candidate.part.0",
+            416
+          ],
+          [
+            "ha_shift_c",
+            364
+          ],
+          [
+            "sort",
+            357
+          ]
+        ],
+        "baseline_instructions": 11296,
+        "ratio": 0.8912889518413598,
+        "reduction_percent": 10.87
+      },
+      "harmony/size_2_voice_0_spread_2": {
+        "instructions": 9836,
+        "max_masked": 0,
+        "result_sha256": "e8a47d20eabbd193ebd3310d3d8e94bb2974645942750978067d1b659dcc6a35",
+        "hotspots": [
+          [
+            ".address",
+            1656
+          ],
+          [
+            "mh_size_voice_c",
+            1173
+          ],
+          [
+            ".build_mod",
+            920
+          ],
+          [
+            "store_part_midi_read",
+            792
+          ],
+          [
+            "store_part_read",
+            576
+          ],
+          [
+            "candidate.part.0",
+            376
+          ],
+          [
+            "ha_shift_c",
+            364
+          ],
+          [
+            ".build_degree",
+            240
+          ]
+        ],
+        "baseline_instructions": 11164,
+        "ratio": 0.8810462199928341,
+        "reduction_percent": 11.9
+      },
+      "harmony/size_2_voice_1_spread_0": {
+        "instructions": 17081,
+        "max_masked": 0,
+        "result_sha256": "013781f1eb039f894bf92cefae4ab244ebf903e4a13cb65a430d8df2b94cb951",
+        "hotspots": [
+          [
+            "mh_size_voice_c",
+            3308
+          ],
+          [
+            "candidate.part.0",
+            2619
+          ],
+          [
+            "clarify",
+            1913
+          ],
+          [
+            ".address",
+            1656
+          ],
+          [
+            "sort",
+            1119
+          ],
+          [
+            ".build_mod",
+            920
+          ],
+          [
+            "store_part_midi_read",
+            792
+          ],
+          [
+            "store_part_read",
+            576
+          ]
+        ],
+        "baseline_instructions": 22827,
+        "ratio": 0.7482805449686775,
+        "reduction_percent": 25.17
+      },
+      "harmony/size_2_voice_1_spread_1": {
+        "instructions": 19385,
+        "max_masked": 0,
+        "result_sha256": "ee8cd626fecb23af2b7610eff30e97b011216874c1e1715a6cc81f9361df6387",
+        "hotspots": [
+          [
+            "candidate.part.0",
+            3611
+          ],
+          [
+            "mh_size_voice_c",
+            3130
+          ],
+          [
+            "sort",
+            2607
+          ],
+          [
+            "clarify",
+            1915
+          ],
+          [
+            ".address",
+            1656
+          ],
+          [
+            ".build_mod",
+            920
+          ],
+          [
+            "store_part_midi_read",
+            792
+          ],
+          [
+            "store_part_read",
+            576
+          ]
+        ],
+        "baseline_instructions": 24117,
+        "ratio": 0.8037898577766721,
+        "reduction_percent": 19.62
+      },
+      "harmony/size_2_voice_1_spread_2": {
+        "instructions": 17474,
+        "max_masked": 0,
+        "result_sha256": "e8a47d20eabbd193ebd3310d3d8e94bb2974645942750978067d1b659dcc6a35",
+        "hotspots": [
+          [
+            "candidate.part.0",
+            3301
+          ],
+          [
+            "mh_size_voice_c",
+            3016
+          ],
+          [
+            "clarify",
+            1916
+          ],
+          [
+            ".address",
+            1656
+          ],
+          [
+            "sort",
+            1119
+          ],
+          [
+            ".build_mod",
+            920
+          ],
+          [
+            "store_part_midi_read",
+            792
+          ],
+          [
+            "store_part_read",
+            576
+          ]
+        ],
+        "baseline_instructions": 22919,
+        "ratio": 0.7624241895370654,
+        "reduction_percent": 23.76
+      },
+      "harmony/size_3_voice_0_spread_0": {
+        "instructions": 10282,
+        "max_masked": 0,
+        "result_sha256": "4d3ef313529c40a65cfd8ef2735b5f3c775e0238994baaf557cfc62f48b9adcf",
+        "hotspots": [
+          [
+            ".address",
+            1656
+          ],
+          [
+            "mh_size_voice_c",
+            1179
+          ],
+          [
+            ".build_mod",
+            920
+          ],
+          [
+            "store_part_midi_read",
+            792
+          ],
+          [
+            "candidate.part.0",
+            608
+          ],
+          [
+            "store_part_read",
+            576
+          ],
+          [
+            "sort",
+            373
+          ],
+          [
+            "ha_shift_c",
+            364
+          ]
+        ],
+        "baseline_instructions": 11566,
+        "ratio": 0.8889849559052395,
+        "reduction_percent": 11.1
+      },
+      "harmony/size_3_voice_0_spread_1": {
+        "instructions": 10710,
+        "max_masked": 0,
+        "result_sha256": "0f600c91c2fcfe6e2131f13fc1d29a6d97fb193b8a4427b98e2d050903e9187e",
+        "hotspots": [
+          [
+            ".address",
+            1656
+          ],
+          [
+            "mh_size_voice_c",
+            1179
+          ],
+          [
+            ".build_mod",
+            920
+          ],
+          [
+            "store_part_midi_read",
+            792
+          ],
+          [
+            "candidate.part.0",
+            756
+          ],
+          [
+            "sort",
+            653
+          ],
+          [
+            "store_part_read",
+            576
+          ],
+          [
+            "ha_shift_c",
+            364
+          ]
+        ],
+        "baseline_instructions": 11842,
+        "ratio": 0.9044080391825705,
+        "reduction_percent": 9.56
+      },
+      "harmony/size_3_voice_0_spread_2": {
+        "instructions": 10386,
+        "max_masked": 0,
+        "result_sha256": "aba3c134dbbf4f4af3abc8cb0e3787d0c914f6a52a4ab90a647fecf3967ac110",
+        "hotspots": [
+          [
+            ".address",
+            1656
+          ],
+          [
+            "mh_size_voice_c",
+            1179
+          ],
+          [
+            ".build_mod",
+            920
+          ],
+          [
+            "store_part_midi_read",
+            792
+          ],
+          [
+            "candidate.part.0",
+            712
+          ],
+          [
+            "store_part_read",
+            576
+          ],
+          [
+            "sort",
+            373
+          ],
+          [
+            "ha_shift_c",
+            364
+          ]
+        ],
+        "baseline_instructions": 11642,
+        "ratio": 0.8921147569146195,
+        "reduction_percent": 10.79
+      },
+      "harmony/size_3_voice_1_spread_0": {
+        "instructions": 22091,
+        "max_masked": 0,
+        "result_sha256": "4be54c2d5b113e1e85ab2d45ebe55a217d30fd961eb12b952f9a8543c4cbb449",
+        "hotspots": [
+          [
+            "candidate.part.0",
+            5099
+          ],
+          [
+            "mh_size_voice_c",
+            3638
+          ],
+          [
+            "sort",
+            2731
+          ],
+          [
+            "clarify",
+            2501
+          ],
+          [
+            ".address",
+            1656
+          ],
+          [
+            ".build_mod",
+            920
+          ],
+          [
+            "store_part_midi_read",
+            792
+          ],
+          [
+            "store_part_read",
+            576
+          ]
+        ],
+        "baseline_instructions": 27440,
+        "ratio": 0.8050655976676385,
+        "reduction_percent": 19.49
+      },
+      "harmony/size_3_voice_1_spread_1": {
+        "instructions": 25209,
+        "max_masked": 0,
+        "result_sha256": "9dd3a6220acf9fd03091840d9804b3b754e3023912bb4e59cbb22ad84995157a",
+        "hotspots": [
+          [
+            "candidate.part.0",
+            6246
+          ],
+          [
+            "sort",
+            4901
+          ],
+          [
+            "mh_size_voice_c",
+            3436
+          ],
+          [
+            "clarify",
+            2504
+          ],
+          [
+            ".address",
+            1656
+          ],
+          [
+            ".build_mod",
+            920
+          ],
+          [
+            "store_part_midi_read",
+            792
+          ],
+          [
+            "store_part_read",
+            576
+          ]
+        ],
+        "baseline_instructions": 29324,
+        "ratio": 0.8596712590369663,
+        "reduction_percent": 14.03
+      },
+      "harmony/size_3_voice_1_spread_2": {
+        "instructions": 22461,
+        "max_masked": 0,
+        "result_sha256": "aba3c134dbbf4f4af3abc8cb0e3787d0c914f6a52a4ab90a647fecf3967ac110",
+        "hotspots": [
+          [
+            "candidate.part.0",
+            5905
+          ],
+          [
+            "mh_size_voice_c",
+            3198
+          ],
+          [
+            "sort",
+            2731
+          ],
+          [
+            "clarify",
+            2505
+          ],
+          [
+            ".address",
+            1656
+          ],
+          [
+            ".build_mod",
+            920
+          ],
+          [
+            "store_part_midi_read",
+            792
+          ],
+          [
+            "store_part_read",
+            576
+          ]
+        ],
+        "baseline_instructions": 27342,
+        "ratio": 0.8214834320825104,
+        "reduction_percent": 17.85
+      },
+      "harmony/retain_empty": {
+        "instructions": 645706,
+        "max_masked": 27,
+        "result_sha256": "49d590276bb40793099660eda254ecce67b14d22ca0d3192136b791b69203ad7",
+        "hotspots": [
+          [
+            "hd_pack_c",
+            277773
+          ],
+          [
+            "hd_track_write_c",
+            255272
+          ],
+          [
+            "hd_packed_valid_c",
+            93576
+          ],
+          [
+            "ha_pack_c",
+            14217
+          ],
+          [
+            "ha_valid_c",
+            3335
+          ],
+          [
+            "hd_checkpoint_c",
+            1427
+          ],
+          [
+            "hd_nv_save_c",
+            75
+          ],
+          [
+            "hd_revision_c",
+            14
+          ]
+        ],
+        "baseline_instructions": 2751452,
+        "ratio": 0.2346782716907291,
+        "reduction_percent": 76.53
+      },
+      "harmony/restore_empty": {
+        "instructions": 851620,
+        "max_masked": 0,
+        "result_sha256": "c3a473e4037b36f8e907af11205871b45dd52022ab3c247aacf92c9e31fe2ac7",
+        "hotspots": [
+          [
+            "hd_track_read_c",
+            313887
+          ],
+          [
+            "hd_unpack_c",
+            282644
+          ],
+          [
+            "hd_packed_valid_c",
+            187152
+          ],
+          [
+            "hd_mirror_c",
+            49152
+          ],
+          [
+            "ha_unpack_c",
+            14358
+          ],
+          [
+            "ha_valid_c",
+            3335
+          ],
+          [
+            "hd_bank_loaded_c.part.0",
+            1040
+          ],
+          [
+            "hd_nv_restore_c",
+            39
+          ]
+        ],
+        "baseline_instructions": 3909564,
+        "ratio": 0.21782991658404877,
+        "reduction_percent": 78.22
+      },
+      "harmony/retain_sparse": {
+        "instructions": 705848,
+        "max_masked": 27,
+        "result_sha256": "9ee6cae106e2a341448083669e8d78ad67b418911f368e3e9dc9c6094da9ef4c",
+        "hotspots": [
+          [
+            "hd_pack_c",
+            287987
+          ],
+          [
+            "hd_track_write_c",
+            255272
+          ],
+          [
+            "hd_packed_valid_c",
+            93704
+          ],
+          [
+            "hd_mirror_c",
+            49160
+          ],
+          [
+            "ha_pack_c",
+            14217
+          ],
+          [
+            "ha_valid_c",
+            3335
+          ],
+          [
+            "hd_checkpoint_c",
+            2067
+          ],
+          [
+            "hd_nv_save_c",
+            75
+          ]
+        ],
+        "baseline_instructions": 2897456,
+        "ratio": 0.24360956646106102,
+        "reduction_percent": 75.64
+      },
+      "harmony/restore_sparse": {
+        "instructions": 851277,
+        "max_masked": 0,
+        "result_sha256": "5dc0fb4ccb174a0a00abd904791b4d51089c3a8a46822122703b675c570985e8",
+        "hotspots": [
+          [
+            "hd_track_read_c",
+            313887
+          ],
+          [
+            "hd_unpack_c",
+            282108
+          ],
+          [
+            "hd_packed_valid_c",
+            187408
+          ],
+          [
+            "hd_mirror_c",
+            49160
+          ],
+          [
+            "ha_unpack_c",
+            14287
+          ],
+          [
+            "ha_valid_c",
+            3335
+          ],
+          [
+            "hd_bank_loaded_c.part.0",
+            1040
+          ],
+          [
+            "hd_nv_restore_c",
+            39
+          ]
+        ],
+        "baseline_instructions": 3934013,
+        "ratio": 0.21638896465263333,
+        "reduction_percent": 78.36
+      },
+      "harmony/retain_dense": {
+        "instructions": 687434,
+        "max_masked": 27,
+        "result_sha256": "eea49669530111c6cb6be9471f55a19105162c4ea19c8436683eab6c7340846a",
+        "hotspots": [
+          [
+            "hd_pack_c",
+            261389
+          ],
+          [
+            "hd_track_write_c",
+            255272
+          ],
+          [
+            "hd_packed_valid_c",
+            93704
+          ],
+          [
+            "hd_mirror_c",
+            57344
+          ],
+          [
+            "ha_pack_c",
+            14217
+          ],
+          [
+            "ha_valid_c",
+            3335
+          ],
+          [
+            "hd_checkpoint_c",
+            2067
+          ],
+          [
+            "hd_nv_save_c",
+            75
+          ]
+        ],
+        "baseline_instructions": 2852316,
+        "ratio": 0.24100906070715866,
+        "reduction_percent": 75.9
+      },
+      "harmony/restore_dense": {
+        "instructions": 834909,
+        "max_masked": 0,
+        "result_sha256": "405103a883e36e168f6e4c16853578ca05a4b75a2e3b975d11158b78b1db809b",
+        "hotspots": [
+          [
+            "hd_track_read_c",
+            313887
+          ],
+          [
+            "hd_unpack_c",
+            257556
+          ],
+          [
+            "hd_packed_valid_c",
+            187408
+          ],
+          [
+            "hd_mirror_c",
+            57344
+          ],
+          [
+            "ha_unpack_c",
+            14287
+          ],
+          [
+            "ha_valid_c",
+            3335
+          ],
+          [
+            "hd_bank_loaded_c.part.0",
+            1040
+          ],
+          [
+            "hd_nv_restore_c",
+            39
+          ]
+        ],
+        "baseline_instructions": 3876725,
+        "ratio": 0.21536451515131974,
+        "reduction_percent": 78.46
+      }
+    }
+  },
+  "accumulator_boundary_benchmark": {
+    "cases": 20,
+    "repeats": 3,
+    "tradeoff": "Five START boundary cases add one instruction; no steady-state or interrupt-masked cost increase. The worst measured case drops from 224 to 153 instructions, and a coincident START+pattern reset drops from 224 to 134.",
+    "comparisons": {
+      "baseline_to_final": {
+        "passed": true,
+        "measurement": "executed linked ColdFire instructions, not hardware cycles",
+        "fixture_sha256": "3c9058886ab2963dda30f483e4fd33dd127b93b945fb4ee6593aa69a470b0e68",
+        "repeat": 3,
+        "phase_state_bytes_compared": 1120,
+        "baseline": "${PRIMARY_INTEGRATION}/out/harmony-cpu/baseline",
+        "candidate": "${FINAL_INTEGRATION}/out/harmony-cpu/candidate-final",
+        "artifact_sha256": {
+          "baseline": {
+            "mainos_bus.bin": "bf4cf547029c4266ed5fa180c39efd89fbb4b237f487f60e2eaa9947d35d3627",
+            "platform/runtime/runtime.elf": "66213776e3db588e56bc2a94b9fcb1124179a5ac861aa501f26ef547b18ae43e",
+            "platform/runtime/runtime.bin": "0a6f898f396a7d9518dadeb559120376b2379752228bf0e6b7680465b06a970d"
+          },
+          "candidate": {
+            "mainos_bus.bin": "b596bc00f599352488e0ceee5896481a71bf3d2f5a3dd2503b8803afd550403d",
+            "platform/runtime/runtime.elf": "73ed7f629039a8a067c5f57de7f567c6e0f9f05846bed896f73e1358bf02d09d",
+            "platform/runtime/runtime.bin": "c4fb84b77d8096d58127ac823c28d8633e97b6317820931df86183dee85c3ef4"
+          }
+        },
+        "cases": {
+          "fresh_start_identity/policy_0": {
+            "baseline_instructions": 140,
+            "candidate_instructions": 141,
+            "instruction_delta": 1,
+            "reduction_percent": -0.71,
+            "baseline_max_masked": 0,
+            "candidate_max_masked": 0,
+            "result_sha256": "42a60120b8c8244091e924a2185dc6f3bbe2e0580900213f141ec4d17a29674b",
+            "shifted_note": 48
+          },
+          "fresh_start_identity/policy_1": {
+            "baseline_instructions": 212,
+            "candidate_instructions": 134,
+            "instruction_delta": -78,
+            "reduction_percent": 36.79,
+            "baseline_max_masked": 0,
+            "candidate_max_masked": 0,
+            "result_sha256": "42a60120b8c8244091e924a2185dc6f3bbe2e0580900213f141ec4d17a29674b",
+            "shifted_note": 48
+          },
+          "fresh_start_identity/policy_2": {
+            "baseline_instructions": 140,
+            "candidate_instructions": 141,
+            "instruction_delta": 1,
+            "reduction_percent": -0.71,
+            "baseline_max_masked": 0,
+            "candidate_max_masked": 0,
+            "result_sha256": "42a60120b8c8244091e924a2185dc6f3bbe2e0580900213f141ec4d17a29674b",
+            "shifted_note": 48
+          },
+          "fresh_start_identity/policy_3": {
+            "baseline_instructions": 212,
+            "candidate_instructions": 134,
+            "instruction_delta": -78,
+            "reduction_percent": 36.79,
+            "baseline_max_masked": 0,
+            "candidate_max_masked": 0,
+            "result_sha256": "42a60120b8c8244091e924a2185dc6f3bbe2e0580900213f141ec4d17a29674b",
+            "shifted_note": 48
+          },
+          "established_start_new_pattern/policy_0": {
+            "baseline_instructions": 82,
+            "candidate_instructions": 82,
+            "instruction_delta": 0,
+            "reduction_percent": 0.0,
+            "baseline_max_masked": 0,
+            "candidate_max_masked": 0,
+            "result_sha256": "9e3558f64f76cdc855ea786eee072a3e192eb432d6c7287b4fcea3209c596254",
+            "shifted_note": 52
+          },
+          "established_start_new_pattern/policy_1": {
+            "baseline_instructions": 154,
+            "candidate_instructions": 134,
+            "instruction_delta": -20,
+            "reduction_percent": 12.99,
+            "baseline_max_masked": 0,
+            "candidate_max_masked": 0,
+            "result_sha256": "ecf8bebab7d2482ec2a8b28909731fb27744f35c664ff82e8a7347624eb982a1",
+            "shifted_note": 48
+          },
+          "established_start_new_pattern/policy_2": {
+            "baseline_instructions": 152,
+            "candidate_instructions": 153,
+            "instruction_delta": 1,
+            "reduction_percent": -0.66,
+            "baseline_max_masked": 0,
+            "candidate_max_masked": 0,
+            "result_sha256": "ecf8bebab7d2482ec2a8b28909731fb27744f35c664ff82e8a7347624eb982a1",
+            "shifted_note": 48
+          },
+          "established_start_new_pattern/policy_3": {
+            "baseline_instructions": 224,
+            "candidate_instructions": 134,
+            "instruction_delta": -90,
+            "reduction_percent": 40.18,
+            "baseline_max_masked": 0,
+            "candidate_max_masked": 0,
+            "result_sha256": "ecf8bebab7d2482ec2a8b28909731fb27744f35c664ff82e8a7347624eb982a1",
+            "shifted_note": 48
+          },
+          "established_start_same_pattern/policy_0": {
+            "baseline_instructions": 68,
+            "candidate_instructions": 69,
+            "instruction_delta": 1,
+            "reduction_percent": -1.47,
+            "baseline_max_masked": 0,
+            "candidate_max_masked": 0,
+            "result_sha256": "5bdba9bfff7bf8e2aba985abf2840eb9e4c4b4ccd6e43c864a1fc84513e4d44b",
+            "shifted_note": 52
+          },
+          "established_start_same_pattern/policy_1": {
+            "baseline_instructions": 140,
+            "candidate_instructions": 134,
+            "instruction_delta": -6,
+            "reduction_percent": 4.29,
+            "baseline_max_masked": 0,
+            "candidate_max_masked": 0,
+            "result_sha256": "42a60120b8c8244091e924a2185dc6f3bbe2e0580900213f141ec4d17a29674b",
+            "shifted_note": 48
+          },
+          "established_start_same_pattern/policy_2": {
+            "baseline_instructions": 68,
+            "candidate_instructions": 69,
+            "instruction_delta": 1,
+            "reduction_percent": -1.47,
+            "baseline_max_masked": 0,
+            "candidate_max_masked": 0,
+            "result_sha256": "5bdba9bfff7bf8e2aba985abf2840eb9e4c4b4ccd6e43c864a1fc84513e4d44b",
+            "shifted_note": 52
+          },
+          "established_start_same_pattern/policy_3": {
+            "baseline_instructions": 140,
+            "candidate_instructions": 134,
+            "instruction_delta": -6,
+            "reduction_percent": 4.29,
+            "baseline_max_masked": 0,
+            "candidate_max_masked": 0,
+            "result_sha256": "42a60120b8c8244091e924a2185dc6f3bbe2e0580900213f141ec4d17a29674b",
+            "shifted_note": 48
+          },
+          "established_no_start_new_pattern/policy_0": {
+            "baseline_instructions": 70,
+            "candidate_instructions": 69,
+            "instruction_delta": -1,
+            "reduction_percent": 1.43,
+            "baseline_max_masked": 0,
+            "candidate_max_masked": 0,
+            "result_sha256": "8b06d9324877256533db5882c0313477546e4eaeb95c890f00bba4b37c66e6b8",
+            "shifted_note": 52
+          },
+          "established_no_start_new_pattern/policy_1": {
+            "baseline_instructions": 70,
+            "candidate_instructions": 69,
+            "instruction_delta": -1,
+            "reduction_percent": 1.43,
+            "baseline_max_masked": 0,
+            "candidate_max_masked": 0,
+            "result_sha256": "8b06d9324877256533db5882c0313477546e4eaeb95c890f00bba4b37c66e6b8",
+            "shifted_note": 52
+          },
+          "established_no_start_new_pattern/policy_2": {
+            "baseline_instructions": 140,
+            "candidate_instructions": 140,
+            "instruction_delta": 0,
+            "reduction_percent": 0.0,
+            "baseline_max_masked": 0,
+            "candidate_max_masked": 0,
+            "result_sha256": "69770a46fd82f3e9b770641c623625ae94df8b03914b89d6fc55ed6d7656632b",
+            "shifted_note": 48
+          },
+          "established_no_start_new_pattern/policy_3": {
+            "baseline_instructions": 140,
+            "candidate_instructions": 140,
+            "instruction_delta": 0,
+            "reduction_percent": 0.0,
+            "baseline_max_masked": 0,
+            "candidate_max_masked": 0,
+            "result_sha256": "69770a46fd82f3e9b770641c623625ae94df8b03914b89d6fc55ed6d7656632b",
+            "shifted_note": 48
+          },
+          "established_steady/policy_0": {
+            "baseline_instructions": 56,
+            "candidate_instructions": 56,
+            "instruction_delta": 0,
+            "reduction_percent": 0.0,
+            "baseline_max_masked": 0,
+            "candidate_max_masked": 0,
+            "result_sha256": "9971c16bcc1960d04643c5a02c7d86d17e2571d23c4a333013c4cb79c3228305",
+            "shifted_note": 52
+          },
+          "established_steady/policy_1": {
+            "baseline_instructions": 56,
+            "candidate_instructions": 56,
+            "instruction_delta": 0,
+            "reduction_percent": 0.0,
+            "baseline_max_masked": 0,
+            "candidate_max_masked": 0,
+            "result_sha256": "9971c16bcc1960d04643c5a02c7d86d17e2571d23c4a333013c4cb79c3228305",
+            "shifted_note": 52
+          },
+          "established_steady/policy_2": {
+            "baseline_instructions": 56,
+            "candidate_instructions": 56,
+            "instruction_delta": 0,
+            "reduction_percent": 0.0,
+            "baseline_max_masked": 0,
+            "candidate_max_masked": 0,
+            "result_sha256": "9971c16bcc1960d04643c5a02c7d86d17e2571d23c4a333013c4cb79c3228305",
+            "shifted_note": 52
+          },
+          "established_steady/policy_3": {
+            "baseline_instructions": 56,
+            "candidate_instructions": 56,
+            "instruction_delta": 0,
+            "reduction_percent": 0.0,
+            "baseline_max_masked": 0,
+            "candidate_max_masked": 0,
+            "result_sha256": "9971c16bcc1960d04643c5a02c7d86d17e2571d23c4a333013c4cb79c3228305",
+            "shifted_note": 52
+          }
+        },
+        "regressions": {
+          "fresh_start_identity/policy_0": {
+            "baseline_instructions": 140,
+            "candidate_instructions": 141,
+            "instruction_delta": 1,
+            "reduction_percent": -0.71,
+            "baseline_max_masked": 0,
+            "candidate_max_masked": 0,
+            "result_sha256": "42a60120b8c8244091e924a2185dc6f3bbe2e0580900213f141ec4d17a29674b",
+            "shifted_note": 48
+          },
+          "fresh_start_identity/policy_2": {
+            "baseline_instructions": 140,
+            "candidate_instructions": 141,
+            "instruction_delta": 1,
+            "reduction_percent": -0.71,
+            "baseline_max_masked": 0,
+            "candidate_max_masked": 0,
+            "result_sha256": "42a60120b8c8244091e924a2185dc6f3bbe2e0580900213f141ec4d17a29674b",
+            "shifted_note": 48
+          },
+          "established_start_new_pattern/policy_2": {
+            "baseline_instructions": 152,
+            "candidate_instructions": 153,
+            "instruction_delta": 1,
+            "reduction_percent": -0.66,
+            "baseline_max_masked": 0,
+            "candidate_max_masked": 0,
+            "result_sha256": "ecf8bebab7d2482ec2a8b28909731fb27744f35c664ff82e8a7347624eb982a1",
+            "shifted_note": 48
+          },
+          "established_start_same_pattern/policy_0": {
+            "baseline_instructions": 68,
+            "candidate_instructions": 69,
+            "instruction_delta": 1,
+            "reduction_percent": -1.47,
+            "baseline_max_masked": 0,
+            "candidate_max_masked": 0,
+            "result_sha256": "5bdba9bfff7bf8e2aba985abf2840eb9e4c4b4ccd6e43c864a1fc84513e4d44b",
+            "shifted_note": 52
+          },
+          "established_start_same_pattern/policy_2": {
+            "baseline_instructions": 68,
+            "candidate_instructions": 69,
+            "instruction_delta": 1,
+            "reduction_percent": -1.47,
+            "baseline_max_masked": 0,
+            "candidate_max_masked": 0,
+            "result_sha256": "5bdba9bfff7bf8e2aba985abf2840eb9e4c4b4ccd6e43c864a1fc84513e4d44b",
+            "shifted_note": 52
+          }
+        },
+        "hardware_tested": false
+      },
+      "reset_only": {
+        "passed": true,
+        "measurement": "executed linked ColdFire instructions, not hardware cycles",
+        "fixture_sha256": "3c9058886ab2963dda30f483e4fd33dd127b93b945fb4ee6593aa69a470b0e68",
+        "repeat": 3,
+        "phase_state_bytes_compared": 1120,
+        "baseline": "${PRIMARY_INTEGRATION}/out/harmony-cpu/candidate",
+        "candidate": "${FINAL_INTEGRATION}/out/harmony-cpu/candidate-final",
+        "artifact_sha256": {
+          "baseline": {
+            "mainos_bus.bin": "da212d36c0cbd4f6bcf8c579af9255ec83750fa59697a0bc4b4283feda977f48",
+            "platform/runtime/runtime.elf": "49cbf7f6850e60d4e5e9793ee779c3c47db5c5b3363b592e1637839e033bb7d6",
+            "platform/runtime/runtime.bin": "e9d45eace0375564ab099a0d316799f5e1cdd577f187cbeeaeb06999f903414c"
+          },
+          "candidate": {
+            "mainos_bus.bin": "b596bc00f599352488e0ceee5896481a71bf3d2f5a3dd2503b8803afd550403d",
+            "platform/runtime/runtime.elf": "73ed7f629039a8a067c5f57de7f567c6e0f9f05846bed896f73e1358bf02d09d",
+            "platform/runtime/runtime.bin": "c4fb84b77d8096d58127ac823c28d8633e97b6317820931df86183dee85c3ef4"
+          }
+        },
+        "cases": {
+          "fresh_start_identity/policy_0": {
+            "baseline_instructions": 140,
+            "candidate_instructions": 141,
+            "instruction_delta": 1,
+            "reduction_percent": -0.71,
+            "baseline_max_masked": 0,
+            "candidate_max_masked": 0,
+            "result_sha256": "42a60120b8c8244091e924a2185dc6f3bbe2e0580900213f141ec4d17a29674b",
+            "shifted_note": 48
+          },
+          "fresh_start_identity/policy_1": {
+            "baseline_instructions": 212,
+            "candidate_instructions": 134,
+            "instruction_delta": -78,
+            "reduction_percent": 36.79,
+            "baseline_max_masked": 0,
+            "candidate_max_masked": 0,
+            "result_sha256": "42a60120b8c8244091e924a2185dc6f3bbe2e0580900213f141ec4d17a29674b",
+            "shifted_note": 48
+          },
+          "fresh_start_identity/policy_2": {
+            "baseline_instructions": 140,
+            "candidate_instructions": 141,
+            "instruction_delta": 1,
+            "reduction_percent": -0.71,
+            "baseline_max_masked": 0,
+            "candidate_max_masked": 0,
+            "result_sha256": "42a60120b8c8244091e924a2185dc6f3bbe2e0580900213f141ec4d17a29674b",
+            "shifted_note": 48
+          },
+          "fresh_start_identity/policy_3": {
+            "baseline_instructions": 212,
+            "candidate_instructions": 134,
+            "instruction_delta": -78,
+            "reduction_percent": 36.79,
+            "baseline_max_masked": 0,
+            "candidate_max_masked": 0,
+            "result_sha256": "42a60120b8c8244091e924a2185dc6f3bbe2e0580900213f141ec4d17a29674b",
+            "shifted_note": 48
+          },
+          "established_start_new_pattern/policy_0": {
+            "baseline_instructions": 82,
+            "candidate_instructions": 82,
+            "instruction_delta": 0,
+            "reduction_percent": 0.0,
+            "baseline_max_masked": 0,
+            "candidate_max_masked": 0,
+            "result_sha256": "9e3558f64f76cdc855ea786eee072a3e192eb432d6c7287b4fcea3209c596254",
+            "shifted_note": 52
+          },
+          "established_start_new_pattern/policy_1": {
+            "baseline_instructions": 154,
+            "candidate_instructions": 134,
+            "instruction_delta": -20,
+            "reduction_percent": 12.99,
+            "baseline_max_masked": 0,
+            "candidate_max_masked": 0,
+            "result_sha256": "ecf8bebab7d2482ec2a8b28909731fb27744f35c664ff82e8a7347624eb982a1",
+            "shifted_note": 48
+          },
+          "established_start_new_pattern/policy_2": {
+            "baseline_instructions": 152,
+            "candidate_instructions": 153,
+            "instruction_delta": 1,
+            "reduction_percent": -0.66,
+            "baseline_max_masked": 0,
+            "candidate_max_masked": 0,
+            "result_sha256": "ecf8bebab7d2482ec2a8b28909731fb27744f35c664ff82e8a7347624eb982a1",
+            "shifted_note": 48
+          },
+          "established_start_new_pattern/policy_3": {
+            "baseline_instructions": 224,
+            "candidate_instructions": 134,
+            "instruction_delta": -90,
+            "reduction_percent": 40.18,
+            "baseline_max_masked": 0,
+            "candidate_max_masked": 0,
+            "result_sha256": "ecf8bebab7d2482ec2a8b28909731fb27744f35c664ff82e8a7347624eb982a1",
+            "shifted_note": 48
+          },
+          "established_start_same_pattern/policy_0": {
+            "baseline_instructions": 68,
+            "candidate_instructions": 69,
+            "instruction_delta": 1,
+            "reduction_percent": -1.47,
+            "baseline_max_masked": 0,
+            "candidate_max_masked": 0,
+            "result_sha256": "5bdba9bfff7bf8e2aba985abf2840eb9e4c4b4ccd6e43c864a1fc84513e4d44b",
+            "shifted_note": 52
+          },
+          "established_start_same_pattern/policy_1": {
+            "baseline_instructions": 140,
+            "candidate_instructions": 134,
+            "instruction_delta": -6,
+            "reduction_percent": 4.29,
+            "baseline_max_masked": 0,
+            "candidate_max_masked": 0,
+            "result_sha256": "42a60120b8c8244091e924a2185dc6f3bbe2e0580900213f141ec4d17a29674b",
+            "shifted_note": 48
+          },
+          "established_start_same_pattern/policy_2": {
+            "baseline_instructions": 68,
+            "candidate_instructions": 69,
+            "instruction_delta": 1,
+            "reduction_percent": -1.47,
+            "baseline_max_masked": 0,
+            "candidate_max_masked": 0,
+            "result_sha256": "5bdba9bfff7bf8e2aba985abf2840eb9e4c4b4ccd6e43c864a1fc84513e4d44b",
+            "shifted_note": 52
+          },
+          "established_start_same_pattern/policy_3": {
+            "baseline_instructions": 140,
+            "candidate_instructions": 134,
+            "instruction_delta": -6,
+            "reduction_percent": 4.29,
+            "baseline_max_masked": 0,
+            "candidate_max_masked": 0,
+            "result_sha256": "42a60120b8c8244091e924a2185dc6f3bbe2e0580900213f141ec4d17a29674b",
+            "shifted_note": 48
+          },
+          "established_no_start_new_pattern/policy_0": {
+            "baseline_instructions": 70,
+            "candidate_instructions": 69,
+            "instruction_delta": -1,
+            "reduction_percent": 1.43,
+            "baseline_max_masked": 0,
+            "candidate_max_masked": 0,
+            "result_sha256": "8b06d9324877256533db5882c0313477546e4eaeb95c890f00bba4b37c66e6b8",
+            "shifted_note": 52
+          },
+          "established_no_start_new_pattern/policy_1": {
+            "baseline_instructions": 70,
+            "candidate_instructions": 69,
+            "instruction_delta": -1,
+            "reduction_percent": 1.43,
+            "baseline_max_masked": 0,
+            "candidate_max_masked": 0,
+            "result_sha256": "8b06d9324877256533db5882c0313477546e4eaeb95c890f00bba4b37c66e6b8",
+            "shifted_note": 52
+          },
+          "established_no_start_new_pattern/policy_2": {
+            "baseline_instructions": 140,
+            "candidate_instructions": 140,
+            "instruction_delta": 0,
+            "reduction_percent": 0.0,
+            "baseline_max_masked": 0,
+            "candidate_max_masked": 0,
+            "result_sha256": "69770a46fd82f3e9b770641c623625ae94df8b03914b89d6fc55ed6d7656632b",
+            "shifted_note": 48
+          },
+          "established_no_start_new_pattern/policy_3": {
+            "baseline_instructions": 140,
+            "candidate_instructions": 140,
+            "instruction_delta": 0,
+            "reduction_percent": 0.0,
+            "baseline_max_masked": 0,
+            "candidate_max_masked": 0,
+            "result_sha256": "69770a46fd82f3e9b770641c623625ae94df8b03914b89d6fc55ed6d7656632b",
+            "shifted_note": 48
+          },
+          "established_steady/policy_0": {
+            "baseline_instructions": 56,
+            "candidate_instructions": 56,
+            "instruction_delta": 0,
+            "reduction_percent": 0.0,
+            "baseline_max_masked": 0,
+            "candidate_max_masked": 0,
+            "result_sha256": "9971c16bcc1960d04643c5a02c7d86d17e2571d23c4a333013c4cb79c3228305",
+            "shifted_note": 52
+          },
+          "established_steady/policy_1": {
+            "baseline_instructions": 56,
+            "candidate_instructions": 56,
+            "instruction_delta": 0,
+            "reduction_percent": 0.0,
+            "baseline_max_masked": 0,
+            "candidate_max_masked": 0,
+            "result_sha256": "9971c16bcc1960d04643c5a02c7d86d17e2571d23c4a333013c4cb79c3228305",
+            "shifted_note": 52
+          },
+          "established_steady/policy_2": {
+            "baseline_instructions": 56,
+            "candidate_instructions": 56,
+            "instruction_delta": 0,
+            "reduction_percent": 0.0,
+            "baseline_max_masked": 0,
+            "candidate_max_masked": 0,
+            "result_sha256": "9971c16bcc1960d04643c5a02c7d86d17e2571d23c4a333013c4cb79c3228305",
+            "shifted_note": 52
+          },
+          "established_steady/policy_3": {
+            "baseline_instructions": 56,
+            "candidate_instructions": 56,
+            "instruction_delta": 0,
+            "reduction_percent": 0.0,
+            "baseline_max_masked": 0,
+            "candidate_max_masked": 0,
+            "result_sha256": "9971c16bcc1960d04643c5a02c7d86d17e2571d23c4a333013c4cb79c3228305",
+            "shifted_note": 52
+          }
+        },
+        "regressions": {
+          "fresh_start_identity/policy_0": {
+            "baseline_instructions": 140,
+            "candidate_instructions": 141,
+            "instruction_delta": 1,
+            "reduction_percent": -0.71,
+            "baseline_max_masked": 0,
+            "candidate_max_masked": 0,
+            "result_sha256": "42a60120b8c8244091e924a2185dc6f3bbe2e0580900213f141ec4d17a29674b",
+            "shifted_note": 48
+          },
+          "fresh_start_identity/policy_2": {
+            "baseline_instructions": 140,
+            "candidate_instructions": 141,
+            "instruction_delta": 1,
+            "reduction_percent": -0.71,
+            "baseline_max_masked": 0,
+            "candidate_max_masked": 0,
+            "result_sha256": "42a60120b8c8244091e924a2185dc6f3bbe2e0580900213f141ec4d17a29674b",
+            "shifted_note": 48
+          },
+          "established_start_new_pattern/policy_2": {
+            "baseline_instructions": 152,
+            "candidate_instructions": 153,
+            "instruction_delta": 1,
+            "reduction_percent": -0.66,
+            "baseline_max_masked": 0,
+            "candidate_max_masked": 0,
+            "result_sha256": "ecf8bebab7d2482ec2a8b28909731fb27744f35c664ff82e8a7347624eb982a1",
+            "shifted_note": 48
+          },
+          "established_start_same_pattern/policy_0": {
+            "baseline_instructions": 68,
+            "candidate_instructions": 69,
+            "instruction_delta": 1,
+            "reduction_percent": -1.47,
+            "baseline_max_masked": 0,
+            "candidate_max_masked": 0,
+            "result_sha256": "5bdba9bfff7bf8e2aba985abf2840eb9e4c4b4ccd6e43c864a1fc84513e4d44b",
+            "shifted_note": 52
+          },
+          "established_start_same_pattern/policy_2": {
+            "baseline_instructions": 68,
+            "candidate_instructions": 69,
+            "instruction_delta": 1,
+            "reduction_percent": -1.47,
+            "baseline_max_masked": 0,
+            "candidate_max_masked": 0,
+            "result_sha256": "5bdba9bfff7bf8e2aba985abf2840eb9e4c4b4ccd6e43c864a1fc84513e4d44b",
+            "shifted_note": 52
+          }
+        },
+        "hardware_tested": false
+      }
+    }
+  },
+  "differential_and_host_evidence": {
+    "codec-equivalence.json": {
+      "cases": 82433,
+      "instructions": {
+        "hd_encode": {
+          "cases": 10752,
+          "before": 1293156,
+          "after": 333144,
+          "before_max": 208,
+          "after_max": 31,
+          "reduction_percent": 74.24
+        },
+        "hd_decode": {
+          "cases": 7056,
+          "before": 304192,
+          "after": 212464,
+          "before_max": 44,
+          "after_max": 31,
+          "reduction_percent": 30.15
+        }
+      },
+      "codec_bytes": {
+        "before": 503,
+        "after": 1952
+      },
+      "register_stack_sr_preservation": "passed",
+      "require_reduction": true,
+      "evidence": "ColdFire instructions",
+      "hardware_tested": false
+    },
+    "voice-equivalence.json": {
+      "cases": {
+        "quantization": 10806,
+        "note_generation": 11130,
+        "spread": 3477,
+        "voicing": 11040,
+        "fixed_size": 33120,
+        "accumulator": 6144,
+        "accumulator_invalid_arguments": 64
+      },
+      "total": 75781,
+      "natural_auto_scored_voices": [
+        10100,
+        8884
+      ],
+      "baseline": "${PRIMARY_INTEGRATION}/out/harmony-cpu/baseline",
+      "candidate": "${PRIMARY_INTEGRATION}/out/harmony-cpu/candidate",
+      "evidence": "Executed linked ColdFire before/after behavior; independent quantization and spread oracles",
+      "hardware_tested": false,
+      "runtime_sha256": [
+        "66213776e3db588e56bc2a94b9fcb1124179a5ac861aa501f26ef547b18ae43e",
+        "49cbf7f6850e60d4e5e9793ee779c3c47db5c5b3363b592e1637839e033bb7d6"
+      ],
+      "candidate_source_commit": "dce25eb",
+      "section": "all",
+      "executed_tool_sha256": null,
+      "reporting_limit": "Historical run recorded 75781 comparisons. Another 1024 lock roundtrips executed but were not counted. The tool later gained explicit lock counts and reset-policy cases; its executed source hash was not frozen."
+    },
+    "accumulator-final-equivalence.json": {
+      "cases": {
+        "quantization": 0,
+        "note_generation": 0,
+        "spread": 0,
+        "voicing": 0,
+        "fixed_size": 0,
+        "accumulator": 6144,
+        "accumulator_locks": 1024,
+        "accumulator_reset": 4,
+        "accumulator_invalid_arguments": 64
+      },
+      "total": 7236,
+      "section": "accumulator",
+      "natural_auto_scored_voices": [
+        0,
+        0
+      ],
+      "baseline": "${PRIMARY_INTEGRATION}/out/harmony-cpu/baseline",
+      "candidate": "${FINAL_INTEGRATION}/out/harmony-cpu/candidate-final",
+      "runtime_sha256": [
+        "66213776e3db588e56bc2a94b9fcb1124179a5ac861aa501f26ef547b18ae43e",
+        "73ed7f629039a8a067c5f57de7f567c6e0f9f05846bed896f73e1358bf02d09d"
+      ],
+      "evidence": "Executed linked ColdFire accumulator before/after behavior; independent reset-policy oracle",
+      "hardware_tested": false
+    },
+    "size-host-equivalence.json": {
+      "baseline_source_commit": "1f83bea",
+      "baseline_sha256": "355c660ccc1ffef469036c20e36c447fd45fb8936df00006efd3fa76088b9f66",
+      "candidate_sha256": "42f3d85748f2425d10dfbb5ca6794fb66e16166f6fb490c37145ecd40cedd9d7",
+      "calls_compared": 786432,
+      "settings": {
+        "size": [
+          1,
+          2,
+          3
+        ],
+        "spread": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "voice": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "root": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "quality": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ]
+      },
+      "roots": "0..127 ascending followed by 127..0 descending; history preserved across each progression",
+      "assertions": [
+        "all four pool bytes identical",
+        "all eight history bytes identical"
+      ],
+      "evidence": "Native host C differential; firmware-architecture differential is separate",
+      "hardware_tested": false
+    },
+    "size-independent-equivalence.json": {
+      "check": "Independent native SIZE baseline/candidate differential review",
+      "passed": true,
+      "cases": 819200,
+      "seed": 803647,
+      "baseline": "1f83beaa6778acb5a68e945940d1fcfcb9827d35",
+      "candidate": "dce25eb5ff51d171193a109524448ecac8681369",
+      "source_sha256": {
+        "before": "355c660ccc1ffef469036c20e36c447fd45fb8936df00006efd3fa76088b9f66",
+        "after": "42f3d85748f2425d10dfbb5ca6794fb66e16166f6fb490c37145ecd40cedd9d7"
+      },
+      "header_sha256": "9465930cc6ba618ed8b4e4a6cb1fef91b4145c11f5eb94e13a3a22648c5d03ed",
+      "compiler": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+      "compiler_flags": [
+        "-O2",
+        "-shared",
+        "-fPIC"
+      ],
+      "coverage": [
+        "all 512 configuration bit patterns",
+        "all eight qualities",
+        "200 sequential calls per quality/configuration",
+        "valid sorted and hostile unsorted byte pools",
+        "randomized and continuing histories including AUTO tokens",
+        "exact four-byte pool and eight-byte history comparison"
+      ],
+      "limitations": [
+        "Native host C comparison, not ColdFire code execution",
+        "No hardware playback or physical CPU timing claim"
+      ]
+    },
+    "codec-command.json": {
+      "baseline_source_commit": "1f83beaa6778acb5a68e945940d1fcfcb9827d35",
+      "candidate_source_commit": "9bc44fec58e6b3fdcbdb5adbad6485a6c6ebc641",
+      "command": [
+        "${PRIMARY_INTEGRATION}/.venv/bin/python3",
+        "${AUTHOR}/tools/verify/verify_harmony_codec_equivalence.py",
+        "--baseline-source",
+        "${AUTHOR}/out/harmony-codec-cpu/baseline.s",
+        "--require-reduction"
+      ],
+      "working_directory": "${AUTHOR}",
+      "file_sha256": {
+        "${AUTHOR}/out/harmony-codec-cpu/baseline.s": "e778ae512c9c03a0aebbdd59d37b7a8d2d8eff562732280242268c0505cb0c66",
+        "${AUTHOR}/modules/midi-harmony/codec.s": "00a4b9341a3e635d62d10eda4c75487f8c2fb4fac5025d8e642968ce0c8804d9",
+        "${AUTHOR}/tools/verify/verify_harmony_codec_equivalence.py": "001f694e40281b1090d948fcafc8156fbd7d5f298b4d2b4681b359019087a7d2"
+      },
+      "started_utc": "2026-10-26T22:06:01.849248+00:00",
+      "exit_code": 0,
+      "finished_utc": "2026-10-26T22:06:24.846540+00:00"
+    },
+    "storage-oracle.json": {
+      "source_commit": "9bc44fec58e6b3fdcbdb5adbad6485a6c6ebc641",
+      "finished_utc": "2026-10-26T22:03:03.205373+00:00",
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_harmony_storage.py",
+        "-v"
+      ],
+      "exit_code": 0,
+      "sanitizers": [
+        "address",
+        "undefined"
+      ],
+      "cases": {
+        "packed_valid_seed_roundtrips": 3,
+        "packed_roundtrip_steps": 24576,
+        "token_validity_and_unpack_cases": 12288,
+        "metadata_validity_cases": 256,
+        "null_destination_unpack_cases": 3,
+        "packing_byte_domain_validity_cases": 4608,
+        "retention_seed_roundtrips": 3,
+        "retention_words_compared_to_independent_oracle": 24576,
+        "retention_untouched_bytes_checked": 1916928,
+        "retention_each_lane_corruption_cases": 384,
+        "retention_uncommitted_rejections": 3,
+        "retention_wrong_bank_rejections": 3,
+        "retention_invalidated_rejections": 3,
+        "retention_invalid_argument_rejections": 3,
+        "token_accepted_and_decoded": 3132,
+        "token_rejected_without_destination_mutation": 9156
+      },
+      "file_sha256": {
+        "tests/test_harmony_storage.py": "c9f46bf86a78b80e17a61e888123f1d720db3d077aa78906b44d1a51cf3c4da3",
+        "tests/harmony_storage.c": "96f09a6b75ad9fd0e32f2d65ce17640d76b0d28afd7c5d92d419b3b41287d2c3",
+        "modules/midi-harmony/packed.c": "bbdcf7e130c6098827381aea5dabad63e4629e3a50c52a1c8fa9e7c2850e89f9",
+        "modules/midi-harmony/roots.c": "5d9ea49c1fe8383a3f1ab623114015920db8c5ef47b9ffe8260773ca6e953c46",
+        "modules/midi-harmony/track-retention.c": "09dc9cf62eb7b204797f28361d717d79623d429b554c395092f1e2026ee2a932"
+      },
+      "evidence": "Native production C with SRAM base redirected to test RAM; independent bit-at-a-time codec/retention oracles; not ColdFire firmware or hardware timing.",
+      "hardware_tested": false
+    },
+    "storage-late-corruption.json": {
+      "passed": true,
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_harmony_storage.py",
+        "-v"
+      ],
+      "returncode": 0,
+      "coverage": "Independent sanitized packed/HMT2 oracle plus rejection of corrupt last token in last lane with both entire destinations unchanged",
+      "sources_sha256": {
+        "tests/harmony_storage.c": "ce8b812312f83067f77258757d80f9ea24461ab4589cadd76d7267e316a8e910",
+        "tests/test_harmony_storage.py": "c9f46bf86a78b80e17a61e888123f1d720db3d077aa78906b44d1a51cf3c4da3",
+        "modules/midi-harmony/packed.c": "bbdcf7e130c6098827381aea5dabad63e4629e3a50c52a1c8fa9e7c2850e89f9",
+        "modules/midi-harmony/track-retention.c": "09dc9cf62eb7b204797f28361d717d79623d429b554c395092f1e2026ee2a932"
+      }
+    },
+    "benchmark-fixture-rejection.json": {
+      "passed": true,
+      "check": "stale fixture comparison rejected before measurement and output publication",
+      "command": [
+        "${PRIMARY_INTEGRATION}/.venv/bin/python3",
+        "tools/verify/benchmark_harmony_cpu.py",
+        "--artifacts",
+        "out/harmony-cpu/baseline",
+        "--output",
+        "out/harmony-cpu-review/should-not-exist.json",
+        "--compare",
+        "out/harmony-cpu/baseline.json"
+      ],
+      "cwd": "${PRIMARY_INTEGRATION}",
+      "returncode": 1
+    },
+    "restore-noop-negative-control.json": {
+      "passed": true,
+      "negative_control": "successful no-op retained restore",
+      "rejected_by": "exact saved-bank reconstruction assertion",
+      "assertion": "('restore did not reconstruct the saved bank', 'empty')",
+      "fixture_sha256": "02ccf9cb04238b6fc79d48a34147a9852e364c7749ccc3e618bf7c6066783003",
+      "image_sha256": "b596bc00f599352488e0ceee5896481a71bf3d2f5a3dd2503b8803afd550403d",
+      "image_mutated": false
+    },
+    "restore-benchmark-rerun.json": {
+      "started_utc": "2026-10-26T22:51:37.683026+00:00",
+      "fixture_sha256": "02ccf9cb04238b6fc79d48a34147a9852e364c7749ccc3e618bf7c6066783003",
+      "artifact_sha256": {
+        "baseline": {
+          "mainos_bus.bin": "bf4cf547029c4266ed5fa180c39efd89fbb4b237f487f60e2eaa9947d35d3627",
+          "platform/layout.json": "9c06067c498df2704147fdbd98a8677c8990e5d3f6bfa681025644e3d5e10dc8",
+          "platform/runtime/runtime.elf": "66213776e3db588e56bc2a94b9fcb1124179a5ac861aa501f26ef547b18ae43e",
+          "platform/runtime/runtime.bin": "0a6f898f396a7d9518dadeb559120376b2379752228bf0e6b7680465b06a970d"
+        },
+        "candidate": {
+          "mainos_bus.bin": "b596bc00f599352488e0ceee5896481a71bf3d2f5a3dd2503b8803afd550403d",
+          "platform/layout.json": "30010d46ca03707274eeefc7b496dd757ae99cf0b03fc16c8ed00dfbb308080a",
+          "platform/runtime/runtime.elf": "73ed7f629039a8a067c5f57de7f567c6e0f9f05846bed896f73e1358bf02d09d",
+          "platform/runtime/runtime.bin": "c4fb84b77d8096d58127ac823c28d8633e97b6317820931df86183dee85c3ef4"
+        }
+      },
+      "commands": [
+        {
+          "command": [
+            "${PRIMARY_INTEGRATION}/.venv/bin/python3",
+            "${PRIMARY_INTEGRATION}/tools/verify/benchmark_harmony_cpu.py",
+            "--artifacts",
+            "${PRIMARY_INTEGRATION}/out/harmony-cpu/baseline",
+            "--output",
+            "${PRIMARY_INTEGRATION}/out/harmony-cpu/baseline-final.json",
+            "--repeat",
+            "2"
+          ],
+          "exit_code": 0,
+          "log": "${ARTIFACTS}/baseline-final.log"
+        },
+        {
+          "command": [
+            "${PRIMARY_INTEGRATION}/.venv/bin/python3",
+            "${PRIMARY_INTEGRATION}/tools/verify/benchmark_harmony_cpu.py",
+            "--artifacts",
+            "${FINAL_INTEGRATION}/out/harmony-cpu/candidate-final",
+            "--output",
+            "${PRIMARY_INTEGRATION}/out/harmony-cpu/candidate-final.json",
+            "--repeat",
+            "2",
+            "--compare",
+            "${PRIMARY_INTEGRATION}/out/harmony-cpu/baseline-final.json"
+          ],
+          "exit_code": 0,
+          "log": "${ARTIFACTS}/candidate-final.log"
+        }
+      ],
+      "finished_utc": "2026-10-26T22:53:50.541629+00:00",
+      "cases": 59,
+      "repeat": 2,
+      "artifact_bytes_unchanged": true,
+      "baseline_candidate_result_digests_match": true,
+      "changes_from_previous_fixture": {
+        "baseline": {},
+        "candidate": {}
+      }
+    }
+  },
+  "verification_tool_sha256": {
+    "current_author_tools": {
+      "tools/verify/benchmark_harmony_cpu.py": "02ccf9cb04238b6fc79d48a34147a9852e364c7749ccc3e618bf7c6066783003",
+      "tools/verify/benchmark_harmony_accumulator_cpu.py": "3c9058886ab2963dda30f483e4fd33dd127b93b945fb4ee6593aa69a470b0e68",
+      "tools/verify/verify_harmony_codec_equivalence.py": "001f694e40281b1090d948fcafc8156fbd7d5f298b4d2b4681b359019087a7d2",
+      "tools/verify/verify_harmony_voice_cpu.py": "4c5a6c702fed6b0235712c998c6c65ac3091ecf8da1128700b9907fc2c05eaa0"
+    },
+    "integration_gate_and_harness_files": {
+      "primary/tools/verify/verify_chord_display.py": "647e5510756717e93dd220317eed6538b1b311b77b5f2aced415aa7b6b033794",
+      "primary/tools/verify/verify_chord_part.py": "ce8e3c427a37f23cfdb98e96e00597000f9cc78f073eee2029ad506449ba59bc",
+      "primary/tools/verify/verify_chord_play.py": "1acc2abed955a1ea1c65a77e4a1318cac88d3f32a679883390dc627bdae639a9",
+      "primary/tools/verify/verify_chord_storage.py": "e88aab551464e9f5c3377842e731985069f38278f6bbbc5279db321c87a966f0",
+      "primary/tools/verify/verify_dram_boot.py": "10686a1e421e78b16c3a614e9d9a62d69aa22a55ea1b5ce03ea96a5b4fe86be1",
+      "primary/tools/verify/verify_harmony_accumulator.py": "18b024a44d3e650dc08abc9ae7e417ba23af3a305076c830f60c904977fe1668",
+      "primary/tools/verify/verify_harmony_degree_codec.py": "0da6346a0c2430bcef969be5b3d859c389615f8aa6d92367006289f08a2f6282",
+      "primary/tools/verify/verify_harmony_degree_core.py": "8bffb15c31ac1c04a677cfa9d354ed4c387d0c60f2f0ead0224cabef41073cb8",
+      "primary/tools/verify/verify_harmony_degree_files.py": "156ca69b98c55be8007dbe7acf58d2566bacfff0935fb60606dbb7120721bdf1",
+      "primary/tools/verify/verify_harmony_degree_integration.py": "7ec8e9766eb1ceb2844a4c254c574e9aad72aec28d6e101a546f359f0e1b1635",
+      "primary/tools/verify/verify_harmony_degree_packed.py": "8add5f4939827fb7850ad70486d6b59782abbd576309cdf41e4b1f45ce090e23",
+      "primary/tools/verify/verify_harmony_degree_part_state.py": "820c87997af27a5179d2d03f9d4a5a237e6ed53ca2b95fd68995b7cd31d8a8a9",
+      "primary/tools/verify/verify_harmony_degree_publication.py": "5b0246aff6eeccce3d07db4f7a2c9d3927b8d2103a16f249815d66b79907a4b0",
+      "primary/tools/verify/verify_harmony_degree_roots.py": "71d4453dd13ce49d518eec8cfb43baf09e527e6be61b540d4600d66077cd4dd4",
+      "primary/tools/verify/verify_harmony_degree_scenes.py": "bd20fb0f73613efd4b85ff7e8d21ef713e080f9e88fd79181196553b2886ac56",
+      "primary/tools/verify/verify_harmony_follow_live.py": "b3a4a4aaab98c98843036b464c62049e936ca9a2786b742caaa37abb649ca4ad",
+      "primary/tools/verify/verify_harmony_load_hooks.py": "3681eda1617ed0452985ad3fd17f1f775cfe3d2e1bc98bd0d5ab5aba2ce0ece0",
+      "primary/tools/verify/verify_harmony_playability.py": "e5f97c5626370e15553a1e724e5a91881bab5cad66e51be2d25544f263c990b2",
+      "primary/tools/verify/verify_harmony_plocks.py": "daf3a700c0a9821d29580fce2a65192f95b2e0b6df301c4ded9bc817d58fe708",
+      "primary/tools/verify/verify_harmony_size.py": "4073af08d0deef4735544d0e900fca12079acba2eac5ff1a205d6fe18fa1da3a",
+      "primary/tools/verify/verify_harmony_size_musical.py": "f59655def602bb00c49a6adbbc373dc224adfb4ea108f441766593a018cf93e8",
+      "primary/tools/verify/verify_harmony_store.py": "a66827d48c4698f7fd529222e674be6821c9e29d1b46bc4f0920a172646eafa4",
+      "primary/tools/verify/verify_harmony_track_retention.py": "5a306f27eb28445abdda9d8eeda87169380af955a08ceac84a2c177e8cee3d77",
+      "primary/tools/verify/verify_midi_follow_response.py": "0220dc8624a1f06c470e24e4cb1c24e47b45c8def514b877d0573d8eb68a05f3",
+      "primary/tools/verify/verify_midi_follow_scale.py": "393ca36f4666b576064888e9ef143b2eec5cdf756e2990ed67b21aa52f1478aa",
+      "primary/tools/verify/verify_midi_harmony.py": "0e84820b3769ddcef028bae2b199580e87e36c5776f3646023364c145b15c5f7",
+      "primary/tools/verify/verify_midi_harmony_stress.py": "0b1b33a329fa744c2906b060e0e46ed1d397602ebcabd57956c886ef769be686",
+      "primary/tools/verify/verify_midi_sram.py": "684a7e6df27577cb1f3fa014463573c94350364416223f961e86d63d4ea00840",
+      "primary/tools/verify/verify_store_part.py": "a5748a81271bf331b382138848eff21558d30c8d3d71843c5a4769891a56bb87",
+      "primary/tools/verify/midi_machine.py": "0e53ad805833d533b528e2d367ea45e09e95682a0fd6b6124b05db7148bd5915",
+      "primary/tools/verify/harmony_retained.py": "fb2f80477a727a85f5004a807ba763608164ad43d9ba36984a32447feefd81a2",
+      "final/tools/verify/verify_dram_boot.py": "10686a1e421e78b16c3a614e9d9a62d69aa22a55ea1b5ce03ea96a5b4fe86be1",
+      "final/tools/verify/verify_harmony_accumulator.py": "18b024a44d3e650dc08abc9ae7e417ba23af3a305076c830f60c904977fe1668",
+      "final/tools/verify/verify_harmony_accumulator_port.py": "f61bdca7626a00e0e22c3c7d32eb65dbb7ddb5d2ae5f47781096d584a7b140c6",
+      "final/tools/verify/verify_harmony_degree_part_port.py": "8b2d7f76c62537b861202c46389d0fbd595a0c6956c897acb74114ce438df263",
+      "final/tools/verify/verify_harmony_follow_matrix_port.py": "21d3ec196494048f938adb32d78cfd003390ba4dfcc91d2b1b84957b879bf90a",
+      "final/tools/verify/verify_harmony_size_port.py": "76583d7f636553d2fcc2526e7ce237ee5aa9a0c8e97430144ed7a1daa5332bd3",
+      "final/tools/verify/midi_machine.py": "0e53ad805833d533b528e2d367ea45e09e95682a0fd6b6124b05db7148bd5915",
+      "final/tools/verify/harmony_retained.py": "fb2f80477a727a85f5004a807ba763608164ad43d9ba36984a32447feefd81a2",
+      "final/tools/verify/verify_midi_sram.py": "684a7e6df27577cb1f3fa014463573c94350364416223f961e86d63d4ea00840"
+    },
+    "scope": "Current tool files hashed at report generation. Recorded executed fixture hashes are retained in their receipts; unavailable historical tool hashes remain null."
+  },
+  "skips": [
+    {
+      "stage": "broad",
+      "gate": "midi_harmony_stress",
+      "detail": "[SKIP] concert UART suite: supply --project DIR or OT_PROJECT"
+    },
+    {
+      "stage": "broad_applicability_rerun",
+      "gate": "harmony_plocks",
+      "detail": "[SKIP] Harmony/PLOCKS composition: select both clients"
+    }
+  ],
+  "limits": [
+    "Emulator and native-host evidence only; no physical Octatrack playback or chip-cycle timing measured.",
+    "No claim of CI execution, complete whole-remix CPU utilization, or every optional composition.",
+    "Optional KITS/PLOCKS/Scenes/Loopback full compositions remain outside this run; individual gates may report selection-dependent N/A/skip results.",
+    "The broad runner attempted 28 gates at dce25eb: 27 eligible gates passed, while the PLOCKS invocation failed before combined testing because no PLOCKS module was selected; the corrected positional invocation explicitly skipped it. The initial failed result remains in this receipt.",
+    "Broad coverage was followed by accumulator-only runtime changes and targeted final-source/project checks at 9bc44fe; it was not rerun wholesale at the final source.",
+    "Private fixture projects and firmware/runtime binaries stay outside the committed source receipt."
+  ],
+  "portable_paths": {
+    "AUTHOR": "author repository root",
+    "PRIMARY_INTEGRATION": "matching primary Octabam worktree",
+    "FINAL_INTEGRATION": "final Octabam worktree",
+    "ARTIFACTS": "external artifacts/harmony-cpu-20261026 directory",
+    "PROJECT_COPY": "disposable accessible Octatrack project fixture"
+  },
+  "external_evidence_files": [
+    {
+      "file": "accumulator-boundary-cpu.json",
+      "sha256": "05d8da499d7e13860c2f330a4febb314ce330ef204b8d78f55c94a675f166d60",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "accumulator-boundary-cpu.log",
+      "sha256": "17e576d8423deb421aff917f72d200128a8bbd7bee878c313607160483a9d2cb",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "accumulator-final-equivalence.json",
+      "sha256": "180f4d655f39798892d3c0ab5de9fe9794b45c6409d41a8d84f1a0846ac40699",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "accumulator-reset-only-cpu.json",
+      "sha256": "9c61d7443a859a65e697e13afe72bde6c5023d5fc52587a61c8522e8a301d0af",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "accumulator-reset-only-cpu.log",
+      "sha256": "17e576d8423deb421aff917f72d200128a8bbd7bee878c313607160483a9d2cb",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "baseline-final.json",
+      "sha256": "ec4d519c4e1556e92b38657f13a812997e029c632a62d44910332727dbdc9ff4",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "baseline-final.previous-fixture.json",
+      "sha256": "a6abd7c00d3d3277dcaee15c0c0d67487884faa5753f1ed93008275942c9c929",
+      "classification": "historical_not_current_fixture"
+    },
+    {
+      "file": "baseline.json",
+      "sha256": "2ca67696c1626f067d437910b5acb41894fa2dcda74fba02df9b0f8ef55c29f0",
+      "classification": "historical_not_current_fixture"
+    },
+    {
+      "file": "benchmark-fixture-rejection.json",
+      "sha256": "2f6fe82f28de47380ebdb602039066b693604b5b42cd582211fdf4f67709cbbd",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "candidate-final.json",
+      "sha256": "0b5d43a9cec195c4022666d2655211812bc3d709e87676e6c21b79ad971461c7",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "candidate-final.previous-fixture.json",
+      "sha256": "9065e75de2184f22f54d22301ccfd765a605e66b6a554e4ce6870846c5bee471",
+      "classification": "historical_not_current_fixture"
+    },
+    {
+      "file": "candidate.json",
+      "sha256": "e2afb591ee56cd07829458534b8dbec690257f3d4e52700fba98d8ac9ac2dcdb",
+      "classification": "historical_not_current_fixture"
+    },
+    {
+      "file": "codec-command.json",
+      "sha256": "7f54bf5e417982b30caa2ead51444018e06ad854fec4597770da638cf38a9122",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "codec-equivalence.json",
+      "sha256": "7f4ed4b39be34da872659f291c9a0c33ecab5c151b559e0fd03a203dfbcb1f8c",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "controls/harmony-follow-native-review-build.log",
+      "sha256": "9f65824c7fcdc794bbf56156300be8ed0e49fe1c82b52d6312c78bb94cc5c9d3",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "controls/harmony-follow-native-review-dram_boot.log",
+      "sha256": "42ecf777b70e15c6553fcf356490e0a0921d454b84e10f014e1c2e83639d8f82",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "controls/harmony-follow-native-review-harmony_follow_live.log",
+      "sha256": "68606e5fdd03c34163c5e280052683bf6f35d09465b77c822ee226686252252d",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "controls/harmony-follow-native-review-midi_follow_scale.log",
+      "sha256": "e1cd5b3294d2159513a9dc9423d0fb5c1aa404ab6c3a9702df5b6df180d845c5",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "controls/harmony-review-build.log",
+      "sha256": "815254e5658b8ddd6fa26183fd7a3d38656f8dbe8d66d4889a073029c98cbbc1",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "controls/harmony-review-dram_boot.log",
+      "sha256": "2cb110cc4b2592703035e9b4c0725e629d0ddc04ba18ace03fc2a65984d327e8",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "controls/harmony-review-harmony_degree_core.log",
+      "sha256": "d89c55ce3df78519844764728a984bd669257f0341e92cce973e069ccbf79b95",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "controls/harmony-review-harmony_degree_integration.log",
+      "sha256": "2f28d7d31d103edb2511fcf09a7b205745e025dab57d9862d868831e8e4aaf8e",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "controls/harmony-review-harmony_playability.log",
+      "sha256": "4bd73e14ba8a22c364c7b275a82b41304f7a68de7357dd2bce29062cc26e7f00",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "controls/harmony-review-harmony_size_musical.log",
+      "sha256": "3f009e8f1697de135e87022f1a280110f8a663ca138dc071a744b85567927cb8",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "controls/results.json",
+      "sha256": "d84c612a6330e2dea4687a67b6a3c97036d16f736ef9a01c4571485685cf0e5f",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "final-gates/dram_boot.log",
+      "sha256": "fec5cc8b9380faa8ccf0319299de4cad49b9a8a0a9111a55e4b7267558d0200a",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "final-gates/harmony_accumulator.log",
+      "sha256": "17c8c54131b67e89dc2a2c287aa66800f17e141f0e2a3f1446c11fef1f5efcde",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "final-gates/harmony_accumulator_port.log",
+      "sha256": "5060b27d4168378a519bfd4a5e19de30454804871428519ddee80fb3bd677453",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "final-gates/harmony_degree_part_port.log",
+      "sha256": "806addb8fdbc44d59b9e58a49dea3a3fd5a44429f87097482e8522ab7bbbc3fd",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "final-gates/harmony_follow_matrix_port.log",
+      "sha256": "cd10b1564b1db86b7d03edc0be90701e139a301f1aaf5503a5d569a2099d1ef0",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "final-gates/harmony_size_port.log",
+      "sha256": "23d782aba5f37bf629df51378d2e521c4da6282ec9699d216d855dc6df46ee36",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "final-gates/results.json",
+      "sha256": "cfc013bbb1962ad68cc745c8f51ad76661600833e97f7995c6ccf704d2dc2e0b",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "gate-allowance-extension.json",
+      "sha256": "5ff013e6c213e0de2e0e47108518daf6d6838effad3a97365d3c3de4ceb38541",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "gates/chord_display.log",
+      "sha256": "adba91a48bd1954d23995cc420a5b5e347cfb983c13f5c6be41729f20166d9c5",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "gates/chord_part.log",
+      "sha256": "693b82e96b2aabe1c7e76736b06e74ede2754e194cb6e94379dced35f55117a1",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "gates/chord_play.log",
+      "sha256": "f49c612e90a7e6e467f49120727a83f15752a61d6db98f61952a433bc6880bb5",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "gates/chord_storage.log",
+      "sha256": "dbce51c96cd279e7880819a9bb11dbcf3358453cc9d355368ff6fb7b3a95fa63",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "gates/harmony_accumulator.log",
+      "sha256": "17c8c54131b67e89dc2a2c287aa66800f17e141f0e2a3f1446c11fef1f5efcde",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "gates/harmony_degree_codec.log",
+      "sha256": "7fb2427aff53d4a7218759e9f7f2b4295322faf95aea7c80b477e1373fba7c0b",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "gates/harmony_degree_core.log",
+      "sha256": "e7250292b2302905e3d7e56f343596a788958655bd6ef7e19b20b107c1e22790",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "gates/harmony_degree_files.log",
+      "sha256": "5492832a54931c90fa682c25ff0148f580529de21d0e55c3c7939343a3f5ddec",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "gates/harmony_degree_integration.log",
+      "sha256": "2f28d7d31d103edb2511fcf09a7b205745e025dab57d9862d868831e8e4aaf8e",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "gates/harmony_degree_packed.log",
+      "sha256": "d62044c8eab6439c56e3a563ef845dd9dae8a57a3529b62ed56c7bc908d0b3f9",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "gates/harmony_degree_part_state.log",
+      "sha256": "965f5a42aa57697f0333387eb27bf12de1a4bc98d1a39736162bb1016dfe0608",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "gates/harmony_degree_publication.log",
+      "sha256": "0269d4978849010c6b320cbd6e7b5c4ee58bbf0b3253e0bdb786afaeb8971221",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "gates/harmony_degree_roots.log",
+      "sha256": "a737f6d38d00af6ac5fb0c66f53d9a7004eb03f5c00cfa8cb245d7532013c054",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "gates/harmony_degree_scenes.log",
+      "sha256": "7820285ab1b7d2df545effbcdf7ee50287c4f85e3794a5bfb5ce8452a5ee7e65",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "gates/harmony_follow_live.log",
+      "sha256": "8446f8913402172b665cbddbfa43e4c3cc36d2ade1d06f9878a1be89e53bce8a",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "gates/harmony_load_hooks.log",
+      "sha256": "57afbc95ca3a7a46a48539ba193c00e3c4cff746dc70401824c3b28d8a1eaf6c",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "gates/harmony_playability.log",
+      "sha256": "ae99828a37f38d9bec60ae3cbb392855d131f30d44b3a82b0e8be093b8d6f6fe",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "gates/harmony_plocks-applicability.json",
+      "sha256": "bf46c8027a17b4117ab2c8110b0021addfc0e790f805f8b779ea3cadcb8da5e8",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "gates/harmony_plocks-applicability.log",
+      "sha256": "47ffd09694a527d3a8818b2e43ce677691e3f7049cd5b89f0517663433236baf",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "gates/harmony_plocks.log",
+      "sha256": "91e7d878775846f3c784f9c2b2a2f51107fa79beceb9830466c43d0986e72b8c",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "gates/harmony_size.log",
+      "sha256": "36054108a7f7ffb94d3d011695425f151bfea35eb95ff86dde315e770f2e5a61",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "gates/harmony_size_musical.log",
+      "sha256": "3f009e8f1697de135e87022f1a280110f8a663ca138dc071a744b85567927cb8",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "gates/harmony_store.log",
+      "sha256": "d14477b54b15b79879bf259bacceb850b7fb66ca6172e234630034f20735e617",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "gates/harmony_track_retention.log",
+      "sha256": "d62044c8eab6439c56e3a563ef845dd9dae8a57a3529b62ed56c7bc908d0b3f9",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "gates/midi_follow_response.log",
+      "sha256": "3067242ad1639aa418fbbe28f908a53add188d4d7efa17cbb568446b2e55a9fd",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "gates/midi_follow_scale.log",
+      "sha256": "82ab692213fb4dbca1f98f17710692e4345d9f9a64bb8fe041adcf73f6690178",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "gates/midi_harmony.log",
+      "sha256": "04431fda815f36a58a3a008aa78b920d4089a450130710ac07462cecce629f34",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "gates/midi_harmony_stress.log",
+      "sha256": "747c3fd0c7e51d6ee315b58ea878a928961948eefce5093aaf3139a89248fe57",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "gates/midi_sram.log",
+      "sha256": "6fb8cfd00df9d8ca1712d96734f54a1030b68280187484632616764dddccf59b",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "gates/results.json",
+      "sha256": "1d1a890f1cef5eaefb66e2de2e27567fc456948241fbe22e718759591cbe189e",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "gates/store_part.log",
+      "sha256": "baca9e7cf62f98876b57221fbb8341e6bcc9f1e8986fda4b4d28efaf7c6aa739",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "project-accumulator.json",
+      "sha256": "0a6322363a5b4ce80a501518a9976eb95de34cbd8b37d9c60bda9b8faef72a34",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "project-follow_matrix.json",
+      "sha256": "41ea8a492f81f3f2b7c62b59db62a41c241f9a11194830de80ed264a00f5da00",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "project-native_part.json",
+      "sha256": "f498fe1bc39b97afb0ae85245fa2948530c9fabdada741c07fa9e930d59a4563",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "project-size.json",
+      "sha256": "5dfeaebabc17025debcdb302b9ff58aada953e4681b2071e8277f7a6bf7e1f96",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "restore-benchmark-rerun.json",
+      "sha256": "94cc6be851722ea915925a4c79a23aa211d1ce09124ea3265ee218a30efa32ab",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "restore-noop-negative-control.json",
+      "sha256": "a6ac9097b24b0ad8296b536f48dff55b51865a41ee9e6343499ebd15f4230fd5",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "size-host-equivalence.json",
+      "sha256": "fa8d38dbdc29c34f0d74823b9069dad04bb97d91d32936521cb1420aea9a787d",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "size-independent-equivalence.json",
+      "sha256": "b38179381af7c9642cbe44babc3c8edf87d280f55a5b67e4879aa50af0e87dc8",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "storage-late-corruption.json",
+      "sha256": "7d159612bfc1ef8e2c59b8aca8bed58d4e1d450c26d7512b3a3ed751a06129ff",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "storage-oracle.json",
+      "sha256": "d01c27f4c5977f11c3858e4456614e63440a9f903eeff1b796ce21758fcd836f",
+      "classification": "current_or_supplemental_evidence"
+    },
+    {
+      "file": "voice-equivalence.json",
+      "sha256": "3651d499cb06a671aba8fcfed3fe313f9fb4cd98641122359bfb2da67c8c1e7e",
+      "classification": "current_or_supplemental_evidence"
+    }
+  ],
+  "generator_sha256": "a62167d4f2a89405567e20ec3e634b0aca06bb711c9711b352c5a9325515a3cc"
+}

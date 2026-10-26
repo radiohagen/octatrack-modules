@@ -31,3 +31,10 @@ skips and remaining qualification boundaries. Source `make check` is a separate
 check and does not establish firmware behavior. Physical hardware testing is
 outstanding; this review neither modifies a device nor qualifies every optional
 KITS, PLOCKS, Scenes or Loopback combination.
+
+The subsequent `codex/harmony-cpu-20261026` branch optimizes Harmony on this
+same integration. Its [CPU measurements](../modules/midi-harmony/DEVELOPMENT.md#cpu-optimization-2026-10-26)
+compare executed ColdFire instructions, preserve persisted formats and separate
+source, linked-firmware and full-port checks from physical hardware timing.
+The [CPU validation receipt](harmony-cpu-validation-20261026.json) records the
+tested source stages, image hashes, measured tradeoffs and declared skips.

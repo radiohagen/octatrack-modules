@@ -362,3 +362,86 @@ unchanged file bytes. A later test setup read an isolated gate's temporary image
 from shared output and failed before running. The selected image was rebuilt,
 its identity checked, and the file/publication/Part tests rerun successfully.
 Full-port tests use frozen candidates. These failed setups are not passes.
+
+
+### CPU optimization, 2026-10-26
+
+Measured against author source `1f83beaa6778acb5a68e945940d1fcfcb9827d35`,
+using the current EVENTS/STORE Harmony + Follow review integration
+`e82dd17a`. The optimized runtime source is `9bc44fec58e6b3fdcbdb5adbad6485a6c6ebc641`.
+These are executed ColdFire instructions under the emulator, not chip cycles,
+wall-clock latency or a percentage of the device CPU meter.
+
+| Workload | Before | After | Fewer instructions |
+| --- | ---: | ---: | ---: |
+| Encode 128 C-major pitches | 15,574 | 3,966 | 74.5% |
+| Decode 84 degrees | 3,621 | 2,529 | 30.2% |
+| UI observation, eight OFF tracks | 2,614 | 1,086 | 58.5% |
+| NOTE generation, eight tracks | 6,136 | 3,960 | 35.5% |
+| CHORD generation, eight tracks | 9,336 | 8,528 | 8.7% |
+| NAT AUTO, four chords | 7,737 | 6,684 | 13.6% |
+| Four-voice AUTO OPEN, four chords | 29,324 | 25,209 | 14.0% |
+| Dense retained-bank save | 2,852,316 | 687,434 | 75.9% |
+| Dense retained-bank restore | 3,876,725 | 834,909 | 78.5% |
+
+All 59 benchmark cases repeated twice with identical instruction counts and
+result digests. Every candidate result matched the baseline; none of these 59
+workloads regressed. Retained storage checksums cover the actual 16,384 HMT2 bytes.
+Restore benchmarks overwrite runtime DEG, CHRD, ACC and status outside the
+measured call, then require their exact reconstruction. A negative control
+rejects a successful no-op restore. Event cases include captured
+provenance; the fixture distinguishes same-named local symbols by section.
+Across these workloads, measured maximum masked instruction spans did not grow: retained commit remains 27
+instructions and active tick/prepare spans decreased. The combined runtime
+grows by 2,764 text/constant bytes; data and BSS sizes are unchanged.
+
+A separate 20-case accumulator boundary probe repeats each case three times
+and compares all 1,120 phase-state bytes plus expected notes. Coincident
+START/pattern resets drop from 224 to 134 instructions in the largest case.
+Five START/policy cases cost one additional instruction (68 to 69, 140 to 141,
+or 152 to 153); steady calls remain 56 instructions. These are direct helper
+calls; the production event caller retains its existing interrupt mask around
+the operation. This small boundary tradeoff is retained to reduce worst-case
+reset work.
+
+Bounded lookup tables replace degree search/division and repeated pitch-class
+subtraction. Unchanged OFF lanes avoid Follow/KEY resolution; NOTE generation
+avoids unused chord work. Voice search stops scoring candidates that cannot
+win, and sorted CLOSE/WIDE and fixed-SIZE candidates avoid redundant sorts.
+The accumulator reuses its known lane, skips unshifted work and resets once
+when START and a pattern change coincide. Packed and
+retained codecs process four tokens per group and validate while packing.
+Persisted formats, checksums, commit-last/retry rules and public interfaces
+are unchanged. Event staging retains its second reconciliation because
+removing it would require a different concurrency contract.
+
+Reproduce in a matching Octabam integration with the author's module pinned.
+Copy the four author-owned tools into the integration first; they use its
+matching firmware harness and Python environment:
+
+```sh
+cp modules/midi-harmony/upstream/tools/verify/benchmark_harmony_cpu.py tools/verify/
+cp modules/midi-harmony/upstream/tools/verify/benchmark_harmony_accumulator_cpu.py tools/verify/
+cp modules/midi-harmony/upstream/tools/verify/verify_harmony_codec_equivalence.py tools/verify/
+cp modules/midi-harmony/upstream/tools/verify/verify_harmony_voice_cpu.py tools/verify/
+.venv/bin/python3 tools/verify/benchmark_harmony_cpu.py --artifacts BASELINE_OUT --output before.json
+.venv/bin/python3 tools/verify/benchmark_harmony_cpu.py --artifacts CANDIDATE_OUT --output after.json --compare before.json
+.venv/bin/python3 tools/verify/benchmark_harmony_accumulator_cpu.py --integration . --baseline BASELINE_OUT --candidate CANDIDATE_OUT --out out/accumulator-cpu
+.venv/bin/python3 tools/verify/verify_harmony_codec_equivalence.py --require-reduction --baseline-source BASELINE_CODEC --candidate-source modules/midi-harmony/upstream/modules/midi-harmony/codec.s
+.venv/bin/python3 tools/verify/verify_harmony_voice_cpu.py --baseline BASELINE_OUT --candidate CANDIDATE_OUT
+```
+
+Each frozen output directory needs `mainos_bus.bin`, `platform/layout.json`,
+and `platform/runtime/runtime.bin` plus `runtime.elf` from the same build.
+The source-only `make check` includes an independent sanitized storage oracle;
+the integration gates additionally exercise native lifecycle, interrupted
+saves, note ownership and real sequencer paths. Physical timing and hardware
+playback remain unmeasured.
+
+The [validation receipt](../../integration/harmony-cpu-validation-20261026.json)
+records exact source/image hashes, commands, outcomes and limits. Broad checks
+ran at `dce25eb`; the final accumulator reset change at `9bc44fe` has separate
+differential, boundary and native project checks. Builds without SCALES cover
+Harmony alone and Harmony with Follow. The optional PLOCKS composition is
+explicitly untested: its initial invocation error and corrected skip are both
+preserved. Private projects and firmware binaries stay outside this repository.
