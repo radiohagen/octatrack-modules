@@ -673,7 +673,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "tools/verify/midi_fixture.py",
       "sha256": "58aa21462e08d67ddd64d2b98de5778037a9bb31c3503e6005439ba461f61dbb",
-      "published_sha256": "868340a8a85b15bd063b6650ee9d49fe9d03867fbdab2b7a07346f6c13d59103",
+      "published_sha256": "a3b383b99cfad16ce638962569e088c746bd073f1416c74092c5cd62004991a5",
       "source_mode": "100644"
     },
     "tools/verify/midi_machine.py": {
@@ -987,7 +987,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "tools/verify/verify_midi_follow.py",
       "sha256": "8466618074bb75ecb9f6781620600e483a7d677f828a29cb058e38d3c47b93eb",
-      "published_sha256": "f0d718b83bcde05327f8c79dfdfb97d8470a089b6df96fb1b0f650de76ac6a4a",
+      "published_sha256": "431221459113313ce9c5c073770896d4b932866267234364a2b09d660e45c4bc",
       "source_mode": "100644"
     },
     "tools/verify/verify_midi_follow_mute.py": {
