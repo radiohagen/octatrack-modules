@@ -87,9 +87,10 @@ void ha_fire_c(unsigned bank, unsigned pattern, unsigned track, unsigned step) {
     if (bank>=16 || pattern>=16 || track>=8 || step>=64) return;
     HaPhase *p=&phases[track];
     const HaLane *c=&ha_lanes[bank][pattern*8+track];
-    if (p->restart && (c->reset&1)) reset(p);
+    /* START and an incoming pattern can request the same phase reset. */
+    if ((p->restart && (c->reset&1)) ||
+        (p->identity!=bank*16+pattern && (p->identity>=256 || (c->reset&2)))) reset(p);
     p->restart=0;
-    if (p->identity!=bank*16+pattern && (p->identity>=256 || (c->reset&2))) reset(p);
     p->identity=bank*16+pattern; p->bank=(uint8_t)bank;
     p->pattern=(uint8_t)pattern; p->step=(uint8_t)step;
     p->captured=p->offset[step]; p->valid=1; p->sounded=0;
