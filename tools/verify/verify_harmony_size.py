@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Execute fixed-size voicing, Part storage and held-note ownership in ColdFire."""
+from midi_machine import HARMONY_SOURCE
 import argparse
 import itertools
 import json
@@ -11,7 +12,7 @@ from unicorn.m68k_const import *
 
 
 def machine():
-    subprocess.run(['python3',str(h.ROOT/'modules/midi-harmony/generate.py'),'--check'],check=True)
+    subprocess.run(['python3',str(HARMONY_SOURCE/'generate.py'),'--check'],check=True)
     m=h.Machine();u=m.uc
     m.setting(0,2)
     def voice(root=60,quality=0):

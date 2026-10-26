@@ -4,6 +4,7 @@
 No device files or shared build outputs are modified. Standalone so conversion
 can be proven before any persistence/UI hook is installed.
 """
+from midi_machine import HARMONY_SOURCE
 import json
 import pathlib
 import re
@@ -24,7 +25,7 @@ def main():
     with tempfile.TemporaryDirectory(prefix='harmony-degree-codec-') as tmp:
         out = pathlib.Path(tmp)
         subprocess.run(['m68k-elf-as', '-mcpu=54455', '-o', str(out/'codec.o'),
-                        str(ROOT/'modules/midi-harmony/codec.s')], check=True)
+                        str(HARMONY_SOURCE/'codec.s')], check=True)
         subprocess.run(['m68k-elf-ld', '-Ttext=0x47000000', '-e', 'hd_encode',
                         '-o', str(out/'codec.elf'), str(out/'codec.o')], check=True)
         subprocess.run(['m68k-elf-objcopy', '-O', 'binary', str(out/'codec.elf'),

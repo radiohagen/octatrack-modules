@@ -989,3 +989,52 @@ mh_ui_delta:
     jsr 0x40032510
     lea 12(%sp),%sp
     rts
+
+/* Follow LIVE preserves generated scale-degree spacing, including inversions
+ * and octave spread. d0 voice, d1 old root, d2 new root, d7 receiver.
+ * Explicit MAJ/MIN/DOM7 and KEY OFF retain their chromatic intervals.
+ * No generator/history/arp-clock mutation; all registers except d0 kept. */
+    .global mh_follow_shift
+mh_follow_shift:
+    lea -28(%sp),%sp
+    movem.l %d1-%d6/%a0,(%sp)
+    move.l %d0,%d4
+    move.l %d1,%d5
+    move.l %d2,%d6
+    lea ch_sequence_quality,%a0
+    moveq #0,%d0
+    move.b (%a0,%d7.l),%d0
+    cmpi.l #5,%d0
+    bcs.s .follow_scale
+    cmpi.l #7,%d0
+    bls.s .follow_chromatic
+.follow_scale:
+    move.l %d7,%d0
+    jsr mh_scale_record
+    tst.l %d0
+    bmi.s .follow_chromatic
+    move.l %d0,%d3
+    move.l %d3,%d1
+    move.l %d4,%d0
+    jsr hd_encode
+    move.l %d0,%d4
+    move.l %d5,%d0
+    jsr hd_encode
+    move.l %d0,%d5
+    move.l %d6,%d0
+    jsr hd_encode
+    add.l %d4,%d0
+    sub.l %d5,%d0
+    jsr hd_decode
+    bra.s .follow_shift_done
+.follow_chromatic:
+    move.l %d4,%d0
+    add.l %d6,%d0
+    sub.l %d5,%d0
+    cmpi.l #127,%d0
+    bls.s .follow_shift_done
+    moveq #-1,%d0
+.follow_shift_done:
+    movem.l (%sp),%d1-%d6/%a0
+    lea 28(%sp),%sp
+    rts

@@ -6,6 +6,9 @@ import re
 import subprocess
 import sys
 ROOT = pathlib.Path(__file__).resolve().parents[2]
+HARMONY_SOURCE = ROOT / 'modules/midi-harmony'
+if (HARMONY_SOURCE / 'upstream/modules/midi-harmony').is_dir():
+    HARMONY_SOURCE = HARMONY_SOURCE / 'upstream/modules/midi-harmony'
 sys.path.insert(0, str(ROOT/'tools'))
 import toolpath
 from unicorn import Uc, UC_ARCH_M68K, UC_MODE_BIG_ENDIAN, UC_HOOK_CODE, UC_HOOK_MEM_WRITE

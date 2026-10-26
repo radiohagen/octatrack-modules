@@ -24,12 +24,17 @@ class HarmonySource(unittest.TestCase):
         self.assertNotIn('variant', fields)
         self.assertNotIn('settings', fields)
         self.assertEqual(set(ast.literal_eval(fields['requires'])),
-                         {'MIDI SRAM', 'STORE', 'SEQUENCER EVENTS', 'EDIT EVENTS'})
+                         {'MIDI SRAM', 'STORE', 'EVENTS'})
         for node in ast.walk(fields['linked']):
             if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == 'Linked':
-                source = ast.literal_eval(node.args[1])
-                self.assertNotIn('/degrees/', source)
-                self.assertTrue((ROOT / source).is_file(), source)
+                source = node.args[1]
+                self.assertIsInstance(source, ast.Call)
+                self.assertEqual(source.func.id, 'str')
+                relative = source.args[0]
+                self.assertEqual(relative.left.id, 'ROOT')
+                name = ast.literal_eval(relative.right)
+                self.assertNotIn('degrees/', name)
+                self.assertTrue((MODULE / name).is_file(), name)
 
     def test_generator_covers_every_c_unit(self):
         tree = ast.parse((MODULE / 'generate.py').read_text())

@@ -5,6 +5,7 @@ Independent host assertions cover native NOTE and retained mirrors, Part key
 scope, inheritance and every byte outside the authorized root/dirty writes.
 This is a component gate, not the later UI/file/port acceptance gate.
 """
+from midi_machine import HARMONY_SOURCE
 import json
 import pathlib
 import re
@@ -26,7 +27,7 @@ LANE = 131
 
 
 def main():
-    subprocess.run(['python3', str(ROOT/'modules/midi-harmony/generate.py'), '--check'], check=True)
+    subprocess.run(['python3', str(HARMONY_SOURCE/'generate.py'), '--check'], check=True)
     with tempfile.TemporaryDirectory(prefix='harmony-degree-core-') as tmp:
         out = pathlib.Path(tmp)
         scales = '--without-scales' not in sys.argv
@@ -48,20 +49,20 @@ store_part_snapshot: .space 1152
 store_part_epochs: .space 256
 """)
         objects = []
-        for name, source in [('codec', ROOT/'modules/midi-harmony/codec.s'),
-                             ('accumulator', ROOT/'modules/midi-harmony/accumulator.s'),
-                             ('roots', ROOT/'modules/midi-harmony/roots.s'),
-                             ('core', ROOT/'modules/midi-harmony/core.s'),
-                             ('access', ROOT/'modules/midi-harmony/part-access.s'),
+        for name, source in [('codec', HARMONY_SOURCE/'codec.s'),
+                             ('accumulator', HARMONY_SOURCE/'accumulator.s'),
+                             ('roots', HARMONY_SOURCE/'roots.s'),
+                             ('core', HARMONY_SOURCE/'core.s'),
+                             ('access', HARMONY_SOURCE/'part-access.s'),
                              ('part', ROOT/'modules/store/part.s'),
-                             ('events', ROOT/'modules/midi-harmony/events.s'),
-                             ('scenes', ROOT/'modules/midi-harmony/scenes.s'),
-                             ('ui', ROOT/'modules/midi-harmony/ui.s'),
-                             ('scene_access', ROOT/'modules/midi-harmony/scene-access.s'),
-                             ('recording', ROOT/'modules/midi-harmony/recording.s'),
-                             ('packed', ROOT/'modules/midi-harmony/packed.s'),
-                             ('storage', ROOT/'modules/midi-harmony/storage.s'),
-                             ('track-retention', ROOT/'modules/midi-harmony/track-retention.s'),
+                             ('events', HARMONY_SOURCE/'events.s'),
+                             ('scenes', HARMONY_SOURCE/'scenes.s'),
+                             ('ui', HARMONY_SOURCE/'ui.s'),
+                             ('scene_access', HARMONY_SOURCE/'scene-access.s'),
+                             ('recording', HARMONY_SOURCE/'recording.s'),
+                             ('packed', HARMONY_SOURCE/'packed.s'),
+                             ('storage', HARMONY_SOURCE/'storage.s'),
+                             ('track-retention', HARMONY_SOURCE/'track-retention.s'),
                              ('stub', out/'stub.s')]:
             obj = out/f'{name}.o'
             subprocess.run(['m68k-elf-as', '-mcpu=54455', '-I', str(out), '-o', str(obj), str(source)], check=True)

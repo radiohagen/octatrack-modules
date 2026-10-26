@@ -3,6 +3,8 @@
 For current MIDI Follow, use [the dedicated integration](midi-follow.md),
 which uses upstream EVENTS.
 
+For Harmony with current Follow, use [the scoped migration review](harmony-current.md).
+
 `octabam.json` preserves the older combined shared-event integration at
 `fa5cf5eb14f2afffd934bb5ecf85b9ab9a8ed670`. Octabam owns the builder,
 SEQUENCER EVENTS, EDIT EVENTS, STORE, KITS, PLOCKS and emulator. This
