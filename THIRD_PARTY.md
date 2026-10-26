@@ -1,6 +1,6 @@
 # Licensing and attribution
 
-The imported MIDI and integration source originates from Mattias Wolff's
+The imported MIDI and integration source originates from radiohagen's
 Octabam work. Original author names and notices are preserved, including the
 PIO fix's yvesrosius attribution. Imported files retain the Octabam MIT terms
 in [the original licence](licenses/octabam-MIT.txt), also reproduced as the
