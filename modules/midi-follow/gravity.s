@@ -287,24 +287,41 @@ bf_gravity_c:
 	.globl	bf_sent_c
 	.type	bf_sent_c, @function
 bf_sent_c:
+	lea (-12,%sp),%sp
 	moveq #7,%d0
-	cmp.l 4(%sp),%d0
-	jcc .L43
-.L39:
-	rts
-.L43:
-	move.l 4(%sp),-(%sp)
-	jsr bf_sync_c
-	move.l 8(%sp),%d0
-	addq.l #4,%sp
+	move.l %a2,-(%sp)
+	move.l 20(%sp),%d1
+	cmp.l %d1,%d0
+	jcs .L39
+	move.l %d1,%d0
 	lsl.l #4,%d0
 	move.l %d0,%a0
 	add.l #bf_history,%a0
-	tst.b 15(%a0)
+	lea (15,%a0),%a1
+	tst.b (%a1)
 	jeq .L39
-	move.b 13(%a0),%d0
+	move.l %a0,%d0
+	add.l #13,%d0
+	move.l %d0,%a2
+	tst.b (%a2)
+	jlt .L39
+	move.l %d1,-(%sp)
+	move.l %d0,8(%sp)
+	move.l %a0,16(%sp)
+	move.l %a1,12(%sp)
+	jsr bf_sync_c
+	addq.l #4,%sp
+	move.l 8(%sp),%a1
+	move.l 12(%sp),%a0
+	tst.b (%a1)
+	jeq .L39
+	move.l 4(%sp),%a1
+	move.b (%a1),%d0
 	jmi .L39
 	move.b %d0,12(%a0)
+.L39:
+	move.l (%sp)+,%a2
+	lea (12,%sp),%sp
 	rts
 	.size	bf_sent_c, .-bf_sent_c
 	.local	bf_history

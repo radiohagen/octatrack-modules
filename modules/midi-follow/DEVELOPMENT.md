@@ -183,6 +183,20 @@ Native transport start/resume resets all history. Playing Part/epoch and
 source/mode/home changes invalidate the affected receiver; unrelated UI
 Parts and ordinary pattern changes do not.
 
+The sequencer begins or synchronizes GRAV once at each track's service entry.
+Accepted notes with no pending proposal return before reading settings; a
+pending proposal still validates its context and configuration before commit.
+Normal and LIVE voice quantization reuse the ultimate source resolved in the
+same operation. Source routes and Part settings are not cached across service
+passes, and all reads still use STORE's replacement snapshot semantics.
+
+TRIG tracks discard LIVE anchors once and defer response context/epoch reads
+until LIVE is selected again. Returning from a TRIG Part to an earlier LIVE
+Part still waits for an ordinary receiver trig. LIVE continues to calculate
+target validity on every service pass: an unchanged source token alone cannot
+skip this work because a TRAN/register edit can move the target out of range.
+Muted-source and previously played source capture is unchanged.
+
 Run `python3 modules/midi-follow/generate.py --check` for generated assembly,
 `verify_midi_follow_gravity.py` for linked policy/lifecycle/packing, and
 `verify_midi_follow_gravity_port.py --project DIR` for emulated panel events

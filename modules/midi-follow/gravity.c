@@ -66,6 +66,11 @@ int bf_gravity_c(int pitch_class, unsigned track) {
 }
 void bf_sent_c(unsigned track) {
     if (track>=8) return;
+    /* Nothing can be committed without a proposal. In particular, ordinary
+     * notes on OFF/FIXED/SOURCE tracks need no settings or route reads. A
+     * live proposal still synchronizes before committing, so a replaced Part
+     * or changed route cannot publish stale history. */
+    if (!bf_history[track].initialized || bf_history[track].pending<0) return;
     bf_sync_c(track);
     if (bf_history[track].initialized && bf_history[track].pending>=0)
         bf_history[track].previous=bf_history[track].pending;

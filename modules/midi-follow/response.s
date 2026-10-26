@@ -211,28 +211,62 @@ bf_response_sync:
     lea 20(%sp),%sp
     rts
 
+/* Private TRIG path: discard LIVE anchors once, without resolving context or
+ * reading an epoch on every service pass. The invalid context makes the next
+ * LIVE pass synchronize and wait for a fresh ordinary-trigger pool, including
+ * when playback visits a TRIG Part and returns to the earlier LIVE Part.
+ * d0 receiver; d0-d2/a0 may be clobbered. */
+bf_response_disable:
+    move.l %d0,%d1
+    lsl.l #3,%d1
+    lea bf_response_context,%a0
+    moveq #-1,%d2
+    cmp.l (%a0,%d1.l),%d2
+    beq.s .disable_done
+    move.l %d2,(%a0,%d1.l)
+    lea bf_response_anchor,%a0
+    move.l %d2,(%a0,%d0.l*4)
+    lea bf_response_seen,%a0
+    move.l %d2,(%a0,%d0.l*4)
+    lea bf_response_pool,%a0
+    move.l %d2,(%a0,%d0.l*4)
+.disable_done:
+    rts
+
 /* d0 stock trigger/release mask, d1 stock effective mute mask.
  * All regs preserved. Skip tracks with a scheduled edge on this pass. */
 bf_response_tick:
-    lea -80(%sp),%sp
+    lea -84(%sp),%sp
     movem.l %d0-%d7/%a0-%a5,(%sp)
     move.l %d0,56(%sp)
     move.l %d1,60(%sp)
     moveq #0,%d7
 .tick_track:
     move.l %d7,%d0
-    jsr bf_register_sync
     move.l 56(%sp),%d1
     btst %d7,%d1
-    beq.s .tick_register_ready
+    beq.s .tick_sync_only
     jsr bf_register_begin
+    bra.s .tick_register_ready
+.tick_sync_only:
+    jsr bf_register_sync
 .tick_register_ready:
-    bsr.w bf_response_sync
     jsr bf_response_play
     tst.l %d0
-    beq.w .tick_next
+    bne.s .tick_live
+    move.l %d7,%d0
+    bsr.s bf_response_disable
+    bra.w .tick_next
+.tick_live:
+    move.l %d7,%d0
+    bsr.w bf_response_sync
     move.l %d7,%d0
     bsr.w bf_response_target
+    /* The validated token carries this operation's ultimate source. Keep it
+     * for all four voices; each still reads the source's current KEY. */
+    move.l %d1,%d2
+    lsr.l #8,%d2
+    move.l %d2,80(%sp)
     move.l 56(%sp),%d2
     btst %d7,%d2
     beq.s .tick_pool_ready
@@ -327,7 +361,10 @@ bf_response_tick:
     extb.l %d1
     add.l %d1,%d0
     move.l %d7,%d1
-    jsr bf_quant_note
+    move.l %d2,-(%sp) /* original sounding pitch is needed for its note-off */
+    move.l 84(%sp),%d2
+    jsr bf_quant_note_resolved
+    move.l (%sp)+,%d2
 .release_pitch_ready:
     move.l %d0,(%a4,%d4.l*4)
     moveq #-1,%d0
@@ -341,7 +378,7 @@ bf_response_tick:
     addq.l #1,%d4
     addq.l #8,%a3
     cmpi.l #4,%d4
-    bne.s .tick_release
+    bne.w .tick_release
     lea -32(%a3),%a3
     moveq #0,%d4
 .tick_on:
@@ -383,7 +420,7 @@ bf_response_tick:
     cmpi.l #8,%d7
     bne.w .tick_track
     movem.l (%sp),%d0-%d7/%a0-%a5
-    lea 80(%sp),%sp
+    lea 84(%sp),%sp
     rts
 /* Local packet, native MIDI queue. Stock sequencer status is signed 0x9n. */
 .send:

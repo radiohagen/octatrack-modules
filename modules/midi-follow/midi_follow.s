@@ -325,7 +325,7 @@ bf_seed_extras:
 bf_note:
     jsr bf_response_adjust
     jsr bf_response_observe
-    lea -16(%sp),%sp
+    lea -20(%sp),%sp
     movem.l %d0-%d2/%a0,(%sp)
     .ifdef HAVE_HARMONY
     move.l %d7,%d0
@@ -341,8 +341,9 @@ bf_note:
     move.l %d7,%d0
     jsr bf_source_resolve
     cmp.l %d7,%d0
-    beq.s .restore
+    beq.w .restore
 .resolved:
+    move.l %d0,16(%sp) /* this voice already resolved its ultimate source */
     move.l %d0,%d2
     move.l %d7,%d1
     jsr bf_register
@@ -389,14 +390,15 @@ bf_note:
     cmpi.l #127,%d0
     bhi.s .follower_extra      /* also rejects negative pitches, no wrapping */
     move.l %d7,%d1
-    jsr bf_quant_note
+    move.l 16(%sp),%d2
+    jsr bf_quant_note_resolved
     move.b %d0,(%a2)
     bra.s .restore
 .follower_extra:
     move.b #0xff,(%a2)
 .restore:
     movem.l (%sp),%d0-%d2/%a0
-    lea 16(%sp),%sp
+    lea 20(%sp),%sp
     move.b (%a2),%d1
     bmi.s .skip
     jmp 0x4009fb86
@@ -563,6 +565,17 @@ bf_quant:
     bhi.w .quant_return
     move.l %d1,%d0
     jsr bf_source_resolve
+    bra.s .quant_source
+/* Private same-operation entry: d2 is the source already resolved by the
+ * caller. No route or settings cache survives this operation. */
+bf_quant_resolved:
+    lea -20(%sp),%sp
+    movem.l %d1-%d3/%a0-%a1,(%sp)
+    move.l %d0,%d3
+    cmpi.l #127,%d0
+    bhi.w .quant_return
+    move.l %d2,%d0
+.quant_source:
     move.l %d0,%d2
     jsr store_part_midi_context
     move.l %d0,%d1
@@ -617,6 +630,16 @@ bf_quant_note:
     movem.l %d1-%d2/%a0,(%sp)
     move.l %d0,%d2
     bsr.w bf_quant
+    bra.s .quant_note_store
+/* Private to Follow: d2 carries the ultimate source for this operation. */
+    .global bf_quant_note_resolved
+bf_quant_note_resolved:
+    lea -12(%sp),%sp
+    movem.l %d1-%d2/%a0,(%sp)
+    move.l %d0,%a0
+    bsr.w bf_quant_resolved
+    move.l %a0,%d2
+.quant_note_store:
     sub.l %d0,%d2
     lsl.l #2,%d1
     add.l %d4,%d1
