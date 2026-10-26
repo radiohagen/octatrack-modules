@@ -88,7 +88,7 @@ def analyze(work,tracks,voices,rich,mode="midi"):
 
 def main():
     p=argparse.ArgumentParser(description=__doc__);p.add_argument('--project',type=Path,required=True);p.add_argument('--name',required=True)
-    p.add_argument('--mode',choices=('midi','transition'),default='midi');p.add_argument('--tracks',default='1');p.add_argument('--voices',type=int,choices=(2,3,4),default=4);p.add_argument('--rich',action='store_true');p.add_argument('--fx',action='store_true');p.add_argument('--filter',action='store_true')
+    p.add_argument('--mode',choices=('midi','transition'),default='midi');p.add_argument('--tracks',default='1');p.add_argument('--voices',type=int,choices=(2,3,4),default=4);p.add_argument('--rich',action='store_true');p.add_argument('--burst',action='store_true');p.add_argument('--fx',action='store_true');p.add_argument('--filter',action='store_true')
     a=p.parse_args();tracks=tuple(int(t)-1 for t in a.tracks.split(','));assert len(set(tracks))==len(tracks) and all(0<=t<8 for t in tracks)
     work=ROOT/'out/supersaw-port'/a.name;work.mkdir(parents=True,exist_ok=False)
     assert a.mode=='midi' or (a.voices==4 and tracks==(0,))
@@ -116,13 +116,30 @@ def main():
         for t in tracks:
             for key in keys:
                 rows.append(f'{ms+offset} midi {(0x90 if on else 0x80)+t:02x} {key:02x} {"64" if on else "00"}')
-                offset+=5
+                offset+=0 if a.burst else 5
     rows+=['5500 quit'];rows.sort(key=lambda row:int(row.split()[0]));(work/'panel.script').write_text('\n'.join(rows)+'\n')
     dumps=f'{sym["ss_filter_samples"]:#x},32={work}/ss_filter_samples.bin;{sym["ss_poly_samples"]:#x},128={work}/ss_poly_samples.bin;{sym["ss_unsupported"]:#x},32={work}/ss_unsupported.bin;0x80000110,512={work}/dsp-records.bin;{sym["ss_native_voices"]:#x},2048={work}/native-voices.bin'
+    if 'ss_diag_events' in sym:
+        dumps+=f';{sym["ss_diag_events"]:#x},4096={work}/diag-events.bin;{sym["ss_diag_tracks"]:#x},896={work}/diag-tracks.bin;{sym["ss_diag_costs"]:#x},384={work}/diag-costs.bin'
     cmd=[str(ROOT/'out/emu/ot_emu'),'--image',str(work/'candidate.bin'),'--card',str(work/'card.img'),'--set','OCTABAM','--project','SYNTH','--mkii','--load-ms','90000','--dsp','--internal-clock','--live-script',str(work/'panel.script'),'--audio-out',str(work/'audio'),'--block-dump',str(work/'blocks.bin'),'--mem-dump',dumps]
     (work/'command.json').write_text(json.dumps(cmd,indent=2)+'\n')
     with (work/'port.log').open('w') as log:r=subprocess.run(cmd,cwd=ROOT,stdout=log,stderr=subprocess.STDOUT,timeout=300)
     assert r.returncode==0,work/'port.log'
     analyze(work,tracks,a.voices,a.rich,a.mode)
+    receipt=json.loads((work/'receipt.json').read_text());receipt['burst_input']=a.burst
+    if (work/'diag-events.bin').exists():
+        raw=(work/'diag-events.bin').read_bytes()
+        events=[struct.unpack_from('>8I',raw,i) for i in range(0,len(raw),32)]
+        events=[e for e in events if e[0]]
+        for t in tracks:
+            kinds={e[3] for e in events if e[4]==t}
+            assert {1,2,3,4,5,6}<=kinds,('missing lifecycle events',t,kinds)
+        receipt['diagnostic_events']=[dict(zip(('sequence','frame','ticks','kind','track','note','selected','stamp'),e)) for e in events]
+        snapshots=[struct.unpack_from('>28I',(work/'diag-tracks.bin').read_bytes(),t*112) for t in tracks]
+        assert all(s[0] and not(s[0]&1) for s in snapshots),'unpublished snapshot'
+        assert all(not any(s[7:11]) for s in snapshots),'voices not retired in diagnostic snapshot'
+        receipt['diagnostic_snapshots']=snapshots
+    (work/'receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
+
 
 if __name__=='__main__':main()

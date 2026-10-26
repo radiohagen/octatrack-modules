@@ -45,19 +45,22 @@ def main():
     uc = Uc(UC_ARCH_M68K, UC_MODE_BIG_ENDIAN); uc.ctl_set_cpu_model(UC_CPU_M68K_CFV4E)
     uc.mem_map(base & ~4095, (base % 4096 + len(data) + 4095) & ~4095)
     uc.mem_map(0x10000, 0x20000); uc.reg_write(UC_M68K_REG_SR, 0x2000)
-    counts = Counter(); functions = Counter()
+    if 'ss_diag_events' in sym:
+        uc.mem_map(0xfc07c000,4096) # flat timer: instruction/stack counts only
+    counts = Counter(); functions = Counter(); lowest=[0x20000]
     def tick(_uc, address, _size, _user):
         counts[op.get(address, 'unknown')] += 1
+        lowest[0]=min(lowest[0],_uc.reg_read(UC_M68K_REG_A7))
         functions[owner.get(address, 'unknown')] += 1
     uc.hook_add(UC_HOOK_CODE, tick)
     def call(name, *values):
-        counts.clear(); functions.clear()
+        counts.clear(); functions.clear(); lowest[0]=0x20000
         uc.reg_write(UC_M68K_REG_A7, 0x20000)
         uc.mem_write(0x20000, struct.pack('>'+'I'*(1+len(values)), 0x10000, *values))
         uc.emu_start(sym[name], 0x10000, count=100000)
         assert uc.reg_read(UC_M68K_REG_PC) == 0x10000, name
         assert uc.reg_read(UC_M68K_REG_A7) == 0x20004, 'stack imbalance'
-        return dict(instructions=sum(counts.values()),
+        return dict(stack_bytes=0x20000-lowest[0],instructions=sum(counts.values()),
                     multiplies=sum(n for k,n in counts.items() if k.startswith('mul')),
                     # binutils prints ColdFire long division as remsl when
                     # quotient/remainder register fields coincide.
@@ -84,6 +87,18 @@ def main():
                     struct.pack_into('>H', pool, v*64+60, 32767)
                     pool[v*64+36] = 1
                 uc.mem_write(0x27000, bytes(pool))
+                # First-ever attack has no prepared oscillator coefficients;
+                # distinguish it from a cold-phase retrigger on a warm cache.
+                uc.mem_write(0x24000+24,struct.pack('>I',16384))
+                uc.mem_write(0x24000+38,bytes(2))
+                for v in range(voices):
+                    uc.mem_write(0x27000+v*64+24,struct.pack('>I',16384))
+                    uc.mem_write(0x27000+v*64+60,bytes(2))
+                first_attack=call('ss_track_fill',0,0x24000,0x25000,0x26000,16,0x27000)
+                uc.mem_write(base,data)
+                uc.mem_write(sym['ss_active'],b'\x01'+bytes(7))
+                uc.mem_write(sym['ss_setup'],bytes((64,64,amount,64,typ,83)))
+                uc.mem_write(0x24000,bytes(state));uc.mem_write(0x27000,bytes(pool))
                 cold = call('ss_track_fill',0,0x24000,0x25000,0x26000,16,0x27000)
                 for _ in range(12):
                     warm = call('ss_track_fill',0,0x24000,0x25000,0x26000,16,0x27000)
@@ -102,17 +117,29 @@ def main():
                         uc.mem_write(0x27000+v*64+60,struct.pack('>H',previous))
                     ramps[phase]=call('ss_track_fill',0,0x24000,0x25000,0x26000,16,0x27000)
                 cases.append(dict(voices=voices, type=typ, setting=setting,
-                                  cold=cold, warm=warm, cutoff_change=changed,pitch_change=pitch,**ramps))
+                                  cold=cold, warm=warm, first_attack=first_attack, cutoff_change=changed,pitch_change=pitch,**ramps))
     # Knob/envelope updates at the native 16-sample size must not reintroduce
     # coefficient/ramp divides. Pitch/AMP still have their own unrelated math.
     for case in cases:
         assert case['cutoff_change']['divides']==0, ('filter update divides',case)
     if not args.baseline:
         for case in cases:
-            for phase in ('cold','attack','release','pitch_change'):
+            for phase in ('cold','first_attack','attack','release','pitch_change'):
                 assert case[phase]['divides']==0, ('normal block divides',case,phase)
+                # Frozen S9 maxima: mono 692 B (nested adapter), poly 540 B.
+                limit=704 if case['voices']==0 else 560
+                assert case[phase]['stack_bytes']<=limit, ('renderer stack regression',case,phase)
             if case['voices']:
                 assert case['silent_tail']['instructions']<600, ('silent voice regression',case)
+    # Native voices have actually retired, rather than merely having zero
+    # gains while still active. Keep the output and counters well defined.
+    uc.mem_write(base,data);uc.mem_write(sym['ss_active'],b'\x01')
+    state=bytearray(128);state[80]=1
+    uc.mem_write(0x24000,bytes(state));uc.mem_write(0x27000,bytes(256))
+    uc.mem_write(0x26000,b'\xa5'*128)
+    retired=call('ss_track_fill',0,0x24000,0x25000,0x26000,16,0x27000)
+    assert bytes(uc.mem_read(0x26000,128))==bytes(128)
+    assert int.from_bytes(uc.mem_read(sym['ss_samples'],4),'big')==16
     # Two independent four-note tracks, sustained modulation rather than a
     # single convenient block. The same harness can profile a frozen baseline.
     scenarios=[]
@@ -162,7 +189,7 @@ def main():
                 multiplies=sum(v for k,v in counts.items() if k.startswith('mul')),
                 divides=sum(v for k,v in counts.items() if k.startswith(('div','rem'))))
     receipt = dict(runtime_sha256=hashlib.sha256(data).hexdigest(), samples_per_call=16,
-                   hardware_cycles=False, two_tracks=scenarios, cases=cases, fine_control=fine, native_poly_parameters=native)
+                   hardware_cycles=False, retired_poly=retired, two_tracks=scenarios, cases=cases, fine_control=fine, native_poly_parameters=native)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(receipt, indent=2)+'\n')
     for c in cases:

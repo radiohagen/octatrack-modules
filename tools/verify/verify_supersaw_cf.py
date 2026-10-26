@@ -291,7 +291,7 @@ def main():
     uc.mem_write(base,data)
     uc.mem_map(0x10000,0x20000)
     uc.reg_write(UC_M68K_REG_SR,0x2000)
-    for name,n in [('ss_page_built',1),('ss_lfo_built',1),('ss_active',8),('ss_samples',32),('ss_unsupported',32),('ss_voices',size),('ss_poly_voices',4*size),('ss_poly_samples',128),('ss_descriptor',402),('ss_lfo_descriptor',402),('ss_filters',1440),('ss_setup',48),('ss_note_stamp',32),('ss_filter_samples',32)]:
+    for name,n in [('ss_page_built',1),('ss_lfo_built',1),('ss_active',8),('ss_samples',32),('ss_unsupported',32),('ss_voices',size),('ss_poly_voices',4*size),('ss_poly_samples',128),('ss_descriptor',402),('ss_lfo_descriptor',402),('ss_filters',1440),('ss_setup',48),('ss_note_stamp',32),('ss_filter_samples',32),('ss_pitch_cache',384)]:
         assert base <= sym[name] and sym[name]+n <= base+len(data), (name,'not initialized by loader')
         assert bytes(uc.mem_read(sym[name],n)) == bytes(n), (name,'not zero at boot')
     instructions = [0]

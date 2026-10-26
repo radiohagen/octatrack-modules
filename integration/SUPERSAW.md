@@ -133,3 +133,20 @@ Drive uses a bounded five-PCM-unit approximation, and the filter envelope
 advances at block rate. Four voices, separate releases, all filter modes and
 both FX slots remain. See the module README for audible compatibility changes.
 The previous S8 sample-exact/filter-response claims do not apply to S9.
+
+## S10 lifecycle follow-up
+
+S10 is based on author commit `007a049` (S9), the source used by the RADBUSS2
+hardware diagnosis. Copy the complete module directory, including
+`diagnostics.h`, and all `verify_supersaw*.py` scripts. The native Synth pin and
+Part layout do not change. Production generation/builds leave `SS_DIAGNOSTICS`
+unset; optional instrumented builds must set it to `1` for both generation and
+composition. Keep their image hashes and timing evidence separate.
+
+The new lifecycle verifier needs the existing corrected ColdFire EMAC library;
+set `LIBUNICORN_PATH` when using an isolated build. Do not substitute the default
+Python Unicorn wheel for native pitch arithmetic. `verify_supersaw_poly.py
+--burst` adds batched MIDI input, and recognizes diagnostic symbols to retain
+frame-stamped enqueue/allocation events and per-voice state in its receipt.
+Source/emulator results do not resolve the hardware burst-start overrun. See
+the module README for the bounded hardware replay and diagnostic layouts.

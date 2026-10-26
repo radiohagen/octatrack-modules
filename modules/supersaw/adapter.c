@@ -54,10 +54,14 @@ static void ss_activate(uint32_t track, uint8_t selected, uint16_t previous_gain
             ss_filter_reset(&ss_filters[track][v]);
         }
     if (!ss_active[track] || !previous_gain) {
-        ss_init(&ss_voices[track]);ss_filter_reset(&ss_filters[track][4]);
+        ss_restart(&ss_voices[track]);ss_filter_reset(&ss_filters[track][4]);
     }
     ss_active[track] = selected;
 }
+#ifdef SS_DIAGNOSTICS
+#define ss_begin ss_begin_impl
+#define ss_track_fill ss_track_fill_impl
+#endif
 void ss_begin(uint32_t track, const uint8_t *state) {
     if (track >= 8) return;
     uint32_t settings = *(volatile uint32_t *)(uintptr_t)(0x800049d8u+0xa8u*track+8);
@@ -158,6 +162,13 @@ int ss_track_fill(uint32_t track, uint8_t *state, const uint16_t *fp,
     if (!n) return 1;
     unsigned active=0;
     for (unsigned v=0;v<4;++v) active |= pool[v*64+36];
+    /* A poly track can remain selected after its final voice retires.
+     * No oscillator, filter or mix preparation is needed in that state. */
+    if(state[80] && !active) {
+        *(uint16_t *)(state+38)=0;ss_samples[track]+=n;
+        for(unsigned i=0;i<n;++i)out[2*i]=out[2*i+1]=0;
+        return 1;
+    }
     int32_t mix[32];
     if (!state[80]) {
         ss_fill(track,state,fp,out,n);
@@ -166,7 +177,6 @@ int ss_track_fill(uint32_t track, uint8_t *state, const uint16_t *fp,
     } else {
         *(uint16_t *)(state+38)=0;
         ss_samples[track]+=n;
-        /* Accumulate directly; no zero stereo pass followed by a copy. */
         for (uint32_t i=0;i<n;++i) mix[i]=0;
     }
     struct ss_params params = {0,(fp[1]>>8)&127,(fp[2]>>8)&127,
@@ -178,7 +188,7 @@ int ss_track_fill(uint32_t track, uint8_t *state, const uint16_t *fp,
         if (!native[36]) continue;
         uint32_t previous=*(uint16_t *)(native+60);
         uint32_t target=*(uint32_t *)(native+24);
-        if (!previous) { ss_init(&ss_poly_voices[track][v]);ss_filter_reset(&ss_filters[track][v]); }
+        if (!previous) { ss_restart(&ss_poly_voices[track][v]);ss_filter_reset(&ss_filters[track][v]); }
         /* Zero-to-zero contributes no sound, and the native zero-previous
          * lifecycle resets oscillator/filter history on its next audible call.
          * Preserve counters but do not synthesize an inaudible block. */
@@ -194,15 +204,27 @@ int ss_track_fill(uint32_t track, uint8_t *state, const uint16_t *fp,
         }
         else ss_render(&ss_poly_voices[track][v],&params,audio,n);
         if (previous==target) {
-            for (uint32_t i=0;i<n;++i) mix[i]+=(audio[i]*(int32_t)target)>>15;
+            for (uint32_t i=0;i<n;++i) mix[i]+=((audio[i]*(int32_t)target)>>15);
         } else {
             /* Match native po_fill: reach the target over this call, Q16.
              * +/-32767 bounds keep the step and accumulator in int32. */
-            int32_t gain=(int32_t)previous*65536;
-            int32_t step=ss_filter_step(((int32_t)target-(int32_t)previous)*65536,n);
-            for (uint32_t i=0;i<n;++i) {
-                gain+=step;
-                mix[i]+=(audio[i]*(gain>>16))>>15;
+            if(n==16) {
+                /* Native full frames need only four fractional bits. This
+                 * is exactly the Q16 ramp, with no division or >>16 loop. */
+                int32_t gain=(int32_t)previous*16;
+                int32_t step=(int32_t)target-(int32_t)previous;
+                /* Full unrolling spills many live samples to the IRQ stack. */
+                #pragma GCC unroll 1
+                for(unsigned i=0;i<16;++i) {
+                    gain+=step;mix[i]+=((audio[i]*(gain>>4))>>15);
+                }
+            } else {
+                int32_t gain=(int32_t)previous*65536;
+                int32_t step=ss_filter_step(((int32_t)target-(int32_t)previous)*65536,n);
+                for (uint32_t i=0;i<n;++i) {
+                    gain+=step;
+                    mix[i]+=((audio[i]*(gain>>16))>>15);
+                }
             }
         }
         *(uint16_t *)(native+60)=(uint16_t)target;
@@ -309,3 +331,9 @@ uint8_t *ss_lfo_page(uint8_t *original,unsigned track) {
     return ss_lfo_descriptor;
 }
 #include "ui.h"
+
+#ifdef SS_DIAGNOSTICS
+#undef ss_begin
+#undef ss_track_fill
+#include "diagnostics.h"
+#endif

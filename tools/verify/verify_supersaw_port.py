@@ -33,8 +33,9 @@ def fixture(source, work, tracks, rich, sequence=False, fx=False, mixed=False, f
     project = work/'project'
     for path in project.glob('project.*'):
         raw = path.read_bytes()
-        for key, value in [('MIDI_AUDIO_TRK_NOTE_IN', 1), ('MIDI_AUDIO_TRK_CC_OUT', 0)]:
-            raw = re.sub(key.encode()+rb'=\d+', f'{key}={value}'.encode(), raw)
+        for key, value in [('MIDI_AUDIO_TRK_NOTE_IN', 1), ('MIDI_AUDIO_TRK_CC_OUT', 0),
+                           *((f'MIDI_TRIG_CH{t+1}', t) for t in tracks)]:
+            raw = re.sub(key.encode()+rb'=-?\d+', f'{key}={value}'.encode(), raw)
         if mixed:
             raw = re.sub(rb'\[SAMPLE\]\r\nTYPE=FLEX\r\nSLOT=002\r\n.*?\[/SAMPLE\]\r\n\r\n', b'', raw, flags=re.S)
             first = re.search(rb'\[SAMPLE\]\r\nTYPE=FLEX\r\nSLOT=001\r\n.*?\[/SAMPLE\]\r\n\r\n', raw, re.S).group()

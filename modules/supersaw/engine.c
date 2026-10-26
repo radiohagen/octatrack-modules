@@ -12,12 +12,17 @@ static int32_t lookup(const int16_t *table, uint32_t phase) {
      * phase to the closest sample, wrapping naturally at the cycle edge. */
     return table[(phase + 0x100000u) >> 21];
 }
-void ss_init(struct ss_voice *voice) {
+/* Cold notes reset audible history, not valid pitch/control coefficients.
+ * ss_prepare still checks every key before reuse, including after a steal. */
+static void ss_restart(struct ss_voice *voice) {
     for (unsigned i = 0; i < 2; ++i) voice->phase[i] = 0;
     /* A quarter-cycle offset makes subtraction a pulse at zero detune. */
     voice->phase[1] = 0x40000000u;
     voice->sub_phase = 0;
     voice->last = voice->previous = voice->older = 0; voice->pending = 0;
+}
+void ss_init(struct ss_voice *voice) {
+    ss_restart(voice);
     voice->base = voice->controls = voice->bank = 0;
     voice->saw_weight = voice->morph_weight = voice->sub_gain = voice->drive_gain = 0;
     for (unsigned i = 0; i < 2; ++i) voice->increments[i] = 0;

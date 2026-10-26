@@ -1,5 +1,107 @@
 # Supersaw
 
+## S10 lifecycle CPU candidate
+
+Hardware testing of S9 found burst-start pressure even with TYPE OFF: one
+four-note host MIDI packet exceeded the nominal frame interval. This candidate
+preserves S9 sound, four voices, independent releases, all controls, and both FX
+slots. It does not claim that the hardware overload or earlier crash is solved.
+
+- Cold retriggers reset oscillator/resampler history while retaining valid
+  derived coefficients. Pitch and controls are checked before reuse.
+- Native 16-sample poly AMP ramps use Q4 instead of Q16 with identical samples;
+  short/split calls retain the original exact arithmetic.
+- A 384-byte, 32-entry cache stores the native pitch conversion keyed by the
+  final slewed word. RATE is fixed to unity in this native routine, so FINE,
+  GLIDE and modulation remain represented by the key. Collisions recompute;
+  non-Supersaw tracks retain the native conversion. Hits cost 18 instructions
+  versus 56.2 on average over 1,814 tested words; misses add about 24 instructions.
+- A selected poly track with no active native voices skips mix/control setup.
+  Audible release tails still use the native gain law and retirement threshold.
+
+The final linked renderer comparison against S9 uses four rich voices, 16
+output samples, and identical state/control inputs:
+
+| Renderer case | S9 instructions | S10 instructions |
+| --- | ---: | ---: |
+| First attack, OFF | 4134 | 4024 |
+| Repeated attack, OFF | 4134 | 3688 |
+| First attack, LOW | 8125 | 8020 |
+| Repeated attack, LOW | 8105 | 7664 |
+| Release, OFF | 3694 | 3616 |
+| Held, OFF | 3375 | 3397 |
+| Held, LOW | 6190 | 6217 |
+| No remaining poly voices | 386 | 123 |
+
+The held renderer has a small overhead increase (0.4–0.7%); the separate native
+pitch cache saves work outside this renderer measurement. Do not add those
+figures into a hardware CPU percentage. First-start savings are much smaller
+than repeated-attack savings. Sampled stack peaks are 700 bytes for the nested
+mono adapter and 548 for poly, versus S9's 692 and 540 respectively. These
+exclude the surrounding OS stack and do not establish device stack headroom.
+The diagnostic probe costs 52 instructions per event and 99 additional
+instructions for a silent render snapshot in the isolated fixture. Actual
+cache/bus/interrupt cost on hardware remains unmeasured.
+
+### Optional lifecycle observation
+
+Production builds contain no diagnostic counters, hooks or timer reads. For an
+isolated diagnostic integration, run `SS_DIAGNOSTICS=1 python3
+modules/supersaw/generate.py`, then build with `SS_DIAGNOSTICS=1` in the environment
+as well. Restore the checked-in production assembly with the ordinary generator
+before committing. The same setting must be used for generation and composition.
+
+`diagnostics.h` defines the fixed layouts, and linked symbols locate them:
+
+- `ss_diag_events`: two 64-record rings. MIDI enqueue/off events use ring 0;
+  audio allocation/activation/selector events use ring 1. Each record contains
+  sequence, native frame, DTCN3 tick, kind, zero-based track, note/identity,
+  selected flag and note stamp. Kind 1=enqueued note, 2=accepted note-off,
+  3=poly allocation attempt (may be absorbed as a duplicate), 4/5=allocator
+  entry/exit, 6=selector completed. Audio activation identities retain their
+  native high bit; these are attempts, not proof of audible output. Inspect
+  the native voice ages/states too. The generic Synth hooks also observe
+  non-Supersaw events, distinguished by the selected flag (which may still be
+  zero on the first enqueue before marker resolution).
+- `ss_diag_tracks`: per-track frame/sample count, mono/poly state, native
+  target gains, previous gains at render entry, four voice states/ages, and
+  all five filter wet amounts. Native voice state 0=free, 1=held, 2=releasing,
+  3=fading. A positive release gain is not a stuck voice by itself.
+- `ss_diag_costs`: calls/last/max/sum in DTCN3 ticks for selector/config/reset,
+  renderer/mix, and native allocator. DTCN3 runs at 132 MHz, as in LOAD METER.
+  Interrupts and bus delays are included. Read counters as a consistent stopped
+  snapshot or retry; sums wrap modulo 2^32. Renderer durations exclude snapshot
+  copying but the diagnostic build still pays that copying cost in its frame.
+  Allocator durations include probe call/return overhead; compare like-for-like
+  instrumented runs, not raw diagnostic timing against production timing.
+
+The event writer publishes its sequence last. Readers must reread it and reject
+zero/changed records. Track snapshots publish an even sequence after an odd
+in-progress sequence. Rings overwrite old records, never allocate or print.
+These records separate enqueue versus allocation frames and remaining native
+release work; no USB stream is opened by the module.
+The records are currently collected through emulator memory dumps. This module
+has not extended the hardware USB LOAD METER request: `load_meter.py` cannot
+read these new buffers yet. Hardware collection needs a separate readout
+integration; merely flashing the diagnostic variant does not expose them.
+
+`tools/verify/verify_supersaw_lifecycle.py` compares native and cached conversion
+through the corrected ColdFire EMAC library, including fractional words, eight
+tracks, collisions, changed pitches, invalid pitches and native fallback. It
+also checks diagnostic ring wrap, timer arithmetic, snapshots and instruction
+overhead when those symbols are present. Use the repository's corrected Unicorn
+build or point `LIBUNICORN_PATH` at an isolated corrected build. The ordinary
+Python wheel is not an EMAC oracle. `verify_supersaw_poly.py --burst` exercises
+batched input with full native allocation, selective release, retrigger and
+unchanged FX; it records diagnostic events when available.
+
+Hardware replay remains separate: capture the exact patch settings; start with
+one note, then the same four-note spaced/batched comparison, OFF then LOW. Keep
+the existing timing guard, avoid forced hangs, and distinguish production from
+diagnostic timing. Only proceed to a bounded real pattern after timing margin
+improves. Do not flash or change a device project as part of these source checks.
+
+
 Two detuned saw oscillators per note, a sine sub and bounded drive, generated entirely
 on the ColdFire CPU. **Both FX1 and FX2 remain available.** No DSP synthesis code,
 effect ID or bus buffer is allocated. The normal DSP signal path still applies

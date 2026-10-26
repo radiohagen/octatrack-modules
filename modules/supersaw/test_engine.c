@@ -332,6 +332,30 @@ static void check_half_filter(void) {
     puts("[ok] half-rate SEM scalar oracle: 100000 extreme blocks, resonant resampling, silent skip, neutral bypass, live ENV");
 }
 
+/* Reusing coefficients must be indistinguishable from a full cold reset,
+ * even when a new note changes controls, pitch, or the split-call phase. */
+static void check_restart(void) {
+    struct ss_voice cached,fresh;ss_init(&cached);
+    uint32_t seed=719;
+    for(unsigned k=0;k<2000;++k) {
+        seed=seed*1664525u+1013904223u;
+        struct ss_params p={seed,(seed>>4)&127,(seed>>11)&127,
+                            (seed>>18)&127,(seed>>25)&127};
+        int16_t a[33],b[33];
+        ss_render(&cached,&p,a,1+k%32);
+        struct ss_voice before=cached;
+        ss_restart(&cached);ss_init(&fresh);
+        assert(cached.base==before.base && cached.controls==before.controls);
+        assert(cached.saw_weight==before.saw_weight);
+        if(k&1)p.increment^=0x777777;
+        if(k&2)p.sub^=127;
+        if(k&4)p.drive^=127;
+        ss_render(&cached,&p,a,33);ss_render(&fresh,&p,b,33);
+        assert(!memcmp(a,b,sizeof(a)));
+        assert(!memcmp(&cached,&fresh,sizeof(cached)));
+    }
+}
+
 int main(int argc, char **argv) {
     assert(ss_marker("../AUDIO/FMSYNTH-SUPERSAW.wav"));
     assert(ss_marker("FMSYNTH-SUPERSAW-pad.wav"));
@@ -435,7 +459,7 @@ int main(int argc, char **argv) {
         int exact=x-(((((x*x)>>15)*x>>15)*10923)>>15);
         assert(abs(ss_drive_curve[(x+32772)>>3]-exact)<=5);
     }
-    check_filter();check_half_filter();
+    check_restart();check_filter();check_half_filter();
     check_gain();
     check_poly();
     if (argc == 2) {
