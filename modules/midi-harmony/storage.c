@@ -69,7 +69,10 @@ int hd_export_c(unsigned bank, uint8_t *p) {
     return valid;
 }
 void hd_import_c(unsigned bank, const uint8_t *p) {
-    if (bank >= 16 || !hd_payload_valid_c(p) || !hd_unpack_c(&hd_banks[bank], ch_lock_table + bank*QUALITY_BYTES, p)) return;
+    /* hd_unpack_c validates all packed lanes before publication. Validate
+     * ACC first, without scanning the packed section a second time. */
+    if (bank >= 16 || !ha_valid_c(p+HD_PAYLOAD_BYTES) ||
+        !hd_unpack_c(&hd_banks[bank], ch_lock_table + bank*QUALITY_BYTES, p)) return;
     ha_unpack_c(bank,p+HD_PAYLOAD_BYTES);
     hd_bank_loaded_c(bank);
 }

@@ -88,10 +88,21 @@ int hd_scale_c(unsigned bank, unsigned part, unsigned track) {
     unsigned raw = part < 4 ? (unsigned)hd_part_key_c(track,bank*4+part) :
                    native(bank)[part_offset(part)+0x4e2 + track*36+17];
     if (!raw || raw > 84) return 0;
-    if (raw <= 24) return (int)(((raw-1)/2)*4+((raw-1)&1)*320);
-    if (!hd_scales_c()) return 0;
-    static const unsigned modes[5] = {1,2,3,4,6};
-    return (int)(((raw-25)/5)*4+modes[(raw-25)%5]*64);
+    if (raw > 24 && !hd_scales_c()) return 0;
+    /* Same native KEY ordering as MIDI Scales: stock major/minor pairs,
+     * followed by five extra modes per tonic. Bounded ROM removes the
+     * per-tick quotient/remainder needed by the extended KEY choices. */
+    static const uint16_t scales[84] = {
+        0,320,4,324,8,328,12,332,16,336,20,340,
+        24,344,28,348,32,352,36,356,40,360,44,364,
+        64,128,192,256,384,68,132,196,260,388,
+        72,136,200,264,392,76,140,204,268,396,
+        80,144,208,272,400,84,148,212,276,404,
+        88,152,216,280,408,92,156,220,284,412,
+        96,160,224,288,416,100,164,228,292,420,
+        104,168,232,296,424,108,172,236,300,428
+    };
+    return scales[raw-1];
 }
 int hd_context_depends_c(unsigned context, unsigned track, unsigned source_context) {
     if (context >= 64 || track >= 8) return 0;
@@ -237,8 +248,12 @@ int hd_sync_c(unsigned bank, unsigned pattern, unsigned track) {
     int context = hd_pattern_context_c(bank,pattern);
     if (context < 0) return -1;
     unsigned part = (unsigned)context%4;
+    unsigned mode = hd_part_type_c(bank,part,track);
+    /* sync_context already returns here without observing KEY. Avoid
+     * resolving an entire Follow chain for an unchanged stock lane. */
+    if (!mode && roots(bank,pattern,track)->state != HD_ROOT_HARM) return 0;
     return sync_context(bank,pattern,track,(unsigned)context,
-                        hd_part_type_c(bank,part,track),(unsigned)hd_scale_c(bank,part,track));
+                        mode,(unsigned)hd_scale_c(bank,part,track));
 }
 int hd_base_c(unsigned bank, unsigned part, unsigned track) {
     if (bank >= 16 || part >= 8 || track >= 8) return -1;
@@ -246,8 +261,9 @@ int hd_base_c(unsigned bank, unsigned part, unsigned track) {
                     native(bank)[part_offset(part)+0x4e2 + track*36+19];
     return code < HD_CODES ? (int)code : 35;
 }
-int hd_lock_c(unsigned bank, unsigned pattern, unsigned track, unsigned step) {
-    if (step >= 64 || hd_sync_c(bank,pattern,track) != 1) return -1;
+/* The caller has reconciled the lane; this short transaction checks the
+ * individual native NOTE again before consuming its retained degree. */
+static int lock_synced(unsigned bank, unsigned pattern, unsigned track, unsigned step) {
     HdRoots *r = roots(bank,pattern,track);
     uint16_t sr = mask();
     unsigned note = *step_note(bank,pattern,track,step);
@@ -263,9 +279,13 @@ int hd_lock_c(unsigned bank, unsigned pattern, unsigned track, unsigned step) {
     unmask(sr);
     return degree < HD_CODES ? (int)degree : -1;
 }
+int hd_lock_c(unsigned bank, unsigned pattern, unsigned track, unsigned step) {
+    if (step >= 64 || hd_sync_c(bank,pattern,track) != 1) return -1;
+    return lock_synced(bank,pattern,track,step);
+}
 int hd_degree_c(unsigned bank, unsigned pattern, unsigned track, unsigned step) {
     if (step >= 64 || hd_sync_c(bank,pattern,track) != 1) return -1;
-    int degree = hd_lock_c(bank,pattern,track,step);
+    int degree = lock_synced(bank,pattern,track,step);
     int context = hd_pattern_context_c(bank,pattern);
     return degree >= 0 ? degree : hd_base_c(bank,(unsigned)context%4,track);
 }

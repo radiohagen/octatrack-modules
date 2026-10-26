@@ -18,141 +18,77 @@ hd_decode_c:
     move.l 8(%sp),%d1
     bra.w hd_decode
 hd_decode:
-    lea -24(%sp),%sp
-    movem.l %d1-%d5/%a0,(%sp)
+    lea -12(%sp),%sp
+    movem.l %d3/%d5/%a0,(%sp)
     cmpi.l #83,%d0
-    bhi.w .decode_bad
+    bhi.s .decode_bad
     bsr.w .scale
-    mulu.w #7,%d3
-    lea hd_scale_degrees,%a0
-    adda.l %d3,%a0
-    move.l %d0,%d2
-    moveq #7,%d1
-    divu.l %d1,%d0
-    move.l %d0,%d3
-    mulu.l %d1,%d3
-    sub.l %d3,%d2 /* degree 0..6 */
-    subq.l #1,%d0
-    moveq #12,%d1
-    muls.l %d1,%d0
-    add.l %d5,%d0 /* tonic pitch */
-    moveq #0,%d3
-    move.b (%a0,%d2.l),%d3
+    mulu.w #84,%d3
     add.l %d3,%d0
+    lea hd_decode_pitch,%a0
+    mvz.b (%a0,%d0.l),%d0
+    add.l %d5,%d0
+    subi.l #12,%d0
     cmpi.l #127,%d0
     bls.s .decode_done
 .decode_bad:
     moveq #-1,%d0
 .decode_done:
-    movem.l (%sp),%d1-%d5/%a0
-    lea 24(%sp),%sp
+    movem.l (%sp),%d3/%d5/%a0
+    lea 12(%sp),%sp
     rts
 
 hd_encode:
-    lea -28(%sp),%sp
-    movem.l %d1-%d6/%a0,(%sp)
+    lea -12(%sp),%sp
+    movem.l %d3/%d5/%a0,(%sp)
     cmpi.l #127,%d0
-    bhi.w .encode_bad
+    bhi.s .encode_bad
     bsr.w .scale
-    move.l %d0,%d6
-    bsr.w .member
-    bne.s .encode_found
-    moveq #1,%d2
-.encode_search:
-    move.l %d6,%d0
-    sub.l %d2,%d0
-    bsr.w .member
-    bne.s .encode_found
-    move.l %d6,%d0
-    add.l %d2,%d0
-    bsr.w .member
-    bne.s .encode_found
-    addq.l #1,%d2
-    cmpi.l #12,%d2
-    bcs.s .encode_search
-    bra.s .encode_bad
-.encode_found:
-    sub.l %d5,%d0
-    moveq #-1,%d1
     tst.l %d0
-    bpl.s .encode_positive
-    addi.l #12,%d0
-    bra.s .encode_register
-.encode_positive:
-    move.l %d0,%d1
-    moveq #12,%d3
-    divu.l %d3,%d1
-    mulu.l %d1,%d3
-    sub.l %d3,%d0 /* scale semitone 0..11 */
-.encode_register:
-    addq.l #1,%d1
-    moveq #7,%d3
-    mulu.l %d3,%d1
-    moveq #0,%d2
-    moveq #0,%d3
-.encode_count:
-    cmp.l %d0,%d3
-    beq.s .encode_result
-    btst %d3,%d4
-    beq.s .encode_next
-    addq.l #1,%d2
-.encode_next:
-    addq.l #1,%d3
-    bra.s .encode_count
-.encode_result:
-    move.l %d1,%d0
-    add.l %d2,%d0
+    beq.s .encode_minimum
+    sub.l %d5,%d0
+    addi.l #12,%d0 /* relative pitch+12, always 2..139 */
+    mulu.w #140,%d3
+    add.l %d3,%d0
+    lea hd_encode_relative,%a0
+    mvz.b (%a0,%d0.l),%d0
+    bra.s .encode_done
+.encode_minimum:
+    /* All seven diatonic modes have gaps <=2 semitones. With lower-on-tie
+     * snapping the only out-of-MIDI nearest pitch is -1 for input 0.
+     * MIDI 0 therefore selects the first playable degree directly. */
+    mulu.w #12,%d3
+    add.l %d5,%d3
+    lea hd_encode_minimum,%a0
+    mvz.b (%a0,%d3.l),%d0
     bra.s .encode_done
 .encode_bad:
     moveq #-1,%d0
 .encode_done:
-    movem.l (%sp),%d1-%d6/%a0
-    lea 28(%sp),%sp
+    movem.l (%sp),%d3/%d5/%a0
+    lea 12(%sp),%sp
     rts
 
-/* d1 -> d3 mode,d4 mask,d5 tonic. Invalid scale falls back to C major.
- * Does not modify d0/d2. Both public callers preserve d3. */
+/* d1 -> d3 mode,d5 tonic. Invalid scale falls back to C major.
+ * Low two scale bits are ignored, preserving the native codec ABI. */
 .scale:
-    moveq #0,%d4
+    moveq #0,%d3
     moveq #0,%d5
     tst.l %d1
-    bmi.s .scale_mask
-    move.l %d1,%d4
-    lsr.l #6,%d4
-    cmpi.l #6,%d4
+    bmi.s .scale_done
+    move.l %d1,%d3
+    lsr.l #6,%d3
+    cmpi.l #6,%d3
     bhi.s .scale_fallback
     move.l %d1,%d5
     lsr.l #2,%d5
     andi.l #15,%d5
     cmpi.l #11,%d5
-    bls.s .scale_mask
+    bls.s .scale_done
 .scale_fallback:
-    moveq #0,%d4
-    moveq #0,%d5
-.scale_mask:
-    move.l %d4,%d3
-    lea hd_masks,%a0
-    move.w (%a0,%d4.l*2),%d4
-    rts
-
-/* d0 pitch,d4 mask,d5 tonic -> Z=0 for valid degree. d3 clobbered. */
-.member:
-    cmpi.l #127,%d0
-    bhi.s .member_no
-    move.l %d0,%d3
-    sub.l %d5,%d3
-    bpl.s .member_mod
-    addi.l #12,%d3
-.member_mod:
-    cmpi.l #12,%d3
-    bcs.s .member_test
-    subi.l #12,%d3
-    bra.s .member_mod
-.member_test:
-    btst %d3,%d4
-    rts
-.member_no:
     moveq #0,%d3
+    moveq #0,%d5
+.scale_done:
     rts
 
 /* Native formatter (char *buffer, int code); no stock formatter needed. */
@@ -189,12 +125,172 @@ hd_format:
     lea 16(%sp),%sp
     rts
     .balign 4
-hd_masks: .word 0xab5,0x6ad,0x5ab,0xad5,0x6b5,0x5ad,0x56b
-hd_scale_degrees:
+/* mode*84+code -> pitch relative to tonic, biased by +12. */
+hd_decode_pitch:
     .byte 0,2,4,5,7,9,11
+    .byte 12,14,16,17,19,21,23
+    .byte 24,26,28,29,31,33,35
+    .byte 36,38,40,41,43,45,47
+    .byte 48,50,52,53,55,57,59
+    .byte 60,62,64,65,67,69,71
+    .byte 72,74,76,77,79,81,83
+    .byte 84,86,88,89,91,93,95
+    .byte 96,98,100,101,103,105,107
+    .byte 108,110,112,113,115,117,119
+    .byte 120,122,124,125,127,129,131
+    .byte 132,134,136,137,139,141,143
     .byte 0,2,3,5,7,9,10
+    .byte 12,14,15,17,19,21,22
+    .byte 24,26,27,29,31,33,34
+    .byte 36,38,39,41,43,45,46
+    .byte 48,50,51,53,55,57,58
+    .byte 60,62,63,65,67,69,70
+    .byte 72,74,75,77,79,81,82
+    .byte 84,86,87,89,91,93,94
+    .byte 96,98,99,101,103,105,106
+    .byte 108,110,111,113,115,117,118
+    .byte 120,122,123,125,127,129,130
+    .byte 132,134,135,137,139,141,142
     .byte 0,1,3,5,7,8,10
+    .byte 12,13,15,17,19,20,22
+    .byte 24,25,27,29,31,32,34
+    .byte 36,37,39,41,43,44,46
+    .byte 48,49,51,53,55,56,58
+    .byte 60,61,63,65,67,68,70
+    .byte 72,73,75,77,79,80,82
+    .byte 84,85,87,89,91,92,94
+    .byte 96,97,99,101,103,104,106
+    .byte 108,109,111,113,115,116,118
+    .byte 120,121,123,125,127,128,130
+    .byte 132,133,135,137,139,140,142
     .byte 0,2,4,6,7,9,11
+    .byte 12,14,16,18,19,21,23
+    .byte 24,26,28,30,31,33,35
+    .byte 36,38,40,42,43,45,47
+    .byte 48,50,52,54,55,57,59
+    .byte 60,62,64,66,67,69,71
+    .byte 72,74,76,78,79,81,83
+    .byte 84,86,88,90,91,93,95
+    .byte 96,98,100,102,103,105,107
+    .byte 108,110,112,114,115,117,119
+    .byte 120,122,124,126,127,129,131
+    .byte 132,134,136,138,139,141,143
     .byte 0,2,4,5,7,9,10
+    .byte 12,14,16,17,19,21,22
+    .byte 24,26,28,29,31,33,34
+    .byte 36,38,40,41,43,45,46
+    .byte 48,50,52,53,55,57,58
+    .byte 60,62,64,65,67,69,70
+    .byte 72,74,76,77,79,81,82
+    .byte 84,86,88,89,91,93,94
+    .byte 96,98,100,101,103,105,106
+    .byte 108,110,112,113,115,117,118
+    .byte 120,122,124,125,127,129,130
+    .byte 132,134,136,137,139,141,142
     .byte 0,2,3,5,7,8,10
+    .byte 12,14,15,17,19,20,22
+    .byte 24,26,27,29,31,32,34
+    .byte 36,38,39,41,43,44,46
+    .byte 48,50,51,53,55,56,58
+    .byte 60,62,63,65,67,68,70
+    .byte 72,74,75,77,79,80,82
+    .byte 84,86,87,89,91,92,94
+    .byte 96,98,99,101,103,104,106
+    .byte 108,110,111,113,115,116,118
+    .byte 120,122,123,125,127,128,130
+    .byte 132,134,135,137,139,140,142
     .byte 0,1,3,5,6,8,10
+    .byte 12,13,15,17,18,20,22
+    .byte 24,25,27,29,30,32,34
+    .byte 36,37,39,41,42,44,46
+    .byte 48,49,51,53,54,56,58
+    .byte 60,61,63,65,66,68,70
+    .byte 72,73,75,77,78,80,82
+    .byte 84,85,87,89,90,92,94
+    .byte 96,97,99,101,102,104,106
+    .byte 108,109,111,113,114,116,118
+    .byte 120,121,123,125,126,128,130
+    .byte 132,133,135,137,138,140,142
+    .balign 4
+/* mode*140+relative pitch+12 -> nearest code, lower on ties. */
+hd_encode_relative:
+    .byte 0,0,1,1,2,3,3,4,4,5,5,6,7,7
+    .byte 8,8,9,10,10,11,11,12,12,13,14,14,15,15
+    .byte 16,17,17,18,18,19,19,20,21,21,22,22,23,24
+    .byte 24,25,25,26,26,27,28,28,29,29,30,31,31,32
+    .byte 32,33,33,34,35,35,36,36,37,38,38,39,39,40
+    .byte 40,41,42,42,43,43,44,45,45,46,46,47,47,48
+    .byte 49,49,50,50,51,52,52,53,53,54,54,55,56,56
+    .byte 57,57,58,59,59,60,60,61,61,62,63,63,64,64
+    .byte 65,66,66,67,67,68,68,69,70,70,71,71,72,73
+    .byte 73,74,74,75,75,76,77,77,78,78,79,80,80,81
+    .byte 0,0,1,2,2,3,3,4,4,5,6,6,7,7
+    .byte 8,9,9,10,10,11,11,12,13,13,14,14,15,16
+    .byte 16,17,17,18,18,19,20,20,21,21,22,23,23,24
+    .byte 24,25,25,26,27,27,28,28,29,30,30,31,31,32
+    .byte 32,33,34,34,35,35,36,37,37,38,38,39,39,40
+    .byte 41,41,42,42,43,44,44,45,45,46,46,47,48,48
+    .byte 49,49,50,51,51,52,52,53,53,54,55,55,56,56
+    .byte 57,58,58,59,59,60,60,61,62,62,63,63,64,65
+    .byte 65,66,66,67,67,68,69,69,70,70,71,72,72,73
+    .byte 73,74,74,75,76,76,77,77,78,79,79,80,80,81
+    .byte 0,1,1,2,2,3,3,4,5,5,6,6,7,8
+    .byte 8,9,9,10,10,11,12,12,13,13,14,15,15,16
+    .byte 16,17,17,18,19,19,20,20,21,22,22,23,23,24
+    .byte 24,25,26,26,27,27,28,29,29,30,30,31,31,32
+    .byte 33,33,34,34,35,36,36,37,37,38,38,39,40,40
+    .byte 41,41,42,43,43,44,44,45,45,46,47,47,48,48
+    .byte 49,50,50,51,51,52,52,53,54,54,55,55,56,57
+    .byte 57,58,58,59,59,60,61,61,62,62,63,64,64,65
+    .byte 65,66,66,67,68,68,69,69,70,71,71,72,72,73
+    .byte 73,74,75,75,76,76,77,78,78,79,79,80,80,81
+    .byte 0,0,1,1,2,2,3,4,4,5,5,6,7,7
+    .byte 8,8,9,9,10,11,11,12,12,13,14,14,15,15
+    .byte 16,16,17,18,18,19,19,20,21,21,22,22,23,23
+    .byte 24,25,25,26,26,27,28,28,29,29,30,30,31,32
+    .byte 32,33,33,34,35,35,36,36,37,37,38,39,39,40
+    .byte 40,41,42,42,43,43,44,44,45,46,46,47,47,48
+    .byte 49,49,50,50,51,51,52,53,53,54,54,55,56,56
+    .byte 57,57,58,58,59,60,60,61,61,62,63,63,64,64
+    .byte 65,65,66,67,67,68,68,69,70,70,71,71,72,72
+    .byte 73,74,74,75,75,76,77,77,78,78,79,79,80,81
+    .byte 0,0,1,1,2,3,3,4,4,5,6,6,7,7
+    .byte 8,8,9,10,10,11,11,12,13,13,14,14,15,15
+    .byte 16,17,17,18,18,19,20,20,21,21,22,22,23,24
+    .byte 24,25,25,26,27,27,28,28,29,29,30,31,31,32
+    .byte 32,33,34,34,35,35,36,36,37,38,38,39,39,40
+    .byte 41,41,42,42,43,43,44,45,45,46,46,47,48,48
+    .byte 49,49,50,50,51,52,52,53,53,54,55,55,56,56
+    .byte 57,57,58,59,59,60,60,61,62,62,63,63,64,64
+    .byte 65,66,66,67,67,68,69,69,70,70,71,71,72,73
+    .byte 73,74,74,75,76,76,77,77,78,78,79,80,80,81
+    .byte 0,0,1,2,2,3,3,4,5,5,6,6,7,7
+    .byte 8,9,9,10,10,11,12,12,13,13,14,14,15,16
+    .byte 16,17,17,18,19,19,20,20,21,21,22,23,23,24
+    .byte 24,25,26,26,27,27,28,28,29,30,30,31,31,32
+    .byte 33,33,34,34,35,35,36,37,37,38,38,39,40,40
+    .byte 41,41,42,42,43,44,44,45,45,46,47,47,48,48
+    .byte 49,49,50,51,51,52,52,53,54,54,55,55,56,56
+    .byte 57,58,58,59,59,60,61,61,62,62,63,63,64,65
+    .byte 65,66,66,67,68,68,69,69,70,70,71,72,72,73
+    .byte 73,74,75,75,76,76,77,77,78,79,79,80,80,81
+    .byte 0,1,1,2,2,3,4,4,5,5,6,6,7,8
+    .byte 8,9,9,10,11,11,12,12,13,13,14,15,15,16
+    .byte 16,17,18,18,19,19,20,20,21,22,22,23,23,24
+    .byte 25,25,26,26,27,27,28,29,29,30,30,31,32,32
+    .byte 33,33,34,34,35,36,36,37,37,38,39,39,40,40
+    .byte 41,41,42,43,43,44,44,45,46,46,47,47,48,48
+    .byte 49,50,50,51,51,52,53,53,54,54,55,55,56,57
+    .byte 57,58,58,59,60,60,61,61,62,62,63,64,64,65
+    .byte 65,66,67,67,68,68,69,69,70,71,71,72,72,73
+    .byte 74,74,75,75,76,76,77,78,78,79,79,80,81,81
+    .balign 4
+/* mode*12+tonic -> first degree inside MIDI 0..127. */
+hd_encode_minimum:
+    .byte 7,6,6,5,5,4,4,3,2,2,1,1
+    .byte 7,7,6,5,5,4,4,3,3,2,1,1
+    .byte 7,7,6,6,5,4,4,3,3,2,2,1
+    .byte 7,6,6,5,5,4,3,3,2,2,1,1
+    .byte 7,7,6,5,5,4,4,3,2,2,1,1
+    .byte 7,7,6,6,5,4,4,3,3,2,1,1
+    .byte 7,7,6,6,5,5,4,3,3,2,2,1

@@ -42,10 +42,15 @@ void ha_bank_reset_c(unsigned bank) {
 int ha_amount_c(unsigned code) {
     return code<2 || code>15 ? 0 : code<9 ? (int)code-9 : (int)code-8;
 }
+/* Internal callers already own a valid lane and step from ha_fire_c. Keep
+ * the checked public entry below for editors and external callers. */
+static unsigned lane_lock(const HaLane *lane, unsigned step) {
+    unsigned byte=lane->amount[step/2];
+    return (byte >> ((step&1) ? 0 : 4))&15;
+}
 unsigned ha_lock_c(unsigned bank, unsigned pattern, unsigned track, unsigned step) {
     if (bank>=16 || pattern>=16 || track>=8 || step>=64) return 0;
-    unsigned byte=ha_lanes[bank][pattern*8+track].amount[step/2];
-    return (byte >> ((step&1) ? 0 : 4))&15;
+    return lane_lock(&ha_lanes[bank][pattern*8+track],step);
 }
 static void dirty(unsigned bank) {
     hd_configuration_changed_c(bank);
@@ -92,11 +97,11 @@ void ha_fire_c(unsigned bank, unsigned pattern, unsigned track, unsigned step) {
 int ha_shift_c(int note, unsigned track, unsigned context) {
     if (track>=8 || context>=64 || note<0 || note>127) return note;
     HaPhase *p=&phases[track];
-    if (!p->valid) return note;
+    if (!p->valid || !p->captured) return note;
     const HaLane *c=&ha_lanes[p->bank][p->pattern*8+track];
-    unsigned code=ha_lock_c(p->bank,p->pattern,track,p->step);
+    unsigned code=lane_lock(c,p->step);
     if (!code) code=c->base;
-    if (!ha_amount_c(code) || !p->captured) return note;
+    if (!ha_amount_c(code)) return note;
     int scale=hd_scale_c(context/4,context%4,track);
     return hd_decode_c(hd_encode_c(note,scale)+p->captured,scale);
 }
@@ -106,7 +111,7 @@ void ha_sounded_c(unsigned track) {
     if (!p->valid || p->sounded) return;
     p->sounded=1;
     const HaLane *c=&ha_lanes[p->bank][p->pattern*8+track];
-    unsigned code=ha_lock_c(p->bank,p->pattern,track,p->step);
+    unsigned code=lane_lock(c,p->step);
     if (!code) code=c->base;
     int amount=ha_amount_c(code), lo=c->lower, hi=c->upper;
     if (!amount) { p->offset[p->step]=0; p->direction[p->step]=1; return; }
