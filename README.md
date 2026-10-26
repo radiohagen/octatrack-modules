@@ -15,6 +15,7 @@ and requires a Sophie-enabled Octabam integration to build firmware.
 
 - [Modules and controls](modules/README.md)
 - [Build and source integration](integration/README.md)
+- [MIDI Follow integration](integration/midi-follow.md)
 - [Licensing and attribution](THIRD_PARTY.md)
 
 The repository includes the modules' Part storage, retained-memory support
