@@ -32,7 +32,7 @@ DEST belongs to each MIDI track in each native Part. Part Save/Reload/Clear,
 copy/paste and project save/load use the existing native storage. Playback
 reads each track's playing Part, independently of the Part selected for editing.
 Fresh Parts use EXT. No parameter locks or separate settings file are added.
-The shared `MIDI PART STATE` module is required; KITS is not required; its combination is not qualified here.
+The shared `STORE` module is required; KITS is not required; its combination is not qualified here.
 
 Changing the playing destination releases held notes at their original
 channel/destinations. Part replacement also releases the outgoing ownership;
@@ -74,7 +74,7 @@ simultaneous external traffic still need separate integration tests.
 ## Implementation
 
 Four ColdFire DRAM units, no DSP effect slot. SETUP offset 12 is owned by
-MIDI PART STATE: DEST uses bits 2–3 and preserves the other bits. Bits 0–1 are reserved
+STORE: DEST uses bits 2–3 and preserves the other bits. Bits 0–1 are reserved
 for future shared MIDI settings. DEST 3 or invalid flags decode as EXT. `lb_routes[8]` is an applied
 runtime cache; tools must use `lb_dest_write(track, route)` to edit native
 settings. `lb_set_route` remains the low-level cache/cleanup helper.
@@ -125,7 +125,7 @@ small portion of that existing reserve; consult the build layout for size.
 
 ## Verification and limits
 
-This contribution selects only Loopback and Part State on stock effects.
+This contribution selects only Loopback and STORE native Part access on stock effects.
 Its gates execute the linked code, installed hooks and native queue/receiver
 routines. They cover all eight tracks, channels 1–16, EXT/INT/BOTH, message
 lengths, live/sequence producers, route changes, ownership, queue fairness,

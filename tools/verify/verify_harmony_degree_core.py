@@ -37,12 +37,12 @@ ch_nv_bank: .long -1
 ch_lock_status: .space 16
 .bss
 ch_lock_table: .space 131072
-.global ch_messages,mp_snapshot_bank,mp_snapshot_parts,mp_snapshot,mp_part_epochs
+.global ch_messages,store_part_snapshot_bank,store_part_snapshot_parts,store_part_snapshot,store_part_epochs
 ch_messages: .space 4096
-mp_snapshot_bank: .space 4
-mp_snapshot_parts: .space 4
-mp_snapshot: .space 1152
-mp_part_epochs: .space 256
+store_part_snapshot_bank: .space 4
+store_part_snapshot_parts: .space 4
+store_part_snapshot: .space 1152
+store_part_epochs: .space 256
 """)
         objects = []
         for name, source in [('codec', ROOT/'modules/midi-harmony/codec.s'),
@@ -67,7 +67,7 @@ mp_part_epochs: .space 256
                         '-o', str(out/'core.elf'), *objects], check=True)
         subprocess.run(['m68k-elf-objcopy', '-O', 'binary', str(out/'core.elf'), str(out/'core.bin')], check=True)
         nm = subprocess.check_output(['m68k-elf-nm', str(out/'core.elf')], text=True)
-        sym = {n: int(a, 16) for a, n in re.findall(r'^([0-9a-f]+) [TtBbDd] ((?:hd|ch|mp)_\w+)$', nm, re.M)}
+        sym = {n: int(a, 16) for a, n in re.findall(r'^([0-9a-f]+) [TtBbDd] ((?:hd|ch|store_part)_\w+)$', nm, re.M)}
         u = Uc(UC_ARCH_M68K, UC_MODE_BIG_ENDIAN)
         u.ctl_set_cpu_model(UC_CPU_M68K_CFV4E)
         for a, n in ((0x47000000, 0x100000), (0x40000000, 0x1000000),
@@ -243,9 +243,9 @@ mp_part_epochs: .space 256
         mode(0,1,0,2); put(key(0,1,0),6)
         call('hd_degree_c',0,1,0,0)
         for part in range(4):
-            u.mem_write(sym['mp_snapshot']+part*288,bytes(u.mem_read(BASE+po(part)+0x4e2,288)))
-        u.mem_write(sym['mp_snapshot_parts'],(1).to_bytes(4,'big'))
-        u.mem_write(sym['mp_snapshot_bank'],BASE.to_bytes(4,'big'))
+            u.mem_write(sym['store_part_snapshot']+part*288,bytes(u.mem_read(BASE+po(part)+0x4e2,288)))
+        u.mem_write(sym['store_part_snapshot_parts'],(1).to_bytes(4,'big'))
+        u.mem_write(sym['store_part_snapshot_bank'],BASE.to_bytes(4,'big'))
         call('hd_part_before_c',BASE+po(0))
         assert byte(degree(0,1,0,130))==1
         for _ in range(3):
@@ -253,8 +253,8 @@ mp_part_epochs: .space 256
             assert byte(degree(0,0,0,130))==255
         mode(0,0,0,0); put(key(0,0,0),6)
         assert call('hd_resolve_c',0,0,0,0)==48
-        u.mem_write(sym['mp_snapshot_bank'],bytes(4))
-        u.mem_write(sym['mp_snapshot_parts'],bytes(4))
+        u.mem_write(sym['store_part_snapshot_bank'],bytes(4))
+        u.mem_write(sym['store_part_snapshot_parts'],bytes(4))
         assert call('hd_sync_c',0,0,0)==0 and byte(note(0,0,0,0))==48
         # A stopped rapid HARM -> OFF -> HARM recall observes the outgoing
         # OFF representation before replacing it again, without any trig.

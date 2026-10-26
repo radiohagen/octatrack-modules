@@ -1,7 +1,9 @@
 """Extend the stock MIDI KEY selector, retaining its Part storage and UI."""
+from pathlib import Path
+ROOT = Path(__file__).resolve().parent
 from remix.schema import Category, Detour, Gate, Kind, Linked, Module, Poke, Proof, SymbolRef
 
-def options(modules):
+def options(modules, remix=None):
     return ('.set HAVE_FOLLOW,1\n' if 'MIDI FOLLOW' in modules else '') + ('.set HAVE_HARMONY,1\n' if 'MIDI HARMONY' in modules else '')
 
 MODULE = Module(
@@ -9,7 +11,7 @@ MODULE = Module(
     category=Category.MIDI_USB,author='radiohagen',author_url='https://github.com/radiohagen/octatrack-modules',
     proof=Proof.PORT,proof_note='',
     doc='Stock MIDI ARP SETUP KEY: OFF plus all 12 keys in seven diatonic modes, stored in the Part.',
-    linked=(Linked('midiscales','modules/midi-scales/scales.s',dram=True,include=options),),
+    linked=(Linked('midiscales',str(Path(__file__).resolve().parent / 'scales.s'),dram=True,include=options),),
     pokes=(Poke(0x400d4096,bytes.fromhex('00000019'),bytes.fromhex('00000055'),'85 KEY values'),),
     symbol_refs=(SymbolRef(0x400d40c6,0x4003b790,'midiscales','ms_format','stock two-line KEY formatter'),),
     detours=(

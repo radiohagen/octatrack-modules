@@ -4,7 +4,7 @@ REMIX = Remix(
     name='midi-ensemble', family='mods', proof=Proof.CHECK,
     proof_note='',
     doc='Scales, Follow and Harmony with KITS, MIDI SCENES and upstream P2 retention and track-local Harmony.',
-    modules=('STORE', 'KITS', 'MIDI SCENES', 'MIDI SRAM', 'MIDI PART STATE',
+    modules=('STORE', 'KITS', 'MIDI SCENES', 'MIDI SRAM', 
              'MIDI FOLLOW', 'MIDI SCALES', 'MIDI HARMONY', 'SEQUENCER EVENTS', 'EDIT EVENTS',
              'SCENES P2', 'PLOCKS P2',
              'FILTER', 'EQUALIZER', 'DJ EQ', 'PHASER', 'FLANGER', 'CHORUS',

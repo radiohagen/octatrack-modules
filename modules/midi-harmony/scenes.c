@@ -6,7 +6,7 @@
 #define LONG(a) (*(volatile uint32_t *)(uintptr_t)(a))
 typedef struct { uint8_t assigned[2], roots[16*8]; } HdSceneSnapshot;
 static HdSceneSnapshot outgoing[64];
-extern volatile uint32_t mp_snapshot_bank, mp_snapshot_parts;
+extern volatile uint32_t store_part_snapshot_bank, store_part_snapshot_parts;
 
 static uintptr_t part(unsigned context) {
     return 0x400e21e0u+(context/4)*0x9b340u+0x8ed80u+(context%4)*0x18b2u;
@@ -32,8 +32,8 @@ void hd_scenes_before_c(uintptr_t bank) {
 int hd_scene_value_c(unsigned context, unsigned track, unsigned flat, int base) {
     if (!hd_scenes_c() || context>=64 || track>=8 || flat!=0) return base;
     const volatile uint8_t *assigned=(const volatile uint8_t *)(part(context)+0x10);
-    int snapshot=mp_snapshot_bank==0x400e21e0u+(context/4)*0x9b340u &&
-        (mp_snapshot_parts & (1u<<(context%4)));
+    int snapshot=store_part_snapshot_bank==0x400e21e0u+(context/4)*0x9b340u &&
+        (store_part_snapshot_parts & (1u<<(context%4)));
     if (snapshot) assigned=outgoing[context].assigned;
     unsigned a=assigned[0],b=assigned[1];
     const volatile uint8_t *slots=table(context);

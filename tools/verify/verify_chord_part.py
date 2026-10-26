@@ -12,7 +12,7 @@ BANK, STRIDE, PART = 0x400e21e0, 0x9b340, 0x18b2
 
 def symbols():
     raw = subprocess.check_output(['m68k-elf-nm', str(ROOT/'out/platform/runtime/runtime.elf')], text=True)
-    return {n: int(a, 16) for a, n in re.findall(r'^([0-9a-f]+) [TtBbDd] ((?:ch|mp|mh|hd)_\w+)$', raw, re.M)}
+    return {n: int(a, 16) for a, n in re.findall(r'^([0-9a-f]+) [TtBbDd] ((?:ch|store_part|mh|hd)_\w+)$', raw, re.M)}
 
 
 class PartMachine(Machine):

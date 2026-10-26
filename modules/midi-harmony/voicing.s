@@ -29,12 +29,12 @@ mh_voice_clear:
 mh_voice:
     lea -92(%sp),%sp
     movem.l %d0-%d7/%a0-%a4,(%sp)
-    jsr mp_play_context
+    jsr store_part_play_context
     bra.s .voice_context
 mh_voice_ui:
     lea -92(%sp),%sp
     movem.l %d0-%d7/%a0-%a4,(%sp)
-    jsr mp_ui_context
+    jsr store_part_ui_context
     bra.s .voice_context
 mh_voice_at: /* d0 track,d1 captured context,a0 pool; all regs preserved */
     lea -92(%sp),%sp
@@ -53,7 +53,7 @@ mh_voice_at: /* d0 track,d1 captured context,a0 pool; all regs preserved */
     move.l 88(%sp),%d1
     moveq #16,%d2
     move.l %d7,%d0
-    jsr mp_read
+    jsr store_part_midi_read
     move.l 88(%sp),%d1
     lsl.l #8,%d1
     or.l %d1,%d0
@@ -64,7 +64,7 @@ mh_voice_at: /* d0 track,d1 captured context,a0 pool; all regs preserved */
     clr.l 4(%a2)
 .voice_context_ready:
     move.l 88(%sp),%d0
-    jsr mp_epoch
+    jsr store_part_epoch
     lea mh_voice_epoch,%a0
     cmp.l (%a0,%d7.l*4),%d0
     beq.s .voice_epoch_ready

@@ -14,20 +14,20 @@ hd_scenes_c:
     rts
     .global hd_ui_context_c,hd_play_context_c,hd_part_read_c,hd_part_write_c,hd_part_key_c
 hd_ui_context_c:
-    jmp mp_ui_context
+    jmp store_part_ui_context
 hd_play_context_c:
     move.l 4(%sp),%d0
-    jmp mp_play_context
+    jmp store_part_play_context
 hd_part_key_c:
     move.l 4(%sp),%d0
     move.l 8(%sp),%d1
-    jmp mp_read_key
+    jmp store_part_midi_key
 hd_part_read_c:
     move.l %d2,-(%sp)
     move.l 8(%sp),%d0
     move.l 12(%sp),%d1
     move.l 16(%sp),%d2
-    jsr mp_read
+    jsr store_part_midi_read
     move.l (%sp)+,%d2
     rts
 hd_part_write_c:
@@ -37,7 +37,7 @@ hd_part_write_c:
     move.l 16(%sp),%d1
     move.l 20(%sp),%d2
     move.l 24(%sp),%d3
-    jsr mp_write
+    jsr store_part_midi_write
     movem.l (%sp),%d2-%d3
     addq.l #8,%sp
     rts

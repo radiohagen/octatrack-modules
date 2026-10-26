@@ -30,7 +30,7 @@ class PoolMachine(Machine):
             raise
 
 def main():
-    m=PoolMachine(symbols);u=m.uc;m.call('mp_activate',stop=0x4000f938)
+    m=PoolMachine(symbols);u=m.uc;m.call('store_part_activate',stop=0x4000f938)
     rng=random.Random(667)
     native=bytearray(rng.randbytes(SIZE))
     for o in OFFSETS:native[o]=255

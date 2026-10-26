@@ -1,6 +1,8 @@
 # MIDI Follow integration
 
-MIDI Follow requires **MIDI Part State** and upstream **EVENTS**. EVENTS owns
+MIDI Follow requires **STORE** native Part access and upstream **EVENTS**.
+The STORE extension is included in the current draft PR; it replaces the
+retired MIDI PART STATE helper without changing native saved settings. EVENTS owns
 transport start/resume and accepted-note notifications; Follow owns source
 notes, register history and the musical response. EUCLID can subscribe to the
 same transport notifications.

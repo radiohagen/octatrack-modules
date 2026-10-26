@@ -1,6 +1,6 @@
 # Harmony with seven scale modes
 
-MIDI Harmony and MIDI Scales with STORE, MIDI Part State and native effects.
+MIDI Harmony and MIDI Scales with STORE, STORE native Part access and native effects.
 Uses Harmony's standard track-local retention and accumulator. Follow, Loopback, PLOCKS, KITS and MIDI Scenes
 are not selected.
 

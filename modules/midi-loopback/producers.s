@@ -22,7 +22,7 @@ lb_track_send:
 lb_key_send:
     SAVE
     move.l %d5,%d7
-    jsr mp_ui_context
+    jsr store_part_ui_context
     bra.s .context
 lb_setup_send:
     SAVE

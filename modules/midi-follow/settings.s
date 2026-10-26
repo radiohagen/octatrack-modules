@@ -7,12 +7,12 @@
 bf_\name\()_get:
     move.l %d1,-(%sp)
     move.l %d0,-(%sp)
-    jsr mp_ui_context
+    jsr store_part_ui_context
     bra.s .L\name\()_context
 bf_\name\()_play:
     move.l %d1,-(%sp)
     move.l %d0,-(%sp)
-    jsr mp_play_context
+    jsr store_part_play_context
 .L\name\()_context:
     move.l %d0,%d1
     move.l (%sp)+,%d0
@@ -23,7 +23,7 @@ bf_\name\()_play:
 bf_\name\()_at:
     move.l %d2,-(%sp)
     moveq #\slot,%d2
-    jsr mp_read
+    jsr store_part_midi_read
     tst.l %d0
     bmi.s .L\name\()_default
     .if \shift
@@ -63,11 +63,11 @@ bf_\name\()_set:
     .endif
     cmpi.l #\maximum,%d5
     bhi.s .L\name\()_bad
-    jsr mp_ui_context
+    jsr store_part_ui_context
     move.l %d0,%d1
     move.l %d4,%d0
     moveq #\slot,%d2
-    jsr mp_read
+    jsr store_part_midi_read
     tst.l %d0
     bmi.s .L\name\()_bad
     move.l %d0,%d3
@@ -80,7 +80,7 @@ bf_\name\()_set:
     beq.s .L\name\()_same
     move.l %d0,%d3
     move.l %d4,%d0
-    jsr mp_write
+    jsr store_part_midi_write
     .if \invalidate
     tst.l %d0
     beq.s .L\name\()_done
@@ -113,7 +113,7 @@ bf_\name\()_set:
 bf_source_resolve:
     move.l %d1,-(%sp)
     move.l %d0,-(%sp)
-    jsr mp_play_context
+    jsr store_part_play_context
     move.l %d0,%d1
     move.l (%sp)+,%d0
     bsr.w bf_source_resolve_at

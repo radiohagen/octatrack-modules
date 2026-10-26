@@ -28,7 +28,7 @@ class CpuMachine(Machine):
         self.addresses = [a for a,_ in self.labels]
         super().__init__(lambda:symbols,artifact_root=out)
         self.initial_sr = 0x2000
-        self.call('mp_activate',stop=0x4000f938)
+        self.call('store_part_activate',stop=0x4000f938)
         self.call('ch_lock_init')
         self.uc.mem_write(BANK,b'\xff'*STRIDE)
         for pattern in range(16): self.put(BANK+pattern*0x8ed8+0x8e57,0)
@@ -80,7 +80,7 @@ class CpuMachine(Machine):
 
 def cases(m):
     u,s=m.uc,m.sym
-    yield 'part/read_8_tracks',lambda:[m.call('mp_read',t,0,regs={UC_M68K_REG_D2:5}) for t in range(8)]
+    yield 'part/read_8_tracks',lambda:[m.call('store_part_midi_read',t,0,regs={UC_M68K_REG_D2:5}) for t in range(8)]
     yield 'follow/no_routes_8_tracks',lambda:[m.call('bf_source_resolve',t) for t in range(8)]
     m.follow_write('source',bytes((2,3,4,5,6,7,8,0)))
     yield 'follow/chain_8_tracks',lambda:[m.call('bf_source_resolve',t) for t in range(8)]

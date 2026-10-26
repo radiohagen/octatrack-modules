@@ -101,7 +101,7 @@ def machine():
         else:
             dest=part0+(3*PS if operation=='unrelated' else 0)
             u.mem_write(m.stack+4,b''.join(v.to_bytes(4,'big') for v in (dest,source,PS)))
-            m.call('mp_native_copy')
+            m.call('store_part_native_copy')
         events=m.change()
         if operation=='unrelated':
             assert events==[(0x91,36,0),(0x91,41,91)]

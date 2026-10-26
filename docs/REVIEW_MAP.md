@@ -7,7 +7,7 @@ must be checked against its C sources and generators. Original credits remain.
 | Module | Files | Declared/selected dependencies |
 |---|---:|---|
 | [midi-scales](../modules/midi-scales/README.md) | 3 | None; optional interaction with Follow/Harmony |
-| [midi-part-state](../modules/midi-part-state/README.md) | 6 | Shared native Part boundary, first consumed by Loopback |
+| [STORE native Parts](https://github.com/sambanks/octabam/tree/main/modules/store) | 6 | Shared native Part boundary, first consumed by Loopback |
 | [midi-loopback](../modules/midi-loopback/README.md) | 7 | MIDI Part State |
 | [midi-loopback-scenes](../modules/midi-loopback-scenes/README.md) | 3 | MIDI Loopback + upstream MIDI Scenes + USB MIDI |
 | [midi-follow](../modules/midi-follow/README.md) | 7 | MIDI Part State; optional Scales/Loopback/Harmony |

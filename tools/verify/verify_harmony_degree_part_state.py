@@ -66,7 +66,7 @@ def main():
         mask_trace.ipl=0
         u.emu_start(COPY,0,count=2000000)
         assert paused and m.arrival is None
-        assert get(s['mp_snapshot_bank'],4)==B and get(s['mp_snapshot_parts'],4)==1
+        assert get(s['store_part_snapshot_bank'],4)==B and get(s['store_part_snapshot_parts'],4)==1
         assert u.reg_read(UC_M68K_REG_SR)&0x700==0,'native bulk copy masked interrupts'
         observing=False
         saved=u.context_save();stack=m.stack;m.stack-=0x2000
@@ -88,7 +88,7 @@ def main():
         u.emu_start(u.reg_read(UC_M68K_REG_PC),0,count=2000000)
         observing=False;copy_counts.append(instructions)
         assert m.arrival==m.done and u.reg_read(UC_M68K_REG_A7)==m.stack+4
-        assert get(s['mp_snapshot_bank'],4)==get(s['mp_snapshot_parts'],4)==0
+        assert get(s['store_part_snapshot_bank'],4)==get(s['store_part_snapshot_parts'],4)==0
         for track in range(8):
             assert m.c('hd_sync_c',0,0,track)==bool(incoming)
             assert get(step(0,track))==48

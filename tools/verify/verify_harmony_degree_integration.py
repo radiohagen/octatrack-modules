@@ -9,13 +9,13 @@ from midi_machine import Machine, ROOT
 
 def symbols():
     raw = subprocess.check_output(['m68k-elf-nm', str(ROOT/'out/platform/runtime/runtime.elf')], text=True)
-    return {n:int(a,16) for a,n in re.findall(r'^([0-9a-f]+) [TtBbDdAa] ((?:seq|ed|ha|hd|ch|mh|bf|ms|mp)_\w+)$',raw,re.M)}
+    return {n:int(a,16) for a,n in re.findall(r'^([0-9a-f]+) [TtBbDdAa] ((?:seq|ed|ha|hd|ch|mh|bf|ms|store_part)_\w+)$',raw,re.M)}
 
 
 class DegreeMachine(Machine):
     def __init__(self):
         super().__init__(symbols)
-        self.call('mp_activate',stop=0x4000f938)
+        self.call('store_part_activate',stop=0x4000f938)
     def instruction_limit(self,name):
         return 30000000
     def c(self,name,*args):

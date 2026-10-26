@@ -13,7 +13,7 @@ MODULE = Module(
     category=Category.MIDI_USB, author='radiohagen', author_url="https://github.com/radiohagen/octatrack-modules",
     proof=Proof.PORT, proof_note='',
     doc="RFOL follows source notes; press D for FIXED/GRAV/SOURCE register, OCT/OFFS and TRIG/LIVE updates.",
-    requires=('MIDI PART STATE', 'EVENTS'),
+    requires=('STORE', 'EVENTS'),
     linked=(Linked("bassfollow", str(ROOT / "midi_follow.s"), dram=True, include=harmony_inc),
             Linked("followresponse", str(ROOT / "response.s"), dram=True, include=harmony_inc),
             Linked("followevents", str(ROOT / "events.s"), dram=True),

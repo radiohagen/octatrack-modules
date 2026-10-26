@@ -9,7 +9,7 @@
 | MIDI Loopback | Per-Part EXT / INT / BOTH routing |
 | MIDI Follow | Root following, register, response and mute behavior |
 | MIDI Harmony | Degree roots, chords, Chord Play, voicing and retained steps |
-| MIDI Part State | Shared native Part settings and coherent copy/clear |
+| STORE native Part access | Shared native Part settings and coherent copy/clear |
 | MIDI SRAM | Protected retained native MIDI step padding |
 | Harmony Follow | Shared transport and successful-note events for Harmony and Follow |
 | Harmony PLOCKS | Shared editing and copy hooks beside upstream PLOCKS |

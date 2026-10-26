@@ -5,7 +5,7 @@ import runpy
 from remix.schema import Proof
 base = runpy.run_path(str(Path(__file__).resolve().parents[1] / 'octabam-bus/remix.py'))['REMIX']
 REMIX = replace(base, name='harmony-track-bus',
-    modules=base.modules + tuple(key for key in ('MIDI PART STATE', 'MIDI SRAM', 'MIDI SCALES',
+    modules=base.modules + tuple(key for key in ('STORE', 'MIDI SRAM', 'MIDI SCALES',
         'MIDI FOLLOW', 'MIDI HARMONY', 'SEQUENCER EVENTS', 'EDIT EVENTS',   'MIDI LOOPBACK',
         'MIDI LOOPBACK SCENES', 'PIO WRITE FIX') if key not in base.modules),
     proof=Proof.CHECK, proof_note='',

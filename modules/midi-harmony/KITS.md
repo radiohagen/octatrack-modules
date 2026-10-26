@@ -25,7 +25,7 @@ applied-engine fallback, never UI fallback. `mp_read`, `mp_write`,
 `mp_read_key` and `mp_epoch` use explicit contexts. Getters distinguish UI,
 playback and captured-event contexts deliberately.
 
-MIDI PART STATE owns boot-safe ROM gates for native memcpy/init. During an
+STORE owns boot-safe ROM gates for native memcpy/init. During an
 ordinary native working-Part replacement it publishes `mp_snapshot_bank`,
 `mp_snapshot_parts` and the outgoing SETUP snapshot, then calls
 `hd_part_before(d0=aligned Part address)` once per affected Part. DEG detaches

@@ -16,7 +16,7 @@ FIELDS = (3, 5, 12, 13, 15, 16, 18, 19)
 
 def symbols():
     raw = subprocess.check_output(['m68k-elf-nm', str(ROOT/'out/platform/runtime/runtime.elf')], text=True)
-    return {n: int(a, 16) for a, n in re.findall(r'^([0-9a-f]+) [Tt] (mp_\w+)$', raw, re.M)}
+    return {n: int(a, 16) for a, n in re.findall(r'^([0-9a-f]+) [Tt] (store_part_\w+)$', raw, re.M)}
 
 
 def main():
@@ -31,20 +31,20 @@ def main():
     for bank in range(16):
         for part in range(4):
             ui(bank, part)
-            assert call('mp_ui_context') == bank*4+part
+            assert call('store_part_ui_context') == bank*4+part
     for ptr, part in ((0, 0), (BANK+1, 0), (BANK+STRIDE*16, 0), (BANK, 4)):
         put(0x46c82456, ptr, 4); put(0x100b14cf, part)
-        assert call('mp_ui_context') == 0xffffffff
+        assert call('store_part_ui_context') == 0xffffffff
     ui(15, 3)
     put(0x80001828, 2); put(0x80001829, 1)
     for track in range(8):
         put(0x8000182a+track, track); put(0x80001832+track, track % 4)
-        assert call('mp_play_context', track) == track*4+track % 4
+        assert call('store_part_play_context', track) == track*4+track % 4
         put(0x8000182a+track, 255)
-        assert call('mp_play_context', track) == 9
-    assert call('mp_play_context', 8) == 0xffffffff
+        assert call('store_part_play_context', track) == 9
+    assert call('store_part_play_context', 8) == 0xffffffff
     put(0x80001828, 255)
-    assert call('mp_play_context', 0) == 0xffffffff
+    assert call('store_part_play_context', 0) == 0xffffffff
     print('  [ok] UI and per-track engine contexts stay distinct; unlatched fallback and invalid inputs')
 
     writes = 0
@@ -61,14 +61,14 @@ def main():
                         at = b+WORK+part*PART+0x4e2+track*36+field
                         put(at, 255)
                         value = (bank+part+track+field) % 128
-                        assert call('mp_write', track, bank*4+part, field, value) == 1
+                        assert call('store_part_midi_write', track, bank*4+part, field, value) == 1
                         allowed = {at, b+0x95048, b+0x9b332}
                         if current:
                             allowed |= {CS1+part*PART+0x4e2+track*36+field, 0x100b145e, 0x100f8598}
                         assert all(a in allowed or m.stack-128 <= a and a+n <= m.stack+4
                                    for a,n in m.writes), m.writes
                         assert get(at) == value
-                        assert call('mp_read', track, bank*4+part, field) == value
+                        assert call('store_part_midi_read', track, bank*4+part, field) == value
                         mirror = CS1+part*PART+0x4e2+track*36+field
                         assert get(mirror) == (value if current else 0xa5)
                         writes += 1
@@ -79,16 +79,16 @@ def main():
 
     for track, context, field, value in ((8,0,3,1), (0,64,3,1), (0,0,4,1),
                                        (0,0,20,1), (0,0,3,128), (0,0,3,0xffffffff)):
-        assert call('mp_write', track, context, field, value) == 0
+        assert call('store_part_midi_write', track, context, field, value) == 0
         assert all(m.stack-128 <= a and a+n <= m.stack+4 for a,n in m.writes), m.writes
     ui(0,0)
     for field in range(36):
         if field not in FIELDS:
-            assert call('mp_read',0,0,field) == 0xffffffff
+            assert call('store_part_midi_read',0,0,field) == 0xffffffff
     regs = {r: 0x12345678 for r in (UC_M68K_REG_D4,UC_M68K_REG_D5,UC_M68K_REG_D6,
                                    UC_M68K_REG_D7,UC_M68K_REG_A0,UC_M68K_REG_A1)}
     regs.update({UC_M68K_REG_D2: 3, UC_M68K_REG_D3: 1})
-    m.call('mp_write',0,0,regs=regs)
+    m.call('store_part_midi_write',0,0,regs=regs)
     assert all(u.reg_read(r) == v for r,v in regs.items())
     assert u.reg_read(UC_M68K_REG_SR) & 0x2700 == 0x2700
     print(f'  [ok] {writes} field writes: bounded working storage, current-bank CS1, native dirty bits, register preservation')
