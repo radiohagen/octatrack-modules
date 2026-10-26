@@ -1071,8 +1071,9 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "tools/verify/verify_midi_follow_register_port.py",
       "sha256": "74453784a220b6314a6d1d8ff4fe8f56d7741213faf02423b53412f6c149ece7",
-      "published_sha256": "74453784a220b6314a6d1d8ff4fe8f56d7741213faf02423b53412f6c149ece7",
-      "source_mode": "100644"
+      "published_sha256": "62a98355de7ff4ef4ee7462ed77f7d8ec78bcc3fdba032404fe0b069052a0161",
+      "source_mode": "100644",
+      "note": "Current three-mode register packing and native N1-4 capture expectations; UI isolation and balanced releases retained."
     },
     "tools/verify/verify_midi_follow_response.py": {
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
@@ -1085,8 +1086,9 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "tools/verify/verify_midi_follow_response_port.py",
       "sha256": "49ef781e74eb42aed03dd1ba53ddf0f1a72c84d70aca407b5ee7277c418c586c",
-      "published_sha256": "49ef781e74eb42aed03dd1ba53ddf0f1a72c84d70aca407b5ee7277c418c586c",
-      "source_mode": "100644"
+      "published_sha256": "cd8cf20babed32d04a1a63ce221627ddc0f918ff76e49e61dc16d0f6d47afc21",
+      "source_mode": "100644",
+      "note": "Current three-mode register packing and native N1-4 capture expectations; UI isolation and balanced releases retained."
     },
     "tools/verify/verify_midi_follow_stress.py": {
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
