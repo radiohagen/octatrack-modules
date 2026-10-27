@@ -26,6 +26,9 @@ typedef struct {
     uint32_t attack, decay, length, edge;
     uint32_t rng, phase, origin, target, level;
     uint8_t ready, last_hit, last_step, reserved;
+    /* Runtime-only previous scaled phase. Read only while last_hit is valid;
+     * edits, context changes and terminals invalidate that history first. */
+    uint32_t position;
 } EulState;
 
 void eul_defaults(EulParams *p);

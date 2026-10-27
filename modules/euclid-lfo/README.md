@@ -94,7 +94,29 @@ python3 tools/verify/verify_euclid_lfo_ui.py --project PATH_TO_TEST_PROJECT
 python3 tools/verify/verify_euclid_lfo_ui.py --project PATH_TO_TEST_PROJECT --dirty-start
 python3 tools/verify/verify_euclid_lfo_load.py --project PATH_TO_TEST_PROJECT
 python3 tools/verify/verify_euclid_lfo_audio.py --project PATH_TO_TEST_PROJECT
+python3 tools/verify/verify_euclid_lfo_cpu.py --baseline PATH_TO_CPU_PROFILE_JSON
 ```
+
+The CPU runner uses the already-built image (it never rebuilds firmware),
+freezes its runtime/symbols and records executed ColdFire instructions and
+long divisions. Its 478 cases compare input and output hashes across all
+shapes/directions, audio/MIDI, edits, resets, silence and clock changes.
+The source suite separately compares the engine with immutable revision
+`88c64670c5847edae3e6ddf4ad897e8864d6ee63` under sanitizers; that Git revision
+and Clang must be available for this equivalence check.
+
+The 27 October optimization preserves exact waveform values, random history,
+timing, controls and saved formats. It replaces byte-loop comparisons and
+index divisions, caches previous scaled phase, separates preparation from
+the frequent evaluation path, and removes redundant clock remainder divides.
+The extra runtime state is 192 bytes across all 48 lanes. In the fixed native
+profile, normal waveform updates execute about 25% fewer instructions. In a
+3,000-frame, eight-voice/48-LFO test, average/peak complete audio-interrupt work
+falls 3.74%/6.26%; subtracting stock's unchanged cost gives 15.15% less added
+Euclid work. These are instruction-model results, not measured hardware-cycle
+percentages or a claim of a globally minimal implementation. Clock wrappers
+trade some additional simple instructions for fewer long divisions.
+Exact images, costs and verification limits are in [DECISIONS.md](DECISIONS.md).
 
 The generated module keeps all writable state in loader-initialized data.
 The loader does not clear BSS: relying on C zero initialization can leave the
@@ -160,6 +182,11 @@ and compares stock SQR with 48 EUCLID lanes on the same image. It requires eight
 non-silent track chains and main output, includes a native Part change, and
 reports ColdFire instruction counts. These are software-model observations,
 not hardware-cycle limits or a headroom guarantee for arbitrary remixes.
+Use `--remix NAME --skip-build` for an already-built composition. A frozen
+comparison additionally takes `--image PATH --runtime-elf PATH`; both must
+belong to the same build. Paired ISR entry/exit counts are the reliable cost
+metric. The port's separately reported whole-frame counter starts after the
+scheduled Part change and is not comparable as a full-run per-frame cost.
 
 The audio comparison check renders seven eight-second native main-output
 captures: sustained chord, zero pulses, regular 4/16, Euclidean 5/16,

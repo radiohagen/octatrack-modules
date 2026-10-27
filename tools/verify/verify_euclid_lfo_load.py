@@ -33,7 +33,13 @@ def main():
     ap.add_argument('--project',type=pathlib.Path)
     ap.add_argument('--analyze',type=pathlib.Path,help='reanalyze an existing run with its captured input metadata')
     ap.add_argument('--frames',type=int,default=6000)
+    ap.add_argument('--remix',default='euclid-lfo')
+    ap.add_argument('--skip-build',action='store_true',help='use an already-built image and linked runtime')
+    ap.add_argument('--image',type=pathlib.Path,help='frozen image; requires --runtime-elf and --skip-build')
+    ap.add_argument('--runtime-elf',type=pathlib.Path,help='linked ELF belonging to the frozen image')
     a=ap.parse_args()
+    if bool(a.image)!=bool(a.runtime_elf): ap.error('--image and --runtime-elf must be supplied together')
+    if a.image and not a.skip_build: ap.error('frozen --image/--runtime-elf require --skip-build')
     if a.analyze:
         inputs=json.loads((a.analyze/'inputs.json').read_text())
         verify_run(a.analyze,inputs['frames'],inputs['symbols'],inputs['source_hashes'])
@@ -89,10 +95,29 @@ def main():
             payload.extend((16,pulses,lane%16,(part+lane)%8,127,127,pulses,0,127,30))
     header=b'EULF'+struct.pack('>II',1,3840)
     (project/'eulf01.work').write_bytes(header+struct.pack('>I',zlib.crc32(header+payload))+payload)
-    run(['make','bus','REMIX=euclid-lfo'],out/'build.log')
-    image=out/'mainos.bin'; shutil.copy2(ROOT/'out/mainos_bus.bin',image)
-    nm=subprocess.check_output(['m68k-elf-nm',str(ROOT/'out/platform/runtime/runtime.elf')],text=True)
+    if not a.skip_build: run(['make','bus',f'REMIX={a.remix}'],out/'build.log')
+    image_source=a.image or ROOT/'out/mainos_bus.bin'
+    elf_source=a.runtime_elf or ROOT/'out/platform/runtime/runtime.elf'
+    image=out/'mainos.bin'; elf=out/'runtime.elf'
+    image_hash=hashlib.sha256(image_source.read_bytes()).hexdigest()
+    elf_hash=hashlib.sha256(elf_source.read_bytes()).hexdigest()
+    shutil.copy2(image_source,image); shutil.copy2(elf_source,elf)
+    assert hashlib.sha256(image.read_bytes()).hexdigest()==image_hash==hashlib.sha256(image_source.read_bytes()).hexdigest(), 'image changed while snapshotting'
+    assert hashlib.sha256(elf.read_bytes()).hexdigest()==elf_hash==hashlib.sha256(elf_source.read_bytes()).hexdigest(), 'ELF changed while snapshotting'
+    nm=subprocess.check_output(['m68k-elf-nm',str(elf)],text=True)
     symbols={s[2]:int(s[0],16) for line in nm.splitlines() if len(s:=line.split())==3}
+    image_bytes=image.read_bytes()
+    for table,name in ((0x400d6210,'eul_audio'),(0x400d6290,'eul_midi')):
+        assert struct.unpack_from('>I',image_bytes,table+19*4-0x40000400)[0]==symbols[name], 'image waveform dispatch does not match runtime ELF'
+    entry_bytes=image_bytes[0x4000aad0-0x40000400:0x4000aad8-0x40000400]
+    if entry_bytes==bytes.fromhex('4fefff0448d77fff'):
+        frame_entry_pc=0x4000aad4
+    else:
+        # LOAD METER replaces the first two stock instructions with one JMP.
+        # Exception entry already executes that JMP, so lm_in is the first
+        # visible instruction. Count that initial JMP as for stock's LEA.
+        assert entry_bytes[:2]==bytes.fromhex('4ef9') and struct.unpack_from('>I',entry_bytes,2)[0]==symbols.get('lm_in'), 'unqualified frame interrupt entry detour'
+        frame_entry_pc=symbols['lm_in']
     card=out/'input.img'
     run([ROOT/'.venv/bin/python3','tools/emu/ot_emu/stage_card.py',project,'EUCLID','LFO',
          '--tree',out/'tree','--out',card,
@@ -104,7 +129,7 @@ def main():
             '--audio-out',out/'boot',  # Install DSP capture before scenario forks.
             # The port takes the first ISR instruction inside exception entry;
             # watch its second instruction and add that one entry instruction.
-            '--watch-pc',f'{symbols["eul_audio"]:#x},{symbols["eul_midi"]:#x},0x4000aad4,0x4000d9a6']
+            '--watch-pc',f'{symbols["eul_audio"]:#x},{symbols["eul_midi"]:#x},{frame_entry_pc:#x},0x4000d9a6']
     scenarios=[]
     for tag,waveform in (('stock',4),('euclid',19)):
         edits=[]
@@ -119,12 +144,19 @@ def main():
             f'--step -:poke:{";".join(edits)} --step -:call:0x40009094,0,0 '
             f'--step 1000:call:0x4004a8a4,1 --mem-dump {dumps} --audio-out {out / tag}'
             +(f' --block-dump {blocks}' if tag=='euclid' else '')])
-    (out/'inputs.json').write_text(json.dumps({'frames':a.frames,'symbols':symbols,'source_hashes':sources},indent=2)+'\n')
+    fixture_hashes={p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(project.glob('*.work'))}
+    fixture_hashes[stress_project.SAMPLE_REL]=hashlib.sha256((project/stress_project.SAMPLE_REL).read_bytes()).hexdigest()
+    (out/'inputs.json').write_text(json.dumps({'frames':a.frames,'symbols':symbols,'source_hashes':sources,
+        'fixture_hashes':fixture_hashes,'remix':a.remix,'frozen_image':bool(a.image),
+        'frame_entry_pc':frame_entry_pc,
+        'image_sha256':image_hash,'runtime_elf_sha256':elf_hash},indent=2)+'\n')
     run(common+scenarios,out/'boot.log')
     verify_run(out,a.frames,symbols,sources)
 
 
 def verify_run(out,frame_count,symbols,sources):
+    inputs=json.loads((out/'inputs.json').read_text())
+    frame_entry_pc=inputs.get('frame_entry_pc',0x4000aad4)
     results={}
     for tag in ('stock','euclid'):
         text=(out/f'{tag}.log').read_text()
@@ -136,7 +168,7 @@ def verify_run(out,frame_count,symbols,sources):
         seen=[set(),set()]; intervals=[]; entry=None
         for match in re.finditer(r'\[\s*(\d+)\] at (0x[0-9a-f]+).*?\[sp .*?: (\S+) (\S+) (\S+)',text):
             tick,pc=int(match[1]),int(match[2],16)
-            if pc==0x4000aad4: entry=tick-1
+            if pc==frame_entry_pc: entry=tick-1
             elif pc==0x4000d9a6 and entry is not None:
                 intervals.append(tick-entry); entry=None
             elif pc in (symbols['eul_audio'],symbols['eul_midi']):
@@ -149,7 +181,9 @@ def verify_run(out,frame_count,symbols,sources):
             assert wav.getsampwidth()==3 and wav.getframerate()==44100
             pcm=wav.readframes(wav.getnframes())
             assert any(pcm[-2000*wav.getnchannels()*3:]), (tag,'silent final main output',out)
-        results[tag]={'instructions_per_frame':int(cpu[2]),'frame_isr_mean':sum(intervals)/len(intervals),
+        results[tag]={'reported_counter_per_frame':int(cpu[2]),
+                      'frame_isr_total':sum(intervals),'frame_isr_measured_frames':len(intervals),
+                      'frame_isr_mean':sum(intervals)/len(intervals),
                       'frame_isr_peak':max(intervals),'active_lanes':[len(x) for x in seen]}
     classes=blockdump.classes(blockdump.read(out/'euclid.dump'))
     for track in range(1,9):
@@ -157,6 +191,10 @@ def verify_run(out,frame_count,symbols,sources):
         assert any(recloop.readback_audio(classes,track)[-2000:]), ('silent final DSP chain',track,out)
     receipt={'scope':__doc__,'image_sha256':hashlib.sha256((out/'mainos.bin').read_bytes()).hexdigest(),
              'frames':frame_count,'source_hashes':sources,'results':results,
+             'fixture_hashes':inputs.get('fixture_hashes'),'remix':inputs.get('remix'),
+             'runtime_elf_sha256':inputs.get('runtime_elf_sha256'),
+             'reported_counter_note':"The emulator's printed CPU counter starts after scheduled actions (here the frame-1000 Part change), but its denominator spans all reported frames. It is not full-run cost; use the paired ISR entry/exit measurements. Source: tools/emu/ot_emu/main.cpp, instr0 after the actions loop and ran from frame0 (lines 2762-2775 in this integration).",
+             'frame_isr_scope':'Instructions from interrupt entry through the stock epilogue address; includes the entry instruction executed before watches, excludes epilogue work. Same boundary is used for stock and Euclid, including the recognized LOAD METER entry detour.',
              'limits':'Port instruction clock; not hardware-cycle or arbitrary-remix headroom acceptance.'}
     (out/'receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
     print(f'PASS: eight FLEX voices, 48 native LFO lanes and a Part change: {out / "receipt.json"}',flush=True)

@@ -30,9 +30,13 @@ static unsigned eul_clip_valid[2] __attribute__((section(".data")))={0};
 static void changed(unsigned bank,unsigned part,unsigned lane);
 extern void eul_stock_draw(void);
 
+/* Native indices are validated before lookup. Avoid a hardware divide by
+ * three in both the per-frame clock adapter and waveform dispatcher. */
+static const uint8_t eul_tracks[24]={0,0,0,1,1,1,2,2,2,3,3,3,
+                                    4,4,4,5,5,5,6,6,6,7,7,7};
 static unsigned clock_steps(unsigned index,unsigned midi) {
     if(index>=24) return 0;
-    unsigned track=index/3, id=index+(midi?24:0);
+    unsigned track=eul_tracks[index], id=index+(midi?24:0);
     unsigned bank=U8(0x8000182au+track), part=U8(0x80001832u+track);
     if(bank>=16 || part>=4) { bank=U8(0x80001828u); part=U8(0x80001829u); }
     if(bank>=16 || part>=4) return 0;
@@ -59,7 +63,7 @@ int32_t eul_scale_audio(int32_t increment,unsigned index,int speed,unsigned mult
 
 void eul_wave(uint32_t *native,unsigned index,unsigned midi,unsigned reset) {
     if (index>=24) { native[1]=0; return; }
-    unsigned track=index/3, lane=index%3;
+    unsigned track=eul_tracks[index], lane=index-3*track;
     unsigned bank=U8(0x8000182au+track), part=U8(0x80001832u+track);
     if (bank>=16 || part>=4) { bank=U8(0x80001828u); part=U8(0x80001829u); }
     if (bank>=16 || part>=4) { native[1]=0; return; }
