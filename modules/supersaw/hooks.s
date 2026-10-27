@@ -1,5 +1,5 @@
 | SPDX-License-Identifier: MIT
-| Synth register ABI adapters. C uses integer multiplies; EMAC untouched.
+| Synth register ABI adapters. Filter EMAC use preserves all caller state.
         .text
         .global ss_begin_hook, ss_fill_hook, ss_page_hook, ss_carry_hook
 ss_begin_hook:

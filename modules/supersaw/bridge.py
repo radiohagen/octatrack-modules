@@ -5,6 +5,7 @@ Legacy Sophie composition is supported only when that separate source is present
 """
 from pathlib import Path
 import hashlib
+import os
 import runpy
 ROOT = Path(__file__).resolve().parents[2]
 PIN = "2b1feb174f228dddfca028afe53b885261209d1f22d2e77f93ee883a07efeef8"
@@ -74,5 +75,88 @@ def assembly(modules, remix=None):
     insert('po_lp_have:\n        move.l  %a1,%d0\n',
            'po_lp_have:\n        move.l  %a1,%d0\n        jsr ss_lfo_page_hook\n')
     insert('po_keyrec:\n', 'po_keyrec:\n        lea ss_active,%a0\n        tst.b (%a0,%d2.l)\n        beq ss_record_native\n        moveq #0,%d0\n        rts\nss_record_native:\n')
+    # po_rate_fold forces RATE=1.0: its output depends only on the final
+    # slewed pitch word and the immutable stock pitch table. A small exact
+    # cache serves held notes and repeated chord pitches across all tracks.
+    # Keep the native path for every other synth. Collisions only cost a miss.
+    for comment in ('the increment for the word d6, any octave',
+                    'the increment, the word folded by octaves'):
+        anchor = '        bsr     po_rate_fold             | d0 = ' + comment
+        insert(anchor, '        bsr     ss_pitch_rate            | d0 = ' + comment)
+    source += r"""
+        .text
+ss_pitch_rate:
+        lea ss_active,%a0
+        tst.b (%a0,%d2.l)
+        beq po_rate_fold
+        move.l %d6,%d0
+        asr.l #8,%d0
+        andi.l #31,%d0
+        move.l %d0,%d1
+        add.l %d0,%d0
+        add.l %d1,%d0
+        lsl.l #2,%d0
+        lea ss_pitch_cache,%a0
+        adda.l %d0,%a0
+        tst.l 8(%a0)
+        beq ss_pitch_miss
+        cmp.l (%a0),%d6
+        bne ss_pitch_miss
+        move.l 4(%a0),%d0
+        rts
+ss_pitch_miss:
+        move.l %a0,-(%sp)
+        bsr po_rate_fold
+        move.l (%sp)+,%a0
+        move.l %d6,(%a0)
+        move.l %d0,4(%a0)
+        moveq #1,%d1
+        move.l %d1,8(%a0)
+        rts
+        .data
+        .align 4
+        .global ss_pitch_cache
+ss_pitch_cache:
+        .rept 32
+        .long 0,0,0
+        .endr
+        .text
+"""
+    if os.environ.get('SS_DIAGNOSTICS') == '1':
+        # Optional, bounded observation. Separate MIDI/audio rings avoid
+        # publication races when the frame interrupt preempts MIDI input.
+        insert('po_mon_start:\n', 'po_mon_start:\n        bsr ss_diag_enqueue_hook\n')
+        insert('        bmi     po_moff_stock\n',
+               '        bmi     po_moff_stock\n        bsr ss_diag_off_hook\n')
+        insert('po_start1:\n', 'po_start1:\n        bsr ss_diag_activate_hook\n')
+        insert('        bsr     po_start\n', '        bsr     ss_diag_allocator\n')
+        for name, kind, note in (('enqueue',1,'        mvz.b (%a3),%d0'),
+                                 ('off',2,'        mvz.b (%a3),%d0'),
+                                 ('activate',3,'        move.l %d7,%d0'),
+                                 ('alloc_begin',4,'        moveq #0,%d0'),
+                                 ('alloc_end',5,'        moveq #0,%d0')):
+            source += f"""
+ss_diag_{name}_hook:
+        lea -16(%sp),%sp
+        movem.l %d0-%d1/%a0-%a1,(%sp)
+{note}
+        move.l %d0,-(%sp)
+        move.l #{kind},-(%sp)
+        move.l %d2,-(%sp)
+        jsr ss_diag_event
+        lea 12(%sp),%sp
+        movem.l (%sp),%d0-%d1/%a0-%a1
+        lea 16(%sp),%sp
+        rts
+"""
+        source += """
+ss_diag_allocator:
+        bsr ss_diag_alloc_begin_hook
+        bsr po_start
+        bra ss_diag_alloc_end_hook
+        .global ss_native_state, ss_native_clock
+        .set ss_native_state,sy_state
+        .set ss_native_clock,po_clock
+"""
     source += '\n        .global ss_native_voices\n        .set ss_native_voices,po_voices\n'
     return source

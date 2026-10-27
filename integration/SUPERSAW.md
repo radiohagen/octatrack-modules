@@ -122,3 +122,78 @@ Image SHA-256: `00d68934661a16d503e633b0021499259035eb155ed342db1b05c29eaf9176ad
 These are source/emulator checks; physical playback and CPU headroom remain
 unverified. This does not replace the broader Inserts suite's retained fixture
 exceptions or extend the one-track filtered-polyphony qualification.
+
+
+## S9 adaptive CPU candidate
+
+The current source moves the per-voice filter before the 2x interpolator,
+with a 9 kHz ceiling. Neutral fully open LOW automatically bypasses; zero-gain
+blocks skip synthesis; optional sub/drive work is selected once per block.
+Drive uses a bounded five-PCM-unit approximation, and the filter envelope
+advances at block rate. Four voices, separate releases, all filter modes and
+both FX slots remain. See the module README for audible compatibility changes.
+The previous S8 sample-exact/filter-response claims do not apply to S9.
+
+## S10 lifecycle follow-up
+
+S10 is based on author commit `007a049` (S9), the source used by the RADBUSS2
+hardware diagnosis. Copy the complete module directory, including
+`diagnostics.h`, and all `verify_supersaw*.py` scripts. The native Synth pin and
+Part layout do not change. Production generation/builds leave `SS_DIAGNOSTICS`
+unset; optional instrumented builds must set it to `1` for both generation and
+composition. Keep their image hashes and timing evidence separate.
+
+The new lifecycle verifier needs the existing corrected ColdFire EMAC library;
+set `LIBUNICORN_PATH` when using an isolated build. Do not substitute the default
+Python Unicorn wheel for native pitch arithmetic. `verify_supersaw_poly.py
+--burst` adds batched MIDI input, and recognizes diagnostic symbols to retain
+frame-stamped enqueue/allocation events and per-voice state in its receipt.
+Source/emulator results do not resolve the hardware burst-start overrun. See
+the module README for the bounded hardware replay and diagnostic layouts.
+
+
+### S11 native-frame optimization
+
+Stage the S11 `engine.c`, `adapter.c`, generated `adapter.s` and accompanying
+verifiers from the same author commit. The bridge and native record layouts
+are unchanged from S10. The fused output path preserves S10 samples/state,
+reduces native-frame attack and held rendering, and lowers regular-frame stack.
+Split/pending fallback paths add at most eight bytes in the measured cases. Compare exact linked runtimes with
+`verify_supersaw_equivalence.py --baseline-runtime <frozen-S10-runtime>`.
+Include `verify_supersaw_poly.py --mode mixed --tracks 6,7 --burst --rich`
+and dual filtered four-note playback in focused image qualification.
+Hardware acceptance still requires the guarded simultaneous-note replay;
+source/emulator improvements do not establish a hardware timing bound.
+
+
+### S12 scenario-aware optimization
+
+Copy the complete Supersaw source and all `verify_supersaw*.py` scripts from
+one author snapshot, including the new `verify_supersaw_emac.py`. Regenerate
+production assembly with `SS_DIAGNOSTICS` unset. No Synth bridge, native voice
+layout, FX allocation, parameter or persistence format changes are required.
+
+The filter now uses ColdFire EMAC while preserving the complete incoming state.
+The image gate includes its independent arithmetic/preservation probe; the
+linked arithmetic, CPU and equivalence gates require the corrected Unicorn
+self-test. Set `LIBUNICORN_PATH` to the already qualified corrected library
+before `make check-remix` and linked verifiers. Do not disable this check to use
+the standard wheel. Retain separate scalar-multiply and EMAC operation counts.
+
+Compare with the frozen S11 runtime using `verify_supersaw_equivalence.py`.
+Keep full native mono-plus-triad bursts, two filtered four-voice tracks,
+mono/poly transitions and live T4 assignment beside Thru/kick in image checks.
+These exercise allocation and release outside the isolated renderer profiler.
+Image qualification does not establish physical interrupt latency, bus/cache
+cost, the full real routing setup or resolution of the original hardware crash.
+
+
+### S13 final CPU pass
+
+Stage the complete module and verifiers from one author snapshot; regenerate
+production assembly with diagnostics unset. The native layouts and interface
+remain unchanged. Compare linked samples and state with a frozen S12 runtime,
+including filter bypass/resume, sparse voices, gain ramps and odd/split calls.
+Retain the full native MIDI, transition and live T4 checks described above.
+This source publication does not update an existing firmware package or claim
+hardware timing or crash acceptance.

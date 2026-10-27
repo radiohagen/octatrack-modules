@@ -10,11 +10,15 @@ from pathlib import Path
 import struct
 import subprocess
 import tempfile
+import sys
 from unicorn import Uc, UC_ARCH_M68K, UC_MODE_BIG_ENDIAN, UC_HOOK_CODE
 from unicorn.m68k_const import (UC_CPU_M68K_CFV4E, UC_M68K_REG_A7,
                                UC_M68K_REG_PC, UC_M68K_REG_SR, UC_M68K_REG_D0, UC_M68K_REG_D1,
                                UC_M68K_REG_D2, UC_M68K_REG_A0, UC_M68K_REG_A1)
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT/'tools'))
+import toolpath
+from emu_bringup import emac_selftest
 CASES = ((21426141,0,0,0,0), (21426141,127,127,0,0),
          (21426141,96,110,40,30), (1024,127,127,127,127),
          (0xffffffff,127,127,127,127), (42726141,65,100,127,90))
@@ -118,7 +122,7 @@ def verify_filter(uc,call,sym):
     cases=[(typ,cut,res,env,dec) for typ in (0,1,2,3,0) for cut,res,env,dec in ((16,0,0,0),(64,64,80,64),(127,127,127,127))]
     for j,(typ,cut,res,env,dec) in enumerate(cases):
         source+='for(unsigned k=0;k<20;++k){for(unsigned i=0;i<16;++i)a[i]=(int16_t)(i*1793+k*313);'
-        source+=f'struct ss_filter_params p={{{cut},{res},{env},{dec},{typ}}};ss_filter_run(&f,&p,{j//3+1},a,16);fwrite(a,2,16,stdout);}}\n'
+        source+=f'struct ss_filter_params p={{{cut},{res},{env},{dec},{typ}}};ss_filter_half(&f,&p,{j//3+1},a,16);fwrite(a,2,16,stdout);}}\n'
     source+='}\n'
     with tempfile.TemporaryDirectory() as tmp:
         c,e=Path(tmp)/'filter.c',Path(tmp)/'filter';c.write_text(source)
@@ -130,7 +134,7 @@ def verify_filter(uc,call,sym):
         for k in range(20):
             a=[((i*1793+k*313+32768)%65536)-32768 for i in range(16)]
             uc.mem_write(0x28200,struct.pack('>16h',*a))
-            n=call('ss_filter_run',0x28000,0x28100,j//3+1,0x28200,16)
+            n=call('ss_filter_half',0x28000,0x28100,j//3+1,0x28200,16)
             actual.extend(struct.unpack('>16h',bytes(uc.mem_read(0x28200,32))))
         costs.append(dict(type=typ,cutoff=cut,resonance=res,env=env,decay=dec,held_16_instructions=n))
     assert tuple(actual)==expected,'SEM host/ColdFire mismatch'
@@ -274,6 +278,8 @@ def verify_voic_dial(uc,call,sym):
 
 
 def main():
+    ok, detail = emac_selftest()
+    if not ok: raise SystemExit('Corrected ColdFire EMAC is required: '+detail)
     runtime = ROOT/'out/platform/runtime'
     out = ROOT/'out/supersaw-cf'
     out.mkdir(parents=True,exist_ok=True)
@@ -291,7 +297,7 @@ def main():
     uc.mem_write(base,data)
     uc.mem_map(0x10000,0x20000)
     uc.reg_write(UC_M68K_REG_SR,0x2000)
-    for name,n in [('ss_page_built',1),('ss_lfo_built',1),('ss_active',8),('ss_samples',32),('ss_unsupported',32),('ss_voices',size),('ss_poly_voices',4*size),('ss_poly_samples',128),('ss_descriptor',402),('ss_lfo_descriptor',402),('ss_filters',1440),('ss_setup',48),('ss_note_stamp',32),('ss_filter_samples',32)]:
+    for name,n in [('ss_page_built',1),('ss_lfo_built',1),('ss_active',8),('ss_samples',32),('ss_unsupported',32),('ss_voices',size),('ss_poly_voices',4*size),('ss_poly_samples',128),('ss_descriptor',402),('ss_lfo_descriptor',402),('ss_filters',1440),('ss_setup',48),('ss_note_stamp',32),('ss_filter_samples',32),('ss_pitch_cache',384)]:
         assert base <= sym[name] and sym[name]+n <= base+len(data), (name,'not initialized by loader')
         assert bytes(uc.mem_read(sym[name],n)) == bytes(n), (name,'not zero at boot')
     instructions = [0]

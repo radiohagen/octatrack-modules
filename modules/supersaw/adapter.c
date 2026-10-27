@@ -4,7 +4,6 @@
  */
 #include <stdint.h>
 #include "engine.c"
-#include "filter.h"
 
 /* The firmware loader copies .data but does not clear .bss. Explicit
  * initializers plus -fno-zero-initialized-in-bss put these in the image. */
@@ -49,16 +48,23 @@ static const char *ss_settings(uint32_t address) {
 }
 
 static void ss_activate(uint32_t track, uint8_t selected, uint16_t previous_gain) {
+    /* The shared native start hook also sees FM and Sophie notes. Leave
+     * dormant histories alone; selecting Supersaw later resets them below. */
+    if (!selected) { ss_active[track]=0; return; }
     if (!ss_active[track])
         for (unsigned v=0;v<4;++v) {
             ss_init(&ss_poly_voices[track][v]);
             ss_filter_reset(&ss_filters[track][v]);
         }
     if (!ss_active[track] || !previous_gain) {
-        ss_init(&ss_voices[track]);ss_filter_reset(&ss_filters[track][4]);
+        ss_restart(&ss_voices[track]);ss_filter_reset(&ss_filters[track][4]);
     }
     ss_active[track] = selected;
 }
+#ifdef SS_DIAGNOSTICS
+#define ss_begin ss_begin_impl
+#define ss_track_fill ss_track_fill_impl
+#endif
 void ss_begin(uint32_t track, const uint8_t *state) {
     if (track >= 8) return;
     uint32_t settings = *(volatile uint32_t *)(uintptr_t)(0x800049d8u+0xa8u*track+8);
@@ -77,18 +83,42 @@ int ss_fill(uint32_t track, uint8_t *state, const uint16_t *fp,
         for (uint32_t i = 0; i < n; ++i) out[2*i] = out[2*i+1] = 0;
         return 1;
     }
+    /* The native mono lifecycle treats zero previous gain as a cold note.
+     * Keep that reset state and zero output without running a silent synth. */
+    if(n && !*(uint16_t *)(state+38) && !*(uint32_t *)(state+24)) {
+        ss_init(&ss_voices[track]);ss_filter_reset(&ss_filters[track][4]);
+        for(uint32_t i=0;i<n;++i)out[2*i]=out[2*i+1]=0;
+        ss_samples[track]+=n;return 1;
+    }
     struct ss_params params = {
         .increment = *(uint32_t *)(state+12),
         .detune = (fp[1] >> 8) & 127, .morph = (fp[2] >> 8) & 127,
         .sub = (fp[4] >> 8) & 127, .drive = (fp[5] >> 8) & 127
     };
     int16_t audio[32];
-    ss_render(&ss_voices[track], &params, audio, n);
-    struct ss_filter_params f={(fp[3]>>8)&127,ss_setup[track][1],ss_setup[track][2],ss_setup[track][3],ss_setup[track][4]};
+    /* OFF with no wet tail never reads the remaining filter parameters. */
+    struct ss_filter_params f;
+    f.type=ss_setup[track][4];
     if(f.type || ss_filters[track][4].wet) {
-        ss_filter_run(&ss_filters[track][4],&f,ss_note_stamp[track],audio,n);
+        f.cutoff=(fp[3]>>8)&127;f.resonance=ss_setup[track][1];
+        f.amount=ss_setup[track][2];f.decay=ss_setup[track][3];
+    }
+    /* A fully open, unresonant LOW with no envelope is transparent by
+     * design. Crossfade out once, then stop spending CPU on the filter. */
+    if(f.type==1 && f.cutoff==127 && !f.resonance && !f.amount)f.type=0;
+    uint32_t native_previous=*(uint16_t *)(state+38),native_target=*(uint32_t *)(state+24);
+    if(n==16 && !ss_voices[track].pending && native_previous<=32768 && native_target<=32768) {
+        struct ss_filter *filter=(f.type || ss_filters[track][4].wet)?&ss_filters[track][4]:0;
+        ss_stereo16(&ss_voices[track],&params,out,native_previous,native_target,filter,&f,ss_note_stamp[track]);
+        if(filter)ss_filter_samples[track]+=n;
+        *(uint16_t *)(state+38)=(uint16_t)native_target;
+        ss_samples[track]+=n;return 1;
+    }
+    if(f.type || ss_filters[track][4].wet) {
+        ss_render_filtered(&ss_voices[track],&params,audio,n,&ss_filters[track][4],&f,ss_note_stamp[track]);
         ss_filter_samples[track]+=n;
     }
+    else ss_render(&ss_voices[track],&params,audio,n);
     /* A held AMP level needs no per-sample ramp arithmetic. */
     uint32_t previous = *(uint16_t *)(state+38);
     if (*(uint32_t *)(state+24) == previous) {
@@ -126,69 +156,128 @@ int ss_fill(uint32_t track, uint8_t *state, const uint16_t *fp,
  * new note stamp retriggers the independent filter envelope. */
 void ss_carry(uint32_t track, uint32_t voice, uint32_t stamp) {
     if (track < 8 && voice < 4 && ss_active[track]) {
-        /* Volatile byte copy: freestanding ColdFire has no libc memcpy. */
-        volatile uint8_t *dst=(volatile uint8_t *)&ss_poly_voices[track][voice];
-        const uint8_t *src=(const uint8_t *)&ss_voices[track];
-        for (unsigned i=0;i<sizeof(struct ss_voice);++i) dst[i]=src[i];
-        dst=(volatile uint8_t *)&ss_filters[track][voice];
-        src=(const uint8_t *)&ss_filters[track][4];
-        for(unsigned i=0;i<sizeof(struct ss_filter);++i)dst[i]=src[i];
+        /* Typed assignments preserve aliasing rules and compile to aligned
+         * longword moves, avoiding byte loops on a mono-to-poly transition. */
+        ss_poly_voices[track][voice]=ss_voices[track];
+        ss_filters[track][voice]=ss_filters[track][4];
         /* This is the same sounding note, now identified by native V_AGE. */
         ss_filters[track][voice].stamp=stamp;
     }
 }
 
-int ss_track_fill(uint32_t track, uint8_t *state, const uint16_t *fp,
-                  int32_t *out, uint32_t n, uint8_t *pool) {
-    if (track >= 8 || !ss_active[track]) return 0;
-    if (n > 32) {
-        ++ss_unsupported[track];
-        for (uint32_t i=0;i<n;++i) out[2*i]=out[2*i+1]=0;
+/* A single poly note cannot clip a sum, even with VOIC set to four. Keep
+ * its native gain/history but write stereo directly without a mix buffer. */
+/* Preserve the direct tail-call ABI; constant-return IPA would otherwise
+ * turn this into a void clone and retain the dispatcher's stack frame. */
+#ifdef __m68k__
+static __attribute__((noipa)) int ss_poly_stereo16
+#else
+static __attribute__((noinline)) int ss_poly_stereo16
+#endif
+(unsigned track,unsigned v,
+        uint8_t *native,const uint16_t *fp,int32_t *out) {
+    uint32_t previous=*(uint16_t *)(native+60),target=*(uint32_t *)(native+24);
+    struct ss_voice *voice=&ss_poly_voices[track][v];
+    struct ss_filter *filter=&ss_filters[track][v];
+    if(!previous) { ss_restart(voice);ss_filter_reset(filter); }
+    ss_poly_samples[track][v]+=16;
+    if(!previous && !target) {
+        for(unsigned i=0;i<32;++i)out[i]=0;
         return 1;
     }
-    if (!n) return 1;
-    unsigned active=0;
-    for (unsigned v=0;v<4;++v) active |= pool[v*64+36];
+    if(previous>32767)previous=32767;
+    if(target>32767)target=32767;
+    struct ss_params params={*(uint32_t *)(native+12),(fp[1]>>8)&127,
+        (fp[2]>>8)&127,(fp[4]>>8)&127,(fp[5]>>8)&127};
+    /* OFF with no wet tail never reads the remaining filter parameters. */
+    struct ss_filter_params f;
+    f.type=ss_setup[track][4];
+    if(f.type || filter->wet) {
+        f.cutoff=(fp[3]>>8)&127;f.resonance=ss_setup[track][1];
+        f.amount=ss_setup[track][2];f.decay=ss_setup[track][3];
+    }
+    if(f.type==1 && f.cutoff==127 && !f.resonance && !f.amount)f.type=0;
+    if(!(f.type || filter->wet))filter=0;
+    ss_stereo16(voice,&params,out,previous,target,filter,&f,*(uint32_t *)(native+48));
+    if(filter)ss_filter_samples[track]+=16;
+    *(uint16_t *)(native+60)=(uint16_t)target;
+    return 1;
+}
+
+/* Keep mixed-voice scratch storage out of the common mono call chain.
+ * The public dispatcher below tail-calls either this body or ss_fill.
+ * Stop GCC specializing the return/arguments: that prevents its tail call. */
+#ifdef __m68k__
+__attribute__((noipa))
+#else
+__attribute__((noinline))
+#endif
+static int ss_track_mix(uint32_t track, uint8_t *state, const uint16_t *fp,
+                  int32_t *out, uint32_t n, uint8_t *pool) {
     int32_t mix[32];
     if (!state[80]) {
         ss_fill(track,state,fp,out,n);
-        if (!active) return 1; /* No poly tail: the mono render is already complete. */
         for (uint32_t i=0;i<n;++i) mix[i]=out[2*i]>>16;
     } else {
         *(uint16_t *)(state+38)=0;
         ss_samples[track]+=n;
-        /* Accumulate directly; no zero stereo pass followed by a copy. */
         for (uint32_t i=0;i<n;++i) mix[i]=0;
     }
     struct ss_params params = {0,(fp[1]>>8)&127,(fp[2]>>8)&127,
                                  (fp[4]>>8)&127,(fp[5]>>8)&127};
-    const struct ss_filter_params f={(fp[3]>>8)&127,ss_setup[track][1],ss_setup[track][2],ss_setup[track][3],ss_setup[track][4]};
+    struct ss_filter_params f={(fp[3]>>8)&127,ss_setup[track][1],ss_setup[track][2],ss_setup[track][3],ss_setup[track][4]};
+    if(f.type==1 && f.cutoff==127 && !f.resonance && !f.amount)f.type=0;
     for (unsigned v=0;v<4;++v) {
         uint8_t *native=pool+v*64;
         if (!native[36]) continue;
         uint32_t previous=*(uint16_t *)(native+60);
         uint32_t target=*(uint32_t *)(native+24);
-        if (!previous) { ss_init(&ss_poly_voices[track][v]);ss_filter_reset(&ss_filters[track][v]); }
+        if (!previous) { ss_restart(&ss_poly_voices[track][v]);ss_filter_reset(&ss_filters[track][v]); }
+        /* Zero-to-zero contributes no sound, and the native zero-previous
+         * lifecycle resets oscillator/filter history on its next audible call.
+         * Preserve counters but do not synthesize an inaudible block. */
+        if (!previous && !target) { ss_poly_samples[track][v]+=n; continue; }
         /* Native poly gains are <=32767; bound malformed state as well. */
         if (previous>32767) previous=32767;
         if (target>32767) target=32767;
         params.increment=*(uint32_t *)(native+12);
+        if(n==16 && !ss_poly_voices[track][v].pending) {
+            struct ss_filter *filter=(f.type || ss_filters[track][v].wet)?&ss_filters[track][v]:0;
+            ss_mix16(&ss_poly_voices[track][v],&params,mix,previous,target,
+                     filter,&f,*(uint32_t *)(native+48));
+            if(filter)ss_filter_samples[track]+=n;
+            *(uint16_t *)(native+60)=(uint16_t)target;
+            ss_poly_samples[track][v]+=n;
+            continue;
+        }
         int16_t audio[32];
-        ss_render(&ss_poly_voices[track][v],&params,audio,n);
         if(f.type || ss_filters[track][v].wet) {
-            ss_filter_run(&ss_filters[track][v],&f,*(uint32_t *)(native+48),audio,n);
+            ss_render_filtered(&ss_poly_voices[track][v],&params,audio,n,&ss_filters[track][v],&f,*(uint32_t *)(native+48));
             ss_filter_samples[track]+=n;
         }
+        else ss_render(&ss_poly_voices[track][v],&params,audio,n);
         if (previous==target) {
-            for (uint32_t i=0;i<n;++i) mix[i]+=(audio[i]*(int32_t)target)>>15;
+            for (uint32_t i=0;i<n;++i) mix[i]+=((audio[i]*(int32_t)target)>>15);
         } else {
             /* Match native po_fill: reach the target over this call, Q16.
              * +/-32767 bounds keep the step and accumulator in int32. */
-            int32_t gain=(int32_t)previous*65536;
-            int32_t step=((int32_t)target-(int32_t)previous)*65536/(int32_t)n;
-            for (uint32_t i=0;i<n;++i) {
-                gain+=step;
-                mix[i]+=(audio[i]*(gain>>16))>>15;
+            if(n==16) {
+                /* Native full frames need only four fractional bits. This
+                 * is exactly the Q16 ramp, with no division or >>16 loop. */
+                int32_t gain=(int32_t)previous*16;
+                int32_t step=(int32_t)target-(int32_t)previous;
+                /* Full unrolling spills many live samples to the IRQ stack. */
+                #pragma GCC unroll 1
+                for(unsigned i=0;i<16;++i) {
+                    gain+=step;mix[i]+=((audio[i]*(gain>>4))>>15);
+                }
+            } else {
+                int32_t gain=(int32_t)previous*65536;
+                int32_t step=ss_filter_step(((int32_t)target-(int32_t)previous)*65536,n);
+                for (uint32_t i=0;i<n;++i) {
+                    gain+=step;
+                    mix[i]+=((audio[i]*(gain>>16))>>15);
+                }
             }
         }
         *(uint16_t *)(native+60)=(uint16_t)target;
@@ -203,6 +292,47 @@ int ss_track_fill(uint32_t track, uint8_t *state, const uint16_t *fp,
         out[2*i]=out[2*i+1]=value*65536;
     }
     return 1;
+}
+
+int ss_track_fill(uint32_t track, uint8_t *state, const uint16_t *fp,
+                  int32_t *out, uint32_t n, uint8_t *pool) {
+    if (track >= 8 || !ss_active[track]) return 0;
+    if (n > 32) {
+        ++ss_unsupported[track];
+        for (uint32_t i=0;i<n;++i) out[2*i]=out[2*i+1]=0;
+        return 1;
+    }
+    if (!n) return 1;
+    unsigned active=0;
+    for (unsigned v=0;v<4;++v) active |= pool[v*64+36];
+    if (!active) {
+        if (!state[80]) return ss_fill(track,state,fp,out,n);
+        /* Poly remains selected after its final native voice retires. */
+        *(uint16_t *)(state+38)=0;ss_samples[track]+=n;
+        /* Native frames need a fixed clear; split calls retain their bounds. */
+        if(n==16) {
+            #pragma GCC unroll 8
+            for(unsigned i=0;i<32;++i)out[i]=0;
+        } else for(unsigned i=0;i<n;++i)out[2*i]=out[2*i+1]=0;
+        return 1;
+    }
+    if(state[80] && n==16) {
+        unsigned single=4;
+        /* Short circuit dense pools; no popcount or per-voice count. */
+        if(pool[36]) {
+            if(!(pool[100]|pool[164]|pool[228]))single=0;
+        } else if(pool[100]) {
+            if(!(pool[164]|pool[228]))single=1;
+        } else if(pool[164]) {
+            if(!pool[228])single=2;
+        } else single=3;
+        if(single<4 && (!*(uint16_t *)(pool+single*64+60) ||
+                         !ss_poly_voices[track][single].pending)) {
+            *(uint16_t *)(state+38)=0;ss_samples[track]+=n;
+            return ss_poly_stereo16(track,single,pool+single*64,fp,out);
+        }
+    }
+    return ss_track_mix(track,state,fp,out,n,pool);
 }
 
 static int ss_assigned(uint32_t track) {
@@ -295,3 +425,9 @@ uint8_t *ss_lfo_page(uint8_t *original,unsigned track) {
     return ss_lfo_descriptor;
 }
 #include "ui.h"
+
+#ifdef SS_DIAGNOSTICS
+#undef ss_begin
+#undef ss_track_fill
+#include "diagnostics.h"
+#endif
