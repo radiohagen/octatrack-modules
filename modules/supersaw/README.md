@@ -1,5 +1,207 @@
 # Supersaw
 
+## S13 final CPU pass
+
+S13 preserves S12 sound, four independent voices and both FX slots. Dry mono
+and single-voice playback skip unused filter-parameter setup once the wet fade
+has ended. Native stereo output combines Q15 gain truncation with 16.16 output
+formatting, and a retired poly track clears its fixed-size native buffer with
+less loop overhead. Short and split calls retain their original bounds.
+
+The output conversion keeps negative fractional rounding and uses unsigned
+formatting for a defined 32-bit result even when old filter history overshoots
+during bypass. Source checks cover all 81,920 values in the interpolation range at seven
+AMP gains (1,146,880 PCM/stereo comparisons), plus 2,048 extreme-history
+blocks, against an independent wide-arithmetic oracle. Retired-note tests
+check every supported buffer length, 0–32, including guards and counters.
+
+The final linked S12/S13 profile improves all 640 isolated cases and all 54
+sustained phase means/peaks. Rich dry mono uses 4.2–5.3% fewer instructions;
+a single active poly note uses 6.0–7.0% fewer. A fully retired poly call falls
+from 136 to 107 instructions (21.3%). Dense four-note playback gains only three
+instructions per track per call in this pass; its larger filter savings come
+from S9–S12. These are executed instructions, not hardware cycles or total CPU.
+
+Normal mono/multi-voice stack maxima stay at 388/520 bytes; singleton poly adds
+four bytes (328 to 332). Odd/split maxima remain 404 mono, 536 poly and 692 mono
+with poly tails. Supersaw function text grows 704 bytes to 37,016; mutable state and tables remain
+unchanged. Compared with S11, 542 of 560 audible cases improve; 18 dry multi-note
+attack/release cases still increase, by at most 59 instructions (2.4%).
+
+Exact linked comparison retains 140,916 stereo samples over 4,512 blocks,
+plus 7,200 paired calls in the extreme-history/bypass gate, including filter
+warm-up. The focused native
+suite exercises mono-plus-triad bursts, dual filtered four-note tracks,
+mono/poly transitions and adding/editing T4 beside synthetic Thru/kick tracks.
+Hardware timing and the original physical crash remain unverified.
+
+## S12 scenario-aware CPU candidate
+
+S12 retains S11 samples, filter response, controls, four independent voices
+and both FX slots. It removes redundant work without reducing the sample rate,
+shortening releases or changing the patch format.
+
+- The per-voice SEM filter uses the **ColdFire CPU EMAC**, not either audio DSP.
+  Coefficients and ramps scale once per block; each wide Q14 multiplication
+  keeps its exact signed rounding. All caller EMAC state is preserved, including
+  MACSR, accumulator extensions and rounding flags. OFF/empty calls skip setup.
+- Held AMP blocks skip ramp arithmetic, and mono unity skips amplitude multiplies.
+- A polyphonic track currently playing one native voice writes stereo directly.
+  It still accepts up to four notes; multiple voices and carried release tails
+  use the ordinary saturating mixer.
+- Pitch and timbre preparation have separate dirty checks. Symmetric detune needs
+  one offset calculation, and bank selection takes three bounded comparisons.
+- SUB=0 uses the exact constant saw weight and advances the unused sub phase once
+  per block. Enabling SUB later resumes at the same phase.
+- Unrelated synth starts skip dormant Supersaw initialization. Mono-to-poly carry
+  uses aligned structure copies. Pure mono rendering skips the poly scratch frame.
+
+The reusable EMAC gate checks 10,000 products and 8,000 full/half-rate filter
+blocks against an independent scalar reference, with arbitrary incoming
+accumulators, extensions and MACSR flags. Linked comparison against frozen S11
+also covers sustained controls, sparse voices, mixed envelopes, feature toggles,
+filter bypass/resume and odd/split blocks. These are software arithmetic and
+state checks, not hardware timing or proof that the original crash is resolved.
+
+Run the linked gates with Octabam's corrected Unicorn library through
+`LIBUNICORN_PATH`. They fail closed when its EMAC arithmetic self-test fails.
+Production lifecycle diagnostics remain off. A source-qualified S12 candidate
+still needs guarded device timing and the real Thru/kick pattern replay.
+
+The linked S11/S12 comparison measures executed CPU instructions for the same
+16-sample calls. Two-track rows use four voices on each track and SUB/DRIV on;
+filter-sweep means cover 256 sustained frames. These are renderer costs, not
+whole-device CPU percentages or hardware cycles.
+
+| Case | S11 instructions | S12 instructions | Reduction |
+| --- | ---: | ---: | ---: |
+| Two tracks, filter OFF | 6242.75 | 6006.75 | 3.8% |
+| Two tracks, LOW sweep | 12062.72 | 10997.34 | 8.8% |
+| Two tracks, BP sweep | 11783.53 | 10381.10 | 11.9% |
+| Two tracks, HP sweep | 11852.47 | 10446.85 | 11.9% |
+| One active poly voice, held, OFF | 1093 | 855 | 21.8% |
+| Four-voice first attack, LOW | 7485 | 6502 | 13.1% |
+| Mono-to-poly history copy | 325 | 74 | 77.2% |
+
+Across 640 isolated render probes, 595 improve and 45 increase. The largest
+absolute increase is 62 instructions (2.5%) on a dry four-voice release; the
+largest audible relative increase is 28 instructions (4.2%) on a dry mono
+release. Retired poly calls increase from 124 to 136 instructions. Sustained mixed-gain tests retain
+the improvements on audible filtered paths; zero-gain/retired overhead does not
+render oscillators. Regular-frame stack peaks fall from 692 to 388 bytes for
+mono and 536 to 520 for poly. Separate odd/split probes fall from 708 to 404 for
+mono, 552 to 536 for poly, and 708 to 692 for mono with poly release tails.
+These stack measurements exclude surrounding OS callers and interrupts.
+
+The specialized paths grow linked Supersaw text from 31,934 to 36,312 bytes
+(+4,378 bytes); mutable state and tables are unchanged. Instruction-cache and
+bus effects of this tradeoff require hardware measurement. EMAC operations are
+counted separately from scalar multiplies; replacing a multiply sequence does
+not remove the underlying multiplication work.
+
+
+## S10 lifecycle CPU candidate
+
+Hardware testing of S9 found burst-start pressure even with TYPE OFF: one
+four-note host MIDI packet exceeded the nominal frame interval. This candidate
+preserves S9 sound, four voices, independent releases, all controls, and both FX
+slots. It does not claim that the hardware overload or earlier crash is solved.
+
+- Cold retriggers reset oscillator/resampler history while retaining valid
+  derived coefficients. Pitch and controls are checked before reuse.
+- Native 16-sample poly AMP ramps use Q4 instead of Q16 with identical samples;
+  short/split calls retain the original exact arithmetic.
+- A 384-byte, 32-entry cache stores the native pitch conversion keyed by the
+  final slewed word. RATE is fixed to unity in this native routine, so FINE,
+  GLIDE and modulation remain represented by the key. Collisions recompute;
+  non-Supersaw tracks retain the native conversion. Hits cost 18 instructions
+  versus 56.2 on average over 1,814 tested words; misses add about 24 instructions.
+- A selected poly track with no active native voices skips mix/control setup.
+  Audible release tails still use the native gain law and retirement threshold.
+
+The final linked renderer comparison against S9 uses four rich voices, 16
+output samples, and identical state/control inputs:
+
+| Renderer case | S9 instructions | S10 instructions |
+| --- | ---: | ---: |
+| First attack, OFF | 4134 | 4024 |
+| Repeated attack, OFF | 4134 | 3688 |
+| First attack, LOW | 8125 | 8020 |
+| Repeated attack, LOW | 8105 | 7664 |
+| Release, OFF | 3694 | 3616 |
+| Held, OFF | 3375 | 3397 |
+| Held, LOW | 6190 | 6217 |
+| No remaining poly voices | 386 | 123 |
+
+The held renderer has a small overhead increase (0.4–0.7%); the separate native
+pitch cache saves work outside this renderer measurement. Do not add those
+figures into a hardware CPU percentage. First-start savings are much smaller
+than repeated-attack savings. Sampled stack peaks are 700 bytes for the nested
+mono adapter and 548 for poly, versus S9's 692 and 540 respectively. These
+exclude the surrounding OS stack and do not establish device stack headroom.
+The diagnostic probe costs 52 instructions per event and 99 additional
+instructions for a silent render snapshot in the isolated fixture. Actual
+cache/bus/interrupt cost on hardware remains unmeasured.
+
+### Optional lifecycle observation
+
+Production builds contain no diagnostic counters, hooks or timer reads. For an
+isolated diagnostic integration, run `SS_DIAGNOSTICS=1 python3
+modules/supersaw/generate.py`, then build with `SS_DIAGNOSTICS=1` in the environment
+as well. Restore the checked-in production assembly with the ordinary generator
+before committing. The same setting must be used for generation and composition.
+
+`diagnostics.h` defines the fixed layouts, and linked symbols locate them:
+
+- `ss_diag_events`: two 64-record rings. MIDI enqueue/off events use ring 0;
+  audio allocation/activation/selector events use ring 1. Each record contains
+  sequence, native frame, DTCN3 tick, kind, zero-based track, note/identity,
+  selected flag and note stamp. Kind 1=enqueued note, 2=accepted note-off,
+  3=poly allocation attempt (may be absorbed as a duplicate), 4/5=allocator
+  entry/exit, 6=selector completed. Audio activation identities retain their
+  native high bit; these are attempts, not proof of audible output. Inspect
+  the native voice ages/states too. The generic Synth hooks also observe
+  non-Supersaw events, distinguished by the selected flag (which may still be
+  zero on the first enqueue before marker resolution).
+- `ss_diag_tracks`: per-track frame/sample count, mono/poly state, native
+  target gains, previous gains at render entry, four voice states/ages, and
+  all five filter wet amounts. Native voice state 0=free, 1=held, 2=releasing,
+  3=fading. A positive release gain is not a stuck voice by itself.
+- `ss_diag_costs`: calls/last/max/sum in DTCN3 ticks for selector/config/reset,
+  renderer/mix, and native allocator. DTCN3 runs at 132 MHz, as in LOAD METER.
+  Interrupts and bus delays are included. Read counters as a consistent stopped
+  snapshot or retry; sums wrap modulo 2^32. Renderer durations exclude snapshot
+  copying but the diagnostic build still pays that copying cost in its frame.
+  Allocator durations include probe call/return overhead; compare like-for-like
+  instrumented runs, not raw diagnostic timing against production timing.
+
+The event writer publishes its sequence last. Readers must reread it and reject
+zero/changed records. Track snapshots publish an even sequence after an odd
+in-progress sequence. Rings overwrite old records, never allocate or print.
+These records separate enqueue versus allocation frames and remaining native
+release work; no USB stream is opened by the module.
+The records are currently collected through emulator memory dumps. This module
+has not extended the hardware USB LOAD METER request: `load_meter.py` cannot
+read these new buffers yet. Hardware collection needs a separate readout
+integration; merely flashing the diagnostic variant does not expose them.
+
+`tools/verify/verify_supersaw_lifecycle.py` compares native and cached conversion
+through the corrected ColdFire EMAC library, including fractional words, eight
+tracks, collisions, changed pitches, invalid pitches and native fallback. It
+also checks diagnostic ring wrap, timer arithmetic, snapshots and instruction
+overhead when those symbols are present. Use the repository's corrected Unicorn
+build or point `LIBUNICORN_PATH` at an isolated corrected build. The ordinary
+Python wheel is not an EMAC oracle. `verify_supersaw_poly.py --burst` exercises
+batched input with full native allocation, selective release, retrigger and
+unchanged FX; it records diagnostic events when available.
+
+Hardware replay remains separate: capture the exact patch settings; start with
+one note, then the same four-note spaced/batched comparison, OFF then LOW. Keep
+the existing timing guard, avoid forced hangs, and distinguish production from
+diagnostic timing. Only proceed to a bounded real pattern after timing margin
+improves. Do not flash or change a device project as part of these source checks.
+
+
 Two detuned saw oscillators per note, a sine sub and bounded drive, generated entirely
 on the ColdFire CPU. **Both FX1 and FX2 remain available.** No DSP synthesis code,
 effect ID or bus buffer is allocated. The normal DSP signal path still applies
@@ -26,6 +228,72 @@ position per encoder event including when pressed. Changing VOIC only changes
 the available note count: a note keeps its mono level at VOIC 2, 3 and 4.
 Chord notes add at their independent AMP levels; the final sum saturates safely
 at full scale. Dense, driven or resonant chords can still reach that limit.
+
+## Adaptive CPU path (S9)
+
+Four voices per track, independent AMP releases and per-note filters remain.
+No FX slot is reserved. The parameter layout and saved Part format are unchanged.
+
+- The filter now runs at 22.05 kHz **before** four-point interpolation. CUT
+  retains its frequency law up to a **9 kHz ceiling**. This changes the sound
+  of existing filtered patches, particularly at high cutoff; it is not a
+  sample-exact replacement for the historical full-rate filter.
+- LOW at CUT=127, RES=0 and ENV=0 is transparent: it fades to bypass, then
+  stops filtering. Closing CUT, raising RES or enabling ENV resumes the filter
+  with its normal activation fade and a fresh filter envelope.
+- TYPE OFF skips filter work after the fade. SUB=0 and DRIV=0 select loops
+  with no sub lookup or drive arithmetic. Sub phase still advances, so turning
+  SUB back up does not restart it. Silent zero-to-zero AMP blocks skip synthesis;
+  audible attacks/releases are still rendered independently.
+- Filter decay advances once per block using elapsed sample time, including
+  while ENV=0. Its final inaudible tail is discarded when no ENV value can move
+  integer CUT. This is an approximation of the old sample-wise decay.
+- Drive uses a 16 KiB lookup with a maximum error of **five signed 16-bit PCM
+  units** relative to the original cubic, verified exhaustively. DRIV=0 avoids
+  this approximation. Filtered interpolation peaks saturate instead of wrapping.
+- Fully enabled filters use dedicated LOW/BP/HP coefficient-ramp loops. Normal
+  16-sample audio calls need no divisions, including pitch changes and AMP ramps.
+
+S9's linked ColdFire benchmark compares against module main `f6910d5` using
+two independent four-note tracks, 16 output samples per call, and 256 measured
+blocks after 16 warm-up blocks. These are **executed instructions, not hardware
+cycles or whole-device CPU percentages**; caches and bus contention are not modeled.
+
+| Scenario | Before (both tracks) | S9 | Instruction reduction |
+| --- | ---: | ---: | ---: |
+| Filter OFF, sub/drive enabled | 7358.7 | 6732.7 | 8.5% |
+| LOW cutoff sweep | 20860.1 | 12657.4 | 39.3% |
+| BP cutoff sweep | 19783.9 | 12372.1 | 37.5% |
+| HP cutoff sweep | 19733.6 | 12397.9 | 37.2% |
+| Fully open neutral LOW | 16294.0 | 5388.0 | 66.9% |
+
+A four-voice zero-to-zero gain call falls from 11,819 to 525 instructions
+(95.6%). This is an active-but-inaudible voice case, not a whole-device idle
+measurement. The plain dry mono warm case increases from 738 to 747 instructions;
+this change is chiefly for filtered polyphony and avoiding unused processing.
+The sampled renderer stack peak is 540 bytes versus 468 before (plus caller/OS
+stack outside this probe); the nested filter path uses more stack despite
+reusing the output buffer. Hardware stack headroom and cache effects are unmeasured.
+
+S9 validation: `make check` passes all 24 source tests, including the scalar
+filter oracles and filtered odd/split-call coverage. The composed `radio-bus`
+BUILD=80 image passes scoped common/Supersaw gates and separate project-backed
+fixtures for two four-note MIDI tracks, filtered mono/poly transitions, native
+filter controls, and live T4 assignment beside T3 with independent releases.
+The live-add fixture includes T1/T2/T5 THRU and a T6 kick, but no external THRU
+audio or reproduction of unknown MIDI routing. The full unscoped suite was not
+run. These checks do not establish hardware timing or resolution of the MKII crash.
+
+Image SHA-256: `fdc09df35e727cdacf27b13095b7f0b962e2886885b430fdf4d2a3d202fa621a`.
+The qualified layout aligns hot render/filter functions to 16 bytes. This also
+avoids an unrelated BRAIN string-pointer fragment matching the builder's raw
+staging-address scan in one intermediate layout. The guard was kept intact;
+this is not a general fix to the builder, so other compositions must be checked.
+
+The older S1-S8 measurements below describe their own implementations, not S9.
+S9's production response check uses a 22.05 kHz TPT analytical reference instead
+of claiming the former full-rate Spectrum response. Hardware timing, cache/bus
+costs and the reported physical-device crash still require device validation.
 
 ## Implementation and limits
 
@@ -364,3 +632,53 @@ without `OT_PROJECT`; the full unscoped suite was not run. LFO SETUP's CUT
 label was also visually checked in the emulator.
 Tested image SHA-256: `7fdef4ae00e63f080612d741650d98db534ba2837b0826d2a84b0dce496b2c7f`.
 This source qualification does not include an installation package or flashing.
+
+
+## S11 native-frame rendering
+
+Native 16-sample calls now interpolate directly into the poly mix or mono
+stereo output while applying the native AMP ramp. They avoid writing and
+rereading a separate full-rate per-voice buffer. The oscillator/filter body
+is specialized for each output layout; bounded source-loop unrolling avoids
+register spills. Odd/pending and non-native block sizes retain the staged
+renderer. Controls, four voices, independent releases, both FX slots and
+persistence are unchanged; no sound-quality reduction is introduced.
+
+Compared with S10, executed ColdFire instructions for a rich 16-sample call:
+
+| Case | S10 | S11 |
+|---|---:|---:|
+| Mono first attack, OFF | 1,145 | 920 |
+| Mono repeated attack, OFF | 1,059 | 834 |
+| Four-note first attack, OFF | 4,024 | 3,533 |
+| Four-note repeated attack, OFF | 3,688 | 3,197 |
+| Four-note held, OFF | 3,397 | 3,130 |
+| Four-note first attack, LOW | 8,020 | 7,485 |
+| Four-note repeated attack, LOW | 7,664 | 7,129 |
+| Four-note held, LOW | 6,217 | 5,890 |
+
+For regular 16-sample calls with no pending odd sample, maximum measured stack
+drops from 700 to 692 bytes for mono and 548 to 536 for poly. Separate probes
+of split/pending calls and mono-with-poly-tail transitions find maxima of
+708 bytes for mono (S10: 700) and 552 for poly (S10: 548). These figures exclude
+callers and the OS; no whole-interrupt stack bound is established. These are emulator
+instruction/stack measurements, not hardware cycles or a guarantee that the
+reported 436.7-us burst fits the hardware frame budget. A smaller shared-body
+experiment regressed held dry rendering and was rejected.
+
+Across 320 native-size profile probes, all 280 audible cold, held, control-change,
+attack and release cases improve. The 40 zero-to-zero cases retain synthesis
+skipping but add 4–20 instructions from adapter dispatch/register setup; a fully
+retired poly call moves from 123 to 124. No release is shortened to get savings.
+
+The source oracle compares 20,000 changing blocks against the staged renderer,
+including exact stereo/mix samples, oscillator/filter state, AMP rounding and
+output guards. `verify_supersaw_equivalence.py --baseline-runtime PATH`
+compares frozen S10 and candidate linked binaries over 1,600 mixed native,
+odd and split blocks, with changing pitch, controls, modes, gains and carries.
+`verify_supersaw_poly.py --mode mixed --tracks 6,7 --burst` exercises one mono
+note plus a three-note chord at a cap of four, independent note-offs and
+retrigger, matching the hardware workload's allocation pattern. This fixture
+uses controlled test settings, not a captured copy of the user's patch.
+The separate two-track four-note and transition gates remain applicable.
+S10's opt-in diagnostics and hardware-readout limitation remain unchanged.
