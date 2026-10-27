@@ -278,6 +278,9 @@ mh_voice_at: /* d0 track,d1 captured context,a0 pool; all regs preserved */
     lsl.l #3,%d0
     addq.l #1,%d0
     add.l %d0,%d2
+    /* Remaining terms are nonnegative; ties retain the earlier candidate. */
+    cmp.l 64(%sp),%d2
+    bge.s .voice_next_octave
 .voice_same:
     addq.l #1,%d3
     cmp.l %d6,%d3
@@ -548,12 +551,15 @@ mh_invert:
  */
     .global mh_spread
 mh_spread:
+    tst.l %d0
+    bne.s .spread_change
+    moveq #1,%d0 /* CLOSE receives a sorted chord and changes nothing. */
+    rts
+.spread_change:
     lea -20(%sp),%sp
     movem.l %d1-%d3/%a1,(%sp)
     move.l (%a0),16(%sp)
     lea 16(%sp),%a1
-    tst.l %d0
-    beq.s .spread_ok
     cmpi.l #1,%d0
     bne.s .spread_wide
     moveq #0,%d2
@@ -582,12 +588,14 @@ mh_spread:
     addq.l #1,%d1
     cmp.l %d6,%d1
     blt.s .spread_upper
+    bra.s .spread_publish /* Raising every upper voice preserves order. */
 .spread_ok:
     /* Sort the completed spacing before publishing it atomically. */
     move.l %a0,-(%sp)
     move.l %a1,%a0
     bsr.w mh_sort_chord
     move.l (%sp)+,%a0
+.spread_publish:
     move.l (%a1),(%a0)
     moveq #1,%d0
     bra.s .spread_return

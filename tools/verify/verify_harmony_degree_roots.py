@@ -5,6 +5,7 @@ Independent musical oracles and byte comparisons cover context replacement,
 mixed Parts, invalid publication, native edits and every scale/tonic. This is
 a component gate; it does not claim native-hook, file or hardware acceptance.
 """
+from midi_machine import HARMONY_SOURCE
 import json
 import pathlib
 import re
@@ -37,14 +38,14 @@ def decode(code, scale):
 
 
 def main():
-    subprocess.run(['python3', str(ROOT/'modules/midi-harmony/generate.py'), '--check'], check=True)
+    subprocess.run(['python3', str(HARMONY_SOURCE/'generate.py'), '--check'], check=True)
     with tempfile.TemporaryDirectory(prefix='harmony-degree-roots-') as tmp:
         out = pathlib.Path(tmp)
         objects = []
         for unit in ('codec', 'roots'):
             obj = out/f'{unit}.o'
             subprocess.run(['m68k-elf-as', '-mcpu=54455', '-o', str(obj),
-                            str(ROOT/f'modules/midi-harmony/{unit}.s')], check=True)
+                            str(HARMONY_SOURCE/f'{unit}.s')], check=True)
             objects.append(str(obj))
         subprocess.run(['m68k-elf-ld', '-Ttext=0x47000000', '-e', 'hd_roots_reset_c',
                         '-o', str(out/'roots.elf'), *objects], check=True)

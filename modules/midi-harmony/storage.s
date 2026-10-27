@@ -150,55 +150,53 @@ hd_export_c:
 	.globl	hd_import_c
 	.type	hd_import_c, @function
 hd_import_c:
-	subq.l #8,%sp
-	move.l %d2,-(%sp)
+	lea (-12,%sp),%sp
 	moveq #15,%d0
-	move.l 16(%sp),%d2
+	move.l %d2,-(%sp)
 	move.l 20(%sp),%d1
-	cmp.l %d2,%d0
-	jcc .L46
+	move.l 24(%sp),%a0
+	cmp.l %d1,%d0
+	jcc .L43
 .L33:
 	move.l (%sp)+,%d2
-	addq.l #8,%sp
+	lea (12,%sp),%sp
 	rts
-.L46:
-	move.l %d1,%a0
-	lea (10368,%a0),%a0
-	move.l %a0,8(%sp)
-	move.l %a0,-(%sp)
+.L43:
+	lea (10368,%a0),%a1
+	move.l %a1,12(%sp)
+	move.l %a1,-(%sp)
 	move.l %d1,8(%sp)
+	move.l %a0,12(%sp)
 	jsr ha_valid_c
 	addq.l #4,%sp
 	move.l 4(%sp),%d1
+	move.l 8(%sp),%a0
 	tst.l %d0
 	jeq .L33
-	move.l %d1,-(%sp)
-	jsr hd_packed_valid_c
-	addq.l #4,%sp
-	move.l 4(%sp),%d1
-	tst.l %d0
-	jeq .L33
-	move.l %d1,-(%sp)
-	moveq #13,%d1
-	move.l %d2,%d0
-	lsl.l %d1,%d0
+	move.l %d1,%d0
+	moveq #13,%d2
+	lsl.l %d2,%d0
+	move.l %a0,-(%sp)
 	add.l #ch_lock_table,%d0
 	move.l %d0,-(%sp)
 	move.l #16768,%d0
-	muls.l %d2,%d0
+	muls.l %d1,%d0
 	add.l #hd_banks,%d0
 	move.l %d0,-(%sp)
+	move.l %d1,16(%sp)
 	jsr hd_unpack_c
 	lea (12,%sp),%sp
+	move.l 4(%sp),%d1
 	tst.l %d0
 	jeq .L33
-	move.l 8(%sp),-(%sp)
-	move.l %d2,-(%sp)
+	move.l 12(%sp),-(%sp)
+	move.l %d1,-(%sp)
+	move.l %d1,12(%sp)
 	jsr ha_unpack_c
 	addq.l #8,%sp
-	move.l %d2,16(%sp)
+	move.l 4(%sp),20(%sp)
 	move.l (%sp)+,%d2
-	addq.l #8,%sp
+	lea (12,%sp),%sp
 	jra hd_bank_loaded_c
 	.size	hd_import_c, .-hd_import_c
 	.align	2
@@ -207,10 +205,10 @@ hd_import_c:
 hd_native_hash_c:
 	moveq #15,%d0
 	cmp.l 4(%sp),%d0
-	jcs .L49
+	jcs .L46
 	move.l 8(%sp),%d0
 	rts
-.L49:
+.L46:
 	clr.l %d0
 	rts
 	.size	hd_native_hash_c, .-hd_native_hash_c
@@ -223,11 +221,11 @@ hd_nv_save_c:
 	movem.l #31868,(%sp)
 	move.l 44(%sp),%d2
 	cmp.l %d2,%d0
-	jcc .L65
+	jcc .L62
 	movem.l (%sp),#31868
 	lea (40,%sp),%sp
 	rts
-.L65:
+.L62:
 	move.l %d2,-(%sp)
 	jsr hd_checkpoint_c
 #APP
@@ -240,7 +238,7 @@ hd_nv_save_c:
 	addq.l #4,%sp
 	addq.l #1,generation
 	tst.l available
-	jne .L54
+	jne .L51
 #APP
 | 29 "storage.c" 1
 	move.w %d3,%sr
@@ -249,7 +247,7 @@ hd_nv_save_c:
 	movem.l (%sp),#31868
 	lea (40,%sp),%sp
 	rts
-.L54:
+.L51:
 	clr.l available
 	jsr hd_track_invalidate_c
 #APP
@@ -284,8 +282,8 @@ hd_nv_save_c:
 	jsr (%a3)
 	lea (24,%sp),%sp
 	tst.l %d3
-	jne .L66
-.L55:
+	jne .L63
+.L52:
 #APP
 | 25 "storage.c" 1
 	move.w %sr,%d6
@@ -293,8 +291,8 @@ hd_nv_save_c:
 | 0 "" 2
 #NO_APP
 	cmp.l generation.l,%d4
-	jeq .L67
-.L56:
+	jeq .L64
+.L53:
 #APP
 | 29 "storage.c" 1
 	move.w %d6,%sr
@@ -322,16 +320,16 @@ hd_nv_save_c:
 	jsr (%a3)
 	lea (24,%sp),%sp
 	tst.l %d3
-	jeq .L55
-	jra .L66
-.L67:
+	jeq .L52
+	jra .L63
+.L64:
 	move.l %d2,-(%sp)
 	jsr (%a2)
 	addq.l #4,%sp
 	cmp.l %d5,%d0
-	jne .L56
+	jne .L53
 	tst.l %d3
-	jne .L57
+	jne .L54
 	moveq #1,%d0
 	move.l %d0,available
 #APP
@@ -339,11 +337,11 @@ hd_nv_save_c:
 	move.w %d6,%sr
 | 0 "" 2
 #NO_APP
-.L68:
+.L65:
 	movem.l (%sp),#31868
 	lea (40,%sp),%sp
 	rts
-.L66:
+.L63:
 	mvz.b (%a6,%d2.l),%d0
 	move.l %d0,-(%sp)
 	move.l %d4,-(%sp)
@@ -359,9 +357,9 @@ hd_nv_save_c:
 | 0 "" 2
 #NO_APP
 	cmp.l generation.l,%d4
-	jne .L56
-	jra .L67
-.L57:
+	jne .L53
+	jra .L64
+.L54:
 	jsr hd_track_commit_c
 	clr.l pending
 	moveq #1,%d0
@@ -371,22 +369,22 @@ hd_nv_save_c:
 	move.w %d6,%sr
 | 0 "" 2
 #NO_APP
-	jra .L68
+	jra .L65
 	.size	hd_nv_save_c, .-hd_nv_save_c
 	.align	2
 	.globl	hd_nv_poll_c
 	.type	hd_nv_poll_c, @function
 hd_nv_poll_c:
 	tst.l pending
-	jeq .L69
+	jeq .L66
 	tst.l available
-	jeq .L69
+	jeq .L66
 	moveq #15,%d0
 	cmp.l ch_nv_bank.l,%d0
-	jcc .L79
-.L69:
+	jcc .L76
+.L66:
 	rts
-.L79:
+.L76:
 	move.l ch_nv_bank,-(%sp)
 	jsr hd_nv_save_c
 	addq.l #4,%sp
@@ -404,12 +402,12 @@ hd_nv_restore_c:
 	jsr hd_track_read_c
 	lea (12,%sp),%sp
 	tst.l %d0
-	jne .L90
-.L80:
+	jne .L87
+.L77:
 	move.l -8(%fp),%d2
 	unlk %fp
 	rts
-.L90:
+.L87:
 	move.l 8(%fp),%d1
 	moveq #13,%d0
 	move.l #16768,%d2
@@ -424,7 +422,7 @@ hd_nv_restore_c:
 	jsr hd_unpack_c
 	lea (12,%sp),%sp
 	tst.l %d0
-	jeq .L80
+	jeq .L77
 	move.l 8(%fp),%d2
 	lea ch_lock_status,%a0
 	lea (-1,%fp),%a1

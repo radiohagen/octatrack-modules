@@ -1,5 +1,8 @@
 """Experimental protected retained pool; see README before composing."""
+from pathlib import Path
 from remix.schema import Category, Claims, Gate, Kind, Linked, Module, Poke, Proof
+
+ROOT = Path(__file__).resolve().parent
 H = bytes.fromhex
 # Only MIDI loops. Audio field 31 is a sample lock and must stay native.
 LOOPS = (
@@ -19,8 +22,8 @@ MODULE = Module(
     proof_note='',
     doc='Protected retained byte pool in native MIDI step padding.',
     requires=('STORE',),
-    linked=(Linked('midisram', 'modules/midi-sram/pool.s', dram=True),
-            Linked('midisramcopy', 'modules/midi-sram/store-copy.s', dram=True),),
+    linked=(Linked('midisram', str(ROOT / 'pool.s'), dram=True),
+            Linked('midisramcopy', str(ROOT / 'store-copy.s'), dram=True),),
     gates=(Gate('tools/verify/verify_midi_sram.py',stage='image',venv=True),),
     pokes=tuple(Poke(at,H(old),H(new),label+': keep CS1 padding') for at,old,new,label in LOOPS),
     claims=Claims(sram=tuple((0x1001614e+p*0x8ed8+0x4900+t*0x8b0+s*32+30, 2,

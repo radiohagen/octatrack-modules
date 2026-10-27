@@ -169,8 +169,7 @@ mh_quant_at: /* d0 pitch,d1 track,d2 captured context; others preserved */
     move.l 28(%sp),%d1
     jsr mh_get_at
     beq.w .quant_done
-    move.l %d1,%d0  /* d1 was clobbered by getter; reload input track */
-    move.l (%sp),%d0
+    move.l (%sp),%d0 /* d1 was clobbered by getter; reload input track */
     move.l 28(%sp),%d1
     bsr.w mh_scale_record_at
     tst.l %d0
@@ -182,7 +181,11 @@ mh_quant_at: /* d0 pitch,d1 track,d2 captured context; others preserved */
     lea mh_masks,%a1
     moveq #0,%d4
     move.w (%a1,%d0.l*2),%d4
-    moveq #0,%d5
+    lea .quant_pitch_classes,%a1
+    move.l %d2,%d0
+    bsr.s .is_degree
+    bne.s .quant_done
+    moveq #1,%d5 /* The original pitch was tested once above. */
 .quant_search:
     move.l %d2,%d0
     sub.l %d5,%d0
@@ -210,18 +213,24 @@ mh_quant_at: /* d0 pitch,d1 track,d2 captured context; others preserved */
     rts
 /* d0 note,d3 tonic,d4 mask -> Z false if degree. */
 .is_degree:
-    move.l %d0,%d1
+    /* Candidate pitches are range-checked by both callers above. */
+    moveq #0,%d1
+    move.b (%a1,%d0.l),%d1
     sub.l %d3,%d1
-    bpl.s .pc_mod
+    bpl.s .pc_test
     addi.l #12,%d1
-.pc_mod:
-    cmpi.l #12,%d1
-    blt.s .pc_test
-    subi.l #12,%d1
-    bra.s .pc_mod
 .pc_test:
     btst %d1,%d4
     rts
+
+/* MIDI pitch classes avoid repeated octave subtraction on every lower and
+ * upper quantization candidate. The assembler owns this constant table. */
+.quant_pitch_classes:
+    .rept 10
+    .byte 0,1,2,3,4,5,6,7,8,9,10,11
+    .endr
+    .byte 0,1,2,3,4,5,6,7
+    .balign 2
 
 /* d0 track, d1 signed transpose, a0 four-byte stock scratch.
  * mh_generate resolves a followed root; mh_direct uses the supplied pitch.
@@ -304,6 +313,9 @@ mh_direct:
     move.b %d2,1(%a1)
     move.b %d2,2(%a1)
     move.b %d2,3(%a1)
+    moveq #1,%d0
+    cmpi.l #1,%d6
+    beq.w .gen_return /* NOTE needs no chord scale or recipe. */
     move.l %d7,%d0
     move.l %d2,%d1
     move.l 36(%sp),%d2
@@ -318,9 +330,6 @@ mh_direct:
     lsr.l #2,%d5
     andi.l #15,%d5
     /* d2 snapped root, d4 mask, d5 tonic. */
-    moveq #1,%d0
-    cmpi.l #1,%d6
-    beq.w .gen_return
     lea ch_current,%a0
     moveq #0,%d1
     move.b (%a0,%d7.l),%d1
@@ -988,4 +997,53 @@ mh_ui_delta:
     move.l %d0,-(%sp)
     jsr 0x40032510
     lea 12(%sp),%sp
+    rts
+
+/* Follow LIVE preserves generated scale-degree spacing, including inversions
+ * and octave spread. d0 voice, d1 old root, d2 new root, d7 receiver.
+ * Explicit MAJ/MIN/DOM7 and KEY OFF retain their chromatic intervals.
+ * No generator/history/arp-clock mutation; all registers except d0 kept. */
+    .global mh_follow_shift
+mh_follow_shift:
+    lea -28(%sp),%sp
+    movem.l %d1-%d6/%a0,(%sp)
+    move.l %d0,%d4
+    move.l %d1,%d5
+    move.l %d2,%d6
+    lea ch_sequence_quality,%a0
+    moveq #0,%d0
+    move.b (%a0,%d7.l),%d0
+    cmpi.l #5,%d0
+    bcs.s .follow_scale
+    cmpi.l #7,%d0
+    bls.s .follow_chromatic
+.follow_scale:
+    move.l %d7,%d0
+    jsr mh_scale_record
+    tst.l %d0
+    bmi.s .follow_chromatic
+    move.l %d0,%d3
+    move.l %d3,%d1
+    move.l %d4,%d0
+    jsr hd_encode
+    move.l %d0,%d4
+    move.l %d5,%d0
+    jsr hd_encode
+    move.l %d0,%d5
+    move.l %d6,%d0
+    jsr hd_encode
+    add.l %d4,%d0
+    sub.l %d5,%d0
+    jsr hd_decode
+    bra.s .follow_shift_done
+.follow_chromatic:
+    move.l %d4,%d0
+    add.l %d6,%d0
+    sub.l %d5,%d0
+    cmpi.l #127,%d0
+    bls.s .follow_shift_done
+    moveq #-1,%d0
+.follow_shift_done:
+    movem.l (%sp),%d1-%d6/%a0
+    lea 28(%sp),%sp
     rts

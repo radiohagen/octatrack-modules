@@ -8,6 +8,16 @@ preserves native registers and owns each firmware hook once. See the
 [current integration](../integration/midi-follow.md). The legacy combined
 integration below must keep its recorded source pin.
 
+## Current Harmony migration
+
+Harmony also uses **EVENTS** for transport, accepted MIDI output, held-step
+ownership and `edit.copy_pre` / `edit.copy_post`. Post-copy callbacks observe
+the completed native copy; the platform preserves its output registers and CCR.
+STORE dispatches Harmony's load, retained-memory and new-project lifecycle.
+Its optional checked callbacks can refuse bank writes/copies and propagate
+companion-copy failures. Existing saved formats and retained allocations stay
+unchanged. See [the migration review](../integration/harmony-current.md).
+
 ## Historical combined integration
 
 The shared-event platform replaces HARMONY FOLLOW and HARMONY PLOCKS.

@@ -62,11 +62,16 @@ int hd_roots_sync_c(HdRoots *r, const uint8_t *notes, uint8_t *result,
     for (unsigned s = 0; s < HD_ROOT_STEPS; ++s)
         if (notes[s] > 127 && notes[s] != HD_ROOT_NONE) return -1;
 
-    unsigned outgoing = unpack_scale(r->scale), changed = 0;
+    /* An OFF-to-OFF observation only copies native notes. No degree is
+     * consumed, and a HARM observation encodes against the incoming KEY. */
+    unsigned outgoing = !harm && r->state == HD_ROOT_HARM ? unpack_scale(r->scale) : scale;
+    unsigned changed = 0;
     for (unsigned s = 0; s < HD_ROOT_STEPS; ++s) {
         unsigned note = notes[s], degree = r->degree[s], next = note;
-        if (r->state != HD_ROOT_HARM || note != r->note[s])
-            degree = (unsigned)hd_encode_c((int)note, (int)(harm ? scale : outgoing));
+        if ((harm || r->state == HD_ROOT_HARM) &&
+            (r->state != HD_ROOT_HARM || note != r->note[s]))
+            degree = note == HD_ROOT_NONE ? HD_ROOT_NONE :
+                     (unsigned)hd_encode_c((int)note, (int)(harm ? scale : outgoing));
         if (!harm && r->state == HD_ROOT_HARM && degree < HD_ROOT_CODES)
             next = absolute(degree, outgoing);
         if (harm) next = hd_mirror_c(degree);

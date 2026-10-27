@@ -50,7 +50,7 @@ static unsigned candidate(const int *base, unsigned n, unsigned target,
         if (v<0 || v>127) return 0;
         out[i]=v;
     }
-    sort(out,n);
+    if (inversion) sort(out,n); /* A shared offset keeps root position sorted. */
     unsigned count=n, fill=target;
     /* Place the actual bass before choosing doublings. A dropped root may
      * be doubled above it; there is still only one voice in the bass octave. */
@@ -75,27 +75,23 @@ static unsigned candidate(const int *base, unsigned n, unsigned target,
         if (next>127) break;
         out[count++]=next;
     }
-    sort(out,count);
-    int spaced[4];
-    for (unsigned i=0; i<count; ++i) spaced[i]=out[i];
-    if (spread==1 && count>1) {
-        spaced[1]+=12;
-        /* A doubled tone may already occupy the usual OPEN destination. */
-        for (;;) {
-            unsigned collision=0;
-            for (unsigned i=0; i<count; ++i)
-                if (i!=1 && spaced[i]==spaced[1]) collision=1;
-            if (!collision) break;
-            spaced[1]+=12;
-        }
-    } else if (spread==2) {
-        for (unsigned i=1; i<count; ++i) spaced[i]+=12;
+    if (count!=originals) sort(out,count);
+    /* CLOSE is already sorted. WIDE preserves the order and only its highest
+     * upper voice can overflow, so neither needs a temporary copy or sort. */
+    if (count<2 || (spread!=1 && spread!=2)) return count;
+    if (spread==2) {
+        if (out[count-1]<=115)
+            for (unsigned i=1; i<count; ++i) out[i]+=12;
+        return count;
     }
-    unsigned fits=1;
-    for (unsigned i=0; i<count; ++i) if (spaced[i]>127) fits=0;
-    if (fits) for (unsigned i=0; i<count; ++i) out[i]=spaced[i];
-    /* Overflow keeps CLOSE. */
-    sort(out,count);
+    /* A doubled tone may already occupy the usual OPEN destination. Test
+     * the one changed voice before writing; overflow keeps CLOSE intact. */
+    int opened=out[1]+12;
+    while (contains(out,count,opened)) opened+=12;
+    if (opened<=127) {
+        out[1]=opened;
+        sort(out,count);
+    }
     return count;
 }
 
@@ -156,6 +152,7 @@ void mh_size_voice_c(uint8_t pool[4], uint8_t history[8], unsigned config,
             for (unsigned i=0; i<got; ++i) {
                 int d=trial[i]-(int)history[i]-shift;
                 cost+=8*(d<0?-d:d)+(d!=0);
+                if (cost>=best_cost) break; /* Later terms cannot win a tie. */
             }
             if (cost<best_cost) {
                 best_cost=cost; count=got;

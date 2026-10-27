@@ -126,10 +126,11 @@ bf_response_adjust:
     bsr.w bf_response_target
     tst.l %d0
     bmi.s .adjust_invalid
-    sub.l %d2,%d0
-    moveq #0,%d1
-    move.b (%a2),%d1
-    add.l %d1,%d0
+    move.l %d2,%d1 /* original pool root */
+    move.l %d0,%d2 /* current followed root */
+    moveq #0,%d0
+    move.b (%a2),%d0
+    jsr mh_follow_shift
     cmpi.l #127,%d0
     bls.s .adjust_store
 .adjust_invalid:
@@ -296,7 +297,7 @@ bf_response_tick:
     move.l %d0,(%a4,%d4.l*4)
     move.l 4(%a3),%d2
     cmpi.l #127,%d2
-    bhi.s .release_next
+    bhi.w .release_next
     move.l (%a3),%d5
     andi.l #15,%d5
     lsl.l #7,%d5
@@ -315,6 +316,16 @@ bf_response_tick:
     tst.l %d0
     beq.s .release_native_pitch
     move.l (%sp)+,%d0
+    lea -12(%sp),%sp
+    movem.l %d1-%d2/%a0,(%sp)
+    move.l %d2,%d0 /* the currently owned voice, before root movement */
+    lea bf_response_anchor,%a0
+    move.l (%a0,%d7.l*4),%d2
+    move.l %d2,%d1
+    sub.l %d6,%d1 /* previous sounding root */
+    jsr mh_follow_shift
+    movem.l (%sp),%d1-%d2/%a0
+    lea 12(%sp),%sp
     bra.s .release_pitch_ready
 .release_native_pitch:
     move.l (%sp)+,%d0
@@ -341,7 +352,7 @@ bf_response_tick:
     addq.l #1,%d4
     addq.l #8,%a3
     cmpi.l #4,%d4
-    bne.s .tick_release
+    bne.w .tick_release
     lea -32(%a3),%a3
     moveq #0,%d4
 .tick_on:
