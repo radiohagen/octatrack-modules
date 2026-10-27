@@ -21,6 +21,23 @@ The default candidate follows native LFO SETUP's split pane. The development
 probe also renders a full-width six-control alternative for comparison;
 it is not another saved setting or a hidden panel gesture.
 
+Encoder resistance is field-specific, with no velocity or held-push multiplier:
+
+| Controls | Range | Raw panel counts per value |
+|---|---|---:|
+| STPS / PULS / ROT | 1–16 / 0–STPS / 0–STPS−1 | 4 |
+| ACNT / AROT | 0–PULS / 0–PULS−1 (0 with no pulses) | 4 |
+| BST / ATK, EDGE, SLEW / DEC, LEN | 0–127; DEC/LEN inactive in RAND/LOOP | 1 |
+| OUT / DIR | ENV, GATE, RAND, LOOP / POS, NEG | 8 |
+| SWNG | 50–80 | 2 |
+| RATE | 13 divisions, 1/1 through 64T | 4 |
+
+Small turns accumulate independently per knob. Reversing discards unfinished
+motion in the previous direction; limits, page changes and reopening the editor
+clear unused motion. Changing STPS/PULS also clears their dependent controls'
+motion. Unchanged turns do not redraw or save. These counts describe panel
+events, not physical detents or a measured number of degrees on the device.
+
 One LFO cycle is one pattern, and **RATE sets each step's duration**, not a
 division of a fixed bar. At RATE 1/16, seven steps take seven sixteenths:
 0.875 seconds at 120 BPM. The pattern runs across bar lines unless native
@@ -44,9 +61,12 @@ is 0–127; reverse runtime increments from modulation are still supported.
 Custom native speeds display VAR; zero displays STOP, and turning RATE
 from STOP selects 1/16. Native SPD/MULT can still be edited normally, and
 selecting EUCL does not overwrite them. No extra rate field is persisted.
+VAR outside the preset range enters the nearest endpoint without skipping it.
 SPD 64 + MULT 2x gives 1/16; SPD 64 + MULT 1x gives 1/8.
 The audio clock uses exact tempo/SPD/MULT arithmetic with fractional carry;
 MIDI scales its native tick increment by 16/STPS. Both feed stock cycle handling.
+Audio caches its division coefficients while SPD/tempo/MULT/STPS are unchanged;
+modulation invalidates the cache immediately, retaining the exact signed carry.
 TRIG restarts the whole pattern,
 HOLD retains its native latch behavior, and FREE continues while stopped.
 ONE plays one complete pattern; HALF plays half a pattern (3.5 steps at STPS 7).
@@ -57,10 +77,11 @@ settings with fewer than 16 steps now run proportionally shorter cycles.
 Sidecar bytes and native project formats are unchanged; this is an intentional
 timing change, not a claim of sound-compatible migration of those prototypes.
 
-This initial module cannot be combined with **PLOCKS P2**: their retained SRAM
-allocations overlap, and the build refuses the combination. Native project
-file formats are unchanged: WAVE selection uses the native Part field, while
-additional settings use versioned `eulfNN.work/.strd` sidecars.
+Retention is selected when composing the firmware. **SRAM** retains unsaved edits
+but conflicts with PLOCKS P2. **SIDECAR** uses no battery-backed allocation and
+can coexist with PLOCKS P2: use SAVE PROJECT before powering off to retain edits.
+The versioned `eulfNN.work/.strd` files and native project formats are unchanged.
+On power-up SIDECAR also loads the bank that native firmware restores from SRAM.
 
 ## Development checks
 
@@ -70,9 +91,39 @@ make bus REMIX=euclid-lfo
 python3 tools/verify/verify_euclid_lfo.py
 python3 tools/verify/verify_euclid_lfo_card.py --project PATH_TO_TEST_PROJECT
 python3 tools/verify/verify_euclid_lfo_ui.py --project PATH_TO_TEST_PROJECT
+python3 tools/verify/verify_euclid_lfo_ui.py --project PATH_TO_TEST_PROJECT --dirty-start
 python3 tools/verify/verify_euclid_lfo_load.py --project PATH_TO_TEST_PROJECT
 python3 tools/verify/verify_euclid_lfo_audio.py --project PATH_TO_TEST_PROJECT
+python3 tools/verify/verify_euclid_lfo_cpu.py --baseline PATH_TO_CPU_PROFILE_JSON
 ```
+
+The CPU runner uses the already-built image (it never rebuilds firmware),
+freezes its runtime/symbols and records executed ColdFire instructions and
+long divisions. Its 478 cases compare input and output hashes across all
+shapes/directions, audio/MIDI, edits, resets, silence and clock changes.
+The source suite separately compares the engine with immutable revision
+`88c64670c5847edae3e6ddf4ad897e8864d6ee63` under sanitizers; that Git revision
+and Clang must be available for this equivalence check.
+
+The 27 October optimization preserves exact waveform values, random history,
+timing, controls and saved formats. It replaces byte-loop comparisons and
+index divisions, caches previous scaled phase, separates preparation from
+the frequent evaluation path, and removes redundant clock remainder divides.
+The extra runtime state is 192 bytes across all 48 lanes. In the fixed native
+profile, normal waveform updates execute about 25% fewer instructions. In a
+3,000-frame, eight-voice/48-LFO test, average/peak complete audio-interrupt work
+falls 3.74%/6.26%; subtracting stock's unchanged cost gives 15.15% less added
+Euclid work. These are instruction-model results, not measured hardware-cycle
+percentages or a claim of a globally minimal implementation. Clock wrappers
+trade some additional simple instructions for fewer long divisions.
+Exact images, costs and verification limits are in [DECISIONS.md](DECISIONS.md).
+
+The generated module keeps all writable state in loader-initialized data.
+The loader does not clear BSS: relying on C zero initialization can leave the
+redraw guard nonzero and blank both native and Euclid LFO SETUP. Generation
+rejects BSS/COMMON state in both retention variants. The dirty-start panel
+check seeds all Euclid state before the real loader runs and checks visible
+popup content, including ordinary stock-wave SETUP, as well as edited values.
 
 The focused check runs mathematical boundary/count tests with sanitizers,
 checks sidecar byte order, CRC and refusal of malformed data (including
@@ -131,6 +182,11 @@ and compares stock SQR with 48 EUCLID lanes on the same image. It requires eight
 non-silent track chains and main output, includes a native Part change, and
 reports ColdFire instruction counts. These are software-model observations,
 not hardware-cycle limits or a headroom guarantee for arbitrary remixes.
+Use `--remix NAME --skip-build` for an already-built composition. A frozen
+comparison additionally takes `--image PATH --runtime-elf PATH`; both must
+belong to the same build. Paired ISR entry/exit counts are the reliable cost
+metric. The port's separately reported whole-frame counter starts after the
+scheduled Part change and is not comparable as a full-run per-frame cost.
 
 The audio comparison check renders seven eight-second native main-output
 captures: sustained chord, zero pulses, regular 4/16, Euclidean 5/16,

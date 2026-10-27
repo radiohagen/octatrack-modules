@@ -169,6 +169,42 @@ int main(void) {
     }
     puts("PASS: bank store/reload, missing-source defaults, strict path scope, corrupt-copy refusal and new project");
     fresh(); install(work,fixture); eul_load_all(); eul_load_post();
+#ifdef EUL_SIDECAR_ONLY
+    memset(retained_memory,0xa5,sizeof(retained_memory));
+    eul_bank[0][0][0].pulses=7; ++eul_revision[0]; eul_dirty[0]=1;
+    eul_nv_touch_part(0,0);
+    assert(!eul_nv_checkpoint(0));
+    eul_nv_boot(0); eul_load_mask(0xfffe); eul_load_post();
+    assert(!memcmp(eul_bank[0],fixture,EUL_BANK_BYTES));
+    eul_bank[0][0][0].pulses=7; ++eul_revision[0]; eul_dirty[0]=1;
+    eul_write_mask(1);
+    EulBank saved; memcpy(saved,eul_bank[0],EUL_BANK_BYTES);
+    memset(eul_bank,0,sizeof(eul_bank));
+    eul_nv_boot(0); eul_load_mask(0xfffe); eul_load_post();
+    assert(!memcmp(eul_bank[0],saved,EUL_BANK_BYTES));
+    for(unsigned i=0;i<sizeof(retained_memory);++i) assert(retained_memory[i]==0xa5);
+    puts("PASS: sidecar power-up loads the native retained bank; saved edits persist, unsaved edits revert, SRAM unchanged");
+#else
+    uint8_t journal_before[EUL_NV_BYTES];
+    for(unsigned part=0;part<EUL_PARTS;++part) for(unsigned lane=0;lane<EUL_LANES;++lane) {
+        memcpy(journal_before,retained_memory,sizeof(journal_before));
+        eul_bank[0][part][lane].boost^=1; ++eul_revision[0];
+        eul_nv_touch_lane(0,part,lane);
+        unsigned begin=16+16*(part*EUL_LANES+lane),end=begin+16;
+        assert(!memcmp(journal_before,retained_memory,begin));
+        assert(!memcmp(journal_before+end,retained_memory+end,EUL_NV_BYTES-end));
+        assert(memcmp(journal_before+begin,retained_memory+begin,16));
+        EulParams saved=eul_bank[0][part][lane];
+        eul_bank[0][part][lane].boost^=1;
+        assert(eul_nv_restore(0));
+        assert(!memcmp(&eul_bank[0][part][lane],&saved,sizeof(saved)));
+    }
+    memcpy(journal_before,retained_memory,sizeof(journal_before));
+    eul_nv_touch_lane(0,0,48); eul_nv_touch_lane(16,0,0); eul_nv_touch_lane(0,8,0);
+    eul_nv_touch_lane(1,0,0);
+    assert(!memcmp(journal_before,retained_memory,sizeof(journal_before)));
+    puts("PASS: single-lane retention updates only its record, all 384 working/saved audio/MIDI lanes recover; invalid contexts inert");
+    fresh(); install(work,fixture); eul_load_all(); eul_load_post();
     assert(eul_nv_checkpoint(0));
     /* Edits in both audio/MIDI and working/saved copies, without a disk save. */
     eul_bank[0][0][0].pulses=7;
@@ -197,11 +233,12 @@ int main(void) {
     eul_load_post();
     other_project=1;
     assert(!eul_nv_restore(0));
-    eul_bank[0][0][0].pulses=7; ++eul_revision[0]; eul_nv_touch_part(0,0);
+    eul_bank[0][0][0].pulses=7; ++eul_revision[0]; eul_nv_touch_lane(0,0,0);
     memcpy(eul_bank[0],fixture,EUL_BANK_BYTES);
     assert(eul_nv_restore(0) && eul_bank[0][0][0].pulses==7);
     other_project=0;
     assert(!eul_nv_restore(0));
     puts("PASS: project identity rejects foreign retained state and re-keys on the first edit after save-as/rename");
+#endif
     return 0;
 }

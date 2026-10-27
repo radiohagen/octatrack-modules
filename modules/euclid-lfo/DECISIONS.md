@@ -4,6 +4,243 @@ This fixed-step revision supersedes the original bar-fitted prototype.
 Evidence is image-specific; no physical-device acceptance or card installation
 is claimed. Historical local prototypes are not part of this source release.
 
+## Bus composition retention
+
+The bus remix explicitly selects SIDECAR. It leaves PLOCKS P2, MIDI Scenes,
+KITS and Harmony retained allocations unchanged. Unsaved LFO edits are not
+restored after power-off. The existing file codec and STORE refusal handling
+remain in use; no second file format or journal is introduced.
+
+## CPU optimization without behavior changes (27 October 2026)
+
+The reference is author commit `88c64670c5847edae3e6ddf4ad897e8864d6ee63`,
+including the startup fix below. Both firmware candidates use the same
+RADBUSR1 composition at integration base
+`6eed3eebc7e9d496b322859e3e6c34b80b4be72c`. This is a local optimization
+candidate, not a new published package or device installation.
+
+Changes are confined to the Euclid engine and its native adapters:
+
+- Compare all ten settings bytes with alias/alignment-safe builtin copies
+  and three fixed-width comparisons instead of a byte loop. No overread,
+  generation counter or external writer invalidation assumption is needed.
+- Separate cold pattern/clock preparation from frequent evaluation. Avoid
+  normalizing an already normalized record again when building its masks.
+- Cache previous scaled phase. Its 4 bytes per lane are read only when the
+  prior hit remains valid; context/shape/length edits, resets and terminal
+  states invalidate that history. DIR-only edits keep it valid. No random
+  values, random draws, interpolation curves or rounding rules are removed.
+- Use a bounded subtraction for pulse rotation and a 24-byte track lookup
+  instead of runtime remainder/division. Avoid crossing calculations when
+  a new hit or reset has already established a pulse transition.
+- Bypass accent division at exactly zero level, zero boost or full boost.
+- ColdFire quotient-only division prevents GCC emitting REMS plus DIVS for
+  the same clock dividend. Reconstruct the remainder with multiply/subtract.
+  MIDI clock division count falls from two to one; audio coefficient misses
+  fall from five to three. The original uncached audio clock stays as oracle.
+
+All arithmetic remains integer and exact. Native SPD/MULT/TRIG/DEP, both LFO
+types, the UI, sidecar bytes, retention variants and Part lifecycle are
+unchanged. No DSP code, global build flags, timing resolution or public
+parameter ranges change. Loaded data grows 192 bytes (83,524 to 83,716);
+code/read-only data grows 888 bytes (16,981 to 17,869). BSS remains zero.
+
+Measured executed ColdFire instructions, **not hardware cycles**:
+
+| Fixed workload | Baseline | Optimized |
+|---|---:|---:|
+| Normal waveform profile, 32,768 forward calls | 8,481,512 | 6,347,252 (-25.16%) |
+| Reverse waveform profile, 16,384 calls | 4,265,184 | 3,207,908 (-24.79%) |
+| Terminal waveform profile, 1,024 calls | 207,872 | 132,608 (-36.21%) |
+| Existing 16-step stress, peak warm 24-lane batch | 7,488 | 5,802 |
+| Eight FLEX voices / 48 LFOs, mean complete frame ISR | 38,858.134 | 37,406.256 (-3.74%) |
+| Same load, peak complete frame ISR | 65,581 | 61,477 (-6.26%) |
+
+The waveform matrix includes all eight shape/direction values, audio/MIDI,
+default/7-step/dense/silent patterns and cold/forward/reverse/stopped/reset/
+live-edit/terminal stages. It is a fixed test mix, not a usage survey.
+Clock adapter groups execute 1.5% more instructions when steady and 11.3%
+more under continuous modulation, but reduce long divisions by 75% and
+55.6% respectively. Instruction counts alone do not price that tradeoff;
+no hardware cycle percentage or global-minimum claim is made. Native UI
+drawing and integrity-protected persistence are deliberately unchanged.
+
+The load test pairs exactly 3,000 ISR entry/exit spans and includes a native
+Part change. All 28 generated fixture hashes match between runs. Stock's
+mean ISR cost is unchanged (29,272.675 versus 29,272.673); subtracting it gives
+an inferred Euclid-added cost of 9,585.458 versus 8,133.583 (-15.15%). That
+subtraction is specific to this fixture. Load audio proves liveness, not
+sample identity: FREE pre-roll differs by one emulated audio frame. Controlled
+phase/output comparisons below establish exact waveform equivalence.
+
+Verification on the optimized image:
+
+- ASan/UBSan baseline comparison: 15,274,528 process calls including random
+  history, 103,472 masks, 7,700,032 clocks and 299,520 edits. It compiles the
+  old header/engine separately, so shared candidate helpers cannot make the
+  reference agree by construction. A deliberately changed output is rejected.
+- All 478 installed CPU-profile cases have matching input hashes, call
+  counts and output hashes. The original-image baseline was frozen before
+  changing firmware; adding input hashes reproduced every original cost and
+  output field. Receipts distinguish current verifier source from binaries.
+- The complete focused gate passes installed audio/MIDI routing, all native
+  trigger modes, signed/exact clocks, register preservation, codec and
+  fault-injected lifecycle tests, native Part save/clear/copy/paste/undo,
+  sidecar no-SRAM-write assertions and all 69 unchanged LCD pixel goldens.
+- Sixteen full-boot panel scenarios pass under both clean and dirty starts
+  (32 checks). All pixels/results match between boots; all twelve shared
+  older-baseline scenarios remain identical. The startup test dirties all
+  35 writable objects, including the additional cache bytes.
+- Source `make check` covers both generated retention variants, no-BSS
+  enforcement, provenance and 32 tests, including comparator negative
+  controls for changed inputs, outputs, call counts and missing cases.
+
+Two measurement limitations were found and kept explicit. LOAD METER detours
+the native ISR entry, so the load gate now recognizes its validated `lm_in`
+target rather than watching unreachable original bytes. The first failed
+instrument run is retained. Also, the port resets its general instruction
+counter after scheduled actions but divides by the full frame count; that
+reported counter is labeled non-comparable and is not used above.
+
+The wider stock-Part panel gesture matrix is unsupported on this KITS
+composition: `part-save`/`part-paste` enter other menus. Exact baseline reruns
+produce identical settings and LCD captures, demonstrating this predates the
+optimization. Those failures remain recorded, not converted into passes;
+the independent installed Part lifecycle gate passes. Full native-card and
+whole-package suites were not rerun, and physical audio/MIDI, cycle/cache/
+memory-bus behavior and device acceptance remain unverified.
+
+Optimized MAIN OS SHA-256:
+`f816e55dfd89ca740f8942377612ab48cc9d800487b313353b0d59f9efe9c37f`.
+Runtime SHA-256:
+`1b8d81f61ffe317c2a7671b6430108ff28cdbcb5af307ab1a028df1adaf89b8d`.
+Local receipts: `out/euclid-lfo-cpu/profile-3zidfciq/receipt.json`,
+`out/euclid-lfo/focused-receipt.json`, load runs `load-dxk0d5wp` /
+`load-dub7xzqn`, and panel runs `panel-cyal4qf4` / `panel-6m72_r15`.
+These ignored artifacts contain private inputs/binaries and are not published.
+
+## Blank LFO SETUP after startup (23 October 2026)
+
+RADBUSR1 was reported to show a blank LFO details page. The released image
+`9ec04860bc0098f9a7723c6483b7aad27947ebc23ee102dd51fffd44b421831e`
+reproduces blank native SETUP and Euclid editor pages on both audio and MIDI
+when its redraw guard, `rate_writing` at `0x4114528c`, is preloaded nonzero
+before boot. The same image draws them with that word initially zero; NO
+still exits in the failing test. This demonstrates a real defect, not a
+readback of the reported device's memory.
+
+The loader deliberately does not clear BSS. C's explicit zero initializers
+were therefore insufficient for several small state variables. In particular,
+the new redraw guard suppressed the entire native/Euclid drawer from startup.
+Previous tests started on zero-filled emulator RAM and asserted settings
+while only recording, not rejecting, blank panel screenshots.
+
+Both retention variants now use `-fno-zero-initialized-in-bss`, matching the
+existing generated-module convention. Generation rejects remaining BSS/COMMON
+symbols. The sidecar build moves 84 bytes from BSS to loaded data, with the
+same text size and total module storage; no rhythm, encoder, native field or
+sidecar-format change. A negative source test restores the old compiler
+behavior and requires rejection in both variants.
+
+The panel gate gains stock-wave SETUP cases, visible-popup assertions and
+`--dirty-start`: all 35 writable variables (83,524 bytes in the sidecar
+build) are dirtied before the actual loader executes, not reset by the test
+after boot. The original RADBUSR1 fails this gate with zero popup ink.
+The fixed combined image passes 12 selected audio/MIDI scenarios under both
+clean and dirty starts (24 cases): stock SETUP, EUCL-selected SETUP, editor
+pages 1/2, rapid/held encoder bursts and above-maximum RATE correction.
+All 12 clean/dirty rendered PNGs and result records match exactly.
+
+Author source checks pass all 26 tests, provenance and both generated variants.
+The direct `verify_euclid_lfo.py radio-bus` gate passes on this exact candidate:
+sanitized engine/clock/codec/lifecycle checks, installed audio/MIDI timing and
+routing, native Part operations, sidecar no-SRAM-write checks and all 69
+unchanged LCD pixel regressions.
+The broader `make check REMIX=radio-bus BUILD=R1 MODULES='EUCLID LFO'`
+run was deliberately interrupted after over 25 minutes in the unrelated
+Harmony SIZE matrix. Completed gates had no failures, including boot/runtime
+readback, DSP dirty-state/init, remix switching, USB and multiple MIDI/Part
+checks; project-backed gates were explicitly skipped without OT_PROJECT.
+That interrupted run is not a complete package qualification.
+
+Candidate MAIN OS SHA-256:
+`f070bbe950bcce8b6206c70fde196bb862e2683cecab26aa89d3771dad2ac17e`.
+Runtime SHA-256:
+`e62168b185fb0af730dbf9f505fe3fb45393865538e67b1a5a3e993223b9d78a`.
+This is a local candidate based on the RADBUSR1 composition, not a replacement
+published package or a device installation. Physical acceptance remains open.
+
+## Encoder response and bounded CPU work (23 October 2026)
+
+The user reported overly fast, possibly laggy/inconsistent controls. The
+editor previously applied every raw panel count directly, even to two/four-way
+choices, and redrew the whole page on unchanged values. Each real edit also
+recomputed and committed all 48 retained records in its Part.
+
+- Field-specific resistance is documented in README: four counts for pattern
+  counts/rotation/rate, eight for OUT/DIR, two for swing and one for 0–127
+  continuous amounts. No acceleration; unused motion is bounded and cleared
+  at limits, direction changes, page changes and reopen. Native encoder state
+  is not borrowed. Existing value ranges, dependent clamps, mode meanings,
+  six-control layout, waveform and persistence formats remain unchanged.
+- No-change/sub-threshold events do not redraw, dirty or write settings. RATE
+  suppresses intermediate native-writer redraws and draws once after both
+  SPD and MULT are updated. Other controls no longer perform RATE lookups.
+  Turning down from VAR above the fastest preset now enters 64T instead of
+  skipping to 1/64. Boundary panel tests cover both ends on audio and MIDI.
+- A knob edit commits only its lane's retained record. Whole-Part lifecycle
+  operations retain their existing path. The same ticket/revision guards,
+  invalidation-before-write, per-record CRC and save-as re-keying are used.
+- A 768-byte audio-clock coefficient cache removes repeated divisions while
+  live speed, tempo, multiplier and length stay unchanged. Any changed input
+  recalculates immediately. Signed carry and reverse/stop transitions remain
+  bit-exact with the original uncached arithmetic, retained as a test oracle.
+
+Measured under the ColdFire port, not hardware cycles:
+
+| Workload | Before | After |
+|---|---:|---:|
+| Already-clamped editor turn, journal uninitialized | 32,422 instructions | 298 |
+| Zero-delta editor event | 32,002 instructions | 292 |
+| Retained edit, all 48 records versus one record | 61,973 instructions | 3,650 |
+| 127 steady clock calls | 4,572 instructions / 635 long divisions | 4,495 / 0 |
+| 127 continuously changing clock calls | 4,572 instructions / 635 long divisions | 7,633 / 635 |
+
+The cache deliberately trades extra miss-path instructions for division-free
+steady updates; it is not a claim that all workloads get fewer instructions.
+The 6,000-frame, 48-lane/eight-FLEX loaded test passes with 36,292 instructions
+per frame, versus 36,256 on the prior image with the same source project;
+peak ISR is 74,513 versus 73,817. Stock comparison remains 27,905 per frame.
+Instruction counts do not price hardware division latency or establish spare
+hardware headroom. Physical knob feel and hardware CPU cost remain unverified.
+
+Image SHA-256:
+`42707abc4dcdf368a09c1471eb3e085701cf4df6d8abbd6aa85d77f30beec323`.
+Runtime SHA-256:
+`a03a88c12b60ae92d377c5b57ad7c2bb6d12969b4bd4cf228fb9ffb8825e65ba`.
+
+Focused validation passes 2,262,400 cached/original clock comparisons plus the
+existing independent 64-bit clock tests, installed native routing/trigger
+checks and all 69 unchanged LCD goldens. Encoder checks include all fields,
+signed slow/coalesced motion, endpoint reversal, held pushes, inactive fields
+and partial-turn isolation between pages/reopens. All 384 retained lane
+records recover independently without changing neighbouring records.
+The linked integration test additionally checks whole-Part publication with
+retention enabled, then an actual native encoder edit: 34,410 instructions
+including the journal and redraw, with neighbouring records unchanged.
+The bulk `eul_changed(bank,part)` entry retains its whole-Part contract; only
+the private editor path supplies a lane-specific change.
+`make check REMIX=euclid-lfo` passes every runnable gate. General `verify_set`
+and `verify_reserve_writes` skip without OT_PROJECT. The final image passes the
+6,000-frame DSP-loaded fixture and four new audio/MIDI RATE boundary scenarios.
+The complete 47-scenario UART panel suite and native FAT/STORE/power-up suite
+pass on preceding image
+`6d93ba97bff470df60058a2811d468437352e7b3a0e09ee2be89c91363c294cb`;
+only the out-of-range VAR-to-preset selection changed afterward. Those full
+panel/card results remain explicitly prior-image evidence, not a rerun of
+every lifecycle scenario on the final RATE-only correction.
+No device, personal firmware package or project has been modified.
+
 ## Exact audio-clock correction (22 October 2026)
 
 This supersedes the earlier image's timing claims below. Paired native

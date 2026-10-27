@@ -18,8 +18,9 @@ static std::vector<uint8_t> read(const char *path) {
     return {std::istreambuf_iterator<char>(f),std::istreambuf_iterator<char>()};
 }
 int main(int argc,char **argv) {
-    if(argc!=8) {
-        std::fprintf(stderr,"euclid_lfo_probe image runtime base settings-address output-directory encode-address decode-address\n");
+    bool cpu_only=argc==9 && std::string(argv[8])=="--cpu-only";
+    if(argc!=8 && !cpu_only) {
+        std::fprintf(stderr,"euclid_lfo_probe image runtime base settings-address output-directory encode-address decode-address [--cpu-only]\n");
         return 2;
     }
     auto image=read(argv[1]),runtime=read(argv[2]);
@@ -30,12 +31,16 @@ int main(int argc,char **argv) {
     auto *cpu=m.getCpuState();
     constexpr uint32_t stack=0x47100000,stop=0x470ff000;
     unsigned peak=0,last_count=0;
+    unsigned last_divides=0;
+    bool count_divides=false;
     bool audio_reference=false;
     int64_t reference_remainder[24]={};
     auto run_to=[&](uint32_t pc,uint32_t end) {
         m68k_set_reg(cpu,M68K_REG_PC,pc);
         unsigned count=0;
+        last_divides=0;
         while(m.pc()!=end && count++<500000) {
+            if(count_divides && (m.read16(m.pc())&0xffc0)==0x4c40) ++last_divides;
             // Test-only oracle: feed the unchanged stock SQR trigger/wrap
             // consumer an independently calculated exact increment. No image
             // patch, no skipped trigger/output instructions. EUCL runs its
@@ -65,6 +70,134 @@ int main(int argc,char **argv) {
         m68k_set_reg(cpu,M68K_REG_SP,stack);
         m.write32(stack,stop); m.write32(stack+4,a); m.write32(stack+8,b);
     };
+    std::map<std::string,uint32_t> symbols;
+    std::ifstream symbol_file(std::string(argv[5])+"/symbols.txt");
+    std::string name; uint32_t address;
+    while(symbol_file>>name>>std::hex>>address) symbols[name]=address;
+    if(cpu_only) {
+        // A short, reproducible profile of the actual linked ColdFire code.
+        // Counts exclude neither the waveform adapter nor clock context work.
+        // Output hashes cover only observable values, not private cache layout.
+        // This is an instruction model: no cache, memory-bus or hardware timing.
+        struct Cost {
+            unsigned calls=0, peak=0, divisions=0, hash=2166136261u, input_hash=2166136261u;
+            uint64_t instructions=0;
+            void input(uint32_t value) {
+                for(unsigned b=0;b<4;++b) { input_hash^=(value>>(8*b))&255; input_hash*=16777619u; }
+            }
+            void add(unsigned count,unsigned divides,uint32_t value) {
+                ++calls; instructions+=count; divisions+=divides;
+                if(count>peak) peak=count;
+                for(unsigned b=0;b<4;++b) { hash^=(value>>(8*b))&255; hash*=16777619u; }
+            }
+        };
+        std::ofstream report(std::string(argv[5])+"/cpu-profile.json");
+        report << "{\"hardware_cycles\":false,\"units\":\"executed ColdFire instructions\",\"cases\":[\n";
+        bool first=true;
+        auto record=[&](const char *kind,const char *pattern,unsigned mode,unsigned midi,
+                        const char *stage,const Cost &cost) {
+            if(!first) report << ",\n";
+            first=false;
+            report << "{\"kind\":\"" << kind << "\",\"pattern\":\"" << pattern
+                   << "\",\"mode\":" << mode << ",\"midi\":" << midi
+                   << ",\"stage\":\"" << stage << "\",\"calls\":" << cost.calls
+                   << ",\"instructions\":" << cost.instructions << ",\"peak\":" << cost.peak
+                   << ",\"long_divisions\":" << cost.divisions << ",\"input_hash\":" << cost.input_hash
+                   << ",\"output_hash\":" << cost.hash << "}";
+        };
+        count_divides=true;
+        m.write32(0x800000e0,0);
+        for(unsigned track=0;track<8;++track) {
+            m.write8(0x8000182a+track,0); m.write8(0x80001832+track,0);
+        }
+        struct Pattern { const char *name; unsigned steps,pulses,accents,attack,decay,swing; };
+        const Pattern patterns[]={{"default",8,3,0,0,63,0},{"musical",7,5,2,27,80,0},
+                                  {"dense",16,16,16,127,127,30},{"silent",16,0,0,0,0,0}};
+        for(const auto &pattern:patterns) for(unsigned mode=0;mode<8;++mode)
+        for(unsigned midi=0;midi<2;++midi) {
+            EulParams p; eul_defaults(&p);
+            p.steps=pattern.steps; p.pulses=pattern.pulses; p.accents=pattern.accents;
+            p.attack=pattern.attack; p.decay=pattern.decay; p.swing=pattern.swing;
+            p.mode=mode; p.boost=80;
+            unsigned id=midi*24;
+            auto publish=[&]() {
+                for(unsigned b=0;b<sizeof(p);++b) m.write8(bank+sizeof(p)*id+b,((uint8_t *)&p)[b]);
+            };
+            publish();
+            m.write32(symbols.at("eul_context")+4*id,0);
+            uint32_t native=midi?0x46c770e0:0x800010e8;
+            uint32_t trig=midi?0x46c76dc0+0x41:0x80000510+0x27;
+            m.write8(trig,1);
+            auto waveform=[&](Cost &cost,unsigned phase,unsigned reset) {
+                m.write32(native,phase); args(0,0);
+                for(unsigned b=0;b<sizeof(p);++b) cost.input(m.read8(bank+sizeof(p)*id+b));
+                cost.input(m.read32(native)); cost.input(reset); cost.input(m.read8(trig));
+                cost.input(0); cost.input(midi); // Native lane index and audio/MIDI context.
+                m68k_set_reg(cpu,M68K_REG_A0,native); m68k_set_reg(cpu,M68K_REG_D0,reset);
+                if(!run(m.read32((midi?0x400d6290:0x400d6210)+19*4))) return false;
+                cost.add(last_count,last_divides,m.read32(native+4)); return true;
+            };
+            Cost cold; if(!waveform(cold,0,1)) return 1;
+            record("waveform",pattern.name,mode,midi,"cold",cold);
+            Cost steady;
+            for(unsigned frame=1;frame<=512;++frame) {
+                unsigned phase=(frame%256)*(EUL_PHASE/256);
+                if(!waveform(steady,phase,!phase)) return 1;
+            }
+            record("waveform",pattern.name,mode,midi,"forward",steady);
+            Cost reverse;
+            for(unsigned frame=0;frame<256;++frame)
+                if(!waveform(reverse,EUL_PHASE-1-frame*(EUL_PHASE/256),0)) return 1;
+            record("waveform",pattern.name,mode,midi,"reverse",reverse);
+            Cost stopped;
+            for(unsigned frame=0;frame<64;++frame)
+                if(!waveform(stopped,EUL_PHASE/3,0)) return 1;
+            record("waveform",pattern.name,mode,midi,"stopped",stopped);
+            Cost reset;
+            for(unsigned frame=0;frame<16;++frame) if(!waveform(reset,0,1)) return 1;
+            record("waveform",pattern.name,mode,midi,"retrigger",reset);
+            Cost edit;
+            for(unsigned frame=0;frame<16;++frame) {
+                p.attack^=1; p.boost^=1; publish();
+                if(!waveform(edit,(frame%8)*(EUL_PHASE/8),frame==0)) return 1;
+            }
+            record("waveform",pattern.name,mode,midi,"live-edit",edit);
+            Cost terminal; m.write8(trig,4);
+            for(unsigned frame=0;frame<16;++frame)
+                if(!waveform(terminal,EUL_PHASE/2,0)) return 1;
+            record("waveform",pattern.name,mode,midi,"terminal",terminal);
+        }
+        for(unsigned steps:{1u,7u,16u}) for(unsigned midi=0;midi<2;++midi) {
+            EulParams p; eul_defaults(&p); p.steps=steps;
+            for(unsigned b=0;b<sizeof(p);++b) m.write8(bank+sizeof(p)*24*midi+b,((uint8_t *)&p)[b]);
+            m.write32(symbols.at("eul_clock_context")+4*24*midi,0);
+            for(const char *stage:{"cold","steady","modulated","reverse","stopped"}) {
+                Cost cost;
+                unsigned frames=std::string(stage)=="cold"?1:512;
+                for(unsigned frame=0;frame<frames;++frame) {
+                    bool modulated=std::string(stage)=="modulated";
+                    int speed=std::string(stage)=="stopped"?0:std::string(stage)=="reverse"?-16384:
+                        modulated?(frame&1?-(int)(16384+frame):(int)(16384+frame)):16384;
+                    m.write32(0x8000181c,modulated?2400+frame:2880);
+                    args(speed,0);
+                    if(midi) m.write32(stack+12,1);
+                    else { m.write32(stack+12,speed); m.write32(stack+16,1); }
+                    cost.input(m.read8(bank+sizeof(p)*24*midi)); // Actual published STEPS.
+                    cost.input(speed); cost.input(speed); // Native increment and live speed.
+                    cost.input(m.read32(0x8000181c)); cost.input(1); // Tempo and MULT.
+                    cost.input(0); cost.input(midi); // Native lane index and clock kind.
+                    if(!run(symbols.at(midi?"eul_scale_increment":"eul_scale_audio"))) return 1;
+                    cost.add(last_count,last_divides,m68k_get_reg(cpu,M68K_REG_D0));
+                }
+                std::string pattern=std::to_string(steps)+"-steps";
+                record("clock",pattern.c_str(),0,midi,stage,cost);
+            }
+        }
+        report << "\n]}\n";
+        if(!report) return 1;
+        puts("PASS: linked ColdFire waveform/clock CPU profile; observable-output hashes captured, not hardware cycles");
+        return 0;
+    }
     // Execute the exact linked ColdFire codec against the independent host
     // fixture. These are codec tests, not STORE or filesystem acceptance.
     auto fixture=read((std::string(argv[5])+"/storage-v1.bin").c_str());
@@ -87,10 +220,29 @@ int main(int argc,char **argv) {
     for(unsigned i=0;i<EUL_BANK_BYTES;++i) if(m.read8(decoded+i)!=0xa5) return 1;
     puts("PASS: composed ColdFire sidecar codec matches independent fixture and refuses corruption without partial output");
     peak=0;
-    std::map<std::string,uint32_t> symbols;
-    std::ifstream symbol_file(std::string(argv[5])+"/symbols.txt");
-    std::string name; uint32_t address;
-    while(symbol_file>>name>>std::hex>>address) symbols[name]=address;
+    // Compare the optimized clock with the original linked reference using
+    // real ColdFire execution, including cache misses and carry reversals.
+    count_divides=true;
+    for(unsigned changed=0;changed<2;++changed) {
+        constexpr uint32_t carry=0x47017000,cache=0x47017010;
+        for(unsigned b=0;b<48;++b) m.write8(carry+b,0);
+        unsigned old_count=0,new_count=0,old_div=0,new_div=0;
+        for(unsigned frame=0;frame<128;++frame) {
+            int speed=changed?(frame&1?-(int)(16384+frame):(int)(16384+frame)):16384;
+            args(speed,2880); m.write32(stack+12,1); m.write32(stack+16,7); m.write32(stack+20,carry);
+            if(!run(symbols.at("eul_audio_clock"))) return 1;
+            unsigned expected=m68k_get_reg(cpu,M68K_REG_D0);
+            if(frame) { old_count+=last_count; old_div+=last_divides; }
+            args(cache,speed); m.write32(stack+12,2880); m.write32(stack+16,1);
+            m.write32(stack+20,7); m.write32(stack+24,carry+4);
+            if(!run(symbols.at("eul_audio_clock_cached"))) return 1;
+            if(m68k_get_reg(cpu,M68K_REG_D0)!=expected || m.read32(carry)!=m.read32(carry+4)) return 1;
+            if(frame) { new_count+=last_count; new_div+=last_divides; }
+        }
+        std::printf("COST: %s audio clock, 127 calls original/cached: %u/%u instructions, %u/%u long divisions\n",
+                    changed?"modulated":"steady",old_count,new_count,old_div,new_div);
+    }
+    count_divides=false;
     if(!symbols.count("eul_st_partsaved") || !symbols.count("eul_st_partclear") || !symbols.count("eul_ui_style")) return 2;
     if(!symbols.count("eul_label") || !symbols.count("eul_icon")) return 2;
     args(0x47015000,19); if(!run(0x4003be4c)) return 1;
@@ -492,6 +644,16 @@ int main(int argc,char **argv) {
     // Register the actual setup keymap; test the native dispatch path, not
     // merely the C setter. Held encoder-push state must not multiply delta.
     args(0x400bbd22); if(!run(0x40031494)) return 1;
+    // Stable before/after workload, including an already-clamped turn. No
+    // retained journal is initialized in this isolated UI probe.
+    args(0x34,1); if(!run(m.read32(0x400bbb22))) return 1;
+    m.write8(bank,16);
+    args(0,1); if(!run(0x40031944)) return 1;
+    unsigned limit_cost=last_count;
+    args(0,-4); if(!run(0x40031944)) return 1;
+    std::printf("COST: editor clamped +1 / changing -4: %u/%u instructions (journal uninitialized)\n",limit_cost,last_count);
+    args(0,0); if(!run(0x40031944)) return 1;
+    std::printf("COST: editor zero delta: %u instructions\n",last_count);
     for(unsigned midi=0;midi<2;++midi) {
         if(midi) {
             m.write32(0x80000012,1);
@@ -506,30 +668,35 @@ int main(int argc,char **argv) {
         eul_defaults(&p);
         for(unsigned b=0;b<sizeof(p);++b) m.write8(settings+b,((uint8_t *)&p)[b]);
         const unsigned page0[]={0,1,2,6,7,8},page1[]={3,4,5,9};
+        const unsigned counts0[]={4,4,4,4,4,1},counts1[]={8,1,1,2};
         for(unsigned enc=0;enc<6;++enc) {
             unsigned field=page0[enc],old=m.read8(settings+field);
             m.write32(0x46c7d8ee + (0x38+enc)*24,1);
+            for(unsigned tick=1;tick<counts0[enc];++tick) {
+                args(enc,1); if(!run(0x40031944)) return 1;
+                if(m.read8(settings+field)!=old || last_count>1000) return 1;
+            }
             args(enc,1); if(!run(0x40031944)) return 1;
             if(m.read8(settings+field)!=old+1) {
                 std::fprintf(stderr,"encoder %u midi=%u: +1 became %d\n",enc,midi,
                              (int)m.read8(settings+field)-(int)old); return 1;
             }
-            args(enc,-1); if(!run(0x40031944)) return 1;
+            args(enc,-counts0[enc]); if(!run(0x40031944)) return 1;
             if(m.read8(settings+field)!=old) return 1;
         }
         args(0x31,1); if(!run(m.read32(0x400bbb56))) return 1;
         for(unsigned enc=0;enc<4;++enc) {
             unsigned field=page1[enc],old=m.read8(settings+field);
-            args(enc,1); if(!run(0x40031944)) return 1;
+            args(enc,counts1[enc]); if(!run(0x40031944)) return 1;
             if(m.read8(settings+field)!=old+1) return 1;
         }
         args(6,127); if(!run(0x40031944)) return 1;
         if(m.read8(settings)!=8) return 1;
-        args(4,1); if(!run(0x40031944)) return 1;
+        args(4,8); if(!run(0x40031944)) return 1;
         if(m.read8(settings+3)!=(EUL_GATE|EUL_NEGATIVE)) return 1;
         args(4,1); if(!run(0x40031944)) return 1;
         if(m.read8(settings+3)!=(EUL_GATE|EUL_NEGATIVE)) return 1;
-        args(4,-1); if(!run(0x40031944)) return 1;
+        args(4,-8); if(!run(0x40031944)) return 1;
         if(m.read8(settings+3)!=EUL_GATE) return 1;
         // RATE's native descriptor/Part writer needs a complete boot. Its
         // preset/STOP/pushed controls are covered by the panel gate.
@@ -548,11 +715,22 @@ int main(int argc,char **argv) {
             if(m.read8(settings+5)!=old) return 1;
         }
         m.write8(settings+3,EUL_GATE);
+        // Partial turns must not carry between pages or across editor exit.
+        args(0x34,1); if(!run(m.read32(0x400bbb22))) return 1;
+        unsigned old_steps=m.read8(settings);
+        args(0,3); if(!run(0x40031944) || m.read8(settings)!=old_steps) return 1;
+        args(0x31,1); if(!run(m.read32(0x400bbb56))) return 1;
+        args(0,1); if(!run(0x40031944) || m.read8(settings+3)!=EUL_GATE) return 1;
+        args(0x31,1); if(!run(m.read32(0x400bbb56))) return 1;
+        args(0,1); if(!run(0x40031944) || m.read8(settings)!=old_steps) return 1;
+        args(0x32,1); if(!run(m.read32(0x400bbb70))) return 1;
+        args(0x31,1); if(!run(m.read32(0x400bbb56))) return 1;
+        args(0,3); if(!run(0x40031944) || m.read8(settings)!=old_steps) return 1;
         // NO returns to native setup without discarding edits.
         args(0x32,1); if(!run(m.read32(0x400bbb70))) return 1;
         if(m.read8(settings+9)!=1 || m.read8(settings+3)!=EUL_GATE) return 1;
     }
-    puts("PASS: native keymap and encoder dispatch: audio/MIDI, 11 pattern controls, signed unit steps, held pushes, DIR end stops, inactive controls inert, NO retains edits; RATE uses the full-boot panel gate");
+    puts("PASS: native keymap and encoder dispatch: audio/MIDI, 11 pattern controls, slow/coalesced resistant steps, held pushes, DIR end stops, inactive controls inert, NO retains edits; RATE uses the full-boot panel gate");
     // STORE's actual client ABI, then Part Reload's installed copy adapter.
     // No file I/O is replaced or claimed by this direct-memory probe.
     for(unsigned part=0;part<4;++part) {
@@ -616,5 +794,57 @@ int main(int argc,char **argv) {
     args(dest_part); if(!run(0x40029b78)) return 1;
     for(unsigned b=0;b<480;++b) if(m.read8(dest_part_data+b)) return 1;
     puts("PASS: native Part copy/paste across banks, immutable clipboard snapshot, undo mirror restore, and clipboard-kind rejection");
+    // Native path formatter and linked retention code, without filesystem
+    // calls. Compare one edit's old all-lane work with the scoped record.
+    const char set_name[]="SET",project_name[]="PROJECT",suffix[]="work";
+    for(unsigned b=0;b<sizeof(set_name);++b) m.write8(0x100f8480+b,set_name[b]);
+    for(unsigned b=0;b<sizeof(project_name);++b) m.write8(0x100f8378+b,project_name[b]);
+    for(unsigned b=0;b<sizeof(suffix);++b) m.write8(0x47015100+b,suffix[b]);
+    args(0x47015000,0); m.write32(stack+12,0x47015100);
+    if(!run(symbols.at("eul_io_path")) || m68k_get_reg(cpu,M68K_REG_D0)!=1) return 1;
+    std::vector<uint8_t> path;
+    for(unsigned b=0;b<260 && m.read8(0x47015000+b);++b) path.push_back(m.read8(0x47015000+b));
+    if(path.empty() || path.size()>=260) return 1;
+    constexpr uint32_t nv=0x100f8600;
+    args(0x47015000,path.size()); m.write32(stack+12,0);
+    if(!run(symbols.at("eul_crc32"))) return 1;
+    m.write32(nv,0x45554e31); m.write32(nv+4,m68k_get_reg(cpu,M68K_REG_D0)); m.write32(nv+8,0);
+    m.write8(0x80000002,0);
+    m.write32(symbols.at("eul_nv_ready"),1); m.write32(symbols.at("eul_nv_suspended"),0);
+    eul_defaults(&p);
+    for(unsigned lane=0;lane<48;++lane) for(unsigned b=0;b<sizeof(p);++b)
+        m.write8(bank+lane*sizeof(p)+b,((uint8_t *)&p)[b]);
+    args(0,0); if(!run(symbols.at("eul_nv_touch_part"))) return 1;
+    unsigned part_cost=last_count;
+    std::vector<uint8_t> journal;
+    for(unsigned b=0;b<16+16*384;++b) journal.push_back(m.read8(nv+b));
+    m.write8(bank+8,65);
+    args(0,0); m.write32(stack+12,0);
+    if(!run(symbols.at("eul_nv_touch_lane"))) return 1;
+    unsigned lane_cost=last_count;
+    for(unsigned b=0;b<journal.size();++b)
+        if((b<16 || b>=32) && m.read8(nv+b)!=journal[b]) return 1;
+    if(m.read8(nv+16+4+8)!=65 || lane_cost>=part_cost) return 1;
+    std::printf("COST: retained edit all-48-lanes/single-lane: %u/%u instructions; unchanged neighbouring records\n",part_cost,lane_cost);
+    // Integration assertion: publishing a whole Part must still retain ALL
+    // records, whereas the actual encoder route must use only one record.
+    p.boost=66;
+    for(unsigned lane=0;lane<48;++lane) for(unsigned b=0;b<sizeof(p);++b)
+        m.write8(decoded+lane*sizeof(p)+b,((uint8_t *)&p)[b]);
+    args(0,0); m.write32(stack+12,decoded);
+    if(!run(symbols.at("eul_publish_part"))) return 1;
+    for(unsigned lane=0;lane<48;++lane)
+        if(m.read8(nv+16+16*lane+4+8)!=66) return 1;
+    m.write32(0x80000012,0); m.write32(0x460d1a32,0);
+    m.write8(0x100b14cc,0); m.write8(0x100b14cf,0);
+    m.write8(0x400e21e0+0x8ed80+0x2f5,19);
+    m.write32(symbols.at("eul_editing"),0);
+    args(0x31,1); if(!run(m.read32(0x400bbb56))) return 1;
+    args(5,1); if(!run(0x40031944)) return 1;
+    if(m.read8(bank+8)!=67 || m.read8(nv+16+4+8)!=67 || last_count>=60000) return 1;
+    for(unsigned lane=1;lane<48;++lane)
+        if(m.read8(nv+16+16*lane+4+8)!=66) return 1;
+    std::printf("COST: complete native encoder edit with live retained journal: %u instructions\n",last_count);
+    puts("PASS: whole-Part publication retains all 48 records; actual encoder edit retains only its lane");
     return 0;
 }

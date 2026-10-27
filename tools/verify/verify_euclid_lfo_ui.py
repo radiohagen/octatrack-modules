@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Boot a clean copied project and exercise Euclid LFO via panel events.
 
-No parameter/settings pokes: native WAVE selection, editor entry and edits
+No post-boot parameter/settings pokes: native WAVE selection, editor entry and edits
 travel through UART panel dispatch. Screenshot candidates remain software
 evidence, not physical LCD acceptance. The input project is never modified.
 """
@@ -38,6 +38,16 @@ class Panel:
     def encoder(self,index,delta,gap=400):
         self.send(f'enc {index} {delta}',gap)
 
+    def edit(self,index,steps=1,page=0,gap=400):
+        """Logical UI steps, sent as real signed-byte UART encoder counts."""
+        counts=((4,4,4,4,4,1),(8,1,1,2,8,4))[page][index]
+        raw=steps*counts
+        while abs(raw)>127:
+            chunk=127 if raw>0 else -127
+            self.encoder(index,chunk,gap)
+            raw-=chunk
+        if raw: self.encoder(index,raw,gap)
+
     def hold(self,key,other,gap=700):
         self.send(f'key {key:#x} down',40)
         self.tap(other,100)
@@ -48,6 +58,8 @@ def main():
     ap=argparse.ArgumentParser(description=__doc__)
     ap.add_argument('--project',required=True,type=pathlib.Path)
     ap.add_argument('--only',help='comma-separated scenario names for a scoped rerun')
+    ap.add_argument('--dirty-start',action='store_true',
+                    help='preload all Euclid writable state with garbage BEFORE the real loader runs')
     ap.add_argument('--panel-model',choices=('mki','mkii'),default='mkii')
     a=ap.parse_args()
     selected=set(a.only.split(',')) if a.only else None
@@ -55,8 +67,9 @@ def main():
     known={f'{kind}-page{page}' for kind in ('audio','midi') for page in (0,1)}
     known.update('part-'+operation for operation in part_cases)
     known.update(('audio-burst','midi-burst'))
-    known.update(('audio-setup','midi-setup'))
-    rates=((8,0),(16,0),(24,0),(32,0),(48,0),(64,0),(96,0),(64,1),(96,1),(64,2),(96,2),(64,3),(96,3),(64,1))
+    known.update(('audio-setup','midi-setup','audio-stock','midi-stock'))
+    rates=((8,0),(16,0),(24,0),(32,0),(48,0),(64,0),(96,0),(64,1),(96,1),(64,2),(96,2),(64,3),(96,3),
+           (64,1),(96,3),(8,0))  # STOP, VAR above maximum, VAR below minimum.
     known.update(f'{kind}-rate-{i}' for kind in ('audio','midi') for i in range(len(rates)))
     known.update(f'{kind}-free-{duration}' for kind in ('audio','midi') for duration in ('short','long'))
     if selected and not selected<=known: ap.error(f'unknown cases: {sorted(selected-known)}')
@@ -86,6 +99,23 @@ def main():
             '--set','EUCLID','--project','LFO','--load-ms','90000',
             '--lcd',out/'boot.lcd']  # Install pixel watches before scenario forks.
     if a.panel_model=='mkii': common.append('--mkii')
+    dirty_state={}
+    if a.dirty_start:
+        objects=list((ROOT/'out/platform/runtime').glob('*_eul.o'))
+        assert len(objects)==1, objects
+        table=subprocess.check_output(['m68k-elf-nm','-S',str(objects[0])],text=True)
+        preload=[]
+        for line in table.splitlines():
+            fields=line.split()
+            if len(fields)!=4 or fields[2] not in 'DdBbCc': continue
+            name=fields[3]; size=int(fields[1],16)
+            if not size: continue
+            seed=out/f'dirty-{name}.bin'
+            seed.write_bytes(bytes([0xa5])*size)
+            preload.append(f'{symbols[name]:#x}={seed}')
+            dirty_state[name]={'address':symbols[name],'size':size}
+        assert 'rate_writing' in dirty_state, 'redraw guard must be dirtied'
+        common.extend(['--preload',';'.join(preload)])
     scenarios=[]
     def add_case(name,p):
         if selected and name not in selected: return
@@ -104,6 +134,12 @@ def main():
         scenarios.extend(['--scenario',f'{out / (name+".log")} --live-script {script} '
                           f'--lcd {out / (name+".lcd")} --mem-dump {dump}'])
     for midi in (False,True):
+        p=Panel(); p.tap(0x32); p.tap(0x10)
+        if midi: p.tap(0x35)
+        p.tap(0x24,80); p.tap(0x24,700)
+        p.encoder(6,-127); p.encoder(1,-127)
+        add_case(('midi' if midi else 'audio')+'-stock',p)
+    for midi in (False,True):
         for index in range(len(rates)):
             p=Panel(); p.tap(0x32); p.tap(0x10)
             if midi: p.tap(0x35)
@@ -111,11 +147,14 @@ def main():
             p.encoder(6,-127); p.encoder(1,127)
             # Saved native SPD clamps at zero; index 13 tests leaving STOP.
             p.encoder(4,-127 if index==13 else 127)
+            if index==14: p.encoder(2,127)  # SPD127/MULT64 exceeds the preset range.
+            if index==15:
+                p.encoder(2,-127); p.encoder(4,-127); p.encoder(4,1)
             p.tap(0x31); p.tap(0x31)
-            if index==13: p.encoder(5,1)
+            if index>=13: p.edit(5,-1 if index==14 else 1,page=1)
             else:
                 p.encoder(5,-127)
-                if index: p.encoder(5,index)
+                if index: p.edit(5,index,page=1)
             add_case(('midi' if midi else 'audio')+f'-rate-{index}',p)
     for midi in (False,True):
         p=Panel(); p.tap(0x32); p.tap(0x10)
@@ -131,27 +170,27 @@ def main():
             p.encoder(6,-127)               # Select first native LFO lane.
             p.encoder(1,127)                # WAVE clamps to appended EUCLID.
             p.tap(0x31,700)                 # Open our editor, no direct call.
-            # Each control receives exactly one count; no injected settings.
-            for encoder in range(6): p.encoder(encoder,1)
+            # One logical increment through real resisted panel counts.
+            for encoder in range(6): p.edit(encoder)
             if page:
                 p.tap(0x31,700)
-                p.encoder(4,1)              # DIR: POS -> NEG, one native count.
+                p.edit(4,page=1)            # DIR: POS -> NEG, eight raw counts.
                 p.encoder(5,-127)           # RATE minimum, independent of fixture SPD.
-                p.encoder(5,7)              # Whole -> sixteenth (including triplets).
+                p.edit(5,7,page=1)          # Whole -> sixteenth (including triplets).
                 p.send('key 0x3d down',40)  # Hold F: no native push acceleration.
-                p.encoder(5,1)
+                p.edit(5,1,page=1)
                 p.send('key 0x3d up',40)
-                p.encoder(5,-1)
+                p.edit(5,-1,page=1)
             add_case(name,p)
     for midi in (False,True):
         p=Panel(); p.tap(0x32); p.tap(0x10)
         if midi: p.tap(0x35)
         p.tap(0x24,80); p.tap(0x24,700)
         p.encoder(6,-127); p.encoder(1,127); p.tap(0x31,700)
-        p.encoder(0,-127)  # Start at one step; eight fast counts must make nine.
-        for _ in range(8): p.encoder(0,1,15)
-        p.send('key 0x38 down',40)  # A push held during five reverse counts.
-        for _ in range(5): p.encoder(0,-1,15)
+        p.encoder(0,-127)  # Start at one step; 32 fast counts must make nine.
+        for _ in range(32): p.encoder(0,1,15)
+        p.send('key 0x38 down',40)  # Held push must not accelerate 20 reverse counts.
+        for _ in range(20): p.encoder(0,-1,15)
         p.send('key 0x38 up',700)
         add_case(('midi' if midi else 'audio')+'-burst',p)
     for midi in (False,True):
@@ -173,9 +212,9 @@ def main():
             if midi: p.tap(0x35)
             p.tap(0x24,80); p.tap(0x24,700)
             p.encoder(6,-127); p.encoder(1,127); p.tap(0x31,700)
-            for encoder in range(6): p.encoder(encoder,1)
-            if midi: p.encoder(0,1)
-            p.tap(0x31); p.encoder(4,1)  # NEG is retained with the Part too.
+            for encoder in range(6): p.edit(encoder)
+            if midi: p.edit(0)
+            p.tap(0x31); p.edit(4,page=1)  # NEG is retained with the Part too.
             p.tap(0x32); p.tap(0x32)
         if operation in ('save','reload'):
             if a.panel_model=='mkii': p.hold(0x2d,0x1d)
@@ -186,7 +225,7 @@ def main():
             p.tap(0x32); p.tap(0x32)
             if operation=='reload':
                 p.tap(0x24,80); p.tap(0x24,700); p.tap(0x31)
-                p.encoder(0,3); p.tap(0x32); p.tap(0x32)
+                p.edit(0,3); p.tap(0x32); p.tap(0x32)
                 p.hold(0x2d,0x2a,1300)  # FUNC+CUE -> saved Part (PANEL.md's measured map).
         if operation in ('paste','undo','clear','switch'):
             if a.panel_model=='mkii': p.tap(0x1d,700)
@@ -199,9 +238,17 @@ def main():
             elif operation=='switch':
                 p.tap(0x31,900)  # Link Part 2, then edit just its MIDI lane.
                 p.tap(0x24,80); p.tap(0x24,700); p.tap(0x31)
-                p.encoder(0,1); p.tap(0x32); p.tap(0x32)
+                p.edit(0); p.tap(0x32); p.tap(0x32)
         add_case('part-'+operation,p)
     run(common+scenarios,out/'boot.log')
+    # Settings can change correctly behind a blank window. Check the visible
+    # pixels too; the native track strips outside the popup do not count.
+    for path in out.glob('*.lcd'):
+        if path.stem=='boot': continue
+        rows=lcd_view.screen(path.read_bytes())
+        lcd_view.png(rows,path.with_suffix('.png'),4)
+        ink=sum(rows[y][x] for y in range(4,60) for x in range(10,118))
+        assert 128<ink<108*56-128, (path.stem,'blank LFO window',ink,out)
     results={}
     for midi in (False,True):
         for index,(speed,mult) in enumerate(rates):
@@ -215,15 +262,16 @@ def main():
                 assert native[0x500 if midi else 0x30a]==mult, (name,mirror,'MULT')
             assert not any((out/f'{name}-settings.bin').read_bytes()), (name,'RATE wrote sidecar')
             results[name]={'native_speed':spd,'native_mult':mult,'part_and_sram_match':True}
-    for kind in ('audio','midi'):
-        name=kind+'-setup'
+    for name in ('audio-setup','midi-setup','audio-stock','midi-stock'):
         if selected and name not in selected: continue
         log=(out/f'{name}.log').read_text()
         assert 'ended on quit' in log and 'WAIT TIMEOUT' not in log, name
         assert (out/f'{name}-editing.bin').read_bytes()==bytes(4), (name,'editor unexpectedly open',out)
         lcd=(out/f'{name}.lcd').read_bytes()
         lcd_view.png(lcd_view.screen(lcd),out/f'{name}.png',4)
-        results[name]={'lcd_sha256':hashlib.sha256(lcd).hexdigest(),'scope':'native SETUP, EUCLID selected, editor closed'}
+        results[name]={'lcd_sha256':hashlib.sha256(lcd).hexdigest(),
+                       'scope':'native SETUP, stock wave' if name.endswith('-stock')
+                       else 'native SETUP, EUCLID selected, editor closed'}
     for midi in (False,True):
         for page in (0,1):
             name=('midi' if midi else 'audio')+f'-page{page}'
@@ -299,6 +347,7 @@ def main():
     receipt={'scope':'native UART panel WAVE/editor/controls/DIR and Part save/reload/paste/undo/clear/switch',
              'image_sha256':hashlib.sha256(image.read_bytes()).hexdigest(),
              'panel_model':a.panel_model,
+             'dirty_start':dirty_state,
              'source_project':str(a.project.resolve()),'source_hashes':sources,'cases':results}
     (out/'receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
     print(f'PASS: native audio/MIDI panel controls and full LCD: {out / "receipt.json"}',flush=True)

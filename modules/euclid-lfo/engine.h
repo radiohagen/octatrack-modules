@@ -26,6 +26,9 @@ typedef struct {
     uint32_t attack, decay, length, edge;
     uint32_t rng, phase, origin, target, level;
     uint8_t ready, last_hit, last_step, reserved;
+    /* Runtime-only previous scaled phase. Read only while last_hit is valid;
+     * edits, context changes and terminals invalidate that history first. */
+    uint32_t position;
 } EulState;
 
 void eul_defaults(EulParams *p);
@@ -37,7 +40,7 @@ void eul_masks(const EulParams *p, uint16_t *hits, uint16_t *accents);
  * while stopped. `terminal` is supplied for native ONE/HALF endpoints. */
 int32_t eul_process(EulState *s, const EulParams *p, uint32_t phase,
                     unsigned reset, unsigned terminal, unsigned identity);
-/* One raw encoder count = one increment, no velocity or push acceleration.
+/* One logical edit increment = one value, after editor-only resistance.
  * Dependencies clamp immediately, and values never wrap at their limits.
  * Field 3 edits shape only; virtual field 10 edits DIR in mode bit 2. */
 unsigned eul_edit(EulParams *p, unsigned field, int delta);
@@ -52,4 +55,14 @@ int32_t eul_clock(int32_t increment, unsigned steps, int32_t *remainder);
  * Only 32-bit arithmetic, including fractional/modulated and reverse SPD. */
 int32_t eul_audio_clock(int speed, unsigned tempo, unsigned mult,
                         unsigned steps, int32_t *remainder);
+/* Runtime-only exact-clock coefficients; never part of the saved payload.
+ * Zero initialization is invalid (steps cannot be zero), forcing preparation.
+ * Caller owns residue/context resets, exactly as for eul_audio_clock. */
+typedef struct {
+    int speed;
+    unsigned tempo, mult, steps;
+    int32_t result, quotient, fraction, denominator;
+} EulAudioClock;
+int32_t eul_audio_clock_cached(EulAudioClock *clock,int speed,unsigned tempo,
+                              unsigned mult,unsigned steps,int32_t *remainder);
 #endif

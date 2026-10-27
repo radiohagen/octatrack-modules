@@ -56,6 +56,8 @@ def lcd_previews():
 def main():
     ap=argparse.ArgumentParser(description=__doc__)
     ap.add_argument('remix',nargs='?',default='euclid-lfo')
+    ap.add_argument('--cpu-baseline',type=pathlib.Path,
+                    help='compare observable output hashes with an earlier cpu-profile.json')
     a=ap.parse_args()
     OUT.mkdir(parents=True,exist_ok=True)
     print(run([sys.executable,'modules/euclid-lfo/generate_control.py','--check']),end='')
@@ -143,18 +145,31 @@ def main():
              if len(s:=line.split())==3}
     (OUT/'symbols.txt').write_text(''.join(f'{name} {value:x}\n' for name,value in symbols.items()))
     layout=json.loads((ROOT/'out/platform/layout.json').read_text())
-    result=run(['out/emu/ot_euclid_lfo_test','out/mainos_bus.bin','out/platform/runtime.raw',
+    probe=['out/emu/ot_euclid_lfo_test','out/mainos_bus.bin','out/platform/runtime.raw',
                 f'{layout["base"]:x}',f'{symbols["eul_bank"]:x}',OUT,
-                f'{symbols["eul_file_encode"]:x}',f'{symbols["eul_file_decode"]:x}'])
+                f'{symbols["eul_file_encode"]:x}',f'{symbols["eul_file_decode"]:x}']
+    result=run(probe)
     (OUT/'probe.log').write_text(result)
     for line in result.splitlines():
         if line.startswith(('PASS:','COST:')): print(line)
     lcd_previews()
+    print(run(probe+['--cpu-only']),end='')
+    profile=json.loads((OUT/'cpu-profile.json').read_text())
+    if a.cpu_baseline:
+        baseline=json.loads(a.cpu_baseline.read_text())
+        assert all('input_hash' in case for case in profile['cases']+baseline['cases']), \
+            'CPU baseline lacks input hashes; regenerate it using its frozen binaries and the current probe'
+        fields=('kind','pattern','mode','midi','stage','calls','input_hash','output_hash')
+        observable=lambda record:tuple(record[field] for field in fields)
+        assert [observable(c) for c in profile['cases']]==[observable(c) for c in baseline['cases']], \
+            'CPU profile scenarios or observable outputs changed from baseline'
+        print(f'PASS: {len(profile["cases"])} linked ColdFire CPU profile output hashes match baseline')
     receipt={'scope':'engine, native destination routing, codec, fault-injected lifecycle, Part callbacks/controls and LCD pixel regression',
              'remix':a.remix,
              'image_sha256':hashlib.sha256(image).hexdigest(),
              'runtime_sha256':hashlib.sha256((ROOT/'out/platform/runtime.raw').read_bytes()).hexdigest(),
              'instruction_costs':[line for line in result.splitlines() if line.startswith('COST:')],
+             'cpu_profile':profile,
              'separate_checks':['native filesystem/power-up card gate','full-panel UI/Part gate',
                                 'DSP-loaded frame gate','make check'],
              'limits':'Software instruction counts and pixels, not physical hardware acceptance.'}
