@@ -1,5 +1,15 @@
 # Shared system events
 
+## Current MIDI Follow
+
+Follow uses upstream **EVENTS**, merged in Octabam #871. It subscribes to
+`transport.start`, `transport.resume` and `midi.note_accepted`; the platform
+preserves native registers and owns each firmware hook once. See the
+[current integration](../integration/midi-follow.md). The legacy combined
+integration below must keep its recorded source pin.
+
+## Historical combined integration
+
 The shared-event platform replaces HARMONY FOLLOW and HARMONY PLOCKS.
 Octabam owns the two platform modules, following STORE's build-time client tables.
 This source repository owns the HARM and Follow callbacks and musical policies.
@@ -10,7 +20,7 @@ This source repository owns the HARM and Follow callbacks and musical policies.
   before and after native pattern/track copies, including clipboard and undo.
   HARM and PLOCKS P2 register independently. Native copying executes once.
 
-Selections must include SEQUENCER EVENTS for Follow, and both platform modules
+Those historical selections include SEQUENCER EVENTS for Follow, and both platform modules
 for HARM. Remove HARMONY FOLLOW and HARMONY PLOCKS from existing selections.
 Their implementations are retired; Git history preserves the previous versions.
 STORE remains responsible for project and Part persistence. No saved format or

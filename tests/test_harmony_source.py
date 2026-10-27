@@ -24,7 +24,7 @@ class HarmonySource(unittest.TestCase):
         self.assertNotIn('variant', fields)
         self.assertNotIn('settings', fields)
         self.assertEqual(set(ast.literal_eval(fields['requires'])),
-                         {'MIDI PART STATE', 'MIDI SRAM', 'STORE', 'SEQUENCER EVENTS', 'EDIT EVENTS'})
+                         {'MIDI SRAM', 'STORE', 'SEQUENCER EVENTS', 'EDIT EVENTS'})
         for node in ast.walk(fields['linked']):
             if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == 'Linked':
                 source = ast.literal_eval(node.args[1])

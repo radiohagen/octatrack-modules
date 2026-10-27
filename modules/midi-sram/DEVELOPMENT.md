@@ -1,12 +1,12 @@
 # Protected MIDI retained pool
 
 Opt-in support module for compositions that need additional retained capacity.
-Select `MIDI SRAM` with `MIDI PART STATE`. It adds no panel control and provides
+Select `MIDI SRAM` with `STORE`. It adds no panel control and provides
 16,384 retained bytes in fields 30/31 of each native MIDI step record in the
 current-bank CS1 mirror: 16 patterns × 8 tracks × 64 steps × 2 bytes.
 Audio step fields are untouched: audio field 31 is a sample lock.
 
-The pool exists only in SRAM. The MIDI PART STATE native-copy boundary skips
+The pool exists only in SRAM. The STORE native-copy boundary skips
 these destinations and returns `0xff` for these source bytes, so pool data
 never enters native DRAM, clipboards or bank files. Eight MIDI-only direct
 write loops stop at the 30 parameter fields. All other native bytes retain

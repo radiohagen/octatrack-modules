@@ -84,14 +84,14 @@ print(f"  [{'PASS' if ok else 'FAIL'}] verify_dram_boot: {remix.name} boots to t
 part_state_ranges = []
 midisc_state = []
 plocks_state = []
-if any(m.key in ('MIDI PART STATE', 'MIDI SCENES', 'PLOCKS P2') for m in mods):
+if any(m.key in ('STORE', 'MIDI SCENES', 'PLOCKS P2') for m in mods):
     runtime_nm = subprocess.check_output([
         'm68k-elf-nm', str(ROOT / 'out/platform/runtime/runtime.elf')], text=True)
     runtime_symbols = {f[2]: int(f[0], 16) for f in
                        (line.split() for line in runtime_nm.splitlines()) if len(f) == 3}
-    if any(m.key == 'MIDI PART STATE' for m in mods):
+    if any(m.key == 'STORE' for m in mods):
         part_state_ranges = [(runtime_symbols[name], size) for name, size in
-                             (('mp_snapshot', 4*8*36), ('mp_part_epochs', 64*4))]
+                             (('store_part_snapshot', 4*8*36), ('store_part_epochs', 64*4))]
     if any(m.key == 'PLOCKS P2' for m in mods):
         # PLOCKS cold boot initializes its marker and checkpoints bank zero.
         # Check exact words rather than raising the generic drift allowance.

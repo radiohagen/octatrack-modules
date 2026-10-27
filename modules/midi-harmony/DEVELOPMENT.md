@@ -122,7 +122,7 @@ fields are reverse-engineered reclamation, not an official free-space contract.
 There is one implementation: degree-based NOTE/CHORD, ACC, HDP4 companions
 and HMT2 own-step retention. Native OFF behavior and representation conversion
 remain. There are no legacy retention options, alternate popups or migration
-readers. All builds require MIDI SRAM, MIDI Part State, STORE, SEQUENCER EVENTS and EDIT EVENTS.
+readers. All builds require MIDI SRAM, STORE native Part access, STORE, SEQUENCER EVENTS and EDIT EVENTS.
 
 HDP4 contains a 10,368-byte packed root/quality section, then appends
 128 ACC lanes of 37 bytes: 32 packed amount bytes followed by signed LOW,

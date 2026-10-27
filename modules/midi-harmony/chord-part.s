@@ -9,7 +9,7 @@
 ch_base_get:
     lea -8(%sp),%sp
     movem.l %d0-%d1,(%sp)
-    jsr mp_ui_context
+    jsr store_part_ui_context
     move.l %d0,%d1
     move.l (%sp),%d0
     bsr.w ch_base_at
@@ -21,7 +21,7 @@ ch_base_get:
 ch_base_play:
     lea -8(%sp),%sp
     movem.l %d0-%d1,(%sp)
-    jsr mp_play_context
+    jsr store_part_midi_context
     move.l %d0,%d1
     move.l (%sp),%d0
     bsr.w ch_base_at
@@ -33,7 +33,7 @@ ch_base_play:
 ch_base_at:
     move.l %d2,-(%sp)
     moveq #18,%d2
-    jsr mp_read
+    jsr store_part_midi_read
     cmpi.l #31,%d0
     bls.s .base_valid
     moveq #0,%d0
@@ -49,11 +49,11 @@ ch_base_set:
     lea -16(%sp),%sp
     movem.l %d0-%d3,(%sp)
     move.l %d1,%d3
-    jsr mp_ui_context
+    jsr store_part_ui_context
     move.l %d0,%d1
     move.l (%sp),%d0
     moveq #18,%d2
-    jsr mp_read
+    jsr store_part_midi_read
     cmpi.l #31,%d0
     bls.s .set_packed_valid
     moveq #0,%d0
@@ -61,7 +61,7 @@ ch_base_set:
     andi.l #24,%d0
     or.l %d0,%d3
     move.l (%sp),%d0
-    jsr mp_write
+    jsr store_part_midi_write
     movem.l 4(%sp),%d1-%d3
     lea 16(%sp),%sp
     rts

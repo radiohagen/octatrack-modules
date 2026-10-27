@@ -10,7 +10,7 @@
 \prefix\()_get:
     move.l %d1,-(%sp)
     move.l %d0,-(%sp)
-    jsr mp_ui_context
+    jsr store_part_ui_context
     move.l %d0,%d1
     move.l (%sp)+,%d0
     bsr.w \prefix\()_get_at
@@ -20,7 +20,7 @@
 \prefix\()_get_at:
     move.l %d2,-(%sp)
     moveq #\field,%d2
-    jsr mp_read
+    jsr store_part_midi_read
     tst.l %d0
     bmi.s .L\prefix\()_default
     .if \field==18
@@ -57,11 +57,11 @@ mh_set_native:
     bhi.w .L\prefix\()_write_bad
     move.l %d0,%d4
     move.l %d1,%d5
-    jsr mp_ui_context
+    jsr store_part_ui_context
     move.l %d0,%d1
     move.l %d4,%d0
     moveq #\field,%d2
-    jsr mp_read
+    jsr store_part_midi_read
     tst.l %d0
     bmi.s .L\prefix\()_write_bad
     .if \field==18
@@ -81,12 +81,12 @@ mh_set_native:
     or.l %d5,%d0
     move.l %d0,%d3
     move.l %d4,%d0
-    jsr mp_write
+    jsr store_part_midi_write
     tst.l %d0
     beq.s .L\prefix\()_write_done
     /* Only reset the sounding context's history, not another Part's. */
     move.l %d4,%d0
-    jsr mp_play_context
+    jsr store_part_midi_context
     cmp.l %d1,%d0
     bne.s .L\prefix\()_write_ok
     lea mh_voice_history,%a0

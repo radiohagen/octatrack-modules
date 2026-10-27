@@ -21,7 +21,9 @@ static void ss_store(uint8_t *part,unsigned at,uint8_t value) {
     *(volatile uint32_t *)(bank+0x9b332)=1;
     *(volatile uint32_t *)0x100f8598u=1;
 }
-void ss_config(unsigned track) {
+/* Persistent legacy conversion belongs to the UI task, never the audio path.
+ * Audio can play an unopened old track using the same defaults below. */
+void ss_prepare_setup(unsigned track) {
     uint8_t *part=ss_part();if(!part || track>=8)return;
     unsigned at=SS_ROW+30*track;
     if(part[at+5]!=SS_TAG) {
@@ -31,6 +33,16 @@ void ss_config(unsigned track) {
         ss_store(part,0x30+30*track+3,127);
         *(volatile uint8_t *)(uintptr_t)(0x80000810u+72*track+3)=127;
     }
+    ss_config(track);
+}
+void ss_config(unsigned track) {
+    uint8_t *part=ss_part();if(!part || track>=8)return;
+    unsigned at=SS_ROW+30*track;
+    if(part[at+5]!=SS_TAG) {
+        ss_setup[track][0]=part[0x30+30*track+3]&127;
+        ss_setup[track][1]=0;ss_setup[track][2]=0;
+        ss_setup[track][3]=64;ss_setup[track][4]=0;ss_setup[track][5]=0;
+    } else
     #pragma GCC unroll 6
     for(unsigned i=0;i<6;++i)ss_setup[track][i]=part[at+i]&127;
     /* MIDI/key polyphony only: no shape expansion or recorded chord locks. */
@@ -54,13 +66,17 @@ unsigned ss_setup_row(unsigned row,unsigned track) {
     return row==1 && ss_assigned(track) ? 3:row;
 }
 uint8_t *ss_setup_page(uint8_t *original,unsigned track,unsigned row) {
-    return row==1 ? ss_page(original,track):original;
+    if(row!=1 || !ss_assigned(track))return original;
+    /* Resolve through Synth's initialized PLAYBACK clone even when SETUP is
+     * opened first. Its PTCH bounds/formatter/handler must not come from FLEX. */
+    typedef uint8_t *(*resolve_fn)(unsigned,unsigned);
+    return ((resolve_fn)(uintptr_t)0x40031da4u)(track,0);
 }
 int ss_setup_edit(unsigned slot,int delta) {
     unsigned track=*(volatile uint8_t *)0x80000000u;
     if(*(volatile uint32_t *)0x460d5c30u!=1 || !ss_assigned(track))return 0;
     if(slot>=5)return slot==5;
-    ss_config(track);
+    ss_prepare_setup(track);
     /* A selector advances one position even with the encoder held down. */
     if(slot==4)delta=(delta>0)-(delta<0);
     else if(*(volatile uint32_t *)(uintptr_t)(0x46c7d8eeu+24*(slot+56)))delta*=7;
@@ -87,4 +103,10 @@ int ss_validate(void *ptr) {
     for(unsigned t=0;t<8;++t)if(mask&(1u<<t))
         for(unsigned i=0;i<6;++i)part[SS_ROW+30*t+i]=saved[t][i]&127;
     return result;
+}
+
+/* The stock LFO PMTR formatter indexes the machine table directly instead of
+ * using the page resolver. Hand it our canonical descriptor on marker tracks. */
+uint8_t *ss_lfo_names(unsigned track) {
+    return ss_setup_page((uint8_t *)0,track,1);
 }

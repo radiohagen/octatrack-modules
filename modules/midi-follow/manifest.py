@@ -8,15 +8,25 @@ def harmony_inc(modules, remix=None):
     return ('.set HAVE_HARMONY,1\n' if 'MIDI HARMONY' in modules else '') + ('.set HAVE_SCALES,1\n' if 'MIDI SCALES' in modules else '') + ('.set HAVE_LOOPBACK,1\n' if 'MIDI LOOPBACK' in modules else '')
 
 
+def select(modules):
+    if 'MIDI SCALES' in modules:
+        return {}
+    return {'detours': MODULE.detours + (
+        Detour(0x4003b79c, bytes.fromhex('242e000c48780064'), 'bassfollow',
+               'bf_key_format', 'native KEY display inherits Follow source', pad_to=8),
+        Detour(0x4007a3e2, bytes.fromhex('7205b280660000e4'), 'bassfollow',
+               'bf_key_encoder', 'inherited native KEY is read-only', pad_to=8),
+    )}
+
 MODULE = Module(
     name="midi-follow", key="MIDI FOLLOW", kind=Kind.CF_PATCH,
     category=Category.MIDI_USB, author='radiohagen', author_url="https://github.com/radiohagen/octatrack-modules",
     proof=Proof.PORT, proof_note='',
     doc="RFOL follows source notes; press D for FIXED/GRAV/SOURCE register, OCT/OFFS and TRIG/LIVE updates.",
-    requires=('MIDI PART STATE','SEQUENCER EVENTS'),
+    requires=('STORE', 'EVENTS'), select=select,
     linked=(Linked("bassfollow", str(ROOT / "midi_follow.s"), dram=True, include=harmony_inc),
             Linked("followresponse", str(ROOT / "response.s"), dram=True, include=harmony_inc),
-            Linked("followevents", str(ROOT / "events.s"), dram=True, include=harmony_inc),
+            Linked("followevents", str(ROOT / "events.s"), dram=True),
             Linked("followregister", str(ROOT / "register.s"), dram=True),
             Linked("followgravity", str(ROOT / "gravity.s"), dram=True),
             Linked("followgravityaccess", str(ROOT / "gravity-access.s"), dram=True),
@@ -39,8 +49,7 @@ MODULE = Module(
         Poke(0x400d4037, b'\x00', b'\x03', 'Follow GRAV home octave 3, mode FIXED'),
     ),
     claims=Claims(part_window=tuple((0x4e2+36*t+f, 1, 'Follow Part setting') for t in range(8) for f in (3,13,15))),
-    detours=(
-             Detour(0x4009F986, bytes.fromhex("41f980006676"),
+    detours=(Detour(0x4009F986, bytes.fromhex("41f980006676"),
                     "bassfollow", "bf_pre_capture", "capture all ordinary source triggers before any track emits"),
              Detour(0x40036674, bytes.fromhex("261524047003"),
                     "bassfollow", "bf_draw_value", "draw RFOL from per-track module RAM"),
@@ -50,7 +59,8 @@ MODULE = Module(
              Detour(0x4009FB80, bytes.fromhex("12126d0001a6"),
                    "bassfollow", "bf_note",
                    "resolve root before the sequencer records the emitted note"),),
-    gates=(Gate('tools/verify/verify_midi_follow_notes.py', stage='image', venv=True),
+    gates=(Gate('tools/verify/verify_midi_follow_scale.py', stage='image', venv=True),
+           Gate('tools/verify/verify_midi_follow_notes.py', stage='image', venv=True),
            Gate('tools/verify/verify_midi_follow_gravity.py', stage='image', venv=True),
            Gate('tools/verify/verify_midi_follow_stress.py', stage='image', venv=True),
            Gate("tools/verify/verify_midi_follow_response.py", stage="image", venv=True),

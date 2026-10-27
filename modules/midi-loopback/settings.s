@@ -7,7 +7,7 @@
 lb_dest_get:
     move.l %d1,-(%sp)
     move.l %d0,-(%sp)
-    jsr mp_ui_context
+    jsr store_part_ui_context
     move.l %d0,%d1
     move.l (%sp)+,%d0
     bsr.w lb_dest_at
@@ -16,7 +16,7 @@ lb_dest_get:
 lb_dest_at:
     move.l %d2,-(%sp)
     moveq #12,%d2
-    jsr mp_read
+    jsr store_part_midi_read
     cmpi.l #11,%d0
     bhi.s .dest_default
     lsr.l #2,%d0
@@ -36,11 +36,11 @@ lb_dest_set:
     bhi.s .dest_bad
     cmpi.l #2,%d5
     bhi.s .dest_bad
-    jsr mp_ui_context
+    jsr store_part_ui_context
     move.l %d0,%d1
     move.l %d4,%d0
     moveq #12,%d2
-    jsr mp_read
+    jsr store_part_midi_read
     tst.l %d0
     bmi.s .dest_bad
     andi.l #3,%d0
@@ -48,7 +48,7 @@ lb_dest_set:
     or.l %d5,%d0
     move.l %d0,%d3
     move.l %d4,%d0
-    jsr mp_write
+    jsr store_part_midi_write
     tst.l %d0
     beq.s .dest_done
     bsr.w lb_part_sync
@@ -66,7 +66,7 @@ lb_dest_write:
     move.l 8(%sp),%d1
     bra.w lb_dest_set
 /* Preserve caller registers. A context replacement releases the old identity
- * even when its destination happens to be unchanged. mp_read observes the
+ * even when its destination happens to be unchanged. store_part_midi_read observes the
  * shared coherent Part snapshot while native copy/clear is in progress.
  */
 lb_part_sync:
@@ -77,7 +77,7 @@ lb_part_sync:
     move.l %d4,%d0
     bsr.w lb_play_context
     move.l %d0,%d5
-    jsr mp_epoch
+    jsr store_part_epoch
     move.l %d0,%d6
     lea lb_contexts,%a1
     cmp.l (%a1,%d4.l*4),%d5
@@ -116,39 +116,7 @@ lb_part_sync:
  */
     .global lb_play_context
 lb_play_context:
-    lea -8(%sp),%sp
-    movem.l %d1/%a0,(%sp)
-    cmpi.l #7,%d0
-    bhi.s .play_invalid
-    lea 0x8000666e,%a0
-    moveq #0,%d1
-    move.b (%a0,%d0.l),%d1
-    lea 0x80006676,%a0
-    move.b (%a0,%d0.l),%d0
-    andi.l #255,%d0
-    cmpi.l #15,%d1
-    bhi.s .play_applied
-    cmpi.l #3,%d0
-    bls.s .play_pack
-.play_applied:
-    moveq #0,%d1
-    move.b 0x80001828,%d1
-    moveq #0,%d0
-    move.b 0x80001829,%d0
-    cmpi.l #15,%d1
-    bhi.s .play_invalid
-    cmpi.l #3,%d0
-    bhi.s .play_invalid
-.play_pack:
-    lsl.l #2,%d1
-    add.l %d1,%d0
-    bra.s .play_done
-.play_invalid:
-    moveq #-1,%d0
-.play_done:
-    movem.l (%sp),%d1/%a0
-    addq.l #8,%sp
-    rts
+    jmp store_part_midi_context
     .balign 4
 lb_contexts: .fill 8,4,-1
 lb_epochs: .fill 8,4,-1

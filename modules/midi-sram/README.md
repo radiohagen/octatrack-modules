@@ -1,7 +1,7 @@
 # MIDI SRAM
 
 Provides 16,384 bytes of retained storage for MIDI modules. Select **MIDI SRAM**
-with **MIDI Part State**. It adds no panel controls and does not alter audio-step fields.
+with **STORE native Part access**. It adds no panel controls and does not alter audio-step fields.
 
 The pool uses protected bytes in the current bank's MIDI step records in SRAM.
 Those bytes are excluded from native bank files and clipboards. Clients own

@@ -1,4 +1,6 @@
 """Per-track internal MIDI routing with a native CHAN-press window."""
+from pathlib import Path
+ROOT = Path(__file__).resolve().parent
 from remix.schema import Category, Detour, Gate, Kind, Linked, Module, Proof, SymbolRef
 
 MODULE = Module(
@@ -7,12 +9,12 @@ MODULE = Module(
     author_url="https://github.com/radiohagen/octatrack-modules",
     doc="Press CHAN for per-Part EXT/INT/BOTH routing of MIDI-track notes and controls.",
     proof=Proof.PORT, proof_note='',
-    requires=("MIDI PART STATE",),
-    linked=(Linked("loopback", "modules/midi-loopback/loopback.s", cpu="54455", dram=True),
-            Linked("loopbackproducers", "modules/midi-loopback/producers.s", dram=True,
-                   include=lambda modules: '.set HAVE_SCENES_BRIDGE,1\n' if 'MIDI LOOPBACK SCENES' in modules else ''),
-            Linked("loopbacksettings", "modules/midi-loopback/settings.s", dram=True),
-            Linked("loopbackpage", "modules/midi-loopback/page.s", dram=True)),
+    requires=("STORE",),
+    linked=(Linked("loopback", str(Path(__file__).resolve().parent / 'loopback.s'), cpu="54455", dram=True),
+            Linked("loopbackproducers", str(Path(__file__).resolve().parent / 'producers.s'), dram=True,
+                   include=lambda modules, remix=None: '.set HAVE_SCENES_BRIDGE,1\n' if 'MIDI LOOPBACK SCENES' in modules else ''),
+            Linked("loopbacksettings", str(Path(__file__).resolve().parent / 'settings.s'), dram=True),
+            Linked("loopbackpage", str(Path(__file__).resolve().parent / 'page.s'), dram=True)),
     detours=(
         *(Detour(site, bytes.fromhex("41f946c7febe"), "loopbackproducers", "lb_rx_map",
                  "internal receive map excludes MIDI-track forwarding", kind="jsr")

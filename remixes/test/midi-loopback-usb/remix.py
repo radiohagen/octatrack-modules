@@ -6,7 +6,7 @@ REMIX = Remix(
     proof_note='',
     doc="Stock effects with the loopback prototype and USB-MIDI for compatibility gates.",
     settings={("octabam.usb", "LAYOUT"): "OFF", ("octabam.usb", "INPUTS"): "OFF"},
-    modules=("MIDI PART STATE", "MIDI LOOPBACK", "USB", "FILTER", "EQUALIZER", "DJ EQ", "PHASER",
+    modules=("STORE", "MIDI LOOPBACK", "USB", "FILTER", "EQUALIZER", "DJ EQ", "PHASER",
              "FLANGER", "CHORUS", "SPATIALIZER", "COMB FILTER", "COMPRESSOR",
              "LO-FI", "DELAY", "PLATE REV", "SPRING REV", "DARK REV"),
     fallback="NONE",

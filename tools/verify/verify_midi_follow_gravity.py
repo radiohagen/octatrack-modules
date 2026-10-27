@@ -6,7 +6,7 @@ import sys
 import subprocess
 from unicorn import UC_HOOK_CODE
 from midi_machine import Machine, ROOT
-from verify_midi_part_settings import symbols
+from verify_store_part_settings import symbols
 from verify_midi_follow import REGS
 from unicorn.m68k_const import UC_M68K_REG_D7, UC_M68K_REG_A7, UC_M68K_REG_PC
 
@@ -82,15 +82,29 @@ def main():
     for t in range(1,8):begin(t);assert query(t)==35;sent(t)
     root(0)
     for t in range(1,8):begin(t);assert query(t)==36;sent(t)
+    transport_seen=[]
+    def observe_transport(uc,pc,size,data):
+        transport_seen.append(int.from_bytes(uc.mem_read(0x800065b8,4),'big'))
+    observer=u.hook_add(UC_HOOK_CODE,observe_transport,
+                        begin=s['bf_seq_start'],end=s['bf_seq_start'])
     for hook,stop in (('seq_start',0x4009c3da),('seq_resume',0x4009c4da)):
-        m.call(hook,stop=stop)
+        epoch=(int.from_bytes(u.mem_read(s['eu_clock']+12,4),'big')
+               if 'eu_clock' in s else None)
+        u.mem_write(0x800065b8,bytes(4))
+        m.call(hook,1,stop=stop)
+        assert transport_seen[-1]==1, 'Follow notification must follow native PLAYING write'
+        if epoch is not None:
+            assert int.from_bytes(u.mem_read(s['eu_clock']+12,4),'big')==epoch+1, \
+                'EUCLID must receive exactly one reset alongside Follow'
         for t in range(1,8):assert query(t)==24
+    assert transport_seen==[1,1], 'one Follow reset per transport notification'
+    u.hook_del(observer)
     # Same-slot native Part replacement invalidates history without saving it.
     root(35);begin();query();sent();root(0);begin();assert query()==36;sent()
     part=0x400e21e0+0x8ed80;copy=m.scratch+0x1000
     u.mem_write(copy,bytes(u.mem_read(part,0x18b2)))
     u.mem_write(m.stack+4,struct.pack('>III',part,copy,0x18b2))
-    m.call('mp_native_copy');assert query()==24
+    m.call('store_part_native_copy');assert query()==24
     # Ordinary pattern changes do not touch the native Part identity.
     root(35);begin();query();sent();u.mem_write(0x100b14d0,b'\x01')
     root(0);begin();assert query()==36

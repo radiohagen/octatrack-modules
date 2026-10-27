@@ -39,7 +39,7 @@ def machine():
     put(0x46c82456,B,4);put(0x80000012,1,4)
     put(0x800065b8,1,4);put(0x80001828,0);put(0x80001829,0)
     for t in range(8):
-        put(0x8000182a+t,0);put(0x80001832+t,0)
+        put(0x8000666e+t,0);put(0x80006676+t,0)
     m.c('hd_scene_ensure_c')
     m.call('hd_bank_loaded',0)
     return m
@@ -183,11 +183,11 @@ def contexts():
     assert m.c('hd_scene_value_c',0,0,0,35)==39
     assert m.c('hd_scene_value_c',1,0,0,35)==42
     m.c('hd_scene_before_c',0)
-    m.put(m.sym['mp_snapshot_bank'],B,4);m.put(m.sym['mp_snapshot_parts'],1,4)
+    m.put(m.sym['store_part_snapshot_bank'],B,4);m.put(m.sym['store_part_snapshot_parts'],1,4)
     scenes(m,[(0,28)])
     assert m.c('hd_scene_value_c',0,0,0,35)==39
     assert m.c('hd_scene_value_c',1,0,0,35)==42
-    m.put(m.sym['mp_snapshot_parts'],0,4)
+    m.put(m.sym['store_part_snapshot_parts'],0,4)
     assert m.c('hd_scene_value_c',0,0,0,35)==28
     return {'outgoing_snapshot':True,'unrelated_context_independent':True,'incoming_published':True}
 

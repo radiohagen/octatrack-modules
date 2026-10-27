@@ -17,8 +17,8 @@ static void ss_filter_reference(struct ss_filter *s,const struct ss_filter_param
     int32_t g=ss_filter_g[cutoff];
     /* Spectrum: damping=(0.998 - (RES/128)*0.587)^4. */
     int32_t b=16351-((p->resonance&127)*9617)/128;
-    int32_t k=ss_mul(b,b);k=ss_mul(k,k);
-    int32_t den=16384+ss_mul(k,g)+ss_mul(g,g);
+    int32_t k=ss_reference_mul(b,b);k=ss_reference_mul(k,k);
+    int32_t den=16384+ss_reference_mul(k,g)+ss_reference_mul(g,g);
     int32_t a1=268435456/den,a2=g,a3=k+g;
     int32_t d1=(a1-s->a1)/(int)n,d2=(a2-s->a2)/(int)n;
     int32_t d3=(a3-s->a3)/(int)n,dk=(k-s->damping)/(int)n;

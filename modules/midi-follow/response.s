@@ -26,9 +26,9 @@ bf_response_set:
     tst.l %d0
     beq.s .set_done
     move.l (%sp),%d0
-    jsr mp_play_context
+    jsr store_part_midi_context
     move.l %d0,%d2
-    jsr mp_ui_context
+    jsr store_part_ui_context
     cmp.l %d2,%d0
     bne.s .set_done
     move.l (%sp),%d0
@@ -183,9 +183,9 @@ bf_response_sync:
     movem.l %d0-%d3/%a0,(%sp)
     cmpi.l #7,%d0
     bhi.s .sync_done
-    jsr mp_play_context
+    jsr store_part_midi_context
     move.l %d0,%d1
-    jsr mp_epoch
+    jsr store_part_epoch
     move.l %d0,%d2
     move.l (%sp),%d3
     lsl.l #3,%d3
@@ -308,6 +308,27 @@ bf_response_tick:
     bne.s .release_next /* Never release another track or live key owner. */
     move.l %d2,%d0
     add.l %d6,%d0
+    .ifdef HAVE_HARMONY
+    move.l %d0,-(%sp)
+    move.l %d7,%d0
+    jsr mh_active
+    tst.l %d0
+    beq.s .release_native_pitch
+    move.l (%sp)+,%d0
+    bra.s .release_pitch_ready
+.release_native_pitch:
+    move.l (%sp)+,%d0
+    .endif
+    /* Undo only the previous KEY correction, move the raw voice, then
+     * reapply the inherited KEY. Harmony owns its generated chord path. */
+    lea bf_scale_offsets,%a0
+    moveq #0,%d1
+    move.b (%a0,%d3.l),%d1
+    extb.l %d1
+    add.l %d1,%d0
+    move.l %d7,%d1
+    jsr bf_quant_note
+.release_pitch_ready:
     move.l %d0,(%a4,%d4.l*4)
     moveq #-1,%d0
     move.b %d0,(%a5,%d5.l)

@@ -11,7 +11,7 @@
 mh_scale_record:
     move.l %d1,-(%sp)
     move.l %d0,-(%sp)
-    jsr mp_play_context
+    jsr store_part_midi_context
     move.l %d0,%d1
     move.l (%sp)+,%d0
     bsr.w mh_scale_record_at
@@ -31,12 +31,12 @@ mh_raw_key_at:
     cmp.l %d2,%d0
     beq.s .record_own_context
     move.l %d0,-(%sp)
-    jsr mp_play_context
+    jsr store_part_midi_context
     move.l %d0,%d3
     move.l (%sp)+,%d0
 .record_own_context:
     move.l %d3,%d1
-    jsr mp_read_key
+    jsr store_part_midi_key
     movem.l (%sp),%d1-%d3
     lea 12(%sp),%sp
     rts
@@ -65,7 +65,7 @@ mh_active:
     /* KEY OFF disables snapping, not the selected Harmony operation. */
     move.l %d1,-(%sp)
     move.l %d0,-(%sp)
-    jsr mp_play_context
+    jsr store_part_midi_context
     move.l %d0,%d1
     move.l (%sp)+,%d0
     jsr mh_get_at
@@ -80,7 +80,7 @@ mh_active:
 mh_chord_scale:
     move.l %d2,-(%sp)
     move.l %d0,-(%sp)
-    jsr mp_play_context
+    jsr store_part_midi_context
     move.l %d0,%d2
     move.l (%sp)+,%d0
     bsr.w mh_chord_scale_at
@@ -118,7 +118,7 @@ mh_source:
 mh_source_ui:
     move.l %d1,-(%sp)
     move.l %d0,-(%sp)
-    jsr mp_ui_context
+    jsr store_part_ui_context
     move.l %d0,%d1
     move.l (%sp)+,%d0
     bsr.w mh_source_at
@@ -140,7 +140,7 @@ mh_quant:
     move.l %d2,-(%sp)
     move.l %d0,-(%sp)
     move.l %d1,%d0
-    jsr mp_play_context
+    jsr store_part_midi_context
     move.l %d0,%d2
     move.l (%sp)+,%d0
     bsr.w mh_quant_at
@@ -150,7 +150,7 @@ mh_quant:
 mh_quant_ui:
     move.l %d2,-(%sp)
     move.l %d0,-(%sp)
-    jsr mp_ui_context
+    jsr store_part_ui_context
     move.l %d0,%d2
     move.l (%sp)+,%d0
     bsr.w mh_quant_at
@@ -233,7 +233,7 @@ mh_generate:
     lea -40(%sp),%sp
     movem.l %d1-%d7/%a0-%a1,(%sp)
     move.l %d0,%d7
-    jsr mp_play_context
+    jsr store_part_midi_context
     move.l %d0,36(%sp)
     moveq #1,%d5
     bra.s .gen_start
@@ -242,7 +242,7 @@ mh_direct:
     lea -40(%sp),%sp
     movem.l %d1-%d7/%a0-%a1,(%sp)
     move.l %d0,%d7
-    jsr mp_ui_context
+    jsr store_part_ui_context
     move.l %d0,36(%sp)
     moveq #0,%d5
 .gen_start:
@@ -958,7 +958,7 @@ mh_draw_key:
     moveq #0,%d0
     move.b 0x100b14cc,%d0
     move.l %d0,-(%sp)
-    jsr mp_ui_context
+    jsr store_part_ui_context
     move.l %d0,%d1
     move.l (%sp)+,%d0
     bsr.w mh_raw_key_at

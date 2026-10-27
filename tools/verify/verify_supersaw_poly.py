@@ -105,10 +105,9 @@ def main():
     if a.mode=='transition':
         events=[(800,True,[80]),(1800,True,notes),(2800,True,[98]),(3700,False,notes+[80,98])]
         lane=0x80000818
-        # Sweep to each endpoint: small raw panel deltas do not advance this
-        # narrow native control in the port. Verify the resulting live value.
-        rows+=['1200 key 0x24 down','1240 key 0x24 up','1400 enc 2 127',f'1600 wait {lane:#x} 04 eq 1',
-               '2400 enc 2 -127',f'2600 wait {lane:#x} 01 eq 1']
+        # Three detents must move three positions, without an endpoint sweep.
+        rows+=['1200 key 0x24 down','1240 key 0x24 up','1400 enc 2 3',f'1600 wait {lane:#x} 04 eq 1',
+               '2400 enc 2 -3',f'2600 wait {lane:#x} 01 eq 1']
     for ms,on,keys in events:
         # A physical MIDI cable needs ~1 ms per three-byte note message.
         # Leave 5 ms for delivery/dispatch instead of asking the UART path

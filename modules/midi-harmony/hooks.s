@@ -116,7 +116,7 @@ hd_set:
     bhi.w .set_invalid
     lea -16(%sp),%sp
     movem.l %d0-%d1/%a0-%a1,(%sp)
-    jsr mp_ui_context
+    jsr store_part_ui_context
     tst.l %d0
     bmi.w .set_unavailable
     move.l (%sp),%d0
@@ -147,7 +147,7 @@ hd_set:
     move.l (%sp)+,%d0
     move.w %d0,%sr
     addq.l #8,%sp
-    jsr mp_ui_context
+    jsr store_part_ui_context
     lsr.l #2,%d0
     jsr ch_nv_save
 .set_done:

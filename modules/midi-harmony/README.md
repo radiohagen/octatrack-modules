@@ -122,7 +122,7 @@ NOTE fields are storage mirrors and can play different pitches on stock.
 Stock also resets voicing/spread/root choices and clamps extended KEY modes
 to B Minor; saving persists those changes for the bank written.
 
-Requires **MIDI Part State**, **STORE**, **MIDI SRAM**, **SEQUENCER EVENTS**
+Requires **STORE native Part access**, **STORE**, **MIDI SRAM**, **SEQUENCER EVENTS**
 and **EDIT EVENTS**. HARM and PLOCKS P2 register independently with EDIT EVENTS;
 no combination-specific bridge is selected. KITS libraries are per
 project; recalling a kit supplies Part defaults while pattern locks stay with

@@ -15,7 +15,7 @@ ms_source_ui:
 .ifdef HAVE_FOLLOW
     move.l %d1,-(%sp)
     move.l %d0,-(%sp)
-    jsr mp_ui_context
+    jsr store_part_ui_context
     move.l %d0,%d1
     move.l (%sp)+,%d0
     jsr bf_source_resolve_at
@@ -31,14 +31,14 @@ ms_raw_ui:
     move.l %d0,%d3
     cmp.l %d2,%d0
     bne.s .ui_followed
-    jsr mp_ui_context
+    jsr store_part_ui_context
     bra.s .ui_context
 .ui_followed:
-    jsr mp_play_context
+    jsr store_part_midi_context
 .ui_context:
     move.l %d0,%d1
     move.l %d3,%d0
-    jsr mp_read_key
+    jsr store_part_midi_key
     movem.l (%sp),%d1-%d3
     lea 12(%sp),%sp
     rts
@@ -46,10 +46,10 @@ ms_raw_ui:
 .ifdef HAVE_HARMONY
     move.l %d1,-(%sp)
     move.l %d0,-(%sp)
-    jsr mp_ui_context
+    jsr store_part_ui_context
     move.l %d0,%d1
     move.l (%sp)+,%d0
-    jsr mp_read_key
+    jsr store_part_midi_key
     move.l (%sp)+,%d1
     rts
 .else

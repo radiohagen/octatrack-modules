@@ -19,6 +19,15 @@ int main(int argc, char **argv) {
     assert(!sf_marker(NULL));
     char longname[256];memset(longname,'a',sizeof(longname));
     assert(!sf_marker(longname));
+    /* Every possible 16-bit source-sample difference stays within one PCM
+     * unit of the old exact /147 interpolation, including negative slopes. */
+    for (int difference=-65535;difference<=65535;++difference)
+        for (unsigned fraction=0;fraction<147;++fraction) {
+            int32_t exact=difference*(int32_t)fraction/147;
+            int32_t fast=sf_interpolate(difference,fraction);
+            int32_t error=fast-exact;
+            assert(error>=-1 && error<=1);
+        }
     uint32_t state[32]={0};uint16_t fp[6]={0x4000,0x3200,0x5000,0x4000,0x3000,0x4000};
     state[3]=25480119;state[6]=32768;*(uint16_t *)((uint8_t *)state+38)=32768;
     reset(0);reset(1);
@@ -35,13 +44,18 @@ int main(int argc, char **argv) {
         .model=0,.color=50,.metal=80,.feedback=48,.velocity=127,.sweep=0,.fold=0};
     for (unsigned n=0;n<48096;n+=32)ds_voice_render(&voice,&params,n==0,oracle+n,32);
     uint32_t step=sf_voices[0].resample_step;
+    uint32_t max_pcm_delta=0;
     for (unsigned n=0;n<44100;++n) {
         uint64_t at=(uint64_t)n*step;
         unsigned pos=(unsigned)(at/(147u*65536u));
         unsigned frac=(unsigned)((at%(147u*65536u))>>16);
         int32_t left=oracle[pos]/65536,right=oracle[pos+1]/65536;
         int32_t expected=2*(left+(right-left)*(int32_t)frac/147)*65536;
-        assert(audio[2*n]==expected && audio[2*n+1]==expected);
+        int64_t delta=(int64_t)audio[2*n]-expected;
+        if (delta<0) delta=-delta;
+        if ((uint32_t)(delta/65536)>max_pcm_delta)
+            max_pcm_delta=(uint32_t)(delta/65536);
+        assert(delta<=2*65536 && audio[2*n+1]==audio[2*n]);
     }
     /* Arbitrary source-call splits retain the same continuous resampler. */
     for (unsigned n=0;n<44100;) {
@@ -76,6 +90,24 @@ int main(int argc, char **argv) {
     }
     assert(low_phase[0]==low_phase[1] && low_phase[1]==low_phase[2]);
     assert(low_step[0]<low_step[1] && low_step[1]<low_step[2]);
+    /* Pitch conversion is cached only while the live PTCH/FINE word stays
+     * unchanged, including cents that share one integer engine increment. */
+    {
+        uint32_t lane[32];memcpy(lane,state,sizeof(lane));
+        int32_t block[32];
+        reset(5);
+        lane[3]=cents[0];
+        assert(sf_fill(5,(uint8_t *)lane,fp,block,16));
+        uint16_t first_phase=sf_voices[5].params.phase_inc;
+        uint32_t first_step=sf_voices[5].resample_step;
+        lane[3]=cents[2];
+        assert(sf_fill(5,(uint8_t *)lane,fp,block,16));
+        assert(sf_voices[5].params.phase_inc==first_phase);
+        assert(sf_voices[5].resample_step>first_step);
+        lane[3]=30000000u;
+        assert(sf_fill(5,(uint8_t *)lane,fp,block,16));
+        assert(sf_voices[5].params.phase_inc>first_phase);
+    }
     /* Unselected track is an exact bypass; polyphonic Sophie fails silent. */
     int32_t untouched[32];for(unsigned i=0;i<32;++i)untouched[i]=123456;
     assert(!sf_fill(7,(uint8_t *)state,fp,untouched,16));
@@ -86,6 +118,6 @@ int main(int argc, char **argv) {
     assert(sf_unsupported[1]==1 && sf_samples[7]==0);
     if(argc==2){FILE *f=fopen(argv[1],"wb");assert(f);assert(fwrite(audio,sizeof(*audio),88200,f)==88200);fclose(f);}
     free(audio);free(oracle);
-    puts("[ok] upstream/fractional-resampler oracle, bipolar fine, 6 dB gain, split blocks and mono boundary");
+    printf("[ok] Sophie resampler within %u PCM units of exact division; bipolar fine, 6 dB gain, split blocks and mono boundary\n",max_pcm_delta);
     return 0;
 }

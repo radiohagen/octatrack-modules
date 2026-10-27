@@ -350,7 +350,8 @@ bf_note:
     beq.s .restore
     /* TRAN is the follower's signed semitone offset (including step locks).
      * Read the original live lane; scratch has already been transposed and
-     * scale-corrected by stock. Do not add that processing a second time.
+     * scale-corrected by stock for the original follower notes. Apply the
+     * inherited source KEY after replacing those notes and adding TRAN.
      */
     moveq #0,%d1
     move.b 0x22c(%a5),%d1
@@ -387,6 +388,8 @@ bf_note:
 .follower_bounds:
     cmpi.l #127,%d0
     bhi.s .follower_extra      /* also rejects negative pitches, no wrapping */
+    move.l %d7,%d1
+    jsr bf_quant_note
     move.b %d0,(%a2)
     bra.s .restore
 .follower_extra:
@@ -544,3 +547,136 @@ bf_ui_delta:
     jsr 0x40032510
     lea 12(%sp),%sp
     rts
+
+/* d0 pitch after register/TRAN, d1 receiver -> corrected pitch.
+ * Native KEY 1..24 uses the stock rotation and correction table at
+ * 0x400d80a0 (stock output 0x4009fb58..0x4009fb7e). KEY OFF is chromatic.
+ * Only additional MIDI Scales values use its extension. All other registers
+ * are preserved. Follow chains inherit the ultimate source's playing KEY.
+ */
+    .global bf_quant,bf_quant_note,bf_scale_offsets
+bf_quant:
+    lea -20(%sp),%sp
+    movem.l %d1-%d3/%a0-%a1,(%sp)
+    move.l %d0,%d3
+    cmpi.l #127,%d0
+    bhi.w .quant_return
+    move.l %d1,%d0
+    jsr bf_source_resolve
+    move.l %d0,%d2
+    jsr store_part_midi_context
+    move.l %d0,%d1
+    move.l %d2,%d0
+    jsr store_part_midi_key
+    tst.l %d0
+    ble.w .quant_return
+    cmpi.l #24,%d0
+    bls.s .quant_native
+    .ifdef HAVE_SCALES
+    cmpi.l #84,%d0
+    bhi.s .quant_return
+    move.l %d0,%d1
+    move.l %d3,%d0
+    jsr ms_snap
+    move.l %d0,%d3
+    .endif
+    bra.s .quant_return
+.quant_native:
+    move.l %d0,%d1
+    subq.l #1,%d1
+    lsr.l #1,%d1
+    btst #0,%d0
+    beq.s .quant_minor
+    moveq #12,%d0
+    bra.s .quant_rotate
+.quant_minor:
+    moveq #21,%d0
+.quant_rotate:
+    sub.l %d1,%d0
+    add.l %d3,%d0
+.quant_mod:
+    cmpi.l #12,%d0
+    blt.s .quant_table
+    subi.l #12,%d0
+    bra.s .quant_mod
+.quant_table:
+    lea 0x400d80a0,%a0
+    add.l (%a0,%d0.l*4),%d3
+.quant_return:
+    move.l %d3,%d0
+    movem.l (%sp),%d1-%d3/%a0-%a1
+    lea 20(%sp),%sp
+    rts
+
+/* As bf_quant, with d4 voice slot. Retain raw-minus-corrected pitch so
+ * LIVE moves the uncorrected voice, then applies KEY afresh without drift.
+ * Only the sequencer owner calls this; the native release record keeps the
+ * corrected MIDI pitch. Initialized data, never uninitialized BSS. */
+bf_quant_note:
+    lea -12(%sp),%sp
+    movem.l %d1-%d2/%a0,(%sp)
+    move.l %d0,%d2
+    bsr.w bf_quant
+    sub.l %d0,%d2
+    lsl.l #2,%d1
+    add.l %d4,%d1
+    lea bf_scale_offsets,%a0
+    move.b %d2,(%a0,%d1.l)
+    movem.l (%sp),%d1-%d2/%a0
+    lea 12(%sp),%sp
+    rts
+    .balign 4
+bf_scale_offsets: .space 32,0
+
+/* Native-only KEY UI. MIDI Scales supplies its own formatter/encoder when
+ * selected. Keep the stock text tables and setter; override only the source
+ * value and disallow editing a followed track's inherited setting. */
+    .global bf_key_format,bf_key_encoder
+bf_key_source_ui:
+    moveq #0,%d0
+    move.b 0x100b14cc,%d0
+    move.l %d0,-(%sp)
+    jsr store_part_ui_context
+    move.l %d0,%d1
+    move.l (%sp)+,%d0
+    jmp bf_source_resolve_at
+bf_key_format:
+    move.l 12(%fp),%d2
+    lea -16(%sp),%sp
+    movem.l %d0-%d1/%d3/%a0,(%sp)
+    bsr.w bf_key_source_ui
+    moveq #0,%d3
+    move.b 0x100b14cc,%d3
+    cmp.l %d3,%d0
+    beq.s .key_format_done
+    move.l %d0,%d3
+    jsr store_part_midi_context
+    move.l %d0,%d1
+    move.l %d3,%d0
+    jsr store_part_midi_key
+    move.l %d0,%d2
+.key_format_done:
+    movem.l (%sp),%d0-%d1/%d3/%a0
+    lea 16(%sp),%sp
+    pea 0x64
+    jmp 0x4003b7a4
+bf_key_encoder:
+    moveq #5,%d1
+    cmp.l %d0,%d1
+    bne.s .key_other
+    lea -16(%sp),%sp
+    movem.l %d0-%d2/%a0,(%sp)
+    bsr.w bf_key_source_ui
+    moveq #0,%d2
+    move.b 0x100b14cc,%d2
+    cmp.l %d2,%d0
+    beq.s .key_edit
+    movem.l (%sp),%d0-%d2/%a0
+    lea 16(%sp),%sp
+    jmp 0x4007a6ba
+.key_edit:
+    movem.l (%sp),%d0-%d2/%a0
+    lea 16(%sp),%sp
+    jmp 0x4007a3ea
+.key_other:
+    jmp 0x4007a4cc

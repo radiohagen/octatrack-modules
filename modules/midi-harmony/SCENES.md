@@ -13,7 +13,7 @@ to native NOTE; switching on encodes against the effective KEY. NOTE/CHORD
 changes preserve degrees. CHRD and dormant native NOT2–4 remain outside
 scene-root editing. Other scene parameters retain upstream behavior.
 
-Before a native Part replacement, the shared MIDI PART STATE boundary takes
+Before a native Part replacement, the shared STORE boundary takes
 an outgoing snapshot of its scene assignments and 128 NOTE endpoints.
 Readers use that snapshot while the native Part is being copied. The previous
 32-active-parameter limit no longer applies. Upstream owns table persistence,

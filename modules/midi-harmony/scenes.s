@@ -133,7 +133,7 @@ hd_scene_value_c:
 	move.l %d1,%d0
 	add.l #1074668000,%d0
 	move.l %d3,16(%sp)
-	cmp.l mp_snapshot_bank.l,%d0
+	cmp.l store_part_snapshot_bank.l,%d0
 	jeq .L50
 .L25:
 	move.w 18(%sp),%d0
@@ -218,7 +218,7 @@ hd_scene_value_c:
 .L50:
 	moveq #1,%d0
 	lsl.l %d3,%d0
-	and.l mp_snapshot_parts,%d0
+	and.l store_part_snapshot_parts,%d0
 	tst.l %d0
 	jeq .L25
 	move.l 36(%sp),%d1

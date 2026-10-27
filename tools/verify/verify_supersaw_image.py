@@ -54,7 +54,7 @@ def main():
             *(['--rich'] if mode=='midi' else []),
             *(['--fx'] if mode=='midi' and pair=='SPECTRUM,CHARACTER' else [])],cwd=ROOT,check=True)
         receipts.append(str(ROOT/'out/supersaw-port'/name/'receipt.json'))
-    for kind in ('filter_port','save','level'):
+    for kind in ('filter_port','save','level','voic_port'):
         name=prefix+'-'+kind
         subprocess.run([sys.executable,f'tools/verify/verify_supersaw_{kind}.py',
             '--project',project,'--name',name],cwd=ROOT,check=True)

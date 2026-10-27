@@ -2,7 +2,7 @@
 
 Makes one MIDI track follow another track's notes while keeping its own
 rhythm, velocity and note length. It follows the source's native N1–4 notes
-and preserves their intervals in the follower's selected register.
+in the follower's selected register, then applies the inherited KEY after TRAN.
 
 ## Use
 
@@ -24,7 +24,8 @@ and preserves their intervals in the follower's selected register.
 Each mode remembers its own value in the same C control. FIXED is the default;
 RFOL starts OFF and UPDT starts TRIG. Octave names use C0 = MIDI 0.
 Use the follower's native **TRAN**, including parameter locks, for a semitone
-offset after register selection. TRAN +7 is always seven semitones, not a scale degree.
+offset after register selection, followed by the source's KEY correction, as in stock.
+TRAN +7 adds seven semitones before correction; it does not mean seven scale degrees.
 Out-of-range roots are silent.
 
 GRAV prefers the twelve notes C–B in the selected octave without a hard
@@ -41,6 +42,12 @@ ordinary pattern changes alone retain it.
 - RFOL OFF uses native notes. Before a source root is available, playback is unchanged.
 - The source supplies its NOTE and NOT2–4 pitches. The follower plays that set in its selected register, with its own
   TRAN. Its stored NOT2–4 do not add notes.
+- Source pitches include the source track's TRAN and KEY/scale processing.
+  The follower applies its register and TRAN, then corrects each resulting
+  note to the inherited source KEY, using stock behavior for major/minor.
+  KEY OFF leaves the result chromatic. The follower's KEY display follows
+  the source and is read-only; its own saved KEY is retained for RFOL OFF.
+  MIDI Scales is optional and adds its extra scale choices.
 - LIVE shifts currently held notes when the source root moves. A change to
   native NOT2–4 with the same root takes effect at the follower's next trig.
 - Several tracks can follow one source. Chains use the ultimate source and
@@ -54,10 +61,8 @@ ordinary pattern changes alone retain it.
 ## Storage and stock firmware
 
 RFOL, REG, all three remembered values and UPDT are native Part settings per track.
-Runtime roots and held notes are not saved. Requires **MIDI Part State** and **SEQUENCER EVENTS**;
-Scales and KITS are optional. Follow and EUCLID register independently with
-SEQUENCER EVENTS and can be selected together. Re-enter register settings
-from an earlier Follow format; there is no migration.
+Runtime roots and held notes are not saved. Requires **STORE native Part access** and **EVENTS**.
+Scales and KITS are optional.
 
 Stock 1.40C preserves the source-track number but resets the mode, response
 and octave fields. After saving that bank on stock, Follow returns as **FIXED,
@@ -70,4 +75,5 @@ MIDI Follow has been tested in the emulator. **Hardware testing is still to
 be done**, including physical MIDI output, timing and note releases on an
 Octatrack MKI/MKII.
 
+[Build integration](../../integration/midi-follow.md) ·
 [Implementation and verification](DEVELOPMENT.md).

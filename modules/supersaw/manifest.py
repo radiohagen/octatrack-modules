@@ -10,6 +10,7 @@ MODULE = Module(
     linked=(Linked('supersaw', 'modules/supersaw/adapter.s', dram=True),
             Linked('supersawhooks', 'modules/supersaw/hooks.s', dram=True)),
     detours=(
+        Detour(0x4003bff0,bytes.fromhex('711041f9400d5f38'),'supersawhooks','ss_lfo_names_hook', 'Supersaw LFO PLAYBACK destination names; native fallback'),
         Detour(0x4003c8d4,bytes.fromhex('2f5000404fef0010'),'supersawhooks','ss_setup_draw_hook', 'Supersaw setup descriptor; other rows untouched',pad_to=8),
         Detour(0x4003cd98,bytes.fromhex('2e06e78fdc869e86'),'supersawhooks','ss_setup_storage_hook', 'Supersaw setup values from retained unused machine row',pad_to=8),
         Detour(0x4003a474,bytes.fromhex('4fefffe048d73c3c'),'supersawhooks','ss_setup_edit_hook', 'Supersaw setup editor; native fallback',pad_to=8),

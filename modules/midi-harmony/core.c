@@ -13,7 +13,7 @@
 HdBank hd_banks[HD_BANKS];
 volatile uint8_t hd_busy[HD_TRACKS], hd_target[HD_TRACKS], hd_busy_context[HD_TRACKS];
 static volatile uint32_t revision[HD_BANKS][HD_LANES], bank_revision[HD_BANKS];
-extern volatile uint32_t mp_snapshot_bank, mp_snapshot_parts;
+extern volatile uint32_t store_part_snapshot_bank, store_part_snapshot_parts;
 static uint16_t mask(void) {
     uint16_t sr;
     __asm__ volatile("move.w %%sr,%0\n\tmove.w #0x2700,%%sr" : "=d"(sr) :: "cc", "memory");
@@ -109,10 +109,10 @@ int hd_context_depends_c(unsigned context, unsigned track, unsigned source_conte
     }
 }
 int hd_context_replacing_c(unsigned context, unsigned track) {
-    uintptr_t bank = mp_snapshot_bank;
+    uintptr_t bank = store_part_snapshot_bank;
     if (!bank) return 0;
     unsigned first = (unsigned)(bank-NATIVE_BASE)/BANK_SIZE*4;
-    unsigned parts = mp_snapshot_parts;
+    unsigned parts = store_part_snapshot_parts;
     for (unsigned part = 0; part < 4; ++part)
         if ((parts & (1u << part)) && hd_context_depends_c(context,track,first+part)) return 1;
     return 0;

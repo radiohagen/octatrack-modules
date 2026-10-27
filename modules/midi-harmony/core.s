@@ -666,7 +666,7 @@ hd_context_depends_c:
 	.globl	hd_context_replacing_c
 	.type	hd_context_replacing_c, @function
 hd_context_replacing_c:
-	move.l mp_snapshot_bank,%d0
+	move.l store_part_snapshot_bank,%d0
 	lea (-20,%sp),%sp
 	movem.l #28,(%sp)
 	tst.l %d0
@@ -675,7 +675,7 @@ hd_context_replacing_c:
 	move.l #635712,%d3
 	clr.l %d1
 	divu.l %d3,%d0
-	move.l mp_snapshot_parts,%d2
+	move.l store_part_snapshot_parts,%d2
 	mvz.w %d0,%d0
 	lsl.l #2,%d0
 	move.l %d0,16(%sp)

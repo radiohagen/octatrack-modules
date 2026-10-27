@@ -234,7 +234,7 @@
       "base": "8250be0c23ca0a0a953cb7e5721e3bdb98dadfe5",
       "prerequisite": "f4f208cdd091cfc2f2811cd839edeac8cc8daf68",
       "author_commit": "e151238a6aef385c81083440afa1ffb255615b8d",
-      "publication_status": "Published and remote commit verified on radiohagen/octabam. No upstream PR submitted; review the prepared series before submission.",
+      "publication_status": "Draft upstream PR #824 is open. The commit, image and validation receipt below are historical snapshots; use the PR for current source and qualification.",
       "image_sha256": "b6a20d82979a14d11d7b87b3d91fae55257cd1d8adcfa1b2cf8ff0cdb89da662",
       "full_checks_commit": "b21dc3f0cf38fc5e70149122a8e1880e34efc360",
       "checks": [
@@ -252,7 +252,7 @@
         "EUCLID is refused pending a separate transport hook bridge"
       ],
       "hardware_tested": false,
-      "submission_qualification": "Review the prepared series; recheck upstream and rerun required reach gates after any new rebase before submission.",
+      "submission_qualification": "Current draft is rebased and qualified separately; physical MIDI and hardware acceptance remain outstanding.",
       "branch_url": "https://github.com/radiohagen/octabam/tree/codex/pr/midi-follow-voices",
       "prerequisite_branch_url": "https://github.com/radiohagen/octabam/tree/codex/pr/midi-include-abi",
       "previous_review_snapshot": {
@@ -301,8 +301,14 @@
         ],
         "hardware_tested": false,
         "image_sha256": "b6a20d82979a14d11d7b87b3d91fae55257cd1d8adcfa1b2cf8ff0cdb89da662"
-      }
+      },
+      "current_pr": "https://github.com/sambanks/octabam/pull/824",
+      "current_integration_guide": "integration/midi-follow.md",
+      "current_dependencies": [
+        "STORE (native Part extension in #824)",
+        "EVENTS (merged upstream in #871)"
+      ]
     }
   ],
-  "limits": "These are prepared candidates. Each needs current make reach qualification before submission. KITS has inherited broad-suite failures and is held. Later feature boundaries are documented but not yet submitted or qualified branches."
+  "limits": "Entries retain exact historical qualification snapshots. Consult each linked active PR for its current head and results. Software evidence is not hardware acceptance."
 }

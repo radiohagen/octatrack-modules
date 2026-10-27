@@ -13,7 +13,7 @@ MODULE = Module(
     author_url='https://github.com/radiohagen/octatrack-modules', proof=Proof.PORT,
     proof_note='',
     doc='Scale-degree roots, generated chords and CHORD PLAY using native ARP KEY; optional MIDI Follow.',
-    requires=('MIDI PART STATE','STORE','MIDI SRAM','SEQUENCER EVENTS','EDIT EVENTS'),
+    requires=('STORE','MIDI SRAM','SEQUENCER EVENTS','EDIT EVENTS'),
     linked=(Linked('chordpart', 'modules/midi-harmony/chord-part.s', dram=True),
             Linked('harmonytransport', 'modules/midi-harmony/transport.s', dram=True),
             Linked('harmonyownership', 'modules/midi-harmony/ownership.s', dram=True),

@@ -19,15 +19,15 @@ Each MIDI track has a native 36-byte SETUP record at Part offset `0x4e2`.
 | 19 | Base DEG, 0..83; default 35 |
 
 Context is `bank*4+workingPart`, 0..63. Public shared entries preserve all
-registers except d0/CCR. `mp_ui_context` identifies the selected Part;
-`mp_play_context(d0=track)` identifies the per-track engine context, with
-applied-engine fallback, never UI fallback. `mp_read`, `mp_write`,
-`mp_read_key` and `mp_epoch` use explicit contexts. Getters distinguish UI,
+registers except d0/CCR. `store_part_ui_context` identifies the selected Part;
+`store_part_midi_context(d0=track)` identifies the per-track engine context, with
+applied-engine fallback, never UI fallback. `store_part_midi_read`, `store_part_midi_write`,
+`store_part_midi_key` and `store_part_epoch` use explicit contexts. Getters distinguish UI,
 playback and captured-event contexts deliberately.
 
-MIDI PART STATE owns boot-safe ROM gates for native memcpy/init. During an
-ordinary native working-Part replacement it publishes `mp_snapshot_bank`,
-`mp_snapshot_parts` and the outgoing SETUP snapshot, then calls
+STORE owns boot-safe ROM gates for native memcpy/init. During an
+ordinary native working-Part replacement it publishes `store_part_snapshot_bank`,
+`store_part_snapshot_parts` and the outgoing SETUP snapshot, then calls
 `hd_part_before(d0=aligned Part address)` once per affected Part. DEG detaches
 outgoing root/queued provenance and suppresses reattachment while the snapshot
 is active, including Follow dependencies. Native bulk copying remains
