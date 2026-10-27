@@ -1,0 +1,40 @@
+diff --git a/tools/emu/emu_bringup.py b/tools/emu/emu_bringup.py
+index fdff9fff..0624b75e 100644
+--- a/tools/emu/emu_bringup.py
++++ b/tools/emu/emu_bringup.py
+@@ -173,7 +173,9 @@ def _emac_macload_selftest():
+     return True, "macload Rx/dual/MASK: OK"
+ STOCK_IMAGE = os.path.join(REPO, "out/raw/section_3_MAIN_OS.bin")
+ BASE = ENTRY = 0x40000400          # load base = 0x40000000 + 0x400 header
+-BUDGET = 50_000_000
++# Larger table-bearing runtimes can still be hashing at 50M instructions.
++# This bounds emulated boot only; it does not change firmware or audio timing.
++BUDGET = 100_000_000
+ 
+ # Root of the MAIN MENU tree (docs/firmware/MAINMENU.md). Address = file offset + BASE.
+ MENU_ROOT_DESC = 0x400cbd8c
+diff --git a/tools/emu/ot_emu/main.cpp b/tools/emu/ot_emu/main.cpp
+index 4421a674..70ec2379 100644
+--- a/tools/emu/ot_emu/main.cpp
++++ b/tools/emu/ot_emu/main.cpp
+@@ -1243,7 +1243,7 @@ int main(int _argc, char** _argv)
+ 	// have named it. Same family as the panic printer O7 could not finish.
+ 	std::setvbuf(stdout, nullptr, _IOLBF, 0);
+ 	std::string image = "out/raw/section_3_MAIN_OS.bin";
+-	uint64_t maxInstructions = 50'000'000;	// route A's own budget
++	uint64_t maxInstructions = 100'000'000;	// route A's bounded boot budget, including larger table-bearing runtimes
+ 	bool showPeripherals = false;
+ 	bool profile = false;
+ 	std::string golden;
+diff --git a/tools/verify/verify_hidden.py b/tools/verify/verify_hidden.py
+index f99db97a..7fbc8539 100644
+--- a/tools/verify/verify_hidden.py
++++ b/tools/verify/verify_hidden.py
+@@ -169,6 +169,7 @@ def main():
+     import emu_bringup as emu
+     from unicorn import UcError
+     boot = emu.boot(str(IMAGE))
++    assert boot.clean, f"hidden-page boot incomplete: {boot.stopped}"
+     uc = boot.uc
+     uc.mem_map(0x100a0000, 0x10000)
+ 

@@ -1,0 +1,100 @@
+{
+  "version": "S14",
+  "author_base_commit": "a67ae18ce9ccdeded016457d0e2ce7ced4b669f1",
+  "integration_base_commit": "6eed3eebc7e9d496b322859e3e6c34b80b4be72c",
+  "remix": "radio-bus",
+  "build": 84,
+  "image_sha256": "1ec5961a5bf7329524809cf961494860585ccc8c9f2480d63774e9847b27e1d8",
+  "runtime_sha256": "4fa5577351254265755a1310dc0a86ca9310740b0e1e6b0a3ea145d809e07ab7",
+  "production_source_sha256": {
+    "modules/supersaw/adapter.c": "890b966f2fb9bfa4bddc888f698f0bc07754bb1298b3140d22e006498d5fd701",
+    "modules/supersaw/adapter.s": "5b0b99734da5348e3209f37af2fd09b4b4b4850f96812a65c734f258298e3f1f",
+    "modules/supersaw/engine.c": "cbad2f0b35e2ebb1cafc84575d9a2a5db659d458d46ef91e4312ac0c025c480b",
+    "modules/supersaw/engine.h": "a2a78a4673698af386b48bf9b25070ec2a65d394aa3c31c0d2f8bf4d3cb71b12",
+    "modules/supersaw/filter.h": "f04f77080586710c36f7ab3440e0dc41ba7659704e8df90658821c1cf92ec1a7",
+    "modules/supersaw/tables.h": "96a38f5ffcaf7e9c579bae5cc48a6155df30bf0a33e0010903b3b9a210394a5a",
+    "modules/supersaw/generate.py": "f02c338cd16510ba296a461ffe937460b9a87e24830ca4c597fdc4e3993aef59",
+    "modules/supersaw/bridge.py": "023f4927343a6ab19c5a3934f1e1557f4db27f748960e1e1d811dd3d247c3067",
+    "modules/supersaw/hooks.s": "3411fe5ded349d3bc917fb8efbd4a06d90854e95235f110ebfc20c1a6a848e48",
+    "modules/supersaw/ui.h": "a24e10444a82fcb714c12b6a8836c9b972372834d3dd5f03f699f791d5554e46",
+    "modules/supersaw/diagnostics.h": "b31952fefc0cb99a4db64185d02f5298a64eb713cbee51d68a9e2bbc09adfbfd",
+    "modules/supersaw/manifest.py": "09d0de91fb867a1be8ef6e1f6d8ad7449d342d8368a46f403222120b7eeee121"
+  },
+  "hardware_tested": false,
+  "sound": {
+    "old": "Hard octave harmonic-bank drop near E/F",
+    "new": "Sixteen baked spectral steps with shared octave endpoints",
+    "added_readonly_bytes": 430080,
+    "voices_per_track": 4,
+    "fx_slots_free": 2
+  },
+  "validation": {
+    "source_tests": 39,
+    "source_command": "make check",
+    "firmware_command": "make check-remix REMIX=radio-bus MODULES=SUPERSAW BUILD=84",
+    "firmware_test_patch": "supersaw-boot-budget.patch",
+    "docs_command": "make verify-docs",
+    "docs_retry": "First run found a nonportable README link; corrected and rerun independently with the original failure retained",
+    "linked_host_exact_samples": 702,
+    "native_pitch_cache_cases": 1814,
+    "independent_pitch_cases": 128,
+    "chromatic_calls": 288,
+    "max_tuning_error_cents": 0.0037352008894706874,
+    "native_poly": {
+      "result": "pass",
+      "tracks": [
+        3,
+        4
+      ],
+      "voices_per_track": 4,
+      "rich": true,
+      "mode": "midi",
+      "hardware_tested": false
+    },
+    "independent_selector_cases": 11388608,
+    "table_fourier": {
+      "path": "modules/supersaw/tables.h",
+      "rows": 113,
+      "values_per_row": 2048,
+      "harmonics_examined_per_row": 129,
+      "max_sine_amplitude_error_pcm": 0.07163827953286273,
+      "max_cosine_leak_pcm": 8.69813639517436e-12,
+      "max_dc_pcm": 0.0,
+      "max_waveform_error_pcm": 0.9897555990646651
+    }
+  },
+  "performance": {
+    "measurement": "Executed ColdFire instructions; not hardware cycles",
+    "cold_or_pitch_change_extra_instructions": [
+      8,
+      34
+    ],
+    "warm_case_delta_range": [
+      -1,
+      1
+    ],
+    "silent_tail_cases_unchanged": 80,
+    "stack_bytes": {
+      "mono": 388,
+      "single_poly": 332,
+      "multi_poly": 520
+    },
+    "runtime_bytes": 1163316,
+    "supersaw_function_bytes": 37016,
+    "mutable_storage_changed": false
+  },
+  "boot_diagnosis": {
+    "default_budget": 50000000,
+    "qualified_budget": 100000000,
+    "baseline_handoff_burst_instructions": 31000000,
+    "candidate_handoff_burst_instructions": 58000000,
+    "reason": "50M cap expired in loader hash; same image passes after clean handoff"
+  },
+  "limitations": [
+    "No hardware sound or cache/bus timing acceptance",
+    "Smaller discrete spectral steps remain during bends",
+    "Generic project-backed image matrix skipped without OT_PROJECT; named dual-track fixture supplements it",
+    "Original physical crash and full real Thru/kick/MIDI routing scenario remain unverified",
+    "No device staging, flashing, or new RADBUSS package"
+  ]
+}

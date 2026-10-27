@@ -60,8 +60,16 @@ static __attribute__((noinline)) void ss_prepare(struct ss_voice *voice, const s
         unsigned bank=0;
         if(maximum<=0x07ffffffu) { bank=4;maximum<<=4; }
         if(maximum<=0x1fffffffu) { bank+=2;maximum<<=2; }
-        if(maximum<=0x3fffffffu)++bank;
-        voice->bank=bank;
+        if(maximum<=0x3fffffffu) { ++bank;maximum<<=1; }
+        /* Fade the upper half of this safe harmonic bank before the next
+         * octave boundary, using sixteen precomputed blends. Adjacent
+         * octaves share their endpoint table, avoiding the old E/F jump.
+         * Clamp below the richest bank and above the sine-only bank.
+         * All selection work is cached; the sample loop is unchanged. */
+        unsigned fade=0;
+        if(bank && maximum>0x40000000u)
+            fade=(maximum-0x40000000u+0x02000000u)>>26;
+        voice->bank=bank*16-fade;
     }
     if (cold || voice->controls != controls) {
         unsigned morph = params->morph & 127;

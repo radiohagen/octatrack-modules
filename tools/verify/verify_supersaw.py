@@ -38,6 +38,12 @@ def main():
         increment = 21426141
         harmonics = 1
         while harmonics < 128 and increment*2*harmonics*2 < 2**31: harmonics *= 2
+        # Independent spectral law: fade only the upper half of the safe
+        # harmonics in sixteen steps across this octave, retaining the old
+        # low-frequency 128-partial cap and the high-frequency fundamental.
+        upper = 2**31 / harmonics
+        fade = min(16, max(0, math.floor(16*(2*increment*2/upper-1)+.5)))
+        upper_weight = 1-fade/16 if harmonics>1 else 1
         for morph,polarity,pcm in ((0,1,samples[:4096]),(127,-1,samples[4096:])):
             # Independent analytical Fourier series at the actual phase; no engine tables.
             def exact(n):
@@ -45,6 +51,7 @@ def main():
                 phase = ((n*increment)%2**32)/2**32
                 return -10000/math.pi * sum(
                     (math.sin(2*math.pi*k*phase) + polarity*math.sin(2*math.pi*k*(phase+.25)))/k
+                    * (1 if k<=harmonics//2 else upper_weight)
                     for k in range(1,harmonics+1))
             # Independent two-saw sum, half-rate source and causal interpolation.
             reference = [exact(n-3) if n % 2 else

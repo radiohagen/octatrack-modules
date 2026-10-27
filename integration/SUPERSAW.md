@@ -197,3 +197,24 @@ including filter bypass/resume, sparse voices, gain ramps and odd/split calls.
 Retain the full native MIDI, transition and live T4 checks described above.
 This source publication does not update an existing firmware package or claim
 hardware timing or crash acceptance.
+
+## S14 E/F timbre fix (27 October 2026)
+
+S14 replaces the abrupt octave-bank drop with sixteen precomputed spectral
+steps per octave. See the module README for the deliberate sound change,
+420 KiB read-only storage cost and remaining bend quantization. No stored
+parameter layout, voice count or FX allocation changes.
+
+For the controlled Octabam `6eed3eebc7e9d496b322859e3e6c34b80b4be72c`
+integration, apply `supersaw-boot-budget.patch` to the **test harness** before
+running the broad remix gate. It raises the bounded boot allowance in both emulators
+from 50M to 100M instructions and makes hidden-page checks fail explicitly
+when boot did not complete. It changes no production firmware. Frozen-image
+controls show S13 reaching handoff at about 31M burst-accounted instructions;
+S14 is still hashing its larger runtime at 50M and reaches handoff at about
+58M. The same S14 image then passes both host-slot label checks and the SEND
+positive control. These counts do not measure hardware boot time.
+
+The scoped qualification uses `radio-bus BUILD=84` on that controlled
+integration. It is not a new RADBUSS delivery or a device test. Keep the
+published S13/RADBUSS6 package pins separate from this candidate.

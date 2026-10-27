@@ -1,5 +1,45 @@
 # Supersaw
 
+## S14 harmonic-bank transition fix
+
+The old octave banks dropped half their harmonics at once. At the 22.05 kHz
+source rate those boundaries fall between E and F: for example, E4 uses 32
+partials while F4 uses 16. Low-pass filtering masks this brightness change.
+Chromatic pitch conversion itself remains equal-tempered.
+
+S14 fades the upper half of each safe harmonic bank through sixteen baked
+steps before the next boundary. Adjacent octaves share an endpoint, including
+the two-partial to sine transition. The source loop still reads one 2048-point
+table per oscillator sample; selection is cached with pitch and detune. There
+are 113 tables instead of eight: 452 KiB total, an extra 420 KiB of read-only
+runtime storage from the sample/recorder arena. Four voices, independent
+releases, both FX slots, controls and stored patches are unchanged.
+
+This deliberately changes the sound: brightness falls progressively within
+an octave bank rather than dropping abruptly at E/F. Pitch bends still have
+smaller discrete spectral steps. The harmonic model makes each step 1/16 of
+the former jump (24.08 dB lower in phase-normalized waveform difference);
+this is not a hardware listening or CPU measurement. Lookup quantization,
+resampling images and distortion aliasing remain. More table storage can
+change cache and bus behavior even with the same sample-loop instructions.
+
+Regression checks cover all seven shared octave endpoints, rounded blend
+thresholds with detune, independent Fourier values for all 113 tables and
+unchanged voice/AMP/filter lifecycle. The native pitch verifier now loads the
+stock image at its actual address, 0x40000400. Its previous cache comparison
+was still exact but used a misplaced reference table and could not prove
+absolute tuning. New independent checks cover 128 pitches and 288 linked
+chromatic-key conversions across T3/T4, with scale OFF.
+
+Against the frozen S13 runtime, all 80 silent-tail instruction probes are
+unchanged. Of 80 held-note probes, 75 are identical and five differ by one
+instruction because the changed samples take different output branches.
+Cold starts and pitch changes add 8–34 instructions per native track call
+(at most 1.3% in the sampled cases). The five warmed two-track means differ by
+less than 0.003%; mono/single-poly/multi-poly stack maxima remain 388/332/520
+bytes. These are executed ColdFire instruction counts, not hardware cycles.
+The revised sound and larger table working set still require device testing.
+
 ## S13 final CPU pass
 
 S13 preserves S12 sound, four independent voices and both FX slots. Dry mono
@@ -312,8 +352,8 @@ detune ratios are generated mathematically. The Synth bridge pins Tim Hastie's
 Sophie is optional legacy compatibility only and is not part of this qualification.
 
 Synthesis runs at 22.05 kHz with four-point interpolation to 44.1 kHz, three output
-samples of latency, and state preserved across split calls. Eight 2048-point
-harmonic banks (1–128 partials) limit aliasing; the fundamental is clamped below
+samples of latency, and state preserved across split calls. 113 2048-point
+waveforms blend eight harmonic limits (1–128 partials) to reduce octave jumps; the fundamental is clamped below
 10.77 kHz. This is not alias-free, particularly after drive. Oscillator controls update per source call without smoothing. Filter coefficients
 ramp per source call; enabling/disabling the filter fades over 128 samples. The Synth Machine's voice/machine-change behavior
 is inherited, including its documented held REL INF machine-switch limitation.
@@ -422,7 +462,7 @@ input while eight voices run. These results do not turn the broader combined
 remix suite, which has retained reference-fixture failures, into a clean pass.
 
 Run the gates inside the prepared Octabam worktree; see
-[CPU Supersaw integration](../../integration/SUPERSAW.md). Neither a build nor an
+[CPU Supersaw integration](https://github.com/radiohagen/octatrack-modules/blob/main/integration/SUPERSAW.md). Neither a build nor an
 emulator pass establishes physical-device acceptance.
 
 ## Two-saw engine (S6)

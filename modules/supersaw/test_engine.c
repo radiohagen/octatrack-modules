@@ -635,8 +635,8 @@ static void check_restart(void) {
     }
 }
 
-/* Pre-optimization coefficient arithmetic, deliberately without production
- * cache guards, symmetric-offset reuse or the leading-zero bank shortcut. */
+/* Independent coefficient arithmetic, without production cache guards,
+ * symmetric-offset reuse or the leading-zero bank shortcut. */
 static void reference_prepare(struct ss_voice *v,const struct ss_params *p) {
     uint32_t base=p->increment,maximum=0;
     if(base<1024)base=1024;
@@ -652,7 +652,10 @@ static void reference_prepare(struct ss_voice *v,const struct ss_params *p) {
     }
     unsigned bank=0;
     while(bank<7 && maximum<=(0x7fffffffu>>(bank+1)))++bank;
-    v->bank=bank;
+    uint64_t lower=(uint64_t)1<<(30-bank);
+    unsigned fade=bank && maximum>lower ?
+        (unsigned)((((uint64_t)maximum-lower)*16+lower/2)/lower) : 0;
+    v->bank=bank*16-fade;
     v->sub_gain=(int32_t)controls[2]*64;
     v->saw_weight=(32768-v->sub_gain)/2;
     v->morph_weight=(v->saw_weight*ss_morph_polarity[controls[1]])>>15;
@@ -695,6 +698,37 @@ static void check_prepare(void) {
         }
     }
     printf("[ok] independent two-ratio/threshold coefficient oracle: %u cold, cached and split-control cases\n",cases);
+}
+
+static void check_bank_boundaries(void) {
+    assert(sizeof ss_saws/sizeof ss_saws[0]==113);
+    struct ss_voice v,expected;ss_init(&v);ss_init(&expected);
+    /* Every former octave jump now meets at one shared table, including
+     * the two-harmonic to sine transition. Walk both sides at one phase LSB. */
+    for(unsigned bank=1;bank<8;++bank) {
+        uint32_t boundary=0x80000000u>>bank;
+        for(int d=-4;d<=4;++d) {
+            struct ss_params p={boundary+d,0,0,0,0};
+            check_prepare_case(&v,&expected,&p);
+            assert(v.bank==(bank-1)*16);
+        }
+        for(unsigned step=0;step<16;++step) {
+            /* Independent rounded-blend thresholds: test below, at, and
+             * above each midpoint, with both extreme detune settings. */
+            uint64_t lower=(uint64_t)1<<(30-bank);
+            uint64_t threshold=lower+lower*(2*step+1)/32;
+            for(unsigned detune=0;detune<128;detune+=127)
+            for(int d=-4;d<=4;++d) {
+                uint32_t base=(uint32_t)(threshold*1048576/ss_ratios[detune][1])+d;
+                struct ss_params p={base,detune,0,0,0};
+                check_prepare_case(&v,&expected,&p);
+                assert(v.bank<=112);
+                unsigned power=(v.bank+15)/16;
+                assert((uint64_t)v.increments[1]*((uint64_t)1<<power)<0x80000000u);
+            }
+        }
+    }
+    puts("[ok] all seven octave bank joins are identical; blend thresholds and detune retain harmonic bounds");
 }
 
 int main(int argc, char **argv) {
@@ -800,7 +834,7 @@ int main(int argc, char **argv) {
         int exact=x-(((((x*x)>>15)*x>>15)*10923)>>15);
         assert(abs(ss_drive_curve[(x+32772)>>3]-exact)<=5);
     }
-    check_restart();check_prepare();check_filter();check_half_filter();
+    check_restart();check_prepare();check_bank_boundaries();check_filter();check_half_filter();
     check_gain();check_output_scale();
     check_mix16();check_poly();check_adapter_lifecycle();check_single_poly();check_retired_poly();
     if (argc == 2) {
