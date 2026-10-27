@@ -2407,21 +2407,21 @@
       "path": "modules/sophie/README.md",
       "sha256": "0125f81700b71a3d3cc0889e5225cbc89291e59355eb28e29c9f458de1077cb4",
       "source_mode": "100644",
-      "published_sha256": "c51097a5b9babf9e2ebd4d5f9999e7999f216368f0cb93813aadffa3e7dd44af"
+      "published_sha256": "7c67db1813eef2d2abf2bbabb8906164998657021a65067b2d549fc9f19fb9be"
     },
     "modules/sophie/adapter.c": {
       "commit": "33ba0c90533e925af29929fd761c5dc8f48eab4a",
       "path": "modules/sophie/adapter.c",
       "sha256": "dffc37cc5a82428191962fc99f39f373ad2e4524df811d335d1e3db2e8d27e0a",
       "source_mode": "100644",
-      "published_sha256": "5c1b354a226841ce383e56f6f8468df5ada98ecca76d202363e997dcd11db0a3"
+      "published_sha256": "85df5a97e5ed2411812b7896a58349b92f3d9c84d59b2cb84daffb6044ba6558"
     },
     "modules/sophie/adapter.s": {
       "commit": "33ba0c90533e925af29929fd761c5dc8f48eab4a",
       "path": "modules/sophie/adapter.s",
       "sha256": "b860e5fd76e45fa6a89be7fc98d2a05048bf16dd301ebc7ef0ef032606de4997",
       "source_mode": "100644",
-      "published_sha256": "c3753d08d184c32cac8567368d4ef30b9d666b060c4589f1949a4386420fd7ad"
+      "published_sha256": "bf45dd0f7293ee8b41ef08fc317a9e0236c29148ca009b76d99eb18e590dddfd"
     },
     "modules/sophie/bridge.py": {
       "commit": "33ba0c90533e925af29929fd761c5dc8f48eab4a",
@@ -2463,7 +2463,7 @@
       "path": "modules/sophie/test_adapter.c",
       "sha256": "6d64eea8bb7937f0a1f04bd1c4095d70f464c04a275e9099b0a5eca00f7bafa4",
       "source_mode": "100644",
-      "published_sha256": "cabe007f219b6eb432860a3ff6409704bb410988c66c7dd04b8a641af7df47a5"
+      "published_sha256": "fa2d134ea3bdb4e07fd65ca5badf1f658d142c0e0edfc757032670550bb89834"
     },
     "tools/verify/verify_sophie.py": {
       "commit": "33ba0c90533e925af29929fd761c5dc8f48eab4a",
@@ -2477,7 +2477,7 @@
       "path": "tools/verify/verify_sophie_image.py",
       "sha256": "cc6113ae1eb16d2ca858832eee4609d03837e99a3810c29e5e78510e61e9a82f",
       "source_mode": "100644",
-      "published_sha256": "cc6113ae1eb16d2ca858832eee4609d03837e99a3810c29e5e78510e61e9a82f"
+      "published_sha256": "c4f4d89c963f91a7673fd081b4cbd96a4eb0df82d86e0b27ef270b7219423fe2"
     },
     "tools/verify/verify_sophie_page.py": {
       "commit": "33ba0c90533e925af29929fd761c5dc8f48eab4a",

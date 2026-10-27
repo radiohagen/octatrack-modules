@@ -52,3 +52,51 @@ placement.
 Run `tools/verify/verify_sophie_cpu.py` with Python's Unicorn package and the
 ColdFire toolchain to reproduce the instruction counts. Its JSON receipt is
 written under ignored `out/`.
+
+## Further CPU optimization (26 October 2026)
+
+This pass keeps the previous optimized adapter's samples and state exactly.
+The resampler cursor stays in local variables during each source call, and a
+settled unity AMP gain avoids redundant multiplication. The pinned engine
+always writes PCM with a zero low word, allowing an exact signed shift when
+reading its output. A small compiler-specialized wrapper exposes the existing
+FUSE, full-velocity and 32-frame constants to GCC; upstream source and its
+24 kHz oscillator / 48 kHz output cadence remain unchanged.
+
+Compared with module `fde8036` (which includes the 25 October optimization),
+the direct ColdFire renderer profile measures these instructions per 16 frames:
+
+| Workload | Before | After | Reduction |
+| --- | ---: | ---: | ---: |
+| Plain FUSE, unity AMP | 3,592.94 | 2,863.19 | 20.3% |
+| Metallic FUSE, unity AMP | 3,643.75 | 2,911.38 | 20.1% |
+| Metallic FUSE, pitch sweep | 3,671.69 | 2,951.63 | 19.6% |
+| Two metallic tracks, total | 7,287.50 | 5,822.75 | 20.1% |
+| Partial gain, attack or release | 3,643.75 | 3,114.75 | 14.5% |
+
+Linked standalone text/constants grow from 9,484 to 11,172 bytes; BSS stays
+at 2,444 bytes. Measured peak stack in the stateful comparison grows from
+176 to 180 bytes. These are executed instruction counts from direct calls
+to the renderer, not hardware CPU percentages, timing or a track-capacity claim.
+The code-size tradeoff still needs physical cache/timing measurement.
+
+The host regression compares 64,512 specialized blocks with the unchanged
+generic upstream renderer, checking exact PCM, every engine-state byte,
+parameter immutability and the zero-low-word invariant. `make check` now runs
+this adapter regression with address and undefined-behavior sanitizers.
+
+The reusable CPU verifier also compares baseline and candidate ColdFire code
+through live controls, pitch/clamp boundaries, FINE increments, retriggers,
+marker changes, gain ramps, all eight independent state slots, unsupported
+polyphony and every call length from 0 through 32. It checks output guards,
+callee-saved registers, stack balance, counters and complete existing voice
+state. Its eight-slot probe does not establish real-time eight-track capacity.
+
+```sh
+python3 tools/verify/verify_sophie_cpu.py --baseline-ref fde8036 --output out/sophie-cpu.json
+# Use the Octabam integration's Python with Unicorn; optionally pass its
+# final out/platform/runtime/runtime.elf through --elf for linked-code checks.
+```
+
+Receipts pin the baseline source, assembly, linked ELF and verifier hashes.
+The generated assembly is checked with `python3 modules/sophie/generate.py --check`.
