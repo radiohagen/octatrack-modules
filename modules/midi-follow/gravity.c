@@ -49,7 +49,8 @@ int bf_gravity_c(int pitch_class, unsigned track) {
     BfGravity *s=&bf_history[track];
     if (!s->initialized) return 256;
     if (s->pitch_class==pitch_class && s->pending>=0) return s->pending;
-    int lo=12*bf_home_c(track), hi=lo+11;
+    /* bf_sync_c validated HOME with the history configuration above. */
+    int lo=12*(int)(s->configuration & 15u), hi=lo+11;
     int best=-1, best_score=0x7fffffff, best_outside=0x7fffffff;
     for (int note=pitch_class;note<128;note+=12) {
         int outside=note<lo ? lo-note : note>hi ? note-hi : 0;

@@ -381,6 +381,7 @@ bf_response_tick:
     bne.w .tick_release
     lea -32(%a3),%a3
     moveq #0,%d4
+    moveq #0,%d6 /* One history commit if any proposed voice sounds. */
 .tick_on:
     move.l (%a4,%d4.l*4),%d1
     cmpi.l #127,%d1
@@ -403,11 +404,18 @@ bf_response_tick:
     move.b %d3,(%a5,%d5.l)
     move.l (%a3),%d0
     bsr.w .send
+    moveq #1,%d6
 .on_next:
     addq.l #1,%d4
     addq.l #8,%a3
     cmpi.l #4,%d4
     bne.s .tick_on
+    tst.l %d6
+    beq.s .tick_next
+    /* All voices share the root proposal. Validate and commit it once,
+     * after at least one note-on; release-only updates retain history. */
+    move.l %d7,%d0
+    jsr bf_register_sent
     bra.s .tick_next
 .tick_forget:
     lea bf_response_anchor,%a0
@@ -437,14 +445,6 @@ bf_response_tick:
     jsr 0x40010bc8
     .endif
     addq.l #8,%sp
-    /* The LIVE path owns its sends; only an actual note-on commits GRAV. */
-    tst.b 2(%sp)
-    beq.s .send_done
-    move.l %d0,-(%sp)
-    move.l %d7,%d0
-    jsr bf_register_sent
-    move.l (%sp)+,%d0
-.send_done:
     addq.l #4,%sp
     rts
     .balign 4

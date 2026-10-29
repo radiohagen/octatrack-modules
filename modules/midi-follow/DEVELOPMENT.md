@@ -190,6 +190,13 @@ Normal and LIVE voice quantization reuse the ultimate source resolved in the
 same operation. Source routes and Part settings are not cached across service
 passes, and all reads still use STORE's replacement snapshot semantics.
 
+A LIVE update commits its shared root proposal once after the four-voice send
+loop, and only if at least one note-on was emitted. Collisions, invalid pitches
+and zero velocity do not commit history. The final commit retains full
+context/epoch/configuration validation; changes during emission invalidate the
+proposal. GRAV scoring uses HOME from the configuration just validated by
+`bf_sync_c`, avoiding a second STORE read within that query.
+
 TRIG tracks discard LIVE anchors once and defer response context/epoch reads
 until LIVE is selected again. Returning from a TRIG Part to an earlier LIVE
 Part still waits for an ordinary receiver trig. LIVE continues to calculate

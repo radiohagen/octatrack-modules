@@ -107,7 +107,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-follow/response.s",
       "sha256": "6e48b8479733d9de6128b9ec9d82fd45f397eef970f7fd8eacec99b90bbbae53",
-      "published_sha256": "92f51cd641d6c1523ea5f272ebf2f18ba4f62813994beec8672977fc6fae7a84",
+      "published_sha256": "4acc0a6ce197a6c1fa1c44f77ce12c1d22e23fe20f42c9c6f62b62b87aead2ab",
       "source_mode": "100644"
     },
     "modules/midi-follow/settings.s": {
@@ -1187,7 +1187,7 @@
     "modules/midi-follow/DEVELOPMENT.md": {
       "path": "modules/midi-follow/DEVELOPMENT.md",
       "sha256": "b984d044ef4eb3bec749dd2752d07d004c137dc95d51cab13aca4bf8aa5e4b2c",
-      "published_sha256": "cc0d8fb97bdb04b78fdd68e1cd6c65747bbc5759aabf7338833224cb802ea286",
+      "published_sha256": "2164eb58ac4e97a70142049c32ced2df7916a6e52e7dc5b152665eb381883277",
       "source_mode": "100644",
       "origin": "Split from adjacent README in this repository; historical evidence is retained in the text."
     },
@@ -1657,7 +1657,7 @@
       "repository": "https://github.com/radiohagen/octatrack-modules",
       "path": "modules/midi-follow/gravity.c",
       "sha256": "e7d102c28aa541ac7a87330d756383f9b8d82e04349b5f796994a673fd07e149",
-      "published_sha256": "c22a95df059b78c9a45992efe306cc57c3761558d73d8fd7e37166a599620568",
+      "published_sha256": "880021d1434efcae8cce2c64ff89c113484f21bc165acf356179913a62a69d42",
       "source_mode": "100644"
     },
     "modules/midi-follow/gravity.h": {
@@ -1673,7 +1673,7 @@
       "repository": "https://github.com/radiohagen/octatrack-modules",
       "path": "modules/midi-follow/gravity.s",
       "sha256": "17209a4bde37486ad06e1b20d8b4880d7e9bdea173ae776f2f2d9c3f3520069b",
-      "published_sha256": "c9bf6b4967931621349b64d6f738dc952f0ac8082db02a9baffaac61e90227d5",
+      "published_sha256": "c89dae6e75f20c4caa88f805a28e506da0496b878b340f2daf0825548a0ab662",
       "source_mode": "100644"
     },
     "tools/verify/verify_midi_follow_gravity.py": {
