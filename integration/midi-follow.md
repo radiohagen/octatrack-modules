@@ -1,8 +1,9 @@
 # MIDI Follow integration
 
 MIDI Follow requires **STORE** native Part access and upstream **EVENTS**.
-The STORE extension is included in the current draft PR; it replaces the
-retired MIDI PART STATE helper without changing native saved settings. EVENTS owns
+STORE native Part access is upstream in
+[#976](https://github.com/sambanks/octabam/pull/976); it replaces the retired
+MIDI PART STATE helper without changing native saved settings. EVENTS owns
 transport start/resume and accepted-note notifications; Follow owns source
 notes, register history and the musical response. EUCLID can subscribe to the
 same transport notifications.
@@ -27,9 +28,23 @@ Project-backed captures check physical-control input in the emulator and the
 resulting MIDI bytes. Source checks in this repository do not build firmware.
 The PR records exact builds, checks and remaining hardware tests.
 
-Hardware acceptance remains outstanding. Use a disposable project copy for
-physical testing; saving a bank in stock firmware resets Follow's register
-and update settings as described in the [module README](../modules/midi-follow/README.md).
+Targeted MKII testing on 30 October 2026 used MFOL30U / BUILD FB, based on
+Octabam `520be921` and author source `22bbdab`. USB MIDI captures passed the
+four-note baseline, ten-minute seven-follower GRAV LIVE runs at 200 BPM in
+fan-out and chain configurations, and a five-minute run alongside eight audio
+tracks. Pitches, counts, cadence and note releases passed. The operator also
+confirmed smooth audio and responsive controls during the combined run.
+
+The eight-track native control at 300 BPM and 2× pattern speed froze the unit
+with RFOL OFF; Follow remained loaded in the remix, so this does not isolate
+the responsible component. The requested traffic exceeds physical DIN capacity.
+Native MIDI transmit-queue handling is a suspected cause based on source
+inspection and timing; the hardware failure location has not been measured.
+MKI, DIN timing and safety across every configuration remain unverified.
+
+Use a disposable project copy for physical testing; saving a bank in stock
+firmware resets Follow's register and update settings as described in the
+[module README](../modules/midi-follow/README.md).
 
 ## Project-backed MIDI checks
 

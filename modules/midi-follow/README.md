@@ -71,9 +71,15 @@ separate project copy to preserve these settings.
 
 ## Testing status
 
-MIDI Follow has been tested in the emulator. **Hardware testing is still to
-be done**, including physical MIDI output, timing and note releases on an
-Octatrack MKI/MKII.
+MIDI Follow has emulator coverage and targeted Octatrack MKII USB MIDI tests
+(30 October 2026). Four-note following and clean releases passed. Seven
+four-note GRAV LIVE followers passed ten-minute runs at 200 BPM, both following
+one source and in a chain. A five-minute run alongside eight audio tracks also
+passed; the operator confirmed smooth audio and responsive controls.
+
+An eight-track, four-note stress case at 300 BPM and 2× pattern speed froze the
+test remix with RFOL OFF. Its cause remains under investigation. MKI, physical
+DIN timing and safety across every configuration remain unverified.
 
 [Build integration](../../integration/midi-follow.md) ·
 [Implementation and verification](DEVELOPMENT.md).

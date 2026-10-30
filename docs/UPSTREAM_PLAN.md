@@ -103,23 +103,30 @@ author history. The remaining feature stages above are planned boundaries,
 not yet submission-ready branches. Prepare them sequentially after predecessor
 review; validate their adapters and exact combinations before opening PRs.
 
-## MIDI Follow status, 26 October 2026
+## MIDI Follow status, 30 October 2026
 
 [Octabam PR #824](https://github.com/sambanks/octabam/pull/824) is a draft
-follow-up to merged EVENTS #871. Follow requires STORE native Part access and EVENTS;
-its transport and accepted-note callbacks share platform hooks with EUCLID.
+follow-up to merged EVENTS #871 and STORE native Part access #976. Follow
+requires STORE and EVENTS; its transport and accepted-note callbacks share
+platform hooks with EUCLID.
 The previous include-callback prerequisite is also upstream.
 
 [The current integration guide](../integration/midi-follow.md) identifies the
 review branch and standalone/combined checks. The PR records the exact source
-pin, software results and hardware checklist. Hardware qualification is still
-outstanding. Historical checks in `integration/review-branches.json` apply
+pin, software results and hardware checklist. Targeted MKII USB MIDI testing
+passed four-note following, ten-minute seven-follower GRAV LIVE fan-out and
+chain runs at 200 BPM, and five minutes with eight audio tracks. The operator
+confirmed smooth audio and responsive controls in the combined run.
+An eight-track native control at 300 BPM and 2× pattern speed froze the test
+remix with RFOL OFF; its cause is under investigation. Broader qualification
+remains open. Historical checks in `integration/review-branches.json` apply
 only to their recorded commits and images.
 
-## STORE native Part migration, 26 October 2026
+## STORE native Part migration, 30 October 2026
 
-The current Follow PR also extends STORE and retires MIDI PART STATE. Current
-author clients use the STORE API; their saved native byte layouts are unchanged.
+STORE native Part access and the retirement of MIDI PART STATE are upstream
+in [#976](https://github.com/sambanks/octabam/pull/976). Current author clients
+use the STORE API; their saved native byte layouts are unchanged.
 The integration owns and tests the shared code, cold activation and native
 lifecycle. Historical source/integration receipts above still identify the old
 implementation; they must not be treated as tests of the STORE migration.
