@@ -156,68 +156,58 @@ bf_gravity_c:
 	move.l 48(%sp),%d2
 	cmp.l %d2,%d0
 	jcs .L22
-	moveq #11,%d1
-	cmp.l 44(%sp),%d1
+	moveq #11,%d6
+	cmp.l 44(%sp),%d6
 	jcs .L22
-	move.l %d2,%d6
-	lsl.l #4,%d6
 	move.l %d2,-(%sp)
+	lsl.l #4,%d2
 	jsr bf_sync_c
-	move.l %d6,28(%sp)
-	move.l %d6,%a0
+	move.l %d2,28(%sp)
+	move.l %d2,%a0
 	addq.l #4,%sp
 	add.l #bf_history,%a0
 	tst.b 15(%a0)
 	jeq .L22
 	mvs.b 14(%a0),%d0
 	cmp.l 44(%sp),%d0
-	jne .L25
-	move.b 13(%a0),%d3
-	jmi .L25
-	mvs.b %d3,%d3
-	move.l %d3,%d0
-	movem.l (%sp),#124
-	lea (40,%sp),%sp
-	rts
+	jeq .L37
 .L25:
-	move.l %d2,-(%sp)
-	moveq #12,%d5
-	jsr bf_home_c
+	move.l 24(%sp),%a0
+	moveq #15,%d2
+	add.l #bf_history,%a0
+	and.l 8(%a0),%d2
+	move.b 12(%a0),%d5
+	move.l #2147483647,%d0
 	moveq #-1,%d3
-	move.l 28(%sp),%d1
-	move.l #2147483647,%a0
-	move.l %d0,%d2
-	move.l #2147483647,%a1
-	lsl.l #2,%d2
-	move.l %a0,24(%sp)
-	muls.l %d0,%d5
-	lea bf_history,%a0
-	addq.l #4,%sp
-	move.b 12(%a0,%d1.l),%d4
+	move.l %d0,20(%sp)
+	move.l %d0,%a1
 	move.l 44(%sp),%d1
-	move.l %d5,%a0
-	sub.l %d2,%d0
-	lea (11,%a0),%a0
-	move.l %d0,%d2
+	move.l %d2,%d6
+	lsl.l #2,%d6
+	move.w %d2,%d4
+	mvs.b %d5,%d0
+	move.l %d0,%a0
 	move.l %d1,%d0
+	sub.l %a0,%d0
+	sub.l %d6,%d2
 	lsl.l #2,%d2
-	move.l %a0,28(%sp)
-	move.l %d5,%a0
-	move.b %d4,%d5
-	mvs.b %d4,%d6
-	sub.l %d6,%d0
+	muls.w #12,%d4
+	move.l %d4,%a0
+	lea (11,%a0),%a0
 	move.l %d2,%d6
 	add.l #-11,%d2
+	move.l %a0,28(%sp)
 	neg.l %d6
 	move.l %d6,32(%sp)
 	move.l %d2,36(%sp)
+	move.l %d4,%a0
 .L30:
 	cmp.l %a0,%d1
 	jge .L26
 	move.l 32(%sp),%d6
 	sub.l %d1,%d6
-	move.l %d6,%d2
-	muls.l %d6,%d2
+	move.w %d6,%d2
+	muls.w %d6,%d2
 .L27:
 	tst.b %d5
 	jlt .L28
@@ -227,14 +217,14 @@ bf_gravity_c:
 .L28:
 	cmp.l %a1,%d2
 	jlt .L32
-	jeq .L37
+	jeq .L38
 .L29:
 	add.l #12,%d1
 	add.l #12,%d0
 	moveq #127,%d2
 	cmp.l %d1,%d2
 	jge .L30
-.L38:
+.L39:
 	move.l 24(%sp),%a0
 	add.l #bf_history,%a0
 	move.b %d3,13(%a0)
@@ -243,7 +233,7 @@ bf_gravity_c:
 	movem.l (%sp),#124
 	lea (40,%sp),%sp
 	rts
-.L37:
+.L38:
 	cmp.l 20(%sp),%d6
 	jge .L29
 	move.l %d1,%d3
@@ -253,7 +243,7 @@ bf_gravity_c:
 	add.l #12,%d1
 	cmp.l %d1,%d2
 	jge .L30
-	jra .L38
+	jra .L39
 .L22:
 	move.l #256,%d3
 	move.l %d3,%d0
@@ -269,42 +259,67 @@ bf_gravity_c:
 	add.l #12,%d0
 	cmp.l %d1,%d2
 	jge .L30
-	jra .L38
+	jra .L39
 .L26:
 	cmp.l 28(%sp),%d1
 	jle .L31
 	move.l 36(%sp),%d6
 	add.l %d1,%d6
-	move.l %d6,%d2
-	muls.l %d6,%d2
+	move.w %d6,%d2
+	muls.w %d6,%d2
 	jra .L27
 .L31:
 	clr.l %d2
 	clr.l %d6
 	jra .L27
+.L37:
+	move.b 13(%a0),%d3
+	jmi .L25
+	mvs.b %d3,%d3
+	move.l %d3,%d0
+	movem.l (%sp),#124
+	lea (40,%sp),%sp
+	rts
 	.size	bf_gravity_c, .-bf_gravity_c
 	.align	2
 	.globl	bf_sent_c
 	.type	bf_sent_c, @function
 bf_sent_c:
+	lea (-12,%sp),%sp
 	moveq #7,%d0
-	cmp.l 4(%sp),%d0
-	jcc .L43
-.L39:
-	rts
-.L43:
-	move.l 4(%sp),-(%sp)
-	jsr bf_sync_c
-	move.l 8(%sp),%d0
-	addq.l #4,%sp
+	move.l %a2,-(%sp)
+	move.l 20(%sp),%d1
+	cmp.l %d1,%d0
+	jcs .L40
+	move.l %d1,%d0
 	lsl.l #4,%d0
 	move.l %d0,%a0
 	add.l #bf_history,%a0
-	tst.b 15(%a0)
-	jeq .L39
-	move.b 13(%a0),%d0
-	jmi .L39
+	lea (15,%a0),%a1
+	tst.b (%a1)
+	jeq .L40
+	move.l %a0,%d0
+	add.l #13,%d0
+	move.l %d0,%a2
+	tst.b (%a2)
+	jlt .L40
+	move.l %d1,-(%sp)
+	move.l %d0,8(%sp)
+	move.l %a0,16(%sp)
+	move.l %a1,12(%sp)
+	jsr bf_sync_c
+	addq.l #4,%sp
+	move.l 8(%sp),%a1
+	move.l 12(%sp),%a0
+	tst.b (%a1)
+	jeq .L40
+	move.l 4(%sp),%a1
+	move.b (%a1),%d0
+	jmi .L40
 	move.b %d0,12(%a0)
+.L40:
+	move.l (%sp)+,%a2
+	lea (12,%sp),%sp
 	rts
 	.size	bf_sent_c, .-bf_sent_c
 	.local	bf_history

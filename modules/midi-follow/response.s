@@ -45,7 +45,7 @@ bf_response_set:
     rts
 
 /* d0 receiver -> d0 effective root or -1, d1 source identity/pitch token.
- * d2-d4/a0-a1 preserved. Resolve chains; register, TRAN and Harmony snap
+ * d2-d4/a0-a1 preserved. Resolve chains; register, TRAN and provider response
  * match the ordinary generator. The token also identifies changed routes.
  */
 bf_response_target:
@@ -69,23 +69,9 @@ bf_response_target:
     move.b 12(%a0,%d2.l),%d1
     subi.l #64,%d1
     add.l %d1,%d0
-    .ifdef HAVE_HARMONY
-    move.l %d0,-(%sp)
-    move.l %d3,%d0
-    jsr mh_active
-    tst.l %d0
-    beq.s .target_no_arrange
-    move.l (%sp)+,%d0
-    lea 0x46c7a124,%a0
-    moveq #0,%d1
-    move.b (%a0,%d3.l),%d1
-    add.l %d1,%d0
-    bra.s .target_quant
-.target_no_arrange:
-    move.l (%sp)+,%d0
-.target_quant:
+    .ifdef HAVE_PITCH_RESPONSE
     move.l %d3,%d1
-    jsr mh_quant
+    pitch_target
     .endif
     cmpi.l #127,%d0
     bhi.s .target_unknown
@@ -103,10 +89,10 @@ bf_response_target:
     lea 20(%sp),%sp
     rts
 
-/* Keep cached Harmony arp pools relative to their last ordinary trig.
+/* Keep provider-owned arp pools relative to their last ordinary trig.
  * Shift only the outgoing scratch, leaving the arp clock/order intact. */
 bf_response_adjust:
-    .ifdef HAVE_HARMONY
+    .ifdef HAVE_PITCH_RESPONSE
     lea -16(%sp),%sp
     movem.l %d0-%d2/%a0,(%sp)
     move.l %d7,%d0
@@ -114,7 +100,8 @@ bf_response_adjust:
     tst.l %d0
     beq.s .adjust_done
     move.l %d7,%d0
-    jsr mh_active
+    pitch_owned
+    tst.l %d0
     beq.s .adjust_done
     tst.b (%a2)
     bmi.s .adjust_done
@@ -130,7 +117,9 @@ bf_response_adjust:
     move.l %d0,%d2 /* current followed root */
     moveq #0,%d0
     move.b (%a2),%d0
-    jsr mh_follow_shift
+    pitch_shift
+    cmpi.l #256,%d0
+    beq.s .adjust_done
     cmpi.l #127,%d0
     bls.s .adjust_store
 .adjust_invalid:
@@ -212,28 +201,66 @@ bf_response_sync:
     lea 20(%sp),%sp
     rts
 
+/* Private TRIG path: discard LIVE anchors once, without resolving context or
+ * reading an epoch on every service pass. The invalid context makes the next
+ * LIVE pass synchronize and wait for a fresh ordinary-trigger pool, including
+ * when playback visits a TRIG Part and returns to the earlier LIVE Part.
+ * d0 receiver; d0-d2/a0 may be clobbered. */
+bf_response_disable:
+    move.l %d0,%d1
+    lsl.l #3,%d1
+    lea bf_response_context,%a0
+    moveq #-1,%d2
+    cmp.l (%a0,%d1.l),%d2
+    beq.s .disable_done
+    move.l %d2,(%a0,%d1.l)
+    lea bf_response_anchor,%a0
+    move.l %d2,(%a0,%d0.l*4)
+    lea bf_response_seen,%a0
+    move.l %d2,(%a0,%d0.l*4)
+    lea bf_response_pool,%a0
+    move.l %d2,(%a0,%d0.l*4)
+.disable_done:
+    rts
+
 /* d0 stock trigger/release mask, d1 stock effective mute mask.
  * All regs preserved. Skip tracks with a scheduled edge on this pass. */
 bf_response_tick:
-    lea -80(%sp),%sp
+    .ifdef HAVE_PITCH_RESPONSE
+    lea -88(%sp),%sp
+    .else
+    lea -84(%sp),%sp
+    .endif
     movem.l %d0-%d7/%a0-%a5,(%sp)
     move.l %d0,56(%sp)
     move.l %d1,60(%sp)
     moveq #0,%d7
 .tick_track:
     move.l %d7,%d0
-    jsr bf_register_sync
     move.l 56(%sp),%d1
     btst %d7,%d1
-    beq.s .tick_register_ready
+    beq.s .tick_sync_only
     jsr bf_register_begin
+    bra.s .tick_register_ready
+.tick_sync_only:
+    jsr bf_register_sync
 .tick_register_ready:
-    bsr.w bf_response_sync
     jsr bf_response_play
     tst.l %d0
-    beq.w .tick_next
+    bne.s .tick_live
+    move.l %d7,%d0
+    bsr.s bf_response_disable
+    bra.w .tick_next
+.tick_live:
+    move.l %d7,%d0
+    bsr.w bf_response_sync
     move.l %d7,%d0
     bsr.w bf_response_target
+    /* The validated token carries this operation's ultimate source. Keep it
+     * for all four voices; each still reads the source's current KEY. */
+    move.l %d1,%d2
+    lsr.l #8,%d2
+    move.l %d2,80(%sp)
     move.l 56(%sp),%d2
     btst %d7,%d2
     beq.s .tick_pool_ready
@@ -291,6 +318,13 @@ bf_response_tick:
     adda.l %d0,%a3
     lea 64(%sp),%a4 /* four proposed pitches; -1 means no owned voice */
     lea 0x46c78152,%a5
+    .ifdef HAVE_PITCH_RESPONSE
+    /* One ownership decision for this service operation, never a retained
+     * mode cache. All four voices use the same provider response policy. */
+    move.l %d7,%d0
+    pitch_owned
+    move.l %d0,84(%sp)
+    .endif
     moveq #0,%d4
 .tick_release:
     moveq #-1,%d0
@@ -306,39 +340,40 @@ bf_response_tick:
     lsl.l #2,%d3
     add.l %d4,%d3
     cmp.b (%a5,%d5.l),%d3
-    bne.s .release_next /* Never release another track or live key owner. */
+    bne.w .release_next /* Never release another track or live key owner. */
     move.l %d2,%d0
     add.l %d6,%d0
-    .ifdef HAVE_HARMONY
-    move.l %d0,-(%sp)
-    move.l %d7,%d0
-    jsr mh_active
-    tst.l %d0
+    .ifdef HAVE_PITCH_RESPONSE
+    tst.l 84(%sp)
     beq.s .release_native_pitch
-    move.l (%sp)+,%d0
     lea -12(%sp),%sp
     movem.l %d1-%d2/%a0,(%sp)
-    move.l %d2,%d0 /* the currently owned voice, before root movement */
+    move.l %d2,%d0 /* current owned pitch, before the root change */
     lea bf_response_anchor,%a0
     move.l (%a0,%d7.l*4),%d2
     move.l %d2,%d1
     sub.l %d6,%d1 /* previous sounding root */
-    jsr mh_follow_shift
+    pitch_shift
     movem.l (%sp),%d1-%d2/%a0
     lea 12(%sp),%sp
-    bra.s .release_pitch_ready
+    cmpi.l #256,%d0 /* declined: use the ordinary Follow response */
+    bne.s .release_pitch_ready
+    move.l %d2,%d0
+    add.l %d6,%d0
 .release_native_pitch:
-    move.l (%sp)+,%d0
     .endif
     /* Undo only the previous KEY correction, move the raw voice, then
-     * reapply the inherited KEY. Harmony owns its generated chord path. */
+     * reapply the inherited KEY. A provider may return its own voice pitch. */
     lea bf_scale_offsets,%a0
     moveq #0,%d1
     move.b (%a0,%d3.l),%d1
     extb.l %d1
     add.l %d1,%d0
     move.l %d7,%d1
-    jsr bf_quant_note
+    move.l %d2,-(%sp) /* original sounding pitch is needed for its note-off */
+    move.l 84(%sp),%d2
+    jsr bf_quant_note_resolved
+    move.l (%sp)+,%d2
 .release_pitch_ready:
     move.l %d0,(%a4,%d4.l*4)
     moveq #-1,%d0
@@ -355,6 +390,7 @@ bf_response_tick:
     bne.w .tick_release
     lea -32(%a3),%a3
     moveq #0,%d4
+    moveq #0,%d6 /* One history commit if any proposed voice sounds. */
 .tick_on:
     move.l (%a4,%d4.l*4),%d1
     cmpi.l #127,%d1
@@ -377,11 +413,18 @@ bf_response_tick:
     move.b %d3,(%a5,%d5.l)
     move.l (%a3),%d0
     bsr.w .send
+    moveq #1,%d6
 .on_next:
     addq.l #1,%d4
     addq.l #8,%a3
     cmpi.l #4,%d4
     bne.s .tick_on
+    tst.l %d6
+    beq.s .tick_next
+    /* All voices share the root proposal. Validate and commit it once,
+     * after at least one note-on; release-only updates retain history. */
+    move.l %d7,%d0
+    jsr bf_register_sent
     bra.s .tick_next
 .tick_forget:
     lea bf_response_anchor,%a0
@@ -394,7 +437,11 @@ bf_response_tick:
     cmpi.l #8,%d7
     bne.w .tick_track
     movem.l (%sp),%d0-%d7/%a0-%a5
-    lea 80(%sp),%sp
+    .ifdef HAVE_PITCH_RESPONSE
+    lea 88(%sp),%sp
+    .else
+    lea 84(%sp),%sp
+    .endif
     rts
 /* Local packet, native MIDI queue. Stock sequencer status is signed 0x9n. */
 .send:
@@ -411,14 +458,6 @@ bf_response_tick:
     jsr 0x40010bc8
     .endif
     addq.l #8,%sp
-    /* The LIVE path owns its sends; only an actual note-on commits GRAV. */
-    tst.b 2(%sp)
-    beq.s .send_done
-    move.l %d0,-(%sp)
-    move.l %d7,%d0
-    jsr bf_register_sent
-    move.l (%sp)+,%d0
-.send_done:
     addq.l #4,%sp
     rts
     .balign 4

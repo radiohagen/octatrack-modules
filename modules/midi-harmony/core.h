@@ -21,7 +21,7 @@ extern int hd_encode_c(int note, int scale);
 extern int hd_decode_c(int degree, int scale);
 extern int hd_ui_context_c(void);
 extern unsigned hd_follow_c(void);
-extern unsigned hd_scales_c(void);
+extern int hd_scale_read_c(unsigned track, unsigned context);
 extern unsigned hd_scenes_c(void);
 int hd_scene_value_c(unsigned context, unsigned track, unsigned flat, int base);
 void hd_scene_before_c(unsigned context);

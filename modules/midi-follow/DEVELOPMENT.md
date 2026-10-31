@@ -1,5 +1,26 @@
 # MIDI Follow
 
+## Integration boundaries
+
+Follow uses synchronous, build-time pitch responses for a selected note generator
+and separate scale-provider requests for correction. The integration binds direct
+calls; there is no runtime service registry. Follow retains routing, timing,
+register history and MIDI ownership. A pitch provider supplies musical policy
+without emitting notes or advancing a generator during a query.
+
+Harmony's adapter retains degree-aware LIVE movement for its scale chords and
+chromatic movement for explicit chord qualities. Both held voices and cached arp
+tones use the same transformation. GRAV history commits once per receiver update
+after at least one replacement note-on; release-only updates do not commit it.
+
+The scale provider receives the already-resolved local track and explicit Part
+context. It does not traverse Follow routes. Native Major/Minor correction and
+MIDI Scales' nearest-note rule remain distinct. See the
+[scale integration boundary](../../integration/harmony-current.md#scale-provider-boundary)
+for supported combinations and the current SCALES storage conflict.
+
+## Musical behavior
+
 Each MIDI track can follow another MIDI track's logical note set while keeping its
 own rhythm, velocity and note length. By default, FIXED octave 3 with TRAN=0 uses MIDI notes 36–47 for the root:
 C → F → G gives 36 → 41 → 43. The follower's TRAN adds a signed semitone

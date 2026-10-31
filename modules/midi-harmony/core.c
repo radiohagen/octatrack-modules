@@ -85,24 +85,11 @@ int hd_scale_c(unsigned bank, unsigned part, unsigned track) {
         bank = (unsigned)context/4;
         part = (unsigned)context%4;
     }
-    unsigned raw = part < 4 ? (unsigned)hd_part_key_c(track,bank*4+part) :
-                   native(bank)[part_offset(part)+0x4e2 + track*36+17];
-    if (!raw || raw > 84) return 0;
-    if (raw > 24 && !hd_scales_c()) return 0;
-    /* Same native KEY ordering as MIDI Scales: stock major/minor pairs,
-     * followed by five extra modes per tonic. Bounded ROM removes the
-     * per-tick quotient/remainder needed by the extended KEY choices. */
-    static const uint16_t scales[84] = {
-        0,320,4,324,8,328,12,332,16,336,20,340,
-        24,344,28,348,32,352,36,356,40,360,44,364,
-        64,128,192,256,384,68,132,196,260,388,
-        72,136,200,264,392,76,140,204,268,396,
-        80,144,208,272,400,84,148,212,276,404,
-        88,152,216,280,408,92,156,220,284,412,
-        96,160,224,288,416,100,164,228,292,420,
-        104,168,232,296,424,108,172,236,300,428
-    };
-    return scales[raw-1];
+    unsigned context = bank*4 + part%4 + (part >= 4 ? 64u : 0u);
+    int scale = hd_scale_read_c(track,context);
+    /* KEY OFF retains the existing C-major degree convention. A provider
+     * refusal is distinct; it must not become a playable C-major scale. */
+    return scale == -1 ? 0 : scale;
 }
 int hd_context_depends_c(unsigned context, unsigned track, unsigned source_context) {
     if (context >= 64 || track >= 8) return 0;
@@ -202,6 +189,7 @@ void hd_ready_all_c(void) {
 }
 static int sync_context(unsigned bank, unsigned pattern, unsigned track,
                         unsigned context, unsigned mode, unsigned scale) {
+    if ((int)scale < 0) return -1;
     HdRoots *r = roots(bank,pattern,track);
     if (!mode && r->state != HD_ROOT_HARM) return 0;
     if (mode && r->state == HD_ROOT_HARM && r->context == context && r->scale == scale_id(scale)) return 1;
@@ -212,8 +200,10 @@ static int sync_context(unsigned bank, unsigned pattern, unsigned track,
         uint32_t ticket = revision[bank][pattern*8+track];
         copy_roots(&next,r);
         for (unsigned step = 0; step < 64; ++step) notes[step] = *step_note(bank,pattern,track,step);
-        if (next.state == HD_ROOT_HARM && next.context < 64)
-            next.scale = (uint8_t)scale_id((unsigned)hd_scale_c(next.context/4,next.context%4,track));
+        if (next.state == HD_ROOT_HARM && next.context < 64) {
+            int outgoing = hd_scale_c(next.context/4,next.context%4,track);
+            if (outgoing >= 0) next.scale = (uint8_t)scale_id((unsigned)outgoing);
+        }
         unmask(sr);
         int edits = hd_roots_sync_c(&next,notes,result,mode,scale,context);
         if (edits < 0) return -1;
@@ -322,11 +312,11 @@ void hd_part_before_c(uintptr_t destination) {
         unsigned context = r->context, track = i%8;
         if (context >= 64 || r->state != HD_ROOT_HARM) continue;
         if (!hd_context_depends_c(context,track,replaced)) continue;
-        unsigned scale = (unsigned)hd_scale_c(context/4,context%4,track);
+        int scale = hd_scale_c(context/4,context%4,track);
         uint16_t sr = mask();
         if (r->context == context) {
             hd_nv_dirty_c(bank);
-            r->scale = (uint8_t)scale_id(scale);
+            if (scale >= 0) r->scale = (uint8_t)scale_id((unsigned)scale);
             r->context = HD_NONE;
             ++revision[bank][i];
             ++bank_revision[bank];
@@ -341,9 +331,12 @@ void hd_checkpoint_c(unsigned bank) {
         HdRoots *r = &hd_banks[bank].roots[i];
         uint16_t sr = mask();
         if (r->state == HD_ROOT_HARM && r->context < 64) {
-            r->scale = (uint8_t)scale_id((unsigned)hd_scale_c(r->context/4,r->context%4,i%8));
-            ++revision[bank][i];
-            ++bank_revision[bank];
+            int scale = hd_scale_c(r->context/4,r->context%4,i%8);
+            if (scale >= 0) {
+                r->scale = (uint8_t)scale_id((unsigned)scale);
+                ++revision[bank][i];
+                ++bank_revision[bank];
+            }
         }
         unmask(sr);
     }

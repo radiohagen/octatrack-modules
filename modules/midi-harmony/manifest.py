@@ -1,13 +1,22 @@
 """Scale-degree MIDI roots and generated chords before the stock arpeggiator."""
 from pathlib import Path
+import runpy
 from remix.schema import Store, Category, Claims, Detour, Gate, Kind, Linked, Module, Proof, Poke, SymbolRef
 
 ROOT = Path(__file__).resolve().parent
+_scale = runpy.run_path(str(ROOT.parents[1] / 'integration/scale_provider.py'))
 
 
 def follow_inc(modules, remix=None):
     return (('.set HAVE_FOLLOW,1\n' if 'MIDI FOLLOW' in modules else '') +
-            ('.set HAVE_SCALES,1\n' if 'MIDI SCALES' in modules else ''))
+            _scale['scale_inc'](modules, remix))
+
+
+def select(modules):
+    linked = MODULE.linked + _scale['scale_links'](modules, 'MIDI HARMONY')
+    if 'MIDI FOLLOW' in modules:
+        linked += (Linked('harmonypitchresponse', str(ROOT / 'pitch-response.s'), dram=True),)
+    return {'linked': linked}
 
 
 MODULE = Module(
@@ -16,7 +25,7 @@ MODULE = Module(
     author_url='https://github.com/radiohagen/octatrack-modules', proof=Proof.PORT,
     proof_note='',
     doc='Scale-degree roots, generated chords and CHORD PLAY using native ARP KEY; optional MIDI Follow.',
-    requires=('STORE','MIDI SRAM','EVENTS'),
+    requires=('STORE','MIDI SRAM','EVENTS'), select=select,
     linked=(Linked('chordpart', str(ROOT / 'chord-part.s'), dram=True),
             Linked('harmonytransport', str(ROOT / 'transport.s'), dram=True),
             Linked('harmonyownership', str(ROOT / 'ownership.s'), dram=True),
@@ -41,8 +50,8 @@ MODULE = Module(
             Linked('degreeroots', str(ROOT / 'roots.s'), dram=True),
             Linked('degreeaccess', str(ROOT / 'part-access.s'), dram=True,
                    include=lambda modules, remix=None: '.set HD_FOLLOW,' + str(int('MIDI FOLLOW' in modules)) +
-                   '\n.set HD_SCALES,' + str(int('MIDI SCALES' in modules)) +
-                   '\n.set HD_SCENES,' + str(int('MIDI SCENES' in modules)) + '\n'),
+                   '\n.set HD_SCENES,' + str(int('MIDI SCENES' in modules)) + '\n' +
+                   _scale['scale_inc'](modules, remix)),
             Linked('degreescenes', str(ROOT / 'scenes.s'), dram=True),
             Linked('degreesceneaccess', str(ROOT / 'scene-access.s'), dram=True,
                    include=lambda modules, remix=None: '.set HD_SCENES,' + str(int('MIDI SCENES' in modules)) + '\n'),
@@ -129,7 +138,8 @@ MODULE = Module(
                     'Degree scene A seed/range before unchanged MIDISC hold', kind='jsr'),
              Detour(0x40052ec2, bytes.fromhex('4eb94006dbcc'), 'degreesceneaccess', 'hd_scene_hold_b',
                     'Degree scene B seed/range before unchanged MIDISC hold', kind='jsr')),
-    gates=(Gate('tools/verify/verify_harmony_follow_live.py', stage='image', venv=True),
+    gates=(Gate('tools/verify/verify_midi_scale_provider.py', stage='image', venv=True),
+           Gate('tools/verify/verify_harmony_follow_live.py', stage='image', venv=True),
            Gate('tools/verify/verify_harmony_plocks.py', stage='image', venv=True),
            Gate('tools/verify/verify_harmony_follow_port.py', stage='image', venv=True),
            Gate('tools/verify/verify_harmony_accumulator.py', stage='image', venv=True),

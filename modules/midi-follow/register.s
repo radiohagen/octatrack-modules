@@ -20,15 +20,14 @@ bf_register:
     jsr bf_mode_play
     cmpi.l #2,%d0
     beq.s .reg_source
+    move.l %d0,%d3
     lea bf_roots,%a0
     moveq #0,%d2
     move.b (%a0,%d4.l),%d2
     cmpi.l #127,%d2
     bhi.w .reg_unknown
     subi.l #36,%d2
-    move.l %d1,%d0
-    jsr bf_mode_play
-    cmpi.l #1,%d0
+    cmpi.l #1,%d3
     bne.s .reg_fixed
     move.l %d2,%d0
     jsr bf_gravity

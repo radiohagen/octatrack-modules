@@ -1,0 +1,870 @@
+{
+  "date_utc": "2026-10-31T10:49:18.243038+00:00",
+  "status": "behavior checks passed; existing combined CPU budgets remain unmet",
+  "author_base": "e4fd0b524ad898275c13308d5074ed63063d4f7b",
+  "author_worktree": "/Users/mattiaswolff/Documents/git/octatrack-modules/.claude/worktrees/scales-provider-20261031",
+  "integration": {
+    "worktree": "/Users/mattiaswolff/Documents/git/octatrack/projects/octabam/.claude/worktrees/scales-provider-integration-20261031",
+    "base": "8ea12be073d0211f42c2d6990ab9a07a7b47aee1",
+    "upstream_ancestor": "645f964f831d061a0b813eb7c4be7b16400fdd8d",
+    "qualification": "Locally preserved composed integration, not a claim that these changes apply directly to current upstream. No remote-containing ref was present for this base.",
+    "original_dependency_pins": {
+      "midi-follow": "0ebe11e7f19fd6c48bf0109544d5da84326db86d",
+      "midi-harmony": "a67ae18ce9ccdeded016457d0e2ce7ced4b669f1"
+    },
+    "staged_author_files": {
+      "integration/pitch_response.py": "e5e1db2c131e97dd3f4d4c7847d849eb9090c7171450b3057c46195c65ee3cc6",
+      "integration/scale_key.s": "16722a41575e7895fba69276cf8b3fe35ba3c6eb727e4deefa7bd15a3351bc17",
+      "integration/scale_math.s": "dcddcb2719997c9bb2545a228d2c41bd73fcb28accfa67846833f8bb4631b63a",
+      "integration/scale_provider.py": "02875a4af5b9709b4ebef0bc66bf12b05d947c0e1a796ec20f34c216c05bfbdc",
+      "modules/midi-follow/DEVELOPMENT.md": "f672f8a8d021f93a730f9cb555c873b2dd9f8296aaf2fac77f0da4e1518fe9b0",
+      "modules/midi-follow/README.md": "cf2e61d957b688a2956986a72fa56d090a97b1faac1d720a4140fa9e69252b82",
+      "modules/midi-follow/events.s": "036ff49f73685395417e4de184b97bb5107306c3ff3e4faca1483e0a09bbf2a8",
+      "modules/midi-follow/generate.py": "317844c71b8c001cf3122c33abfe40925c900e142ca801ab01a9f83776b27684",
+      "modules/midi-follow/gravity-access.s": "4acc77e238d372a2e2e66f93c8d223824ee843ddbe08a335bddbde4fb8090ded",
+      "modules/midi-follow/gravity.c": "880021d1434efcae8cce2c64ff89c113484f21bc165acf356179913a62a69d42",
+      "modules/midi-follow/gravity.h": "25dc237ba8e1f999048ea7f3746f0646a2b9bb98d27c6fe3932c388d83b3d181",
+      "modules/midi-follow/gravity.s": "c89dae6e75f20c4caa88f805a28e506da0496b878b340f2daf0825548a0ab662",
+      "modules/midi-follow/manifest.py": "ea0a55df11a2232ca10dabd645d07c2838a160d212b555df6a3749c9d58574b2",
+      "modules/midi-follow/midi_follow.s": "f77aae1a3d1892f26f2f36f5795b06170cf1428f5c23c97c1a0f7e7162c16350",
+      "modules/midi-follow/page.s": "e5139d88a5b5e6068b02f598308fe963aef5656ec5170af8bdca0dcd5cc11d31",
+      "modules/midi-follow/register.s": "ed6d79d83575cb72778780b62fc4db6d2a1bd681bd6a54e6d1084eaee0360f17",
+      "modules/midi-follow/response.s": "13ec9eba5f76be1c7382455ccf2cd531759c7bd97de4b9f98d11986002a3de39",
+      "modules/midi-follow/settings.s": "cbc5ed2eb36074a51856756bbd696b6d0d51e7b7e7e443145bc12e10e8b651db",
+      "modules/midi-harmony/ACCEPTANCE.md": "3ab4a2799ca08f71667432da92a1f617558086d158bea193c2670b2ec64a0c56",
+      "modules/midi-harmony/DEVELOPMENT.md": "5144a2f96261b4135c2ab36d629fcdc311c73bc389402913cfdae65c63365c50",
+      "modules/midi-harmony/KITS.md": "2b66adb93ef7827d3be4a88a5e2212c37919c4ac8acb5995ec697e7a514052bb",
+      "modules/midi-harmony/README.md": "76f2c861c6c98b00243810024eaedfd3014de013cc6dc1c7e0c079c3c4a3829b",
+      "modules/midi-harmony/SCENES.md": "60ad2eecba218273abbb8adaf22922413b1f268ae90e57c34add4098a080e21b",
+      "modules/midi-harmony/VOICING.md": "0025c80eb2ef08e78a411019594098a1e20e8bcedaa39020bd87e2fdecfd8e10",
+      "modules/midi-harmony/accumulator-access.s": "a12a6f5c9cece83f86781bf8725e661e12cc95b295cbda1ba2632f27dc84e6b2",
+      "modules/midi-harmony/accumulator.c": "ecb379866022e6199bd574c8da4ab4d6ba083c635aebf4f444983538c789a105",
+      "modules/midi-harmony/accumulator.h": "65c78322837b4d5b5214c898bebb90a94e79eb5aba15c6c5a0b4e5382bc6ad51",
+      "modules/midi-harmony/accumulator.s": "defa367765d148bb238db99516961b95716defa6765cd207badba9f17a3478de",
+      "modules/midi-harmony/brain.lock": "8a6f28f2c7722ed51397fe51323bd070c3f52f0a1e36940f5b9715e93a712e5f",
+      "modules/midi-harmony/chord-display.s": "940481d0e82996fb59f0a5f21d11556309e82d4df608209527cbfebb880faaee",
+      "modules/midi-harmony/chord-files.s": "9f350107098f3e649051b26baf34d8305a90d18a418f9ea4627061c7c68b7f69",
+      "modules/midi-harmony/chord-name.s": "34aacdb2dfa1e55c30ff2b60264309a670cf274216ba24a60c7cf12bd3be6fb5",
+      "modules/midi-harmony/chord-operations.s": "a75080f43367a5f7e7f491badea4d7379772b6c52be8e9150296cd837e6e3c1f",
+      "modules/midi-harmony/chord-part.s": "bdfc762ce532e0604b0b74a4fa51ad90818956d6e3a266bf8e2d45387ba41842",
+      "modules/midi-harmony/chord-record.s": "d91e1d23adf338147fbb467466fa3d6ede39e9ec416adec8b3efd7592603d951",
+      "modules/midi-harmony/chord-sequence.s": "979932a6704451e4f4f58d25d10fab7c3157b363226680fbbb572323692e19fe",
+      "modules/midi-harmony/chord-ui.s": "f2e8029d0a13339cd02957c189e1b6dfeb9b1c86bc1abd3d69189a1c03c62545",
+      "modules/midi-harmony/chords.s": "b81a9ebf527c35f0a38e36d3bdcb27d82e190c2d6c255636d6c70125748adca2",
+      "modules/midi-harmony/codec.s": "00a4b9341a3e635d62d10eda4c75487f8c2fb4fac5025d8e642968ce0c8804d9",
+      "modules/midi-harmony/core.c": "d3a3067dbe3335eb4b6c9c7f9379c33463473de16949d3c90ed54d70f97eb11f",
+      "modules/midi-harmony/core.h": "b659e96457d6e17ec81ace20a2fb8965c4cdd524b87c308ac7f8ea62f69f1ea1",
+      "modules/midi-harmony/core.s": "235883839d38027b69a2f16b77883bc062d36f275bfd2da841ff889b9ac00862",
+      "modules/midi-harmony/edit-hooks.s": "251fc1826d6463c73192ce4e4b8abb478ba5c3c36a8facb4f3075b35131e0376",
+      "modules/midi-harmony/events.c": "7cd73c8a69cca8aa94c14493f48cbe094e6db13891ba652cb204b70602ced7a3",
+      "modules/midi-harmony/events.s": "ac082c479b30ab30d943e17633f59509f5244680446b0e14ee3a57979d53988d",
+      "modules/midi-harmony/generate.py": "24242713528e85c0d00f35ef8081761ee0961180861bf6a0d4fe9618968dbd25",
+      "modules/midi-harmony/harmony.s": "34e64d3a27c69ede82ccc0870087b1ffa656bbe36df022a8a2217c3a12cea8b2",
+      "modules/midi-harmony/hooks.s": "b801eb96fb3af397673dd377cfbdd1696eee5b87cc33106c3eaae2eccb5daca8",
+      "modules/midi-harmony/locks.s": "76ff4cc60c71a5d481e0c0596cf4306db387b098e65cb565b8af0a59690c1fe4",
+      "modules/midi-harmony/manifest.py": "27407cf4e013a12d1b6982c13ffb0b9c739aeae7fd858798be6b6481210b2a7f",
+      "modules/midi-harmony/operations.c": "69de2a9eeccf75f66cd753857ca2e9f3246799ab92cf14469f5edb2dfe85a19b",
+      "modules/midi-harmony/operations.s": "a42510132e40d8696ed1d36949ee20f2cce4e55b1c641c4bf1546ec07c42964f",
+      "modules/midi-harmony/ownership.s": "2eb6b4d761af84605f0a24b84c0af1af55d3ab836a445697591d8e094a550d5e",
+      "modules/midi-harmony/packed.c": "bbdcf7e130c6098827381aea5dabad63e4629e3a50c52a1c8fa9e7c2850e89f9",
+      "modules/midi-harmony/packed.h": "f382115597226a39a9746dca3af1f31b14c53880104d1d90aca61d950c05eb96",
+      "modules/midi-harmony/packed.s": "a2c8d71ee5a5f28c88a6bf5b0be6a7210121d6e42a61e9d7a69d501366d14641",
+      "modules/midi-harmony/page.s": "59f40f23370b1b443327a2658c5d0b1177dcc06a18db346abcf9fbe5df71253c",
+      "modules/midi-harmony/panel.s": "39b698257d31db986c16b7e7ef7b72dbbdc6a7a39576e7c5b2dd4579751dbe19",
+      "modules/midi-harmony/part-access.s": "37fc6a11b927fc001425cbcc6a357ed26d06897708f230f5cf71ecfbfb0760ad",
+      "modules/midi-harmony/pitch-response.s": "3f0b0741c4de356c4619e8eee1b5350b6479d1a7d35096f815eed3fea74f2558",
+      "modules/midi-harmony/play.s": "16ef9d78404adce6f024583386ed51419ed0045a33e3cecbe183e7b9e0c7e696",
+      "modules/midi-harmony/pool.s": "9a764cb922f68f324b861ddddc44412034be6f20a639f2e0f52fdd7c8ee7cbe9",
+      "modules/midi-harmony/recording.c": "d4455ab41d06fd1d075b3353cc1e6663237bffac1f0f1352ae10610ff086613b",
+      "modules/midi-harmony/recording.s": "bbec80d103875d66982d7a8e1fc232b1bc8e918b352af2a9e72a48c4ac4645fe",
+      "modules/midi-harmony/roots.c": "5d9ea49c1fe8383a3f1ab623114015920db8c5ef47b9ffe8260773ca6e953c46",
+      "modules/midi-harmony/roots.h": "9cdc343ebf2e22249b4d2c43a984e227559c6d1567800c412a3fca74b42e629b",
+      "modules/midi-harmony/roots.s": "37c311b748fbb4f706af3b4a3f2fe4cfe8e569857e0bae111bccb4b2c1bc66a7",
+      "modules/midi-harmony/scene-access.s": "057759bb2f56f9a31b931ea51d4d591d4e936ef0cdb7864b0454dadbf5780123",
+      "modules/midi-harmony/scenes.c": "890647f29afea45fa28207e568b1b82eb21ada931932a07c342b00b6b549a3a3",
+      "modules/midi-harmony/scenes.s": "0b21e7810dbe1db00a0aa2c26c3dae51552026568d7abda714c77ad3d810988f",
+      "modules/midi-harmony/settings.s": "d4b5fe1b9f55045488cff9ca475b49a9b73b84b241d15c409e95c2618fbc8f51",
+      "modules/midi-harmony/size.c": "42f3d85748f2425d10dfbb5ca6794fb66e16166f6fb490c37145ecd40cedd9d7",
+      "modules/midi-harmony/size.h": "9465930cc6ba618ed8b4e4a6cb1fef91b4145c11f5eb94e13a3a22648c5d03ed",
+      "modules/midi-harmony/size.s": "fd9f0e3bb2636dbf571bfb98bf5f5e3ccb9862d078922cbb9abc5bea70b7f1d5",
+      "modules/midi-harmony/storage.c": "69d3fe846b861d7bbfe4d877ec66c5b2f16ed8d89c82b94c19660bf793719885",
+      "modules/midi-harmony/storage.s": "34e3d95ba073307109eea810ceb7e2b7c32d35076f43c728c80b10f427b0a0b4",
+      "modules/midi-harmony/track-retention.c": "09dc9cf62eb7b204797f28361d717d79623d429b554c395092f1e2026ee2a932",
+      "modules/midi-harmony/track-retention.h": "7613f831da025b9881fb242cbd6c26f0358909abae212cd6ca2e76a9943bee51",
+      "modules/midi-harmony/track-retention.s": "22433285f417aa8066215c428c398b12eaf7b748d26a4a879f5ba183804308b8",
+      "modules/midi-harmony/transport.s": "65620456b5f27c0601d83064d4a53729372e7395f4e7173c031c0382a124da1c",
+      "modules/midi-harmony/ui.c": "ed7b4574e7924802e14999be0f35c33ee2b907396110306fe76ac8f6f7e8cfdc",
+      "modules/midi-harmony/ui.s": "f981fc1b87c4495e399f0d2fbe8e830034ec9e7370c08c4d70d0a19bc6171cdb",
+      "modules/midi-harmony/voicing.s": "12e1754dac3993c6cfd955664169dba154e55c7160b72b8ef23bb69f9d69db9b"
+    }
+  },
+  "reproduction": {
+    "support_patch": "integration/scale-provider-integration-20261031.patch",
+    "support_patch_sha256": "beb8b37d315275ab6c697b9d518d7560592b07c36d1c523e66b9dc1192a3ff73",
+    "patch_apply_check": "PASS: root agent used disposable GIT_INDEX_FILE, read-tree exact8ea12, git apply --cached --check; real index untouched",
+    "author_verifiers_to_copy": {
+      "tools/verify/benchmark_midi_pitch_response.py": "979abaf62555d13159f098844662ba1fc49c15a22cde2db554cb263a18cbda5f",
+      "tools/verify/verify_chord_display.py": "647e5510756717e93dd220317eed6538b1b311b77b5f2aced415aa7b6b033794",
+      "tools/verify/verify_chord_part.py": "ce8e3c427a37f23cfdb98e96e00597000f9cc78f073eee2029ad506449ba59bc",
+      "tools/verify/verify_chord_play.py": "1acc2abed955a1ea1c65a77e4a1318cac88d3f32a679883390dc627bdae639a9",
+      "tools/verify/verify_chord_play_port.py": "80e337aecee4bb5a715bdf1b81f542bc563b33258d2a1d80dad1b5f01a48c96c",
+      "tools/verify/verify_chord_playability_port.py": "d1512ba5aac07bf8140203f0e98e2f7a434dd43fdd86ced409104885d3ee4e3a",
+      "tools/verify/verify_chord_storage.py": "e88aab551464e9f5c3377842e731985069f38278f6bbbc5279db321c87a966f0",
+      "tools/verify/verify_harmony_accumulator.py": "18b024a44d3e650dc08abc9ae7e417ba23af3a305076c830f60c904977fe1668",
+      "tools/verify/verify_harmony_accumulator_port.py": "f61bdca7626a00e0e22c3c7d32eb65dbb7ddb5d2ae5f47781096d584a7b140c6",
+      "tools/verify/verify_harmony_accumulator_ui.py": "1a7c574d18c81bbc956120552869af8ce7de1ab0c0fcb8d770fcbb71b1e90e3c",
+      "tools/verify/verify_harmony_degree_codec.py": "0da6346a0c2430bcef969be5b3d859c389615f8aa6d92367006289f08a2f6282",
+      "tools/verify/verify_harmony_degree_core.py": "a57a0594fbd01fcdaaaea1bbedbba7627d1222f634154f758bc0486f1ef8070a",
+      "tools/verify/verify_harmony_degree_files.py": "156ca69b98c55be8007dbe7acf58d2566bacfff0935fb60606dbb7120721bdf1",
+      "tools/verify/verify_harmony_degree_integration.py": "7ec8e9766eb1ceb2844a4c254c574e9aad72aec28d6e101a546f359f0e1b1635",
+      "tools/verify/verify_harmony_degree_kits_port.py": "5f2390f91648bc7e7033fc6f4fb5a65c02159cc3ee75712733e8b8a947d04dc7",
+      "tools/verify/verify_harmony_degree_packed.py": "8add5f4939827fb7850ad70486d6b59782abbd576309cdf41e4b1f45ce090e23",
+      "tools/verify/verify_harmony_degree_part_port.py": "8b2d7f76c62537b861202c46389d0fbd595a0c6956c897acb74114ce438df263",
+      "tools/verify/verify_harmony_degree_part_state.py": "820c87997af27a5179d2d03f9d4a5a237e6ed53ca2b95fd68995b7cd31d8a8a9",
+      "tools/verify/verify_harmony_degree_port.py": "f45232e7dc40c4d3700d9485e94bacd0da831986cb81d5204600294bbfee36a1",
+      "tools/verify/verify_harmony_degree_publication.py": "5b0246aff6eeccce3d07db4f7a2c9d3927b8d2103a16f249815d66b79907a4b0",
+      "tools/verify/verify_harmony_degree_roots.py": "71d4453dd13ce49d518eec8cfb43baf09e527e6be61b540d4600d66077cd4dd4",
+      "tools/verify/verify_harmony_degree_scenes.py": "bd20fb0f73613efd4b85ff7e8d21ef713e080f9e88fd79181196553b2886ac56",
+      "tools/verify/verify_harmony_degree_scenes_port.py": "21cc6d8fdf0066459b11e3600510db5a415e8fd395894f7703175fb83f8d735f",
+      "tools/verify/verify_harmony_follow_matrix_port.py": "ccc0095e26efd98b2d721123c65b722a76e6d0ebd4522ab89c817e4b806bf711",
+      "tools/verify/verify_harmony_follow_port.py": "bf64de6894662101ed88af380f42b48bcfa90f8060472895fbc4d497bac551a4",
+      "tools/verify/verify_harmony_playability.py": "e5f97c5626370e15553a1e724e5a91881bab5cad66e51be2d25544f263c990b2",
+      "tools/verify/verify_harmony_plocks.py": "daf3a700c0a9821d29580fce2a65192f95b2e0b6df301c4ded9bc817d58fe708",
+      "tools/verify/verify_harmony_size.py": "4073af08d0deef4735544d0e900fca12079acba2eac5ff1a205d6fe18fa1da3a",
+      "tools/verify/verify_harmony_size_musical.py": "f59655def602bb00c49a6adbbc373dc224adfb4ea108f441766593a018cf93e8",
+      "tools/verify/verify_harmony_size_port.py": "76583d7f636553d2fcc2526e7ce237ee5aa9a0c8e97430144ed7a1daa5332bd3",
+      "tools/verify/verify_harmony_size_scenes_port.py": "515e84be31d296940a287e90015cb80fdbf438cb4d205d5a50cfdfaa78c5d60e",
+      "tools/verify/verify_harmony_store.py": "a66827d48c4698f7fd529222e674be6821c9e29d1b46bc4f0920a172646eafa4",
+      "tools/verify/verify_harmony_track_port.py": "54a961ce8c64fe3fc6b5433d8dffb0465c54e1b298bba731a899b443c2cdeca8",
+      "tools/verify/verify_harmony_track_retention.py": "5a306f27eb28445abdda9d8eeda87169380af955a08ceac84a2c177e8cee3d77",
+      "tools/verify/verify_midi_harmony_port.py": "ba33988cc997ba2801b40b618573eea936fb6b4adacb7277c98da9be7a35aacc",
+      "tools/verify/verify_midi_harmony_stress.py": "0b1b33a329fa744c2906b060e0e46ed1d397602ebcabd57956c886ef769be686",
+      "tools/verify/verify_midi_pitch_response.py": "8d68a0dfbf1e3d6711e9dd66589248cbf7b64f2610e23aec3bd9cadf99f5f9d2",
+      "tools/verify/verify_midi_scale_provider.py": "0ce48a0d9fa468d217ffd4b0b83448568d9f0b73ab3f8731a99e039bd82ecae4",
+      "tools/verify/verify_midi_sram.py": "684a7e6df27577cb1f3fa014463573c94350364416223f961e86d63d4ea00840"
+    },
+    "historical_harness_origin": "4316bd1f071af6a1fe9f564dbfba93eb934b2f26",
+    "historical_commit_required_for_replay": false,
+    "note": "All38 historical helper verifier files match current author source; copy them plus the new scale gate from the author commit. Five remixes and the midi_machine bridge are in the small support patch. Raw firmware, emulator, generated images and private project are excluded.",
+    "notes": "integration/scale-provider-reproduce-20261031.md"
+  },
+  "source_checks": {
+    "command": "make check",
+    "tests": 60,
+    "seconds": 10.908,
+    "status": "PASS",
+    "log": "/tmp/octatrack-scales-provider-make-check.log",
+    "log_sha256": "dd90d9908c0f205c869d6a7f6b021258d0a126fe3153c66adab47365206f2605",
+    "generated_harmony_and_follow": "generate.py --check passed (source agent)",
+    "initial_environment_failure": "Sophie submodule was uninitialized; initialized its existing pin and reran successfully."
+  },
+  "combined_midi_scales": {
+    "build_command": "REMIX=harmony-follow-review XBUS=1 SPEC=1 .venv/bin/python tools/build/build_bus.py",
+    "scale_command": ".venv/bin/python -u tools/verify/verify_midi_scale_provider.py harmony-follow-review --output out/scales-provider-ms-scale.json",
+    "scale": {
+      "remix": "harmony-follow-review",
+      "artifacts": {
+        "mainos_bus.bin": "3d4bb7409470fd5198f658690490b37ec598bd328ce52765eafc83d46e120b34",
+        "mainos_bus.remix": "dd4bbdf9323d1ebd95448cf1bc8bf2d6a0bbb2981fde029059dd0460be76dc16",
+        "platform/layout.json": "50431e3ab00f618944e9a44181a45186be0d9e23d5423ba226550aba7020250b",
+        "platform/runtime/runtime.elf": "6b28e469385ba60b6e25c5bf49d3c8f7c615760360315f1078601eef105802ec",
+        "platform/runtime/runtime.bin": "e7ae66922832be37481316bdb1b5ec43e761ef6886983d0c36a69279e1d1ed98"
+      },
+      "extended_key_adapter": true,
+      "counts": {
+        "reads": 2048,
+        "native_quant": 3200,
+        "extension_quant": 7680,
+        "general_quant": 7680,
+        "legacy": 4204,
+        "guards": 39,
+        "abi": 24920,
+        "effective": 512
+      },
+      "explicit_working_and_saved_contexts": true,
+      "adapter_read_coverage": "native KEY matrix",
+      "exact_seven_mode_whitelist": true,
+      "stock_instruction_oracle": true,
+      "registers_stack_interrupt_mask_and_write_bounds": true,
+      "boundary": "Check the linked scale service against music and executable stock firmware.\n\nThe adapter reads explicit working/saved Part contexts. Pure-helper checks\ncover the register/stack contract, native rounding, general masks and Harmony's\nexact seven-mode whitelist; they do not qualify an external provider or hardware.\n",
+      "hardware_tested": false
+    },
+    "pitch_response": {
+      "image_sha256": "3d4bb7409470fd5198f658690490b37ec598bd328ce52765eafc83d46e120b34",
+      "artifacts": {
+        "mainos_bus.bin": "3d4bb7409470fd5198f658690490b37ec598bd328ce52765eafc83d46e120b34",
+        "platform/runtime/runtime.elf": "6b28e469385ba60b6e25c5bf49d3c8f7c615760360315f1078601eef105802ec",
+        "platform/runtime/runtime.bin": "e7ae66922832be37481316bdb1b5ec43e761ef6886983d0c36a69279e1d1ed98",
+        "platform/layout.json": "50431e3ab00f618944e9a44181a45186be0d9e23d5423ba226550aba7020250b",
+        "mainos_bus.remix": "dd4bbdf9323d1ebd95448cf1bc8bf2d6a0bbb2981fde029059dd0460be76dc16"
+      },
+      "remix": "harmony-follow-review",
+      "checked_calls": {
+        "bf_response_tick": 358,
+        "bf_response_adjust": 337,
+        "mh_pitch_capture": 6,
+        "mh_pitch_owned": 3,
+        "mh_pitch_quant": 3,
+        "mh_pitch_target": 3,
+        "mh_pitch_prepare": 6,
+        "mh_pitch_shift": 4
+      },
+      "checked_call_count": 720,
+      "harmony_selected": true,
+      "scales": [
+        [
+          1,
+          0
+        ],
+        [
+          2,
+          5
+        ],
+        [
+          25,
+          1
+        ],
+        [
+          27,
+          3
+        ]
+      ],
+      "native_controls": true,
+      "registers_and_stack": true,
+      "unchanged_deadlines": true,
+      "ownership_collisions_and_bounds": true,
+      "protected_state_unchanged": true,
+      "ordinary_event_paths_not_entered": true,
+      "direct_callback_abi": true,
+      "boundary": "linked firmware with substituted native MIDI queue; no sequencer clock or UART",
+      "hardware_tested": false
+    },
+    "other_checks": [
+      {
+        "command": "tools/verify/verify_midi_follow_scale.py",
+        "status": "PASS",
+        "seconds": 15.3
+      },
+      {
+        "command": "tools/verify/verify_harmony_follow_live.py",
+        "status": "PASS",
+        "seconds": 14.1
+      },
+      {
+        "command": "tools/verify/verify_harmony_degree_part_state.py",
+        "status": "PASS",
+        "seconds": 5.2
+      }
+    ],
+    "harmony_partial": {
+      "command": "tools/verify/verify_midi_harmony.py harmony-follow-review",
+      "status": "Stopped during unrelated exhaustive inversion sweep after231.2s; not a full script pass",
+      "completed": [
+        "machine_gate: all available scales and128pitches, Follow inheritance/cycles, KEY OFF, Part storage/write guards",
+        "final_note_gate: TRAN, final arp snap, source latch, bounds",
+        "keyboard_gate: ownership and held-setting changes",
+        "octave_gate: register jumps and resets",
+        "voicing_sort_gate:320 register/pitch/tie checks",
+        "voicing_gate: minimum movement across MIDI range/scales"
+      ]
+    }
+  },
+  "component_and_retained_checks": [
+    {
+      "command": "tools/verify/verify_harmony_degree_core.py",
+      "status": "PASS",
+      "scales": true,
+      "coverage": "16banks,256patterns,256KEY values,explicit/savedPart authority,snapshot separation,Follow chain/cycle,retained15104-byte payload,15 corruptions"
+    },
+    {
+      "command": "tools/verify/verify_harmony_degree_core.py --without-scales",
+      "status": "PASS",
+      "scales": false
+    },
+    {
+      "command": "tools/verify/verify_harmony_degree_codec.py",
+      "status": "PASS",
+      "seconds": 1.1
+    },
+    {
+      "command": "tools/verify/verify_harmony_degree_packed.py",
+      "status": "PASS",
+      "seconds": 80.4,
+      "coverage": "765legal tuples,128lanes,8192steps,134corruptions,clear+restore first/middle/last track,preempting save retry,torn snapshot rejection,contiguousSRAM unchanged"
+    }
+  ],
+  "composition_matrix": {
+    "follow-ms": {
+      "remix": "midi-follow-scales-provider",
+      "steps": [
+        {
+          "name": "build",
+          "command": [
+            ".venv/bin/python",
+            "-u",
+            "tools/build/build_bus.py"
+          ],
+          "seconds": 2.585,
+          "exit_code": 0,
+          "log": "out/scales-provider-follow-ms/build.log"
+        },
+        {
+          "name": "scale",
+          "command": [
+            ".venv/bin/python",
+            "-u",
+            "tools/verify/verify_midi_scale_provider.py",
+            "midi-follow-scales-provider",
+            "--output",
+            "out/scales-provider-follow-ms/scale.json"
+          ],
+          "seconds": 2.416,
+          "exit_code": 0,
+          "log": "out/scales-provider-follow-ms/scale.log"
+        },
+        {
+          "name": "pitch",
+          "command": [
+            ".venv/bin/python",
+            "-u",
+            "tools/verify/verify_midi_pitch_response.py",
+            "midi-follow-scales-provider",
+            "--expect-harmony",
+            "absent",
+            "--output",
+            "out/scales-provider-follow-ms/pitch.json"
+          ],
+          "seconds": 0.693,
+          "exit_code": 0,
+          "log": "out/scales-provider-follow-ms/pitch.log"
+        },
+        {
+          "name": "cpu",
+          "command": [
+            ".venv/bin/python",
+            "-u",
+            "tools/verify/verify_midi_follow_cpu.py",
+            "midi-follow-scales-provider",
+            "--output",
+            "out/scales-provider-follow-ms/cpu.json"
+          ],
+          "seconds": 0.864,
+          "exit_code": 0,
+          "log": "out/scales-provider-follow-ms/cpu.log"
+        }
+      ],
+      "artifacts": "out/scales-provider-follow-ms",
+      "artifacts_sha256": {
+        "mainos_bus.bin": "5eb66bb25d13f450e2bba4bfaf34de1c8b8b479bdfe7431d8a012a6800403480",
+        "mainos_bus.remix": "53766fc6557d0796bc4b61fd19a23118cc91c08d94957d5d98fc22dcda23f771",
+        "platform/layout.json": "fc2e14b9a0cd329e386415af444b50da78be2520de176b8585154eac13d19c19",
+        "platform/runtime/runtime.elf": "08dfd5bf6157d5a96b9beeea15fb96ad674f4aa92bb81fafc9bb77198d404f1e",
+        "platform/runtime/runtime.bin": "3db5d7ec6f97882cff14cfb906ab387d9a3d3a803921cf3c9a96eb31e671dfde"
+      },
+      "scale_counts": {
+        "reads": 2048,
+        "native_quant": 3200,
+        "extension_quant": 7680,
+        "general_quant": 7680,
+        "legacy": 4204,
+        "guards": 39,
+        "abi": 24920,
+        "effective": 512
+      },
+      "cpu_summary": {
+        "cases": 143,
+        "budget_failures": 0,
+        "status": "pass"
+      },
+      "pitch_summary": {
+        "checked_calls": 12,
+        "harmony_selected": false
+      }
+    },
+    "follow-stock": {
+      "remix": "midi-follow",
+      "steps": [
+        {
+          "name": "build",
+          "command": [
+            ".venv/bin/python",
+            "-u",
+            "tools/build/build_bus.py"
+          ],
+          "seconds": 2.499,
+          "exit_code": 0,
+          "log": "out/scales-provider-follow-stock/build.log"
+        },
+        {
+          "name": "scale",
+          "command": [
+            ".venv/bin/python",
+            "-u",
+            "tools/verify/verify_midi_scale_provider.py",
+            "midi-follow",
+            "--output",
+            "out/scales-provider-follow-stock/scale.json"
+          ],
+          "seconds": 2.445,
+          "exit_code": 0,
+          "log": "out/scales-provider-follow-stock/scale.log"
+        },
+        {
+          "name": "pitch",
+          "command": [
+            ".venv/bin/python",
+            "-u",
+            "tools/verify/verify_midi_pitch_response.py",
+            "midi-follow",
+            "--expect-harmony",
+            "absent",
+            "--output",
+            "out/scales-provider-follow-stock/pitch.json"
+          ],
+          "seconds": 0.676,
+          "exit_code": 0,
+          "log": "out/scales-provider-follow-stock/pitch.log"
+        },
+        {
+          "name": "cpu",
+          "command": [
+            ".venv/bin/python",
+            "-u",
+            "tools/verify/verify_midi_follow_cpu.py",
+            "midi-follow",
+            "--output",
+            "out/scales-provider-follow-stock/cpu.json"
+          ],
+          "seconds": 0.67,
+          "exit_code": 0,
+          "log": "out/scales-provider-follow-stock/cpu.log"
+        }
+      ],
+      "artifacts": "out/scales-provider-follow-stock",
+      "artifacts_sha256": {
+        "mainos_bus.bin": "70e93e14fe5625c31f8a3a7ac9c694d68f60df4e36abf81e8e978439db6d3e93",
+        "mainos_bus.remix": "5ccf0fdc637aafd98feee842d325f73b1c6de0b0563b1b4f0205e0db2a653555",
+        "platform/layout.json": "24a6cdafc9c3316bc44079ba45c70ca0db475f6311820f5ba3f0b232525bc57d",
+        "platform/runtime/runtime.elf": "1a1665dac17100a28db6d590f12f46f94bd6cea1d008acda54dbd21cbb1a6afa",
+        "platform/runtime/runtime.bin": "2696ff6e360b2d7c7c8dab06190df9522d1bf7f37f8cc914a879e4696f914c08"
+      },
+      "scale_counts": {
+        "reads": 2048,
+        "native_quant": 3200,
+        "extension_quant": 7680,
+        "general_quant": 7680,
+        "legacy": 4204,
+        "guards": 39,
+        "abi": 24920,
+        "effective": 512
+      },
+      "cpu_summary": {
+        "cases": 79,
+        "budget_failures": 0,
+        "status": "pass"
+      },
+      "pitch_summary": {
+        "checked_calls": 12,
+        "harmony_selected": false
+      }
+    },
+    "harmony-ms": {
+      "remix": "harmony-scales-provider",
+      "steps": [
+        {
+          "name": "build",
+          "command": [
+            ".venv/bin/python",
+            "-u",
+            "tools/build/build_bus.py"
+          ],
+          "seconds": 7.944,
+          "exit_code": 0,
+          "log": "out/scales-provider-harmony-ms/build.log"
+        },
+        {
+          "name": "scale",
+          "command": [
+            ".venv/bin/python",
+            "-u",
+            "tools/verify/verify_midi_scale_provider.py",
+            "harmony-scales-provider",
+            "--output",
+            "out/scales-provider-harmony-ms/scale.json"
+          ],
+          "seconds": 2.334,
+          "exit_code": 0,
+          "log": "out/scales-provider-harmony-ms/scale.log"
+        }
+      ],
+      "artifacts": "out/scales-provider-harmony-ms",
+      "artifacts_sha256": {
+        "mainos_bus.bin": "fd4339c2212905caa627f213444a459dd302b1d5355a926dca280c199b05e1c4",
+        "mainos_bus.remix": "c66d88f69e4172bd2e7115f8038ae1f567038be0c1487f0cbc6f99796e4a0eb1",
+        "platform/layout.json": "6fea9d37a2e85a6248d1f059e958269fcc77af91dde1da672ccda7ae80a6d7e5",
+        "platform/runtime/runtime.elf": "2f5b883c7f16d87fae87495522d03a42c98d69ab2fac7882f8537fe3c1909e87",
+        "platform/runtime/runtime.bin": "e48ea1167670b18922e9152bea0286bef8a7f156babf8f823122b35c782fcba5"
+      },
+      "scale_counts": {
+        "reads": 2048,
+        "native_quant": 3200,
+        "extension_quant": 7680,
+        "general_quant": 7680,
+        "legacy": 4204,
+        "guards": 39,
+        "abi": 24920,
+        "effective": 0
+      }
+    },
+    "harmony-stock": {
+      "remix": "harmony-review",
+      "steps": [
+        {
+          "name": "build",
+          "command": [
+            ".venv/bin/python",
+            "-u",
+            "tools/build/build_bus.py"
+          ],
+          "seconds": 7.913,
+          "exit_code": 0,
+          "log": "out/scales-provider-harmony-stock/build.log"
+        },
+        {
+          "name": "scale",
+          "command": [
+            ".venv/bin/python",
+            "-u",
+            "tools/verify/verify_midi_scale_provider.py",
+            "harmony-review",
+            "--output",
+            "out/scales-provider-harmony-stock/scale.json"
+          ],
+          "seconds": 2.308,
+          "exit_code": 0,
+          "log": "out/scales-provider-harmony-stock/scale.log"
+        }
+      ],
+      "artifacts": "out/scales-provider-harmony-stock",
+      "artifacts_sha256": {
+        "mainos_bus.bin": "2dcde37b69ef170670180f1e7f66d192b9403508f06adb6c9f5b885297650e05",
+        "mainos_bus.remix": "a788f0f80ce1563bfdb24cc2c45f4ea70207c69feadcedce548e15b8107c50d0",
+        "platform/layout.json": "db144e749d76e0a8272f0cdda2553935b67326bb31b4e7785476457ea4810704",
+        "platform/runtime/runtime.elf": "f4a14d1cf0f3e17d9bc0bb8489ec7bf9ebef915dc1a83c7c72dd55b78d7ff9f9",
+        "platform/runtime/runtime.bin": "44c007f7ce8ca70ef4c14a5d25ce8f1e1ad0cb5829b94cf09c2ccfca6f48eb81"
+      },
+      "scale_counts": {
+        "reads": 2048,
+        "native_quant": 3200,
+        "extension_quant": 7680,
+        "general_quant": 7680,
+        "legacy": 4204,
+        "guards": 39,
+        "abi": 24920,
+        "effective": 0
+      }
+    },
+    "combined-stock": {
+      "remix": "harmony-follow-native-review",
+      "steps": [
+        {
+          "name": "build",
+          "command": [
+            ".venv/bin/python",
+            "-u",
+            "tools/build/build_bus.py"
+          ],
+          "seconds": 8.157,
+          "exit_code": 0,
+          "log": "out/scales-provider-combined-stock/build.log"
+        },
+        {
+          "name": "scale",
+          "command": [
+            ".venv/bin/python",
+            "-u",
+            "tools/verify/verify_midi_scale_provider.py",
+            "harmony-follow-native-review",
+            "--output",
+            "out/scales-provider-combined-stock/scale.json"
+          ],
+          "seconds": 2.468,
+          "exit_code": 0,
+          "log": "out/scales-provider-combined-stock/scale.log"
+        },
+        {
+          "name": "pitch",
+          "command": [
+            ".venv/bin/python",
+            "-u",
+            "tools/verify/verify_midi_pitch_response.py",
+            "harmony-follow-native-review",
+            "--expect-harmony",
+            "present",
+            "--output",
+            "out/scales-provider-combined-stock/pitch.json"
+          ],
+          "seconds": 6.667,
+          "exit_code": 0,
+          "log": "out/scales-provider-combined-stock/pitch.log"
+        },
+        {
+          "name": "cpu",
+          "command": [
+            ".venv/bin/python",
+            "-u",
+            "tools/verify/verify_midi_follow_cpu.py",
+            "harmony-follow-native-review",
+            "--output",
+            "out/scales-provider-combined-stock/cpu.json"
+          ],
+          "seconds": 0.764,
+          "exit_code": 1,
+          "log": "out/scales-provider-combined-stock/cpu.log"
+        },
+        {
+          "name": "follow-scale",
+          "command": [
+            ".venv/bin/python",
+            "-u",
+            "tools/verify/verify_midi_follow_scale.py"
+          ],
+          "seconds": 12.849,
+          "exit_code": 0,
+          "log": "out/scales-provider-combined-stock/follow-scale.log"
+        },
+        {
+          "name": "part",
+          "command": [
+            ".venv/bin/python",
+            "-u",
+            "tools/verify/verify_harmony_degree_part_state.py"
+          ],
+          "seconds": 5.024,
+          "exit_code": 0,
+          "log": "out/scales-provider-combined-stock/part.log"
+        },
+        {
+          "name": "harmony-machine",
+          "command": [
+            ".venv/bin/python",
+            "-u",
+            "-c",
+            "import sys;sys.path.insert(0,\"tools/verify\");import verify_midi_harmony as v;v.machine_gate();v.final_note_gate()"
+          ],
+          "seconds": 14.66,
+          "exit_code": 0,
+          "log": "out/scales-provider-combined-stock/harmony-machine.log"
+        }
+      ],
+      "artifacts": "out/scales-provider-combined-stock",
+      "artifacts_sha256": {
+        "mainos_bus.bin": "f65b927703ad4b94a3fbd11cd78424ecce9a79a7b70c01f85d2f8e035e656e55",
+        "mainos_bus.remix": "f337506483817eef52b961574bdaf8bf9e9e9abbdf36800d5bf992f2664e6d18",
+        "platform/layout.json": "9cc1b19099927b7260a267bdcaf2edc010b084a8fc6dda2ba109fe0e29b15481",
+        "platform/runtime/runtime.elf": "bc7b91d09b5fd33733115177ce8e5f3fe7799c6ccb12fba047074f426ffbb21b",
+        "platform/runtime/runtime.bin": "63235dd422303f93e451b6054a5735ff6cc16de051c6bd857ae4d38caabfab0b"
+      },
+      "scale_counts": {
+        "reads": 2048,
+        "native_quant": 3200,
+        "extension_quant": 7680,
+        "general_quant": 7680,
+        "legacy": 4204,
+        "guards": 39,
+        "abi": 24920,
+        "effective": 512
+      },
+      "cpu_summary": {
+        "cases": 79,
+        "budget_failures": 25,
+        "status": "fail"
+      },
+      "pitch_summary": {
+        "checked_calls": 432,
+        "harmony_selected": true
+      }
+    }
+  },
+  "port": {
+    "command": ".venv/bin/python -u tools/verify/verify_harmony_follow_matrix_port.py --project out/scales-provider-fixture --workers 3 --case 0,2,1,1,0 --case 0,2,1,1,1 --case 1,2,25,1,1 --case 2,0,25,1,1 --case 2,2,0,1,1 --case 0,0,0,1,1 --output out/scales-provider-ms-port --compare ../follow-harmony-contract-20261027/out/contract-port/results.json",
+    "status": "PASS",
+    "cases": 6,
+    "selected_cases": [
+      "s0-f2-k1-live1-arp0",
+      "s0-f2-k1-live1-arp1",
+      "s1-f2-k25-live1-arp1",
+      "s2-f0-k25-live1-arp1",
+      "s2-f2-k0-live1-arp1",
+      "s0-f0-k0-live1-arp1"
+    ],
+    "image_sha256": "3d4bb7409470fd5198f658690490b37ec598bd328ce52765eafc83d46e120b34",
+    "baseline_image_sha256": "6e188edd2eea3f0f65d97da40b1497fe087259d5bbb17141560af0521034dc8e",
+    "complete_event_sequences_equal": true,
+    "balanced_releases": true,
+    "receipt": "/Users/mattiaswolff/Documents/git/octatrack/projects/octabam/.claude/worktrees/scales-provider-integration-20261031/out/scales-provider-ms-port/results.json",
+    "receipt_sha256": "f4073387344dc90a9d0cd3fa16c2cded41483a5bec1c6e27b121c83041ca4a30",
+    "baseline_local_only": "/Users/mattiaswolff/Documents/git/octatrack/projects/octabam/.claude/worktrees/follow-harmony-contract-20261027/out/contract-port/results.json",
+    "fixture_receipt": {
+      "source": "/Users/mattiaswolff/Documents/git/octatrack/projects/octabam/.claude/worktrees/follow-harmony-contract-20261027/out/degree-native-part-port/0-to-2/project",
+      "destination": "/Users/mattiaswolff/Documents/git/octatrack/projects/octabam/.claude/worktrees/scales-provider-integration-20261031/out/scales-provider-fixture",
+      "files": {
+        "bank10.work": "dc35f0807b773cf6a59db26d18f02b1c6817aa929ce3908332d36418a9832f89",
+        "bank06.work": "dc35f0807b773cf6a59db26d18f02b1c6817aa929ce3908332d36418a9832f89",
+        "project.work": "f3a3e53eb480ce553d753fb3cfdc71ac049adc959c11d97702c6d6f3140fa22e",
+        "bank01.strd": "dc35f0807b773cf6a59db26d18f02b1c6817aa929ce3908332d36418a9832f89",
+        "arr03.work": "e21ee32c5571a9c0b8c89cf3877fc1fae20dce25c158e0d6dfc6cb90a165a80c",
+        "arr02.work": "e21ee32c5571a9c0b8c89cf3877fc1fae20dce25c158e0d6dfc6cb90a165a80c",
+        "bank16.strd": "8bfbf8cfdd9a9f135b8641d2e06dad17d7c23aa6a9d4583365a26dab5c35daae",
+        "bank07.work": "dc35f0807b773cf6a59db26d18f02b1c6817aa929ce3908332d36418a9832f89",
+        "bank11.work": "dc35f0807b773cf6a59db26d18f02b1c6817aa929ce3908332d36418a9832f89",
+        "arr05.work": "e21ee32c5571a9c0b8c89cf3877fc1fae20dce25c158e0d6dfc6cb90a165a80c",
+        "bank16.work": "8bfbf8cfdd9a9f135b8641d2e06dad17d7c23aa6a9d4583365a26dab5c35daae",
+        "bank11.strd": "dc35f0807b773cf6a59db26d18f02b1c6817aa929ce3908332d36418a9832f89",
+        "bank07.strd": "dc35f0807b773cf6a59db26d18f02b1c6817aa929ce3908332d36418a9832f89",
+        "bank06.strd": "dc35f0807b773cf6a59db26d18f02b1c6817aa929ce3908332d36418a9832f89",
+        "bank10.strd": "dc35f0807b773cf6a59db26d18f02b1c6817aa929ce3908332d36418a9832f89",
+        "arr08.work": "e21ee32c5571a9c0b8c89cf3877fc1fae20dce25c158e0d6dfc6cb90a165a80c",
+        "bank01.work": "dc35f0807b773cf6a59db26d18f02b1c6817aa929ce3908332d36418a9832f89",
+        "arr04.work": "e21ee32c5571a9c0b8c89cf3877fc1fae20dce25c158e0d6dfc6cb90a165a80c",
+        "bank09.strd": "dc35f0807b773cf6a59db26d18f02b1c6817aa929ce3908332d36418a9832f89",
+        "arr07.work": "e21ee32c5571a9c0b8c89cf3877fc1fae20dce25c158e0d6dfc6cb90a165a80c",
+        "bank05.strd": "dc35f0807b773cf6a59db26d18f02b1c6817aa929ce3908332d36418a9832f89",
+        "bank13.strd": "dc35f0807b773cf6a59db26d18f02b1c6817aa929ce3908332d36418a9832f89",
+        "bank02.work": "dc35f0807b773cf6a59db26d18f02b1c6817aa929ce3908332d36418a9832f89",
+        "bank14.work": "dc35f0807b773cf6a59db26d18f02b1c6817aa929ce3908332d36418a9832f89",
+        "bank15.work": "dc35f0807b773cf6a59db26d18f02b1c6817aa929ce3908332d36418a9832f89",
+        "bank03.work": "dc35f0807b773cf6a59db26d18f02b1c6817aa929ce3908332d36418a9832f89",
+        "bank12.strd": "dc35f0807b773cf6a59db26d18f02b1c6817aa929ce3908332d36418a9832f89",
+        "bank04.strd": "dc35f0807b773cf6a59db26d18f02b1c6817aa929ce3908332d36418a9832f89",
+        "arr06.work": "e21ee32c5571a9c0b8c89cf3877fc1fae20dce25c158e0d6dfc6cb90a165a80c",
+        "bank08.strd": "dc35f0807b773cf6a59db26d18f02b1c6817aa929ce3908332d36418a9832f89",
+        "bank03.strd": "dc35f0807b773cf6a59db26d18f02b1c6817aa929ce3908332d36418a9832f89",
+        "bank15.strd": "dc35f0807b773cf6a59db26d18f02b1c6817aa929ce3908332d36418a9832f89",
+        "bank04.work": "dc35f0807b773cf6a59db26d18f02b1c6817aa929ce3908332d36418a9832f89",
+        "bank12.work": "dc35f0807b773cf6a59db26d18f02b1c6817aa929ce3908332d36418a9832f89",
+        "bank08.work": "dc35f0807b773cf6a59db26d18f02b1c6817aa929ce3908332d36418a9832f89",
+        "arr01.work": "e21ee32c5571a9c0b8c89cf3877fc1fae20dce25c158e0d6dfc6cb90a165a80c",
+        "bank09.work": "dc35f0807b773cf6a59db26d18f02b1c6817aa929ce3908332d36418a9832f89",
+        "bank13.work": "dc35f0807b773cf6a59db26d18f02b1c6817aa929ce3908332d36418a9832f89",
+        "bank05.work": "dc35f0807b773cf6a59db26d18f02b1c6817aa929ce3908332d36418a9832f89",
+        "bank14.strd": "dc35f0807b773cf6a59db26d18f02b1c6817aa929ce3908332d36418a9832f89",
+        "bank02.strd": "dc35f0807b773cf6a59db26d18f02b1c6817aa929ce3908332d36418a9832f89"
+      },
+      "source_unchanged": true
+    },
+    "boundary": "Full firmware/sequencer virtual-card UART evidence. Fixture and comparison capture are local, not bundled or hardware evidence."
+  },
+  "cpu": {
+    "boundary": "Executed guest instructions, not ColdFire cycles, physical CPU load or MIDI latency.",
+    "same_composition_control": {
+      "source": "Original pinned Follow0ebe/Harmonya67 restored into private dependencies for one combined build, then tested author snapshot restored.",
+      "build_seconds": 8.4,
+      "cases": 143,
+      "budget_failures": 53,
+      "image_sha256": "4b0e2dccf163693a5738f8f4ba7ed83ba79da8f69894beedb5d6b0d56393d815"
+    },
+    "candidate": {
+      "cases": 143,
+      "budget_failures": 54,
+      "image_sha256": "3d4bb7409470fd5198f658690490b37ec598bd328ce52765eafc83d46e120b34"
+    },
+    "all_functional_lifecycle_assertions_passed": true,
+    "budgets_unchanged": true,
+    "delta_percent_range": [
+      -6.8759,
+      8.7945
+    ],
+    "representative_deltas": {
+      "note_key0_direct_FIXED_bf_note.cold.1": {
+        "before": 808,
+        "after": 844,
+        "percent": 4.4554
+      },
+      "note_key25_direct_FIXED_ms_output.cold.1": {
+        "before": 1288,
+        "after": 1318,
+        "percent": 2.3292
+      },
+      "live_seven_FIXED.unchanged": {
+        "before": 6396,
+        "after": 6452,
+        "percent": 0.8755
+      },
+      "live_seven_GRAV.unchanged": {
+        "before": 12710,
+        "after": 12766,
+        "percent": 0.4406
+      },
+      "enable.muted_source_while_off": {
+        "before": 3650,
+        "after": 3971,
+        "percent": 8.7945
+      }
+    },
+    "standalone_stock": {
+      "cases": 79,
+      "budget_failures": 0
+    },
+    "standalone_midi_scales": {
+      "cases": 143,
+      "budget_failures": 0
+    },
+    "combined_stock": {
+      "cases": 79,
+      "budget_failures": 25
+    },
+    "control_receipt": "/Users/mattiaswolff/Documents/git/octatrack/projects/octabam/.claude/worktrees/scales-provider-integration-20261031/out/scales-provider-pinned-cpu.json",
+    "candidate_receipt": "/Users/mattiaswolff/Documents/git/octatrack/projects/octabam/.claude/worktrees/scales-provider-integration-20261031/out/scales-provider-ms-cpu.json"
+  },
+  "response_benchmark": {
+    "command": ".venv/bin/python -u tools/verify/benchmark_midi_pitch_response.py --integration-root . --baseline ../follow-harmony-contract-20261027/out/contract-combined --candidate out/scales-provider-ms-frozen --remix harmony-follow-review --output out/scales-provider-response-benchmark.json",
+    "status": "PASS",
+    "cases": 12,
+    "behavior_hashes_equal": true,
+    "delta_percent_range": [
+      -0.25,
+      3.41
+    ],
+    "baseline_source": "6b3d232afaa77f91f05335a31664bd0c3cfe9f2c, locally frozen historical contract image; separate from current originalpin CPU control",
+    "receipt": "/Users/mattiaswolff/Documents/git/octatrack/projects/octabam/.claude/worktrees/scales-provider-integration-20261031/out/scales-provider-response-benchmark.json",
+    "receipt_sha256": "b9859fb0653714e462d6fcf9820d548c69352ac84512bd7719a0e93af3aa3fa8"
+  },
+  "resolved_test_failures": [
+    {
+      "problem": "Native oracle read stock byte255 while helper correctly returned full-width -1 at KEY4 pitch0.",
+      "fix": "Capture stock D0 at0x4009fb7e before byte store; exact scalar comparison now passes3200cases."
+    },
+    {
+      "problem": "Isolated degree-core harness did not define new scale_read/scale_legacy binding macros.",
+      "fix": "Generate include through actual scale_provider.py and link actual scale_key.s/scale_math.s; both stock/MS component gates pass."
+    }
+  ],
+  "limits": [
+    "Current Djib SCALES explicitly refused by selector; no SCALES firmware composition or custom-provider lifecycle qualification claimed. Source registry tests cover compatible/incompatible adapter binding.",
+    "Seven existing diatonic Harmony modes and persisted representation preserved; general helper mask tests do not authorize unsupported Harmony scales.",
+    "No full108case sequencer matrix, whole check/reach/CI refhash regeneration, card write, physical boot, load, latency or hardware MIDI acceptance.",
+    "Complete Harmony script intentionally not finished beyond listed focused checks.",
+    "Combined CPU budgets remain failed and unmodified; standalone gates pass, and same-composition control distinguishes existing overhead."
+  ],
+  "artifact_log_sha256": {
+    "scales-provider-ms-follow-scale.log": "82ab692213fb4dbca1f98f17710692e4345d9f9a64bb8fe041adcf73f6690178",
+    "scales-provider-ms-pitch-response.log": "44b51a5ef905570bd6c585b0a0437da6135689577e0ad41bcb69500ac1730795",
+    "scales-provider-ms-follow-cpu.log": "fe92007b76332035756e5004149657f4b4a324d72b5bdc64e67318a4807aa639",
+    "scales-provider-ms-harmony-live.log": "8446f8913402172b665cbddbfa43e4c3cc36d2ade1d06f9878a1be89e53bce8a",
+    "scales-provider-ms-native-part.log": "0d34515f8d1c4b7ef96330152489cf5ef59d5aa6744c846c0e176ed7635a943e",
+    "scales-provider-ms-harmony.log": "7ab015d72b16f06e8b19177f51d798ee0929ffd1d38f3f0e11260194b20d07a7",
+    "scales-provider-ms-degree-core.log": "e7250292b2302905e3d7e56f343596a788958655bd6ef7e19b20b107c1e22790",
+    "scales-provider-stock-degree-core.log": "d89c55ce3df78519844764728a984bd669257f0341e92cce973e069ccbf79b95",
+    "scales-provider-ms-degree-codec.log": "7fb2427aff53d4a7218759e9f7f2b4295322faf95aea7c80b477e1373fba7c0b",
+    "scales-provider-ms-degree-packed.log": "d62044c8eab6439c56e3a563ef845dd9dae8a57a3529b62ed56c7bc908d0b3f9",
+    "scales-provider-ms-port.log": "ecdc8982efacc0825cf503e10c4d60048bb52dd8138c806406221c67ba82e431",
+    "scales-provider-response-benchmark.log": "1467a0809c1ec8bab67d02375a1b9650bc7036c293e9cb193cf9c51f745ac852",
+    "scales-provider-final-build.log": "a04887a9a92bd2edd5a23129f46c24b9a3d9a57521673e7b15d6310ea36bfb1e",
+    "scales-provider-final-scale.log": "ae292fd08ef29c0d204272c60604f0370d2c87ef64f0d42c241d076d79f59869",
+    "scales-provider-pinned-build.log": "230914cc823e8090d6687accd715904e27bc86f8c82eaf8581d5c33025870dcb",
+    "scales-provider-pinned-cpu.log": "5c1e571905604c6b70f600d912aec371d73f206fa579885f78e194231179f0c9"
+  },
+  "hardware_tested": false,
+  "card_written": false
+}

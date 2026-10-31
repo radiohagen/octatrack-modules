@@ -49,7 +49,8 @@ int bf_gravity_c(int pitch_class, unsigned track) {
     BfGravity *s=&bf_history[track];
     if (!s->initialized) return 256;
     if (s->pitch_class==pitch_class && s->pending>=0) return s->pending;
-    int lo=12*bf_home_c(track), hi=lo+11;
+    /* bf_sync_c validated HOME with the history configuration above. */
+    int lo=12*(int)(s->configuration & 15u), hi=lo+11;
     int best=-1, best_score=0x7fffffff, best_outside=0x7fffffff;
     for (int note=pitch_class;note<128;note+=12) {
         int outside=note<lo ? lo-note : note>hi ? note-hi : 0;
@@ -66,6 +67,11 @@ int bf_gravity_c(int pitch_class, unsigned track) {
 }
 void bf_sent_c(unsigned track) {
     if (track>=8) return;
+    /* Nothing can be committed without a proposal. In particular, ordinary
+     * notes on OFF/FIXED/SOURCE tracks need no settings or route reads. A
+     * live proposal still synchronizes before committing, so a replaced Part
+     * or changed route cannot publish stale history. */
+    if (!bf_history[track].initialized || bf_history[track].pending<0) return;
     bf_sync_c(track);
     if (bf_history[track].initialized && bf_history[track].pending>=0)
         bf_history[track].previous=bf_history[track].pending;
