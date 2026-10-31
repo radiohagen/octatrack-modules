@@ -1,0 +1,112 @@
+diff --git a/tools/verify/midi_machine.py b/tools/verify/midi_machine.py
+index 18372d60..da0dc512 100644
+--- a/tools/verify/midi_machine.py
++++ b/tools/verify/midi_machine.py
+@@ -14,6 +14,7 @@ sys.path.insert(0, str(ROOT/'tools'))
+ import toolpath
+ from unicorn import Uc, UC_ARCH_M68K, UC_MODE_BIG_ENDIAN, UC_HOOK_CODE, UC_HOOK_MEM_WRITE
+ from unicorn.m68k_const import *
++from harmony_midi_machine import HARMONY_SOURCE, InterruptMaskTrace, MODES, raw_scale
+
+
+
+@@ -114,6 +115,9 @@ class Machine:
+     def set_key(self,track,value):
+         self.uc.mem_write(self.part_address(track,17),bytes((value,)))
+         self.uc.mem_write(0x46c76df1+68*track,bytes((value,)))
++    def harmony_state(self):
++        return b''.join(bytes(self.uc.mem_read(self.part_address(t,f),1))
++                        for t in range(8) for f in (5,16))
+     def stop(self,u,p,n,x):
+         if p in self.stops:self.arrival=p;u.emu_stop()
+     def read_sr(self):
+diff --git a/remixes/test/midi-follow-scales-provider/remix.py b/remixes/test/midi-follow-scales-provider/remix.py
+new file mode 100644
+index 00000000..4550048d
+--- /dev/null
++++ b/remixes/test/midi-follow-scales-provider/remix.py
+@@ -0,0 +1,12 @@
++"""Stock effects and the experimental per-track MIDI root follower."""
++from remix.schema import Proof, Remix
++
++REMIX = Remix(
++    name="midi-follow-scales-provider", family="mods", proof=Proof.PORT,
++    proof_note='',
++    doc="Per-track RFOL source selection on MIDI NOTE SETUP; Part-owned bass following.",
++    modules=("MIDI SCALES", "EVENTS", "STORE", "MIDI FOLLOW", "FILTER", "EQUALIZER", "DJ EQ", "PHASER", "FLANGER",
++             "CHORUS", "SPATIALIZER", "COMB FILTER", "COMPRESSOR", "LO-FI",
++             "DELAY", "PLATE REV", "SPRING REV", "DARK REV"),
++    fallback="NONE",
++)
+diff --git a/remixes/test/harmony-scales-provider/remix.py b/remixes/test/harmony-scales-provider/remix.py
+new file mode 100644
+index 00000000..03d79813
+--- /dev/null
++++ b/remixes/test/harmony-scales-provider/remix.py
+@@ -0,0 +1,12 @@
++"""Harmony native-KEY control composition for the EVENTS/STORE migration."""
++from remix.schema import Proof, Remix
++
++REMIX = Remix(
++    name="harmony-scales-provider", family="mods", proof=Proof.PORT,
++    proof_note='',
++    doc="Harmony native-KEY control composition for the EVENTS/STORE migration.",
++    modules=("MIDI SCALES", "STORE", "MIDI SRAM", "MIDI HARMONY", "EVENTS", "FILTER", "EQUALIZER", "DJ EQ", "PHASER", "FLANGER",
++             "CHORUS", "SPATIALIZER", "COMB FILTER", "COMPRESSOR", "LO-FI",
++             "DELAY", "PLATE REV", "SPRING REV", "DARK REV"),
++    fallback="NONE",
++)
+diff --git a/remixes/test/harmony-follow-native-review/remix.py b/remixes/test/harmony-follow-native-review/remix.py
+new file mode 100644
+index 00000000..dcb7a6fb
+--- /dev/null
++++ b/remixes/test/harmony-follow-native-review/remix.py
+@@ -0,0 +1,12 @@
++"""Harmony native-KEY control composition for the EVENTS/STORE migration."""
++from remix.schema import Proof, Remix
++
++REMIX = Remix(
++    name="harmony-follow-native-review", family="mods", proof=Proof.PORT,
++    proof_note='',
++    doc="Harmony native-KEY control composition for the EVENTS/STORE migration.",
++    modules=("STORE", "MIDI SRAM", "MIDI HARMONY", "EVENTS", "MIDI FOLLOW", "FILTER", "EQUALIZER", "DJ EQ", "PHASER", "FLANGER",
++             "CHORUS", "SPATIALIZER", "COMB FILTER", "COMPRESSOR", "LO-FI",
++             "DELAY", "PLATE REV", "SPRING REV", "DARK REV"),
++    fallback="NONE",
++)
+diff --git a/remixes/test/harmony-follow-review/remix.py b/remixes/test/harmony-follow-review/remix.py
+new file mode 100644
+index 00000000..84933955
+--- /dev/null
++++ b/remixes/test/harmony-follow-review/remix.py
+@@ -0,0 +1,12 @@
++"""MIDI Harmony, Scales and Follow together with all stock effects."""
++from remix.schema import Proof, Remix
++
++REMIX = Remix(
++    name="harmony-follow-review", family="mods", proof=Proof.PORT,
++    proof_note='',
++    doc="MIDI Harmony, Scales and Follow together with all stock effects.",
++    modules=("STORE", "MIDI SRAM", "MIDI HARMONY", "EVENTS", "MIDI SCALES",  "MIDI FOLLOW", "FILTER", "EQUALIZER", "DJ EQ", "PHASER", "FLANGER",
++             "CHORUS", "SPATIALIZER", "COMB FILTER", "COMPRESSOR", "LO-FI",
++             "DELAY", "PLATE REV", "SPRING REV", "DARK REV"),
++    fallback="NONE",
++)
+diff --git a/remixes/test/harmony-review/remix.py b/remixes/test/harmony-review/remix.py
+new file mode 100644
+index 00000000..edb5c041
+--- /dev/null
++++ b/remixes/test/harmony-review/remix.py
+@@ -0,0 +1,12 @@
++"""Harmony native-KEY control composition for the EVENTS/STORE migration."""
++from remix.schema import Proof, Remix
++
++REMIX = Remix(
++    name="harmony-review", family="mods", proof=Proof.PORT,
++    proof_note='',
++    doc="Harmony native-KEY control composition for the EVENTS/STORE migration.",
++    modules=("STORE", "MIDI SRAM", "MIDI HARMONY", "EVENTS", "FILTER", "EQUALIZER", "DJ EQ", "PHASER", "FLANGER",
++             "CHORUS", "SPATIALIZER", "COMB FILTER", "COMPRESSOR", "LO-FI",
++             "DELAY", "PLATE REV", "SPRING REV", "DARK REV"),
++    fallback="NONE",
++)

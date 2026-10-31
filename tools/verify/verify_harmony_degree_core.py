@@ -33,7 +33,12 @@ def main():
         scales = '--without-scales' not in sys.argv
         sys.path.insert(0,str(ROOT/'tools'))
         part_inc=runpy.run_path(str(ROOT/'modules/store/parts.py'))['part_inc']
-        (out/'remix.inc').write_text(part_inc({'MIDI HARMONY','MIDI FOLLOW'}) + f'.set HD_FOLLOW,1\n.set HD_SCENES,0\n.set HD_SCALES,{int(scales)}\n')
+        selected = {'MIDI HARMONY', 'MIDI FOLLOW'} | ({'MIDI SCALES'} if scales else set())
+        integration = HARMONY_SOURCE.parents[1]/'integration'
+        provider = runpy.run_path(str(integration/'scale_provider.py'))
+        (out/'remix.inc').write_text(part_inc(selected) + provider['scale_inc'](selected)
+                                    + provider['_reader_inc'](selected)
+                                    + '.set HD_FOLLOW,1\n.set HD_SCENES,0\n')
         (out/'stub.s').write_text("""
 .data
 .global ch_lock_table,ch_nv_bank,ch_lock_status
@@ -54,6 +59,8 @@ store_part_epochs: .space 256
                              ('roots', HARMONY_SOURCE/'roots.s'),
                              ('core', HARMONY_SOURCE/'core.s'),
                              ('access', HARMONY_SOURCE/'part-access.s'),
+                             ('scale-key', integration/'scale_key.s'),
+                             ('scale-math', integration/'scale_math.s'),
                              ('part', ROOT/'modules/store/part.s'),
                              ('events', HARMONY_SOURCE/'events.s'),
                              ('scenes', HARMONY_SOURCE/'scenes.s'),

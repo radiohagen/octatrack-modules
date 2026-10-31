@@ -77,21 +77,11 @@ bf_pre_capture:
 bf_capture:
     lea -16(%sp),%sp
     movem.l %d0-%d2/%a0,(%sp)
-    .ifdef HAVE_HARMONY
+    .ifdef HAVE_PITCH_RESPONSE
     move.l %d7,%d0
-    jsr mh_active
-    andi.l #3,%d0
-    bne.s .capture_done /* Harmony keyboard roots must survive arp-only ticks. */
-    /* HARM OFF / KEY OFF live pools also have a root published by the
-     * keyboard. Never replace it with the unrelated stored NOTE lane. */
-    move.l %d7,%d0
-    lsl.l #2,%d0
-    add.l %d7,%d0
-    add.l %d0,%d0
-    lea 0x46c77b1e,%a0
-    move.b (%a0,%d0.l),%d1
-    cmpi.b #1,%d1
-    beq.s .capture_done
+    pitch_capture
+    tst.l %d0
+    bne.s .capture_done
     .endif
     move.l -64(%fp),%d1
     bsr.w bf_latch
@@ -112,24 +102,10 @@ bf_latch:
     clr.l %d0
     move.b 0x220(%a5),%d0
     bmi.w .latch_invalid
-    .ifdef HAVE_HARMONY
-    move.l %d1,-(%sp)
-    move.l %d7,%d1
-    jsr mh_prepare
-    move.l (%sp)+,%d1
+    .ifdef HAVE_PITCH_RESPONSE
+    pitch_prepare
     cmpi.l #127,%d0
     bhi.w .latch_invalid
-    move.l %d0,-(%sp)
-    move.l %d1,-(%sp)
-    move.l %d7,%d0
-    jsr mh_active
-    andi.l #3,%d0
-    move.l (%sp)+,%d1
-    tst.l %d0
-    beq.s .latch_native_scale
-    clr.l %d1
-.latch_native_scale:
-    move.l (%sp)+,%d0
     .endif
     bsr.w bf_effective
     cmpi.l #127,%d0
@@ -165,32 +141,39 @@ bf_effective:
     andi.l #255,%d0
     tst.b %d0
     bmi.w .effective_invalid
-    .ifdef HAVE_SCALES
     move.l %d1,-(%sp)
     move.l %d0,-(%sp)
-    .ifdef HAVE_HARMONY
+    .ifdef HAVE_PITCH_RESPONSE
     move.l %d7,%d0
-    jsr mh_active
+    pitch_owned
     tst.l %d0
-    bne.s .latch_harmony_restore
+    bne.s .effective_provider
     .endif
+    /* Route ownership stays here. The scale reader sees one local track
+     * and its captured playing Part, never the unrelated selected UI Part. */
     move.l %d7,%d0
-    jsr ms_raw
-    cmpi.l #24,%d0
-    bls.s .latch_stock_restore
+    jsr bf_source_resolve
+    move.l %d0,%d2
+    jsr store_part_midi_context
+    move.l %d0,%d1
+    move.l %d2,%d0
+    scale_read
+    tst.l %d0
+    beq.s .effective_native
+    bmi.s .effective_quant
+    btst #16,%d0
+    bne.s .effective_native
+.effective_quant:
     move.l %d0,%d1
     move.l (%sp)+,%d0
-    jsr ms_snap
-    addq.l #4,%sp
-    bra.s .root_mod
-.latch_harmony_restore:
-    move.l (%sp)+,%d0
+    scale_quant
     move.l (%sp)+,%d1
     bra.s .root_mod
-.latch_stock_restore:
+.effective_native:
+    /* Stock may deliberately supply a zero rotation even with KEY set.
+     * Preserve that captured decision; only provider extensions replace it. */
     move.l (%sp)+,%d0
     move.l (%sp)+,%d1
-    .endif
     tst.l %d1
     ble.s .root_mod
     add.l %d0,%d1
@@ -206,11 +189,15 @@ bf_effective:
     andi.l #255,%d0
     tst.b %d0
     bmi.w .effective_invalid
+    bra.s .root_mod
+.effective_provider:
+    move.l (%sp)+,%d0
+    move.l (%sp)+,%d1
 .root_mod:
-    .ifdef HAVE_HARMONY
+    .ifdef HAVE_PITCH_RESPONSE
     move.l %d1,-(%sp)
     move.l %d7,%d1
-    jsr mh_quant /* Root snap is independent of the selected chord quality. */
+    pitch_quant
     move.l (%sp)+,%d1
     .endif
     cmpi.l #127,%d0
@@ -221,16 +208,16 @@ bf_effective:
     rts
 
 /* A native source offers its three effective extra notes as signed intervals
- * from its effective root. Harmony NOTE/CHORD offers only its logical root;
- * its generated voices never enter Follow. 0x80 is an absent voice. */
+ * from its effective root. A pitch provider may own generated voices and
+ * publish only its logical root. 0x80 is an absent voice. */
 bf_latch_extra:
     lea -28(%sp),%sp
     movem.l %d0-%d5/%a0,(%sp)
     move.l %d1,%d5
-    .ifdef HAVE_HARMONY
+    .ifdef HAVE_PITCH_RESPONSE
     move.l %d7,%d0
-    jsr mh_active
-    andi.l #3,%d0
+    pitch_owned
+    tst.l %d0
     bne.s .extra_clear
     .endif
     moveq #0,%d4
@@ -291,10 +278,10 @@ bf_seed_extras:
     cmp.l %d7,%d0
     beq.s .seed_done
     move.l %d0,%d2
-    .ifdef HAVE_HARMONY
+    .ifdef HAVE_PITCH_RESPONSE
     move.l %d7,%d0
-    jsr mh_active
-    andi.l #3,%d0
+    pitch_owned
+    tst.l %d0
     bne.s .seed_done
     .endif
     move.l %d2,%d0
@@ -325,13 +312,13 @@ bf_seed_extras:
 bf_note:
     jsr bf_response_adjust
     jsr bf_response_observe
-    lea -16(%sp),%sp
+    lea -20(%sp),%sp
     movem.l %d0-%d2/%a0,(%sp)
-    .ifdef HAVE_HARMONY
+    .ifdef HAVE_PITCH_RESPONSE
     move.l %d7,%d0
-    jsr mh_active
-    andi.l #3,%d0
-    bne.w .restore /* Harmony has already generated the follower chord before arp. */
+    pitch_owned
+    tst.l %d0
+    bne.w .restore /* The provider owns the generated pool before arp. */
     .endif
     tst.l %d4
     bne.s .root_ready
@@ -341,8 +328,9 @@ bf_note:
     move.l %d7,%d0
     jsr bf_source_resolve
     cmp.l %d7,%d0
-    beq.s .restore
+    beq.w .restore
 .resolved:
+    move.l %d0,16(%sp) /* this voice already resolved its ultimate source */
     move.l %d0,%d2
     move.l %d7,%d1
     jsr bf_register
@@ -361,12 +349,11 @@ bf_note:
     beq.s .follower_bounds
     tst.b -4(%fp)
     bmi.s .follower_extra
-    .ifdef HAVE_HARMONY
+    .ifdef HAVE_PITCH_RESPONSE
     move.l %d2,-(%sp)
     move.l %d0,-(%sp)
     move.l %d2,%d0
-    jsr mh_active
-    andi.l #3,%d0
+    pitch_owned
     move.l %d0,%d1
     move.l (%sp)+,%d0
     move.l (%sp)+,%d2
@@ -389,14 +376,15 @@ bf_note:
     cmpi.l #127,%d0
     bhi.s .follower_extra      /* also rejects negative pitches, no wrapping */
     move.l %d7,%d1
-    jsr bf_quant_note
+    move.l 16(%sp),%d2
+    jsr bf_quant_note_resolved
     move.b %d0,(%a2)
     bra.s .restore
 .follower_extra:
     move.b #0xff,(%a2)
 .restore:
     movem.l (%sp),%d0-%d2/%a0
-    lea 16(%sp),%sp
+    lea 20(%sp),%sp
     move.b (%a2),%d1
     bmi.s .skip
     jmp 0x4009fb86
@@ -410,7 +398,7 @@ bf_encoder:
     move.l 4(%sp),%d0
     cmpi.l #3,%d0
     beq.s .encoder_follow
-    jmp 0x4003a8e8 /* Native CHAN/BANK/PROG/SBNK, or Harmony's F wrapper. */
+    jmp 0x4003a8e8 /* Native CHAN/BANK/PROG/SBNK handler. */
 .encoder_follow:
     move.l 8(%sp),%d1
     bsr.w bf_ui_delta
@@ -551,7 +539,7 @@ bf_ui_delta:
 /* d0 pitch after register/TRAN, d1 receiver -> corrected pitch.
  * Native KEY 1..24 uses the stock rotation and correction table at
  * 0x400d80a0 (stock output 0x4009fb58..0x4009fb7e). KEY OFF is chromatic.
- * Only additional MIDI Scales values use its extension. All other registers
+ * The selected adapter supplies all other scale choices. All other registers
  * are preserved. Follow chains inherit the ultimate source's playing KEY.
  */
     .global bf_quant,bf_quant_note,bf_scale_offsets
@@ -563,45 +551,26 @@ bf_quant:
     bhi.w .quant_return
     move.l %d1,%d0
     jsr bf_source_resolve
+    bra.s .quant_source
+/* Private same-operation entry: d2 is the source already resolved by the
+ * caller. No route or settings cache survives this operation. */
+bf_quant_resolved:
+    lea -20(%sp),%sp
+    movem.l %d1-%d3/%a0-%a1,(%sp)
+    move.l %d0,%d3
+    cmpi.l #127,%d0
+    bhi.w .quant_return
+    move.l %d2,%d0
+.quant_source:
     move.l %d0,%d2
     jsr store_part_midi_context
     move.l %d0,%d1
     move.l %d2,%d0
-    jsr store_part_midi_key
-    tst.l %d0
-    ble.w .quant_return
-    cmpi.l #24,%d0
-    bls.s .quant_native
-    .ifdef HAVE_SCALES
-    cmpi.l #84,%d0
-    bhi.s .quant_return
+    scale_read
     move.l %d0,%d1
     move.l %d3,%d0
-    jsr ms_snap
+    scale_quant
     move.l %d0,%d3
-    .endif
-    bra.s .quant_return
-.quant_native:
-    move.l %d0,%d1
-    subq.l #1,%d1
-    lsr.l #1,%d1
-    btst #0,%d0
-    beq.s .quant_minor
-    moveq #12,%d0
-    bra.s .quant_rotate
-.quant_minor:
-    moveq #21,%d0
-.quant_rotate:
-    sub.l %d1,%d0
-    add.l %d3,%d0
-.quant_mod:
-    cmpi.l #12,%d0
-    blt.s .quant_table
-    subi.l #12,%d0
-    bra.s .quant_mod
-.quant_table:
-    lea 0x400d80a0,%a0
-    add.l (%a0,%d0.l*4),%d3
 .quant_return:
     move.l %d3,%d0
     movem.l (%sp),%d1-%d3/%a0-%a1
@@ -617,6 +586,16 @@ bf_quant_note:
     movem.l %d1-%d2/%a0,(%sp)
     move.l %d0,%d2
     bsr.w bf_quant
+    bra.s .quant_note_store
+/* Private to Follow: d2 carries the ultimate source for this operation. */
+    .global bf_quant_note_resolved
+bf_quant_note_resolved:
+    lea -12(%sp),%sp
+    movem.l %d1-%d2/%a0,(%sp)
+    move.l %d0,%a0
+    bsr.w bf_quant_resolved
+    move.l %a0,%d2
+.quant_note_store:
     sub.l %d0,%d2
     lsl.l #2,%d1
     add.l %d4,%d1
@@ -628,8 +607,8 @@ bf_quant_note:
     .balign 4
 bf_scale_offsets: .space 32,0
 
-/* Native-only KEY UI. MIDI Scales supplies its own formatter/encoder when
- * selected. Keep the stock text tables and setter; override only the source
+/* Native-only KEY UI. An adapter owning KEY supplies its formatter/encoder
+ * when selected. Keep the stock text tables and setter; override only the source
  * value and disallow editing a followed track's inherited setting. */
     .global bf_key_format,bf_key_encoder
 bf_key_source_ui:

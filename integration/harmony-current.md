@@ -1,5 +1,55 @@
 # Harmony on current EVENTS and STORE
 
+## Scale provider boundary
+
+Follow and Harmony bind scale requests through the integration layer. A provider
+owns scale selection and storage; the consumers own source routing, Part context,
+generated notes and releases. Adding a provider requires an adapter and its
+compatibility checks, without putting its module name or catalogue IDs into
+Follow or Harmony. The existing stock and MIDI Scales paths remain the reference
+for their respective note-correction rules.
+
+Harmony retains its current saved format and the seven existing diatonic modes:
+Ionian, Dorian, Phrygian, Lydian, Mixolydian, Aeolian and Locrian. This does not
+include harmonic or melodic minor merely because they also have seven notes.
+A Harmony-compatible adapter must preserve that restriction. Unsupported scales
+must not be substituted with Major/Minor or interpreted as stored mode IDs.
+Composition rejects an adapter whose declared catalogue includes unsupported
+masks; the adapter must enforce that catalogue when loading or editing scales.
+
+The adapter contract is in [scale_provider.py](scale_provider.py). Reads take a
+resolved local track and an explicit working or saved Part context, and return a
+tonic plus pitch-class mask. The binding declares its finite mask set and whether
+it owns KEY display/editing. A provider with its own storage must supply a KEY
+formatter that reads its own context, rather than interpreting Harmony's native
+display byte. It must also resolve inherited Follow display values and keep all
+editing paths, including any chooser, read-only on followed tracks. These are
+adapter qualification requirements; declaring a mask set alone is insufficient.
+
+The unmodified [SCALES prototype](https://github.com/Djibdjib/octabam/tree/feat/scales)
+at `e4fbba56d098cf79909212991609df906bf82646` is incompatible. Its extended scale
+ID occupies native MIDI SETUP byte 18, already used for Harmony CHRD/SIZE.
+Its encoder/output hooks also need Follow inheritance and Harmony output
+ownership support. A provider adapter cannot repair those ownership conflicts.
+This combination is refused until the provider supplies compatible storage and
+hooks. Existing Harmony projects keep their byte assignments; untagged prototype
+SCALES data cannot be distinguished from Harmony settings by its value alone.
+
+The earlier integration and validation records below apply only to their named
+commits. Source checks, linked-code checks and complete firmware captures are
+separate evidence; none establishes physical hardware behavior.
+
+The [31 October validation receipt](scale-provider-validation-20261031.json)
+records six stock/MIDI Scales compositions, explicit-Part and persisted-format
+checks, and six complete UART comparisons. Standalone Follow instruction budgets
+pass; combined budgets remain unmet in both the original-pin control and this
+candidate, with measured differences recorded separately. The
+[replay notes](scale-provider-reproduce-20261031.md) identify the locally preserved
+Octabam base and the small support patch. This does not advance the older package
+pin or qualify the SCALES prototype.
+
+## Earlier integration
+
 Review branch: `codex/harmony-follow-review-20261026` in the author and
 Octabam repositories. The integration starts at Octabam
 `f79ad3cab83a1cd7aae4c87b8500f9d63256d854`; author changes start at

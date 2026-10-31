@@ -4,9 +4,9 @@
     .global mh_get,mh_set,mh_source,mh_quant,mh_generate,mh_sequence
     .global mh_boot,mh_defaults,mh_arp_encoder,mh_note_encoder,mh_draw_type,mh_type_format,mh_keyboard
 
-/* Effective native KEY, decoded to key<<2 | mode<<6; -1 for OFF.
- * Standalone Harmony uses stock Major/Minor. MIDI Scales adds five modes.
- */
+/* Effective scale translated by the selected adapter to the unchanged
+ * key<<2 | mode<<6 identity; -1 for OFF. Incompatible mask catalogues are
+ * rejected by composition before this seven-mode consumer is linked. */
     .global mh_active,mh_scale_record
 mh_scale_record:
     move.l %d1,-(%sp)
@@ -19,8 +19,32 @@ mh_scale_record:
     rts
     .global mh_scale_record_at
 mh_scale_record_at:
-    bsr.w mh_raw_key_at
-    bra.w .record_decode
+    lea -12(%sp),%sp
+    movem.l %d1-%d3,(%sp)
+    move.l %d0,%d2
+    move.l %d1,%d3
+    bsr.w mh_source_at
+    cmp.l %d2,%d0
+    beq.s .scale_own_context
+    move.l %d0,-(%sp)
+    jsr store_part_midi_context
+    move.l %d0,%d3
+    move.l (%sp)+,%d0
+.scale_own_context:
+    move.l %d3,%d1
+    scale_read
+    tst.l %d0
+    bmi.s .scale_read_off
+    scale_legacy
+    bra.s .scale_read_done
+.scale_read_off:
+    /* Preserve the previous native KEY reader's unavailable/OFF convention.
+     * Unsupported descriptors still remain distinct in scale_legacy. */
+    moveq #-1,%d0
+.scale_read_done:
+    movem.l (%sp),%d1-%d3
+    lea 12(%sp),%sp
+    rts
     .global mh_raw_key_at
 mh_raw_key_at:
     lea -12(%sp),%sp
@@ -40,27 +64,6 @@ mh_raw_key_at:
     movem.l (%sp),%d1-%d3
     lea 12(%sp),%sp
     rts
-.record_decode:
-.ifdef HAVE_SCALES
-    jmp ms_decode
-.else
-    tst.l %d0
-    beq.s .record_off
-    cmpi.l #24,%d0
-    bhi.s .record_off
-    subq.l #1,%d0
-    move.l %d0,%d1
-    lsr.l #1,%d0
-    lsl.l #2,%d0
-    btst #0,%d1
-    beq.s .record_done
-    ori.l #320,%d0
-.record_done:
-    rts
-.record_off:
-    moveq #-1,%d0
-    rts
-.endif
 mh_active:
     /* KEY OFF disables snapping, not the selected Harmony operation. */
     move.l %d1,-(%sp)

@@ -13,20 +13,55 @@ import emu_card
 from hw import ot_project as otp
 
 
+def parse_case(text):
+    try:
+        case=tuple(int(value) for value in text.split(','))
+    except ValueError as error:
+        raise argparse.ArgumentTypeError('case must contain five comma-separated integers') from error
+    if len(case)!=5:
+        raise argparse.ArgumentTypeError('case must be sourceMode,followerMode,key,response,arp')
+    sh,fh,key,response,arp=case
+    if sh not in range(3) or fh not in range(3):
+        raise argparse.ArgumentTypeError('sourceMode and followerMode must be 0 (OFF), 1 (NOTE) or 2 (CHORD)')
+    if not 0<=key<=127 or response not in range(2) or arp not in range(2):
+        raise argparse.ArgumentTypeError('key must be 0..127; response and arp must be 0 or 1')
+    return case
+
+
+def compare_events(name,result,baseline):
+    assert name in baseline['cases'], (name,'missing baseline case')
+    expected=baseline['cases'][name].get('events')
+    assert expected is not None, (name,'baseline has no complete event sequence; record it with this verifier')
+    actual=result.get('events')
+    assert actual is not None, (name,'result has no complete event sequence; rerun without --resume')
+    for index,(got,want) in enumerate(itertools.zip_longest(actual,expected)):
+        assert got==want, (name,'event sequence differs',index,got,want)
+
+
 def main():
     ap=argparse.ArgumentParser(description=__doc__)
     ap.add_argument('--project',type=Path,required=True)
     ap.add_argument('--workers',type=int,default=3)
+    ap.add_argument('--case',type=parse_case,action='append',help='select sourceMode,followerMode,key,response,arp; repeat for multiple cases (default: full matrix)')
+    ap.add_argument('--output',type=Path,help='artifact directory for frozen image, symbols, case logs and results.json')
+    ap.add_argument('--compare',type=Path,help='baseline results.json whose complete MIDI event sequences must match')
     ap.add_argument('--resume',action='store_true',help='reuse recorded cases only for the same image; retain the original project template')
     args=ap.parse_args()
-    port.OUT=port.ROOT/'out/harmony-follow-matrix'
+    if args.workers<1: ap.error('--workers must be positive')
+    port.OUT=(args.output or port.ROOT/'out/harmony-follow-matrix').resolve()
+    receipt=port.OUT/'results.json'
+    baseline=json.loads(args.compare.read_text()) if args.compare else None
+    if args.compare and args.compare.resolve()==receipt.resolve():
+        ap.error('--compare must be a separate receipt; choose another --output directory')
     image=port.freeze_candidate(port.OUT)
     has_scales='ms_snap' in port.harmony.symbols()
     keys=(0,1,25) if has_scales else (0,1,2)
-    cases=list(itertools.product(range(3),range(3),keys,range(2),range(2)))
+    cases=list(dict.fromkeys(args.case)) if args.case else list(itertools.product(range(3),range(3),keys,range(2),range(2)))
+    for case in cases:
+        if case[2] not in keys:
+            ap.error(f'key {case[2]} is not available in this matrix/image; choose from {keys}')
     digest=hashlib.sha256(image.read_bytes()).hexdigest()
     results={}
-    receipt=port.OUT/'results.json'
     if args.resume and receipt.exists():
         previous=json.loads(receipt.read_text())
         assert previous['image_sha256']==digest, 'resume image changed'
@@ -34,6 +69,16 @@ def main():
     def name_for(case):
         sh,fh,key,response,arp=case
         return f's{sh}-f{fh}-k{key}-live{response}-arp{arp}'
+    for case in cases:
+        name=name_for(case)
+        if name in results:
+            assert 'events' in results[name], (name,'resume lacks complete events; rerun without --resume')
+    if baseline is not None:
+        for case in cases:
+            name=name_for(case)
+            assert name in baseline['cases'], (name,'missing baseline case')
+            assert 'events' in baseline['cases'][name], (name,'baseline lacks complete events; record it with this verifier')
+            if name in results: compare_events(name,results[name],baseline)
     def cleanup(name):
         if os.environ.get('KEEP_CARDS')=='1': return
         work=port.OUT/name
@@ -91,15 +136,24 @@ def main():
             allowed=set(want)
             assert len(notes)>6,(name,notes)
             assert set(notes)<=allowed,(name,notes,sorted(allowed))
-        return name,dict(notes=notes,balanced_releases=True,exact_nonarp=(not arp),arp_pitch_material=(bool(arp)))
+        result=dict(notes=notes,events=[list(event) for event in events],balanced_releases=True,exact_nonarp=(not arp),arp_pitch_material=(bool(arp)))
+        if baseline is not None:
+            compare_events(name,result,baseline)
+            result['exact_baseline_events']=True
+        return name,result
+    def write_receipt():
+        receipt.write_text(json.dumps(dict(image_sha256=digest,comparison_image_sha256=baseline['image_sha256'] if baseline is not None else None,cases=results,total=len(cases),selected_cases=[name_for(case) for case in cases],hardware_tested=False),indent=2)+'\n')
     with ThreadPoolExecutor(max_workers=args.workers) as pool:
         futures={pool.submit(run,case):case for case in cases if name_for(case) not in results}
         for future in as_completed(futures):
             name,result=future.result();results[name]=result
             print('[ok]',name,flush=True)
-            receipt.write_text(json.dumps(dict(image_sha256=hashlib.sha256(image.read_bytes()).hexdigest(),cases=results,total=len(cases),hardware_tested=False),indent=2)+'\n')
+            write_receipt()
             cleanup(name)
-    print(f'[ok] {len(results)} full-firmware combinations: nine HARM pairs x three keys x TRIG/LIVE x arp off/on',flush=True)
+    write_receipt()
+    scope='selected' if args.case else 'full-matrix'
+    comparison='; exact MIDI event sequences match baseline' if baseline is not None else ''
+    print(f'[ok] {len(cases)} {scope} full-firmware combinations{comparison}',flush=True)
 
 
 if __name__=='__main__':main()

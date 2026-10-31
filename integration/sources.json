@@ -78,7 +78,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-follow/manifest.py",
       "sha256": "808bfa85b9c5a366c455bff56f5e38d6e625243348a260b3fc8211c5f8ac24d6",
-      "published_sha256": "baa23635cd93f67d63ad8304602dd400194865f3048c19c5b89f71b47872399a",
+      "published_sha256": "ea0a55df11a2232ca10dabd645d07c2838a160d212b555df6a3749c9d58574b2",
       "source_mode": "100644",
       "migration_note": "Operational author URL updated; original author name/credit preserved."
     },
@@ -86,7 +86,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-follow/midi_follow.s",
       "sha256": "79d5a4a8064e020c87735caebf5fc5e24cceed44dda3f41f28f3f75a74ec7356",
-      "published_sha256": "f8dde01d993ec5e303c51e3703d9443304907b81661026c3daa2241cb220becb",
+      "published_sha256": "f77aae1a3d1892f26f2f36f5795b06170cf1428f5c23c97c1a0f7e7162c16350",
       "source_mode": "100644"
     },
     "modules/midi-follow/page.s": {
@@ -100,14 +100,15 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-follow/register.s",
       "sha256": "1c97d19675cc5bdb064726ae1bdf2ac2c402b1814dbbd71ac5b0d7647691e2f3",
-      "published_sha256": "22086ab15a68cd126cfa64907b104857d418495006b5d1e5887e3fa51b3a6532",
-      "source_mode": "100644"
+      "published_sha256": "ed6d79d83575cb72778780b62fc4db6d2a1bd681bd6a54e6d1084eaee0360f17",
+      "source_mode": "100644",
+      "update_commit": "0ebe11e7f19fd6c48bf0109544d5da84326db86d"
     },
     "modules/midi-follow/response.s": {
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-follow/response.s",
       "sha256": "6e48b8479733d9de6128b9ec9d82fd45f397eef970f7fd8eacec99b90bbbae53",
-      "published_sha256": "d96b422bd0110c65e56f0b47b8d11162519ad99a4f5e1776c6c457791eb8c1ae",
+      "published_sha256": "13ec9eba5f76be1c7382455ccf2cd531759c7bd97de4b9f98d11986002a3de39",
       "source_mode": "100644"
     },
     "modules/midi-follow/settings.s": {
@@ -121,7 +122,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-harmony/README.md",
       "sha256": "2503b41cfcdfaae42effb0ec2c17a9c6a3f0ffd11f74e623d3f78d94c7d4704e",
-      "published_sha256": "00d00ee6d5dfa366cc9d6e4c10c688c69e9996bb60b3511a1ec1dba0e613fe4d",
+      "published_sha256": "76f2c861c6c98b00243810024eaedfd3014de013cc6dc1c7e0c079c3c4a3829b",
       "source_mode": "100644"
     },
     "modules/midi-harmony/VOICING.md": {
@@ -215,7 +216,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-harmony/harmony.s",
       "sha256": "de9434a5d4ceb65664344ca39f132a00f605a020c2c4ae4954ff66fe480814d9",
-      "published_sha256": "529f958e1938805beda522fe305d6f4f11c1d75e8a8ccf9c07c0415edeba3812",
+      "published_sha256": "34e64d3a27c69ede82ccc0870087b1ffa656bbe36df022a8a2217c3a12cea8b2",
       "source_mode": "100644",
       "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
     },
@@ -230,7 +231,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-harmony/manifest.py",
       "sha256": "8691286ad370961aafba521e00a070797d2b70f257dddea18eb4874f70893097",
-      "published_sha256": "4cd9d3906d7808225d57f430364ce2277ead04b1995c2b8ea410a1235c1a48c9",
+      "published_sha256": "27407cf4e013a12d1b6982c13ffb0b9c739aeae7fd858798be6b6481210b2a7f",
       "source_mode": "100644",
       "migration_note": "Operational author URL updated; original author name/credit preserved.",
       "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
@@ -789,7 +790,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "tools/verify/verify_harmony_degree_core.py",
       "sha256": "b2c4f457f361ea7247d5535c281e2927d6eea8d138e4fc563c4d6d1d0478e85b",
-      "published_sha256": "8bffb15c31ac1c04a677cfa9d354ed4c387d0c60f2f0ead0224cabef41073cb8",
+      "published_sha256": "a57a0594fbd01fcdaaaea1bbedbba7627d1222f634154f758bc0486f1ef8070a",
       "source_mode": "100644",
       "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
     },
@@ -1187,7 +1188,7 @@
     "modules/midi-follow/DEVELOPMENT.md": {
       "path": "modules/midi-follow/DEVELOPMENT.md",
       "sha256": "b984d044ef4eb3bec749dd2752d07d004c137dc95d51cab13aca4bf8aa5e4b2c",
-      "published_sha256": "887e621b70e1fc1bdd5be01a01347a2b6a65a84effd0a25cf1c440982c50187b",
+      "published_sha256": "f672f8a8d021f93a730f9cb555c873b2dd9f8296aaf2fac77f0da4e1518fe9b0",
       "source_mode": "100644",
       "origin": "Split from adjacent README in this repository; historical evidence is retained in the text."
     },
@@ -1417,7 +1418,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-harmony/degrees/core.c",
       "sha256": "0dcd55a24efbf37a30431fb37c6915cd8b75202287073dd93b04ea49bc1e9f45",
-      "published_sha256": "332e95ebbc6fdf343d91081b8ee537ca96d2656e1a009a401761d46d52ed2875",
+      "published_sha256": "d3a3067dbe3335eb4b6c9c7f9379c33463473de16949d3c90ed54d70f97eb11f",
       "source_mode": "100644",
       "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
     },
@@ -1425,7 +1426,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-harmony/degrees/core.h",
       "sha256": "e619e95a3698f8d2c24acbcd23f6c9faa63c4a62a8999e9a83fedb9f1b530260",
-      "published_sha256": "c9359b490c5a8f3d992c65c52041c815ccb90a324ec07ead6ce60066d51d5511",
+      "published_sha256": "b659e96457d6e17ec81ace20a2fb8965c4cdd524b87c308ac7f8ea62f69f1ea1",
       "source_mode": "100644",
       "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
     },
@@ -1433,7 +1434,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-harmony/degrees/core.s",
       "sha256": "6f09006c7387486e079e6ff9982972bc8307f8c9aaf150dde8f94a0e3266d91b",
-      "published_sha256": "45c38d8b0eb79b3a7fcd3c12c8d6fed5672e508c681e74b55a384e7d27aa9b5c",
+      "published_sha256": "235883839d38027b69a2f16b77883bc062d36f275bfd2da841ff889b9ac00862",
       "source_mode": "100644",
       "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
     },
@@ -1516,7 +1517,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-harmony/degrees/part-access.s",
       "sha256": "7cb3b1bbdafb1cb06cca721633f9fe0e90db2595205e8851711ce62f04e4c1b0",
-      "published_sha256": "115de24a0b0ed904833f5927ccaa60a1c9c7fed3a5f0439b5eda0f8c4355525f",
+      "published_sha256": "37fc6a11b927fc001425cbcc6a357ed26d06897708f230f5cf71ecfbfb0760ad",
       "source_mode": "100644"
     },
     "modules/midi-harmony/pool.s": {
@@ -1657,8 +1658,9 @@
       "repository": "https://github.com/radiohagen/octatrack-modules",
       "path": "modules/midi-follow/gravity.c",
       "sha256": "e7d102c28aa541ac7a87330d756383f9b8d82e04349b5f796994a673fd07e149",
-      "published_sha256": "e7d102c28aa541ac7a87330d756383f9b8d82e04349b5f796994a673fd07e149",
-      "source_mode": "100644"
+      "published_sha256": "880021d1434efcae8cce2c64ff89c113484f21bc165acf356179913a62a69d42",
+      "source_mode": "100644",
+      "update_commit": "0ebe11e7f19fd6c48bf0109544d5da84326db86d"
     },
     "modules/midi-follow/gravity.h": {
       "origin": "authored",
@@ -1673,8 +1675,9 @@
       "repository": "https://github.com/radiohagen/octatrack-modules",
       "path": "modules/midi-follow/gravity.s",
       "sha256": "17209a4bde37486ad06e1b20d8b4880d7e9bdea173ae776f2f2d9c3f3520069b",
-      "published_sha256": "17209a4bde37486ad06e1b20d8b4880d7e9bdea173ae776f2f2d9c3f3520069b",
-      "source_mode": "100644"
+      "published_sha256": "c89dae6e75f20c4caa88f805a28e506da0496b878b340f2daf0825548a0ab662",
+      "source_mode": "100644",
+      "update_commit": "0ebe11e7f19fd6c48bf0109544d5da84326db86d"
     },
     "tools/verify/verify_midi_follow_gravity.py": {
       "origin": "authored",
@@ -2524,6 +2527,86 @@
       "published_sha256": "8c5adc6d8da253bdacc3ef6cbcf4514453cb152cbe2f23d99346c974194d0eb1",
       "source_mode": "100644",
       "stage": false
+    },
+    "integration/pitch_response.py": {
+      "repository": "https://github.com/radiohagen/octatrack-modules",
+      "commit": "6b3d232afaa77f91f05335a31664bd0c3cfe9f2c",
+      "path": "integration/pitch_response.py",
+      "sha256": "e5e1db2c131e97dd3f4d4c7847d849eb9090c7171450b3057c46195c65ee3cc6",
+      "published_sha256": "e5e1db2c131e97dd3f4d4c7847d849eb9090c7171450b3057c46195c65ee3cc6",
+      "source_mode": "100644"
+    },
+    "modules/midi-harmony/pitch-response.s": {
+      "repository": "https://github.com/radiohagen/octatrack-modules",
+      "commit": "6b3d232afaa77f91f05335a31664bd0c3cfe9f2c",
+      "path": "modules/midi-harmony/pitch-response.s",
+      "sha256": "3f0b0741c4de356c4619e8eee1b5350b6479d1a7d35096f815eed3fea74f2558",
+      "published_sha256": "3f0b0741c4de356c4619e8eee1b5350b6479d1a7d35096f815eed3fea74f2558",
+      "source_mode": "100644"
+    },
+    "tests/test_pitch_response.py": {
+      "repository": "https://github.com/radiohagen/octatrack-modules",
+      "commit": "6b3d232afaa77f91f05335a31664bd0c3cfe9f2c",
+      "path": "tests/test_pitch_response.py",
+      "sha256": "a82aa8238ebec429f8de7d8d76acd5f562373389b6f61672385bba5bded3556c",
+      "published_sha256": "5c3092ffb9b22f34668fcf513da75dbb80107cef1d252cfae7581f9d120c3278",
+      "source_mode": "100644"
+    },
+    "tools/verify/benchmark_midi_pitch_response.py": {
+      "repository": "https://github.com/radiohagen/octatrack-modules",
+      "commit": "6b3d232afaa77f91f05335a31664bd0c3cfe9f2c",
+      "path": "tools/verify/benchmark_midi_pitch_response.py",
+      "sha256": "979abaf62555d13159f098844662ba1fc49c15a22cde2db554cb263a18cbda5f",
+      "published_sha256": "979abaf62555d13159f098844662ba1fc49c15a22cde2db554cb263a18cbda5f",
+      "source_mode": "100644"
+    },
+    "tools/verify/verify_midi_pitch_response.py": {
+      "repository": "https://github.com/radiohagen/octatrack-modules",
+      "commit": "6b3d232afaa77f91f05335a31664bd0c3cfe9f2c",
+      "path": "tools/verify/verify_midi_pitch_response.py",
+      "sha256": "8d68a0dfbf1e3d6711e9dd66589248cbf7b64f2610e23aec3bd9cadf99f5f9d2",
+      "published_sha256": "8d68a0dfbf1e3d6711e9dd66589248cbf7b64f2610e23aec3bd9cadf99f5f9d2",
+      "source_mode": "100644"
+    },
+    "integration/scale_provider.py": {
+      "origin": "authored",
+      "repository": "https://github.com/radiohagen/octatrack-modules",
+      "path": "integration/scale_provider.py",
+      "sha256": "02875a4af5b9709b4ebef0bc66bf12b05d947c0e1a796ec20f34c216c05bfbdc",
+      "published_sha256": "02875a4af5b9709b4ebef0bc66bf12b05d947c0e1a796ec20f34c216c05bfbdc",
+      "source_mode": "100644"
+    },
+    "integration/scale_key.s": {
+      "origin": "authored",
+      "repository": "https://github.com/radiohagen/octatrack-modules",
+      "path": "integration/scale_key.s",
+      "sha256": "16722a41575e7895fba69276cf8b3fe35ba3c6eb727e4deefa7bd15a3351bc17",
+      "published_sha256": "16722a41575e7895fba69276cf8b3fe35ba3c6eb727e4deefa7bd15a3351bc17",
+      "source_mode": "100644"
+    },
+    "integration/scale_math.s": {
+      "origin": "authored",
+      "repository": "https://github.com/radiohagen/octatrack-modules",
+      "path": "integration/scale_math.s",
+      "sha256": "dcddcb2719997c9bb2545a228d2c41bd73fcb28accfa67846833f8bb4631b63a",
+      "published_sha256": "dcddcb2719997c9bb2545a228d2c41bd73fcb28accfa67846833f8bb4631b63a",
+      "source_mode": "100644"
+    },
+    "tests/test_scale_provider.py": {
+      "origin": "authored",
+      "repository": "https://github.com/radiohagen/octatrack-modules",
+      "path": "tests/test_scale_provider.py",
+      "sha256": "94c68611fcd28b8444f20c627ea9e318500babba22695146ba9afd1a00fac267",
+      "published_sha256": "94c68611fcd28b8444f20c627ea9e318500babba22695146ba9afd1a00fac267",
+      "source_mode": "100644"
+    },
+    "tools/verify/verify_midi_scale_provider.py": {
+      "origin": "authored",
+      "repository": "https://github.com/radiohagen/octatrack-modules",
+      "path": "tools/verify/verify_midi_scale_provider.py",
+      "sha256": "0ce48a0d9fa468d217ffd4b0b83448568d9f0b73ab3f8731a99e039bd82ecae4",
+      "published_sha256": "0ce48a0d9fa468d217ffd4b0b83448568d9f0b73ab3f8731a99e039bd82ecae4",
+      "source_mode": "100644"
     }
   },
   "submodules": {},

@@ -3,6 +3,11 @@
 Turns scale-degree roots into notes or chords using the MIDI ARP KEY, with
 inversions, automatic voice leading, spread and root placement.
 
+Supported scales are the seven diatonic modes: Major, Dorian, Phrygian,
+Lydian, Mixolydian, natural Minor and Locrian. The selected scale module must
+provide a compatible integration; additional catalogue scales are not yet
+supported by Harmony. Existing project formats are unchanged.
+
 ## Start playing
 
 1. Set the MIDI track's output channel and choose **KEY** on **ARP SETUP**
