@@ -13,6 +13,10 @@
 HdBank hd_banks[HD_BANKS];
 volatile uint8_t hd_busy[HD_TRACKS], hd_target[HD_TRACKS], hd_busy_context[HD_TRACKS];
 static volatile uint32_t revision[HD_BANKS][HD_LANES], bank_revision[HD_BANKS];
+/* Runtime-only index of attached Harmony provenance. Publication updates it
+ * under the same mask as the roots. Imports detach all contexts, so it is
+ * rebuilt by sync_context rather than persisted or inferred from Part mode. */
+static volatile uint32_t attached[HD_BANKS][HD_LANES/32];
 extern volatile uint32_t store_part_snapshot_bank, store_part_snapshot_parts;
 static uint16_t mask(void) {
     uint16_t sr;
@@ -163,6 +167,7 @@ static int same_roots(const HdRoots *a, const HdRoots *b) {
 void hd_bank_reset_c(unsigned bank) {
     if (bank >= 16) return;
     ha_bank_reset_c(bank);
+    for (unsigned word = 0; word < HD_LANES/32; ++word) attached[bank][word] = 0;
     for (unsigned i = 0; i < HD_LANES; ++i) {
         hd_roots_reset_c(&hd_banks[bank].roots[i]);
         revision[bank][i] = 0;
@@ -178,6 +183,7 @@ void hd_reset_c(void) {
  * Imported representation remains authoritative; physical slot indices do not. */
 void hd_bank_loaded_c(unsigned bank) {
     if (bank >= 16) return;
+    for (unsigned word = 0; word < HD_LANES/32; ++word) attached[bank][word] = 0;
     for (unsigned i = 0; i < HD_LANES; ++i) {
         hd_banks[bank].roots[i].context = HD_NONE;
         ++revision[bank][i];
@@ -226,6 +232,11 @@ static int sync_context(unsigned bank, unsigned pattern, unsigned track,
             if (notes[step] != result[step]) write_native(bank,step_note(bank,pattern,track,step),result[step]);
         if (update) {
             copy_roots(r,&next);
+            unsigned lane = pattern*8+track;
+            uint32_t bit = 1u << (lane%32);
+            if (next.state == HD_ROOT_HARM && next.context < 64)
+                attached[bank][lane/32] |= bit;
+            else attached[bank][lane/32] &= ~bit;
             changed(bank,pattern,track);
             dirty(bank);
         }
@@ -307,22 +318,29 @@ void hd_part_before_c(uintptr_t destination) {
     /* A second recall may arrive without a trig. Observe the currently
      * selected pattern against the complete outgoing snapshot first. */
     hd_ui_observe_c();
-    for (unsigned bank = 0; bank < 16; ++bank) for (unsigned i = 0; i < HD_LANES; ++i) {
-        HdRoots *r = &hd_banks[bank].roots[i];
-        unsigned context = r->context, track = i%8;
-        if (context >= 64 || r->state != HD_ROOT_HARM) continue;
-        if (!hd_context_depends_c(context,track,replaced)) continue;
-        int scale = hd_scale_c(context/4,context%4,track);
-        uint16_t sr = mask();
-        if (r->context == context) {
-            hd_nv_dirty_c(bank);
-            if (scale >= 0) r->scale = (uint8_t)scale_id((unsigned)scale);
-            r->context = HD_NONE;
-            ++revision[bank][i];
-            ++bank_revision[bank];
+    for (unsigned bank = 0; bank < HD_BANKS; ++bank)
+        for (unsigned word = 0; word < HD_LANES/32; ++word) {
+            uint32_t candidates = attached[bank][word];
+            for (unsigned bit = 0; candidates; ++bit, candidates >>= 1) {
+                if (!(candidates & 1u)) continue;
+                unsigned i = word*32+bit;
+                HdRoots *r = &hd_banks[bank].roots[i];
+                unsigned context = r->context, track = i%8;
+                if (context >= 64 || r->state != HD_ROOT_HARM) continue;
+                if (!hd_context_depends_c(context,track,replaced)) continue;
+                int scale = hd_scale_c(context/4,context%4,track);
+                uint16_t sr = mask();
+                if (r->context == context) {
+                    hd_nv_dirty_c(bank);
+                    if (scale >= 0) r->scale = (uint8_t)scale_id((unsigned)scale);
+                    r->context = HD_NONE;
+                    attached[bank][word] &= ~(1u << bit);
+                    ++revision[bank][i];
+                    ++bank_revision[bank];
+                }
+                unmask(sr);
+            }
         }
-        unmask(sr);
-    }
     hd_events_part_before_c(replaced);
 }
 void hd_checkpoint_c(unsigned bank) {

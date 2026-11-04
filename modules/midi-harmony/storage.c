@@ -41,6 +41,18 @@ void hd_nv_dirty_c(unsigned bank) {
     ++generation;
     pending = 1;
 }
+/* UI edits invalidate immediately, then coalesce the bulk serialization at
+ * the existing UI poll. Explicit project saves still use hd_nv_save_c. A
+ * concurrent writer sees the generation change and retries the latest bank. */
+void hd_nv_request_c(unsigned bank) {
+    if (bank >= HD_BANKS) return;
+    uint16_t sr = mask();
+    ch_nv_bank = bank;
+    invalidate();
+    ++generation;
+    pending = 1;
+    unmask(sr);
+}
 void hd_nv_poll_c(void) {
     /* A UI poll is not a new edit. Re-requesting an in-flight save here
      * increments its generation forever when encoding spans a UI tick.
@@ -63,8 +75,10 @@ int hd_export_c(unsigned bank, uint8_t *p) {
         ticket = generation;
         roots_ticket = hd_revision_c(bank);
         valid = hd_pack_c(&hd_banks[bank], ch_lock_table + bank*QUALITY_BYTES, p);
-        ha_pack_c(bank,p+HD_PAYLOAD_BYTES);
-        valid = valid && ha_valid_c(p+HD_PAYLOAD_BYTES);
+        if (valid) {
+            ha_pack_c(bank,p+HD_PAYLOAD_BYTES);
+            valid = ha_valid_c(p+HD_PAYLOAD_BYTES);
+        }
     } while (ticket != generation || roots_ticket != hd_revision_c(bank));
     return valid;
 }
@@ -99,8 +113,10 @@ void hd_nv_save_c(unsigned bank) {
         bank = ch_nv_bank;
         uint32_t roots_ticket = hd_revision_c(bank);
         int valid = hd_pack_c(&hd_banks[bank], ch_lock_table + bank*QUALITY_BYTES, track_payload);
-        ha_pack_c(bank,track_payload+HD_PAYLOAD_BYTES);
-        if (valid) valid = hd_track_write_c(track_payload, bank, ticket, ch_lock_status[bank]);
+        if (valid) {
+            ha_pack_c(bank,track_payload+HD_PAYLOAD_BYTES);
+            valid = hd_track_write_c(track_payload, bank, ticket, ch_lock_status[bank]);
+        }
         sr = mask();
         if (ticket == generation && roots_ticket == hd_revision_c(bank)) {
             if (!valid) { available = 1; unmask(sr); return; }

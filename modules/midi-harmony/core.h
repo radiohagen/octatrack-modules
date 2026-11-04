@@ -43,6 +43,7 @@ unsigned hd_part_type_c(unsigned bank, unsigned part, unsigned track);
 int hd_sync_c(unsigned bank, unsigned pattern, unsigned track);
 void hd_part_before_c(uintptr_t destination);
 void hd_checkpoint_c(unsigned bank);
+void hd_nv_request_c(unsigned bank);
 uint32_t hd_revision_c(unsigned bank);
 void hd_configuration_changed_c(unsigned bank);
 void hd_ui_observe_c(void);

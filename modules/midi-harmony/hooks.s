@@ -149,7 +149,11 @@ hd_set:
     addq.l #8,%sp
     jsr store_part_ui_context
     lsr.l #2,%d0
-    jsr ch_nv_save
+    /* Native changes already invalidated the old snapshot. Schedule the
+     * complete retained save at the existing UI poll, not on this edit. */
+    move.l %d0,-(%sp)
+    jsr hd_nv_request_c
+    addq.l #4,%sp
 .set_done:
     movem.l (%sp),%d0-%d1/%a0-%a1
     lea 16(%sp),%sp

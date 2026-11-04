@@ -1418,7 +1418,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-harmony/degrees/core.c",
       "sha256": "0dcd55a24efbf37a30431fb37c6915cd8b75202287073dd93b04ea49bc1e9f45",
-      "published_sha256": "d3a3067dbe3335eb4b6c9c7f9379c33463473de16949d3c90ed54d70f97eb11f",
+      "published_sha256": "b5398ffb70dcb816c2c626b8abd52baf87389e2500ac39da211109e02a21e9fa",
       "source_mode": "100644",
       "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
     },
@@ -1426,7 +1426,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-harmony/degrees/core.h",
       "sha256": "e619e95a3698f8d2c24acbcd23f6c9faa63c4a62a8999e9a83fedb9f1b530260",
-      "published_sha256": "b659e96457d6e17ec81ace20a2fb8965c4cdd524b87c308ac7f8ea62f69f1ea1",
+      "published_sha256": "12094738b3392183ab2adade7f79eaeb568817c171d615dd951794c32d165b89",
       "source_mode": "100644",
       "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
     },
@@ -1434,7 +1434,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-harmony/degrees/core.s",
       "sha256": "6f09006c7387486e079e6ff9982972bc8307f8c9aaf150dde8f94a0e3266d91b",
-      "published_sha256": "235883839d38027b69a2f16b77883bc062d36f275bfd2da841ff889b9ac00862",
+      "published_sha256": "26ff95a0b4915a4f332bbb71db4bdaa5cf59dd5cc02c564346e6f2e030a93f99",
       "source_mode": "100644",
       "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
     },
@@ -1465,7 +1465,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-harmony/degrees/hooks.s",
       "sha256": "3647bc4e78b124aebedef965eff1ecea6efc703ac70e16c59e42f2123684788f",
-      "published_sha256": "b801eb96fb3af397673dd377cfbdd1696eee5b87cc33106c3eaae2eccb5daca8",
+      "published_sha256": "cccc2bb418760443b026385d9e63c18830990e8d3bbd214894c0614e0b0c6ed1",
       "source_mode": "100644"
     },
     "modules/midi-harmony/operations.c": {
@@ -1587,7 +1587,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-harmony/degrees/storage.c",
       "sha256": "02e6f4204ddebfcc6128a8379919ab1aae269bdd4bf1f285e3e5c80745dcda8f",
-      "published_sha256": "69d3fe846b861d7bbfe4d877ec66c5b2f16ed8d89c82b94c19660bf793719885",
+      "published_sha256": "e5c44d1892f0726b70b1553d7db2179cd5c073b22d2eb19321817d3ab4dd786b",
       "source_mode": "100644",
       "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
     },
@@ -1595,7 +1595,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-harmony/degrees/storage.s",
       "sha256": "44b76769855b967e751a394d1a59aab5995b7d81597646292164a38bc74773bf",
-      "published_sha256": "34e3d95ba073307109eea810ceb7e2b7c32d35076f43c728c80b10f427b0a0b4",
+      "published_sha256": "5a6f1b3c837535efea4c5ef1febbf2a3d732b6159eecf04723c077072e55b6fe",
       "source_mode": "100644",
       "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
     },
