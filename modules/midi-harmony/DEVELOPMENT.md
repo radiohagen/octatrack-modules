@@ -167,8 +167,12 @@ whose snapshot violates the invariant instead of discarding information.
 Native/degree publication stays under the existing short interrupt masks.
 Before a Harmony native write the old retained checkpoint is invalidated,
 so an interrupted publication cannot reinterpret a new reference pitch as
-an absolute edit against an old degree. Explicit save paths and the UI-task
-poll commit the refreshed snapshot with magic last. A preempting saver only
+an absolute edit against an old degree. HARM mode edits request a checkpoint without serializing a bank in the
+encoder call. Requests select the current bank and invalidate/increment the
+same generation under a short mask; repeated edits coalesce at the existing
+UI-task poll. A request that preempts a writer forces that writer to retry.
+Explicit save paths still commit synchronously; they and the UI-task poll
+commit the refreshed snapshot with magic last. A preempting saver only
 requests a retry: one outer writer owns the retained bytes. Bulk copying is
 interruptible. UI polls do not request another save while that writer is busy:
 repeated polls otherwise advance its generation indefinitely when a checkpoint
@@ -181,6 +185,18 @@ copy, and the full KITS gate checks held notes across NOTE-to-OFF recall.
 As with previous retention, power loss during an invalidated
 or incomplete checkpoint falls back to validated companions; this does not
 claim atomic unsaved-edit recovery at every power-loss instruction.
+
+Part replacement uses a 256-byte runtime bitmap of attached Harmony root
+records. Root publication updates the bit under the same mask as the record;
+reset/load clear it, and imported roots re-enter it only when playback attaches
+their context. Replacements still resolve Follow dependencies across banks and
+capture the outgoing scale before detaching. They skip unattached records
+rather than scanning all 2,048 lanes. This index is not persisted.
+
+Rejected root packing now stops before copying accumulator bytes, both for
+export and retained saves. Retained formats, validation and commit ordering
+are unchanged. Full-bank serialization still occurs at the poll or explicit
+save; deferring it does not remove its cost or establish hardware latency.
 
 Earlier Harmony formats are not migrated.
 Use a disposable project copy for first testing. Incompatible companions are

@@ -1213,7 +1213,7 @@
     "modules/midi-harmony/DEVELOPMENT.md": {
       "path": "modules/midi-harmony/DEVELOPMENT.md",
       "sha256": "2503b41cfcdfaae42effb0ec2c17a9c6a3f0ffd11f74e623d3f78d94c7d4704e",
-      "published_sha256": "5144a2f96261b4135c2ab36d629fcdc311c73bc389402913cfdae65c63365c50",
+      "published_sha256": "bb0dd2d28cedbb377b970965276e61bc57182f2ec4db837cf24462d555ce59ce",
       "source_mode": "100644",
       "origin": "Split from adjacent README in this repository; historical evidence is retained in the text."
     },
