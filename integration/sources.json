@@ -255,7 +255,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-harmony/play.s",
       "sha256": "16ef9d78404adce6f024583386ed51419ed0045a33e3cecbe183e7b9e0c7e696",
-      "published_sha256": "22fb6b5483585c37668c67808ad28dd5b0574180d92837a32c3b9d9deed4dc69",
+      "published_sha256": "0a79d116f0ec0bbbfcf41a5c4dbaae5313bc958240d742a0a98d409cf2713cec",
       "source_mode": "100644"
     },
     "modules/midi-harmony/settings.s": {

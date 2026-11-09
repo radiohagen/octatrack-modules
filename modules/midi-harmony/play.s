@@ -184,12 +184,6 @@ mhc_play_key:
     cmpi.l #8,%d7
     bne.s .modifier_retrigger
 .key_done:
-    move.l 0x460d16f0,%d0
-    cmpi.l #6,%d0
-    bne.s .key_no_draw
-    jsr mhc_play_leds
-    jsr mhc_play_guide
-.key_no_draw:
     movem.l (%sp),%d2-%d7/%a2
     lea 28(%sp),%sp
     moveq #1,%d0
