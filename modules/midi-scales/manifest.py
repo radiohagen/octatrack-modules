@@ -4,7 +4,12 @@ ROOT = Path(__file__).resolve().parent
 from remix.schema import Category, Detour, Gate, Kind, Linked, Module, Poke, Proof, SymbolRef
 
 def options(modules, remix=None):
-    return ('.set HAVE_FOLLOW,1\n' if 'MIDI FOLLOW' in modules else '') + ('.set HAVE_HARMONY,1\n' if 'MIDI HARMONY' in modules else '')
+    flags = {'HAVE_FOLLOW': 'MIDI FOLLOW' in modules,
+             'HAVE_HARMONY': 'MIDI HARMONY' in modules,
+             'HAVE_CHORDS': 'CHORDS FACTORY' in modules,
+             'HAVE_PART_SERVICE': bool({'MIDI HARMONY', 'CHORDS FACTORY'} & set(modules))}
+    return ''.join(f'.set {name},1\n' for name, selected in flags.items() if selected)
+
 
 MODULE = Module(
     name='midi-scales',key='MIDI SCALES',kind=Kind.CF_PATCH,

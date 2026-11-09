@@ -22,6 +22,8 @@ hd_decode:
     movem.l %d3/%d5/%a0,(%sp)
     cmpi.l #83,%d0
     bhi.s .decode_bad
+    cmpi.l #-2,%d1
+    beq.s .decode_bad
     bsr.w .scale
     mulu.w #84,%d3
     add.l %d3,%d0
@@ -43,6 +45,8 @@ hd_encode:
     movem.l %d3/%d5/%a0,(%sp)
     cmpi.l #127,%d0
     bhi.s .encode_bad
+    cmpi.l #-2,%d1
+    beq.s .encode_bad
     bsr.w .scale
     tst.l %d0
     beq.s .encode_minimum
@@ -69,7 +73,7 @@ hd_encode:
     lea 12(%sp),%sp
     rts
 
-/* d1 -> d3 mode,d5 tonic. Invalid scale falls back to C major.
+/* d1 -> d3 mode,d5 tonic. Legacy invalid scales fall back to C major; -2 is a provider refusal.
  * Low two scale bits are ignored, preserving the native codec ABI. */
 .scale:
     moveq #0,%d3

@@ -65,7 +65,7 @@ MODULE = Module(
             Linked('degreeoperations', str(ROOT / 'operations.s'), dram=True),
             Linked('degreeedit', str(ROOT / 'edit-hooks.s'), dram=True, include=follow_inc),
             Linked('degreepool', str(ROOT / 'pool.s'), dram=True),
-            Linked('degreehooks', str(ROOT / 'hooks.s'), dram=True),
+            Linked('degreehooks', str(ROOT / 'hooks.s'), dram=True, include=follow_inc),
             Linked('degreetrack',str(ROOT / 'track-retention.s'),dram=True)),
     store=Store('mattias.midi-harmony'),
     symbol_refs=(

@@ -252,6 +252,18 @@ mh_page_draw:
     move.l %a5,-(%sp)
     jsr 0x40035624
     addq.l #4,%sp
+    .if SCALE_HAS_UNSUPPORTED
+    move.l mh_page_track,%d0
+    jsr mh_scale_supported_ui
+    tst.l %d0
+    bne.s .page_scale_ready
+    moveq #8,%d0
+    moveq #36,%d1
+    lea .page_scale_required,%a0
+    bsr.w .page_text
+    bra.w .page_draw_done
+.page_scale_ready:
+    .endif
     tst.l mh_page_tab
     bne.w .page_draw_accum
     /* Native PLAYBACK selectors: exact count, with our value formatters.
@@ -571,6 +583,7 @@ mh_page_sprd_format:
     jsr 0x40012bd8
     lea 24(%sp),%sp
     rts
+.page_scale_required: .asciz "DIATONIC SCALE REQUIRED"
 .page_title: .asciz "HARMONY T%d"
 .page_harm_label: .asciz "HARM"
 .page_voic_label: .asciz "VOIC"

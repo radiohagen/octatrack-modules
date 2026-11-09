@@ -1,6 +1,7 @@
 /* C ABI adapters. Native/public Harmony helpers use register arguments.
  * C retains d2-d7/a2-a6; the called helpers preserve that set.
  */
+    .include "remix.inc"
     .text
 /* Register ABI wrappers for the existing lifecycle hooks. Preserve all
  * registers except a documented result, including C's volatile a1. */
@@ -123,6 +124,15 @@ hd_set:
     jsr mh_get
     cmp.l 4(%sp),%d0
     beq.s .set_done
+    .if SCALE_HAS_UNSUPPORTED
+    move.l (%sp),%d0
+    jsr mh_scale_supported_ui
+    tst.l %d0
+    bne.s .set_scale_ready
+    jsr mh_scale_message
+    bra.w .set_unavailable
+.set_scale_ready:
+    .endif
     move.l 4(%sp),-(%sp)
     move.l 4(%sp),-(%sp)
     jsr hd_mode_c

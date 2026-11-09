@@ -100,15 +100,14 @@ class ScaleProviderBinding(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, 'only one selected adapter'):
                 PROVIDER({'MIDI FOLLOW', 'FIRST', 'SECOND'})
 
-    def test_unadapted_scales_is_never_implicitly_accepted(self):
+    def test_scales_uses_its_explicit_context_reader(self):
         for modules in ({'MIDI FOLLOW', 'SCALES'}, {'MIDI HARMONY', 'SCALES'},
-                        {'MIDI FOLLOW', 'MIDI HARMONY', 'SCALES'},
-                        {'MIDI FOLLOW', 'MIDI SCALES', 'SCALES'}):
+                        {'MIDI FOLLOW', 'MIDI HARMONY', 'SCALES'}):
             with self.subTest(modules=modules):
-                for action in (PROVIDER, INCLUDE,
-                               lambda keys: LINKS(keys, 'MIDI FOLLOW')):
-                    with self.assertRaisesRegex(ValueError, 'qualified MIDI scale adapter'):
-                        action(modules)
+                self.assertEqual(PROVIDER(modules)['reader'], 'msp_scales_read')
+                self.assertIn('.set SCALE_HAS_UNSUPPORTED,1', INCLUDE(modules))
+        with self.assertRaisesRegex(ValueError, 'only one selected adapter'):
+            PROVIDER({'MIDI FOLLOW', 'MIDI SCALES', 'SCALES'})
 
     def test_scales_name_requires_an_explicit_qualified_adapter(self):
         provider = adapter('SCALES', reader='qualified_scales_read')
@@ -126,7 +125,7 @@ class ScaleProviderBinding(unittest.TestCase):
         with patch.dict(PROVIDER.__globals__, PROVIDERS=(provider,)):
             self.assertIs(PROVIDER({'MIDI HARMONY', 'OTHER SCALE'}), provider)
 
-    def test_harmony_rejects_other_scales_including_seven_note_scales(self):
+    def test_open_catalogues_require_the_consumers_runtime_guard(self):
         # Harmonic and melodic minor each have seven notes but cannot be
         # represented by Harmony's saved diatonic mode identity.
         for mask in (0x9ad, 0xaad, 0x295, 0x6db, 0xfff):
@@ -135,8 +134,9 @@ class ScaleProviderBinding(unittest.TestCase):
                     provider = adapter(masks=masks)
                     with patch.dict(PROVIDER.__globals__, PROVIDERS=(provider,)):
                         self.assertIs(PROVIDER({'MIDI FOLLOW', 'OTHER SCALE'}), provider)
-                        with self.assertRaisesRegex(ValueError, 'seven existing diatonic'):
-                            PROVIDER({'MIDI HARMONY', 'OTHER SCALE'})
+                        self.assertIs(PROVIDER({'MIDI HARMONY', 'OTHER SCALE'}), provider)
+                        self.assertIn('.set SCALE_HAS_UNSUPPORTED,1',
+                                      INCLUDE({'MIDI HARMONY', 'OTHER SCALE'}))
 
     def test_reader_and_math_are_linked_once_for_both_consumers(self):
         schema = SimpleNamespace(Linked=linked)
@@ -188,9 +188,8 @@ class ScaleProviderBinding(unittest.TestCase):
                         self.assertEqual(labels.count('midiscalemath'), 1)
                         self.assertEqual(labels.count('harmonypitchresponse'),
                                          int(len(consumers) == 2))
-                with self.assertRaisesRegex(ValueError, 'qualified MIDI scale adapter'):
-                    for owner in consumers:
-                        selectors[owner](consumers | {'SCALES'})
+                for owner in consumers:
+                    selectors[owner](consumers | {'SCALES'})
 
     def test_follow_respects_the_selected_adapters_ui_ownership(self):
         select = module_selector('MIDI FOLLOW')

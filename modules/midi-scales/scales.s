@@ -43,7 +43,7 @@ ms_raw_ui:
     lea 12(%sp),%sp
     rts
 .else
-.ifdef HAVE_HARMONY
+.ifdef HAVE_PART_SERVICE
     move.l %d1,-(%sp)
     move.l %d0,-(%sp)
     jsr store_part_ui_context
@@ -136,6 +136,28 @@ ms_snap:
 .snap_test:
     btst %d1,%d4
     rts
+
+/* Optional catalogue service for clients that need a local UI scale:
+ * d0 track -> mask<<4 | tonic, -1 OFF. No note or persistence ownership. */
+.ifdef HAVE_CHORDS
+    .global ms_track
+ms_track:
+    bsr.w ms_raw_ui
+    bsr.w ms_decode
+    tst.l %d0
+    bmi.s .track_done
+    move.l %d0,%d1
+    lsr.l #2,%d1
+    andi.l #15,%d1
+    lsr.l #6,%d0
+    lea ms_masks,%a0
+    move.w (%a0,%d0.l*2),%d0
+    andi.l #0xfff,%d0
+    lsl.l #4,%d0
+    or.l %d1,%d0
+.track_done:
+    rts
+.endif
 
 ms_encoder:
     moveq #5,%d1
@@ -240,6 +262,20 @@ ms_encoder:
 ms_output:
     lea -12(%sp),%sp
     movem.l %d0-%d1/%a0,(%sp)
+.ifdef HAVE_CHORDS
+    /* Absolute multi-note trigs retain their authored intervals, as in
+     * SCALES. Harmony already owns its generated pitches below. */
+    moveq #64,%d1
+    mvz.b 547(%a5),%d0
+    cmp.l %d1,%d0
+    bne.w .output_skip
+    mvz.b 548(%a5),%d0
+    cmp.l %d1,%d0
+    bne.w .output_skip
+    mvz.b 549(%a5),%d0
+    cmp.l %d1,%d0
+    bne.w .output_skip
+.endif
 .ifdef HAVE_HARMONY
     move.l %d7,%d0
     jsr mh_active

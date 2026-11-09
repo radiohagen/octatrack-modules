@@ -34,6 +34,11 @@ mhc_chord_name: /* d0 track -> a0 name; d0/d1/a1 volatile */
     move.l %d7,%d0
     move.l %d2,%d1
     jsr mh_chord_scale
+    cmpi.l #-2,%d0
+    bne.s .name_supported
+    lea mhc_name_text,%a2
+    bra.w .name_idle
+.name_supported:
     move.l %d0,%d3
     lsr.l #2,%d3
     andi.l #15,%d3

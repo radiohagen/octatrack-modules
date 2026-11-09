@@ -36,6 +36,13 @@ mhc_play_key:
     bpl.w .key_done
     move.l %d4,%d0
     jsr mh_scale_record
+    .if SCALE_HAS_UNSUPPORTED
+    cmpi.l #-2,%d0
+    bne.s .key_supported
+    jsr mh_scale_message
+    bra.w .key_done
+.key_supported:
+    .endif
     tst.l %d0
     bpl.s .key_scale
     moveq #0,%d0 /* KEY OFF: C-major root keyboard; each root builds its own major chord */

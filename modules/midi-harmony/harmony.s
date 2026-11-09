@@ -64,6 +64,35 @@ mh_raw_key_at:
     movem.l (%sp),%d1-%d3
     lea 12(%sp),%sp
     rts
+/* UI capability check, also used after source/Part changes. A refusal is
+ * distinct from KEY OFF; it never substitutes a different musical scale. */
+    .global mh_scale_supported_ui,mh_scale_message
+mh_scale_supported_ui:
+    lea -8(%sp),%sp
+    movem.l %d0-%d1,(%sp)
+    jsr store_part_ui_context
+    move.l %d0,%d1
+    move.l (%sp),%d0
+    bsr.w mh_scale_record_at
+    cmpi.l #-2,%d0
+    beq.s .scale_not_supported
+    moveq #1,%d0
+    bra.s .scale_supported_return
+.scale_not_supported:
+    moveq #0,%d0
+.scale_supported_return:
+    move.l 4(%sp),%d1
+    lea 8(%sp),%sp
+    rts
+mh_scale_message:
+    pea 0x60
+    pea .scale_message
+    jsr 0x4005a2b8
+    addq.l #8,%sp
+    rts
+.scale_message: .asciz "HARM NEEDS DIATONIC SCALE"
+    .balign 2
+
 mh_active:
     /* KEY OFF disables snapping, not the selected Harmony operation. */
     move.l %d1,-(%sp)
@@ -95,6 +124,8 @@ mh_chord_scale_at: /* d0 track,d1 root,d2 context */
     move.l %d1,%d3
     move.l %d2,%d1
     bsr.w mh_scale_record_at
+    cmpi.l #-2,%d0
+    beq.s .chord_scale_done
     tst.l %d0
     bpl.s .chord_scale_done
     move.l %d3,%d0
@@ -264,6 +295,13 @@ mh_direct:
     jsr mh_get_at
     move.l %d0,%d6
     beq.w .gen_return
+    .if SCALE_HAS_UNSUPPORTED
+    move.l %d7,%d0
+    move.l 36(%sp),%d1
+    bsr.w mh_scale_record_at
+    cmpi.l #-2,%d0
+    beq.w .gen_invalid
+    .endif
     moveq #0,%d2
     move.b (%a1),%d2
 .ifdef HAVE_FOLLOW
@@ -712,6 +750,10 @@ mh_keyboard:
     moveq #0,%d1
     move.l %a2,%a0
     bsr.w mh_direct
+    .if SCALE_HAS_UNSUPPORTED
+    tst.l %d0
+    bmi.w .keyboard_done
+    .endif
 .ifdef HAVE_FOLLOW
     moveq #0,%d0
     move.b (%a2),%d0
