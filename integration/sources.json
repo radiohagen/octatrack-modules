@@ -122,7 +122,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-harmony/README.md",
       "sha256": "2503b41cfcdfaae42effb0ec2c17a9c6a3f0ffd11f74e623d3f78d94c7d4704e",
-      "published_sha256": "76f2c861c6c98b00243810024eaedfd3014de013cc6dc1c7e0c079c3c4a3829b",
+      "published_sha256": "2997d326a9fd113ca650bed64cdc480c35b45a89c50ac1f50a2cb6b54a8e86c6",
       "source_mode": "100644"
     },
     "modules/midi-harmony/VOICING.md": {
@@ -231,7 +231,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-harmony/manifest.py",
       "sha256": "8691286ad370961aafba521e00a070797d2b70f257dddea18eb4874f70893097",
-      "published_sha256": "27407cf4e013a12d1b6982c13ffb0b9c739aeae7fd858798be6b6481210b2a7f",
+      "published_sha256": "98aee3d5dee11999caf6ee9d1d6e47781a3074cdab590bcc75b1ab4c47e41bda",
       "source_mode": "100644",
       "migration_note": "Operational author URL updated; original author name/credit preserved.",
       "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
@@ -255,7 +255,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-harmony/play.s",
       "sha256": "16ef9d78404adce6f024583386ed51419ed0045a33e3cecbe183e7b9e0c7e696",
-      "published_sha256": "16ef9d78404adce6f024583386ed51419ed0045a33e3cecbe183e7b9e0c7e696",
+      "published_sha256": "26451aeb9d3482612ab96d1f5f3547270343ba77207fccbe1b7d9f39787f128a",
       "source_mode": "100644"
     },
     "modules/midi-harmony/settings.s": {

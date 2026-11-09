@@ -5,8 +5,8 @@
  * in a most-recent-first stack, independent of the encoder's base choice.
  */
     .text
-    .global ch_play_key,ch_play_modes,ch_mode_names,ch_mode_icons
-    .global ch_modifiers,ch_pressed,ch_octave_compare
+    .global ch_play_key
+    .global ch_modifiers,ch_pressed
 ch_play_key:
     move.l 0x460d16f0,%d0
     cmpi.l #6,%d0
@@ -229,34 +229,10 @@ ch_play_key:
     lea 16(%sp),%sp
     rts
 .key_stock:
-    move.l %d2,-(%sp)
-    move.l 8(%sp),%a0
-    jmp 0x400501de
-
-/* FUNC+LEFT/RIGHT's two mode comparisons. Return Z for native CHROMATIC
- * or MIDI CHORD PLAY without changing the mode or the key-edge argument. */
-ch_octave_compare:
-    move.l %d1,-(%sp)
-    move.l 0x460d16f0,%d1
-    cmpi.l #1,%d1
-    beq.s .octave_flags
-    tst.l 0x80000012
-    beq.s .octave_no
-    cmpi.l #6,%d1
-    bra.s .octave_flags
-.octave_no:
-    moveq #-1,%d1
-.octave_flags:
-    movem.l (%sp),%d1 /* MOVEM and LEA preserve the comparison flags. */
-    lea 4(%sp),%sp
+    moveq #0,%d0
     rts
 
-    .balign 4
-ch_play_modes: .long 0,1,6,4
-ch_mode_names:
-    .long 0x400b5f4b,0x400b5366,0x400b5370,0x400b6cb9,0x400b5376,0x400b5381,ch_play_title
-ch_mode_icons:
-    .long 0x400beaaa,0x400beae6,0x400bea82,0x400bea96,0x400beabe,0x400bead2,0x400beae6
+    .balign 2
 ch_play_title: .asciz "CHORD PLAY"
     .balign 4
     .global ch_last_root
@@ -334,9 +310,7 @@ ch_play_leds:
     lea 12(%sp),%sp
     rts
 .led_stock:
-    lea -68(%sp),%sp
-    movem.l %d2-%d6/%a2-%a5,(%sp)
-    jmp 0x40043fe4
+    rts
 
 ch_play_guide:
     move.l 0x460d16f0,%d0
@@ -438,9 +412,7 @@ ch_play_guide:
 .guide_done:
     rts
 .guide_stock:
-    lea -44(%sp),%sp
-    movem.l %d2-%d7/%a2-%fp,(%sp)
-    jmp 0x40044928
+    rts
 .guide_text: /* a0 text, d0 baseline */
     move.l %a0,-(%sp)
     pea -1
@@ -472,12 +444,10 @@ ch_refresh_quality:
     adda.l %d0,%a2
     bra.w .modifier_selected
 
-/* Native playing-layout cleanup supplies the track as its only argument.
- * Release captured roots before native mode dispatch (which knows no mode 6).
- * No held variation survives a switch into grid or another playing mode.
- */
-    .global ch_release_track
-ch_release_track:
+/* TRIG MODES cleanup callback: C(track). Release only this client's
+ * captured roots and variations. The system owns native continuation. */
+    .global mh_trig_release
+mh_trig_release:
     lea -24(%sp),%sp
     movem.l %d2-%d6/%a2,(%sp)
     move.l 28(%sp),%d4
@@ -524,29 +494,7 @@ ch_release_track:
 .release_done:
     movem.l (%sp),%d2-%d6/%a2
     lea 24(%sp),%sp
-    lea -16(%sp),%sp
-    movem.l %d2-%d3/%a2-%a3,(%sp)
-    jmp 0x40043730
-
-/* REC entering grid bypasses stock playing-mode cleanup. Release our
- * owned notes before the grid layout takes over physical key releases. */
-    .global ch_grid_toggle
-ch_grid_toggle:
-    move.l 0x460d16f0,%d0
-    cmpi.l #6,%d0
-    bne.s .grid_stock
-    tst.l 0x80000012
-    beq.s .grid_stock
-    tst.l 0x460d1736
-    bne.s .grid_stock
-    lea -16(%sp),%sp
-    movem.l %d0-%d1/%a0-%a1,(%sp)
-    jsr 0x400438dc
-    movem.l (%sp),%d0-%d1/%a0-%a1
-    lea 16(%sp),%sp
-.grid_stock:
-    lea 0x4007e998,%a0
-    jmp 0x40048790
+    rts
 
     .balign 4
     .global ch_pressed_quality

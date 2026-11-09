@@ -140,3 +140,7 @@ project; recalling a kit supplies Part defaults while pattern locks stay with
 the patterns. See [storage](DEVELOPMENT.md#compact-harmony-storage) and [KITS](KITS.md).
 
 [Implementation, provenance and verification](DEVELOPMENT.md).
+
+CHORD PLAY registers mode 6 with Octabam’s TRIG MODES system service.
+The service owns the shared menu, navigation and cleanup boundary; Harmony
+retains its root keys, variations, display and captured-note ownership.
