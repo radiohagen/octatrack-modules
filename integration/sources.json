@@ -326,7 +326,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-loopback/manifest.py",
       "sha256": "80faa30df46576c906544a8b61c50f3c879b0b22c9800f245f9a04d6e55c1783",
-      "published_sha256": "bf333fbbf03759d72293a2f4742e409f2d00e737d272602775f40e2951a6ddf9",
+      "published_sha256": "a87aee0d609176efb990e6891f7f4ed1cc033e46d258f2b328db6873c472789e",
       "source_mode": "100644",
       "migration_note": "Operational author URL updated; original author name/credit preserved.",
       "update_source": {
@@ -349,7 +349,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-loopback/producers.s",
       "sha256": "82877c8bb20f996adc2281406f3ca308ffbe68510b72e5027520aca5debd0e43",
-      "published_sha256": "4e44437d640974487d4c2a70d63bcfcf8e5b522fdd32ddc1f65b4d20e1191830",
+      "published_sha256": "be63e78726371f9062896bb0901d931fff272fc2f25e34cbc472fdfcd2a0cf6a",
       "source_mode": "100644"
     },
     "modules/midi-loopback/settings.s": {

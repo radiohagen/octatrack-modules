@@ -43,6 +43,24 @@ lb_setup_send:
     RESTORE
     rts
 
+/* Explicit Scenes packet callback: same (length, bytes) stack ABI as
+ * MIDI_TX, with d7 = source track. Scenes owns its current mix context;
+ * no private offsets, global sender interception or mutable route flag. */
+    .ifdef HAVE_SCENES
+    .global lb_scenes_send
+lb_scenes_send:
+    SAVE
+    bsr.s lb_scenes_dest
+    bra.w .args
+lb_scenes_dest:
+    jsr scn_midi_context
+    move.l %d0,%d1
+    move.l %d7,%d0
+    jsr lb_dest_at
+    move.l %d0,%d6
+    rts
+    .endif
+
 /* Cached live controls still have their source in d7. Ignore the generic
  * received-CC setter: its echoed traffic must not acquire an internal copy.
  * Preview is an original track event, just like turning the panel knob. */
@@ -52,12 +70,11 @@ lb_control_send:
     bsr.s .control_route
     bra.s .args
 .control_route:
-    .ifdef HAVE_SCENES_BRIDGE
-    cmpi.l #scn_morph,%d0
-    bcs.s .native_control
-    cmpi.l #scn_invalidate,%d0
-    bcc.s .native_control
-    jsr lb_scenes_dest
+    .ifdef HAVE_SCENES
+    /* Exact public producer continuation, not a private source range. */
+    cmpi.l #scn_control_sent,%d0
+    bne.s .native_control
+    bsr.w lb_scenes_dest
     rts
 .native_control:
     .endif

@@ -12,7 +12,7 @@ MODULE = Module(
     requires=("STORE",),
     linked=(Linked("loopback", str(Path(__file__).resolve().parent / 'loopback.s'), cpu="54455", dram=True),
             Linked("loopbackproducers", str(Path(__file__).resolve().parent / 'producers.s'), dram=True,
-                   include=lambda modules, remix=None: '.set HAVE_SCENES_BRIDGE,1\n' if 'MIDI LOOPBACK SCENES' in modules else ''),
+                   include=lambda modules, remix=None: '.set HAVE_SCENES,1\n' if 'MIDI SCENES' in modules else ''),
             Linked("loopbacksettings", str(Path(__file__).resolve().parent / 'settings.s'), dram=True),
             Linked("loopbackpage", str(Path(__file__).resolve().parent / 'page.s'), dram=True)),
     detours=(
