@@ -34,7 +34,7 @@ def port_gate(image, project, out):
     candidate.write_bytes(image.read_bytes())
     raw = subprocess.check_output(['m68k-elf-nm', str(follow.ROOT/'out/platform/runtime/runtime.elf')], text=True)
     sym = {name: int(addr, 16) for addr, name in
-           re.findall(r'^([0-9a-f]+) [TtBb] ((?:bf|mh|ms|ch)_\w+)$', raw, re.M)}
+           re.findall(r'^([0-9a-f]+) [TtBb] ((?:bf|mh|ms|mhc)_\w+)$', raw, re.M)}
     (out/'symbols.json').write_text(json.dumps(sym, indent=2)+'\n')
     modes = [('plain', 0, False), ('reverse', 7, False), ('arp', 0, True)]
     if 'ms_decode' in sym:

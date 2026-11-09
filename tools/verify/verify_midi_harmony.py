@@ -17,7 +17,7 @@ from midi_machine import MODES, raw_scale, Machine as LinkedMidiMachine
 
 def symbols():
     raw = subprocess.check_output(['m68k-elf-nm', str(ROOT/'out/platform/runtime/runtime.elf')], text=True)
-    return {n:int(a,16) for a,n in re.findall(r'^([0-9a-f]+) [TtBbAa] ((?:ha|hd|ch|mh|bf|ms)_\w+)$',raw,re.M)}
+    return {n:int(a,16) for a,n in re.findall(r'^([0-9a-f]+) [TtBbAa] ((?:ha|hd|mhc|mh|bf|ms)_\w+)$',raw,re.M)}
 
 class Machine(LinkedMidiMachine):
     def __init__(self):

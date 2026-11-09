@@ -78,7 +78,7 @@ store_part_epochs: .space 256
                         '-o', str(out/'core.elf'), *objects], check=True)
         subprocess.run(['m68k-elf-objcopy', '-O', 'binary', str(out/'core.elf'), str(out/'core.bin')], check=True)
         nm = subprocess.check_output(['m68k-elf-nm', str(out/'core.elf')], text=True)
-        sym = {n: int(a, 16) for a, n in re.findall(r'^([0-9a-f]+) [TtBbDd] ((?:hd|ch|store_part)_\w+)$', nm, re.M)}
+        sym = {n: int(a, 16) for a, n in re.findall(r'^([0-9a-f]+) [TtBbDd] ((?:hd|mhc|store_part)_\w+)$', nm, re.M)}
         u = Uc(UC_ARCH_M68K, UC_MODE_BIG_ENDIAN)
         u.ctl_set_cpu_model(UC_CPU_M68K_CFV4E)
         for a, n in ((0x47000000, 0x100000), (0x40000000, 0x1000000),
