@@ -23,6 +23,13 @@ msp_scales_read:
     tst.l %d0
     bmi.s .invalid
     beq.s .done
+    /* Extra catalogue IDs use Major/Minor as their native carrier. The
+     * other five directly encoded modes cannot have an active extra ID. */
+    cmpi.l #24,%d0
+    bls.s .catalogue
+    jsr sc_key_descriptor
+    bra.s .done
+.catalogue:
     move.l (%sp),%d2
     jsr sc_decode_at
     tst.l %d0
