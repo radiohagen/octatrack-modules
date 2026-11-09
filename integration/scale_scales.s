@@ -3,13 +3,28 @@
     .text
     .global msp_scales_read
 msp_scales_read:
-    lea -16(%sp),%sp
-    movem.l %d1-%d2/%a0-%a1,(%sp)
+    lea -24(%sp),%sp
+    movem.l %d0-%d3/%a0-%a1,(%sp)
     cmpi.l #7,%d0
-    bhi.s .invalid
+    bhi.w .invalid
     cmpi.l #127,%d1
-    bhi.s .invalid
-    jsr sc_track_at
+    bhi.w .invalid
+    cmpi.l #64,%d1
+    bcc.s .saved
+    jsr store_part_midi_key
+    bra.s .decode
+.saved:
+    subi.l #64,%d1
+    mulu.w #36,%d0
+    addi.l #0x4e2+17,%d0
+    jsr store_part_saved_read
+    move.l 4(%sp),%d1
+.decode:
+    tst.l %d0
+    bmi.s .invalid
+    beq.s .done
+    move.l (%sp),%d2
+    jsr sc_decode_at
     tst.l %d0
     bmi.s .off
     move.l %d0,%d2
@@ -36,6 +51,6 @@ msp_scales_read:
 .invalid:
     moveq #-1,%d0
 .done:
-    movem.l (%sp),%d1-%d2/%a0-%a1
-    lea 16(%sp),%sp
+    movem.l 4(%sp),%d1-%d3/%a0-%a1
+    lea 24(%sp),%sp
     rts

@@ -2612,7 +2612,8 @@
       "origin": "authored",
       "repository": "https://github.com/radiohagen/octatrack-modules",
       "sha256": "3eecf83ccbdb70c428522ee82518e11e2df83e148166aab4777df53813374cbb",
-      "source_mode": "100644"
+      "source_mode": "100644",
+      "published_sha256": "4a71a353b301146a5aedc8dc1cda47e9afe1e75f457d29744ddd68e4c5363102"
     }
   },
   "submodules": {},
