@@ -29,7 +29,7 @@ class CpuMachine(Machine):
         super().__init__(lambda:symbols,artifact_root=out)
         self.initial_sr = 0x2000
         self.call('store_part_activate',stop=0x4000f938)
-        self.call('ch_lock_init')
+        self.call('mhc_lock_init')
         self.uc.mem_write(BANK,b'\xff'*STRIDE)
         for pattern in range(16): self.put(BANK+pattern*0x8ed8+0x8e57,0)
         for part in range(8):
@@ -135,9 +135,9 @@ def cases(m):
             notes=[255 if d==255 else max(0,min(127,(d//7-1)*12+(0,2,4,5,7,9,11)[d%7])) for d in degrees]
             roots.extend(bytes(degrees+notes+[2 if density else 1,0,255]))
             qualities.extend(bytes((i+lane)%8 if lane*64+i<density else 255 for i in range(64)))
-        u.mem_write(s['hd_banks'],bytes(roots));u.mem_write(s['ch_lock_table'],bytes(qualities))
+        u.mem_write(s['hd_banks'],bytes(roots));u.mem_write(s['mhc_lock_table'],bytes(qualities))
         def retain():
-            m.call('ch_nv_save',0)
+            m.call('mhc_nv_save',0)
             return bytes(u.mem_read(0x100fd560,10400)).hex()
         yield f'harmony/retain_{name}',retain
 

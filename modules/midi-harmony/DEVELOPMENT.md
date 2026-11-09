@@ -243,7 +243,7 @@ not physical encoder or display acceptance.
 
 The Part initialization harness retains the common degree-aware instruction
 allowance instead of overriding it with a smaller one-million-instruction cap.
-With ACC, linked `ch_lock_init` completes after 1,023,352 emulated instructions;
+With ACC, linked `mhc_lock_init` completes after 1,023,352 emulated instructions;
 the old cap stopped inside `hd_roots_reset_c`, before the return assertion.
 The unchanged Part/default/inheritance assertions pass with the existing
 degree-aware budget. This count is harness evidence, not hardware timing.

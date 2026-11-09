@@ -2,35 +2,35 @@
  * the pattern companion. No KITS or retained-default storage is involved.
  * Public entries preserve all registers except d0/condition codes. */
     .text
-    .global ch_base_get,ch_base_play,ch_base_at,ch_base_set
-    .global ch_pattern_context,ch_base_pattern
+    .global mhc_base_get,mhc_base_play,mhc_base_at,mhc_base_set
+    .global mhc_pattern_context,mhc_base_pattern
 
 /* d0 track -> selected working Part's base quality. */
-ch_base_get:
+mhc_base_get:
     lea -8(%sp),%sp
     movem.l %d0-%d1,(%sp)
     jsr store_part_ui_context
     move.l %d0,%d1
     move.l (%sp),%d0
-    bsr.w ch_base_at
+    bsr.w mhc_base_at
     move.l 4(%sp),%d1
     addq.l #8,%sp
     rts
 
 /* d0 track -> this track's engine Part, never the UI selection. */
-ch_base_play:
+mhc_base_play:
     lea -8(%sp),%sp
     movem.l %d0-%d1,(%sp)
     jsr store_part_midi_context
     move.l %d0,%d1
     move.l (%sp),%d0
-    bsr.w ch_base_at
+    bsr.w mhc_base_at
     move.l 4(%sp),%d1
     addq.l #8,%sp
     rts
 
 /* d0 track, d1 explicit context -> quality; corrupt/unavailable -> TRI. */
-ch_base_at:
+mhc_base_at:
     move.l %d2,-(%sp)
     moveq #18,%d2
     jsr store_part_midi_read
@@ -43,7 +43,7 @@ ch_base_at:
     rts
 
 /* d0 track, d1 quality -> accepted. Native Part access owns dirty/mirror. */
-ch_base_set:
+mhc_base_set:
     cmpi.l #7,%d1
     bhi.s .set_bad
     lea -16(%sp),%sp
@@ -70,7 +70,7 @@ ch_base_set:
     rts
 
 /* d0 bank, d1 pattern -> context, or -1. No selected-bank fallback. */
-ch_pattern_context:
+mhc_pattern_context:
     cmpi.l #15,%d0
     bhi.s .context_bad
     cmpi.l #15,%d1
@@ -104,11 +104,11 @@ ch_pattern_context:
     rts
 
 /* d0 bank, d1 pattern, d2 track -> that pattern's inherited quality. */
-ch_base_pattern:
+mhc_base_pattern:
     move.l %d1,-(%sp)
-    bsr.w ch_pattern_context
+    bsr.w mhc_pattern_context
     move.l %d0,%d1
     move.l %d2,%d0
-    bsr.w ch_base_at
+    bsr.w mhc_base_at
     move.l (%sp)+,%d1
     rts

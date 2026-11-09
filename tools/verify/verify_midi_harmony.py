@@ -25,16 +25,16 @@ class Machine(LinkedMidiMachine):
     def instruction_limit(self, name):
         if 'hd_set' in self.sym:
             return 10000000
-        return 250000 if (name == 'mh_boot' or name.startswith('ch_')) else 20000
+        return 250000 if (name == 'mh_boot' or name.startswith('mhc_')) else 20000
     def setting(self,t,kind=0,key=0,scale=0):
         # Historical test cases 2/3 denote TRI/7TH; both now use HARM CHORD.
         # These exhaustive pitch/voicing fixtures configure the generator,
         # not project-bank transitions. The degree integration gate exercises
         # the interactive setter with real banks and retention separately.
         self.call('mh_set_native' if 'hd_set' in self.sym else 'mh_set',t,min(kind,2))
-        for name in ('ch_current','ch_live','ch_sequence_quality'):
+        for name in ('mhc_current','mhc_live','mhc_sequence_quality'):
             self.uc.mem_write(self.sym[name]+t, bytes((1 if kind==3 else 0,)))
-        self.call('ch_base_set',t,int(kind==3))
+        self.call('mhc_base_set',t,int(kind==3))
         self.set_key(t,raw_scale(key,scale))
     def chord(self,t,n,offset=0,direct=False):
         self.uc.mem_write(self.scratch,bytes((n,11,12,13)))

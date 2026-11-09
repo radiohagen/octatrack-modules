@@ -5,15 +5,15 @@
  * remain unchanged; the two metadata bytes live after the native 12 bytes.
  */
     .text
-    .global ch_record_post,ch_record_free,ch_record_on,ch_record_commit
-ch_record_post:
+    .global mhc_record_post,mhc_record_free,mhc_record_on,mhc_record_commit
+mhc_record_post:
     lea -20(%sp),%sp
     movem.l %d0-%d1/%a0-%a2,(%sp)
     move.l %d5,%d0
     jsr mh_get
     tst.l %d0
     beq.w .post_done
-    lea ch_messages,%a1
+    lea mhc_messages,%a1
     move.l #256,%d1
 .post_scan:
     tst.b 14(%a1)
@@ -22,7 +22,7 @@ ch_record_post:
     subq.l #1,%d1
     bne.s .post_scan
     /* Never overwrite a queued message. Visible diagnostic for a gate. */
-    addq.l #1,ch_record_overflow
+    addq.l #1,mhc_record_overflow
     bra.s .post_done
 .post_found:
     moveq #1,%d0
@@ -33,7 +33,7 @@ ch_record_post:
     move.l 8(%a0),8(%a1)
     move.b %d5,13(%a1)
     move.l %d5,%d0
-    jsr ch_live_get
+    jsr mhc_live_get
     move.b %d0,12(%a1)
     moveq #0,%d0
     move.b 2(%a1),%d0
@@ -50,9 +50,9 @@ ch_record_post:
 
 /* Called at the end of the common key-event consumer, while a2 still
  * identifies its message. Validate range and alignment before freeing. */
-ch_record_free:
+mhc_record_free:
     move.l %a2,%d0
-    subi.l #ch_messages,%d0
+    subi.l #mhc_messages,%d0
     cmpi.l #4095,%d0
     bhi.s .free_done
     moveq #15,%d1
@@ -64,13 +64,13 @@ ch_record_free:
 
 /* Wrapper around native live recorder, called with its four arguments.
  * Active quality is scoped to this call, never a later unrelated record. */
-ch_record_on:
+mhc_record_on:
     lea -8(%sp),%sp
     movem.l %d2/%a2,(%sp)
     moveq #-1,%d2
     move.l %d2,hd_record_active
     move.l %a2,%d0
-    subi.l #ch_messages,%d0
+    subi.l #mhc_messages,%d0
     cmpi.l #4095,%d0
     bhi.s .on_call
     moveq #15,%d1
@@ -86,7 +86,7 @@ ch_record_on:
     move.b 13(%a2),%d0
     move.l %d0,12(%sp) /* captured track */
 .on_call:
-    move.l %d2,ch_record_active
+    move.l %d2,mhc_record_active
     move.l 24(%sp),-(%sp)
     move.l 24(%sp),-(%sp)
     move.l 24(%sp),-(%sp)
@@ -94,7 +94,7 @@ ch_record_on:
     jsr 0x40041bc4
     lea 16(%sp),%sp
     moveq #-1,%d0
-    move.l %d0,ch_record_active
+    move.l %d0,mhc_record_active
     move.l %d0,hd_record_active
     movem.l (%sp),%d2/%a2
     addq.l #8,%sp
@@ -104,8 +104,8 @@ ch_record_on:
  * note trig. Replace NOTE for a CHRD event even when another physical
  * key/change landed on this same step. Never append generated NOT2-4.
  */
-ch_record_commit:
-    move.l ch_record_active,%d0
+mhc_record_commit:
+    move.l mhc_record_active,%d0
     cmpi.l #7,%d0
     bhi.w .commit_stock
     lea -36(%sp),%sp
@@ -116,7 +116,7 @@ ch_record_commit:
     move.l 8(%fp),%d2
     move.l %a3,%d3
     jsr hd_record_sync
-    jsr ch_lock_set
+    jsr mhc_lock_set
     move.w %sr,%d0
     move.l %d0,-(%sp)
     move.w #0x2700,%sr
@@ -171,28 +171,28 @@ ch_record_commit:
     lea 0x400e6ae0,%a0
     jmp 0x40041f78
     .balign 4
-ch_record_active: .long -1
+mhc_record_active: .long -1
 hd_record_active: .long -1
-    .global ch_record_overflow
-ch_record_overflow: .long 0
+    .global mhc_record_overflow
+mhc_record_overflow: .long 0
     .bss
     .balign 4
-    .global ch_messages
-ch_messages: .space 4096
+    .global mhc_messages
+mhc_messages: .space 4096
 
     .text
-    .global ch_record_off,ch_record_grid_off
+    .global mhc_record_off,mhc_record_grid_off
 /* The UI can change tracks between enqueue and consume. Off messages must
  * use the same captured owner as on messages, including native grid entry. */
-ch_record_off:
+mhc_record_off:
     bsr.s .off_owner
     jmp 0x40041784
-ch_record_grid_off:
+mhc_record_grid_off:
     bsr.s .off_owner
     jmp 0x4004ef54
 .off_owner:
     move.l %a2,%d0
-    subi.l #ch_messages,%d0
+    subi.l #mhc_messages,%d0
     cmpi.l #4095,%d0
     bhi.s .off_owner_done
     moveq #15,%d1

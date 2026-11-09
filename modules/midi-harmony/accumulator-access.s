@@ -81,7 +81,7 @@ ha_encoder:
     tst.l %d0
     beq.s .ha_edit_done
     jsr hd_edit_finish
-    jmp ch_ui_redraw
+    jmp mhc_ui_redraw
 .ha_edit_done:
     rts
 ha_step_push:

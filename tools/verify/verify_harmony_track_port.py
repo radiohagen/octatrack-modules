@@ -68,7 +68,7 @@ def main():
     for name,source,checkpoint in (('resume',w/'dense-cs1.bin',True),('again',w/'resume-cs1.bin',False)):
         extra=['--cs1-in',source,'--no-post','--sequencer','--internal-clock','--frames','1']
         if checkpoint:extra+=['--step','-:call:0x4000faf0,0']
-        extra+=['--mem-dump',f'{sym["STORE"]:#x},98304={w}/{name}-p2.bin;{sym["ch_lock_table"]:#x},8192={w}/{name}-quality.bin;{sym["hd_banks"]:#x},16768={w}/{name}-roots.bin;{sym["ha_lanes"]:#x},4736={w}/{name}-accumulator.bin;{sym["scn_lib"]:#x},16384={w}/{name}-scenes.bin;0x10000000,0x100000={w}/{name}-cs1.bin']
+        extra+=['--mem-dump',f'{sym["STORE"]:#x},98304={w}/{name}-p2.bin;{sym["mhc_lock_table"]:#x},8192={w}/{name}-quality.bin;{sym["hd_banks"]:#x},16768={w}/{name}-roots.bin;{sym["ha_lanes"]:#x},4736={w}/{name}-accumulator.bin;{sym["scn_lib"]:#x},16384={w}/{name}-scenes.bin;0x10000000,0x100000={w}/{name}-cs1.bin']
         port.run(w,name,extra,image=image,card=w/'base-card.img')
         assert 'DID NOT RETURN' not in (w/f'{name}.log').read_text(),name
         assert (w/f'{name}-p2.bin').read_bytes()==expected_p2,(name,'P2 mismatch')
@@ -89,7 +89,7 @@ def main():
         extra=['--cs1-in',source,'--no-post','--sequencer','--internal-clock','--frames','1']
         if clear:extra+=['--step',f'-:call:0x40039b00,{lane//8},{lane%8},1',
                           '--step',f'-:call:{sym["hd_nv_poll_c"]:#x}']
-        extra+=['--mem-dump',f'{sym["STORE"]:#x},98304={w}/{name}-p2.bin;{sym["ch_lock_table"]:#x},8192={w}/{name}-quality.bin;{sym["hd_banks"]:#x},16768={w}/{name}-roots.bin;{sym["ha_lanes"]:#x},4736={w}/{name}-accumulator.bin;{sym["scn_lib"]:#x},16384={w}/{name}-scenes.bin;0x10000000,0x100000={w}/{name}-cs1.bin']
+        extra+=['--mem-dump',f'{sym["STORE"]:#x},98304={w}/{name}-p2.bin;{sym["mhc_lock_table"]:#x},8192={w}/{name}-quality.bin;{sym["hd_banks"]:#x},16768={w}/{name}-roots.bin;{sym["ha_lanes"]:#x},4736={w}/{name}-accumulator.bin;{sym["scn_lib"]:#x},16384={w}/{name}-scenes.bin;0x10000000,0x100000={w}/{name}-cs1.bin']
         port.run(w,name,extra,image=image,card=w/'base-card.img')
         assert 'DID NOT RETURN' not in (w/f'{name}.log').read_text(),name
         expected_q=bytearray(qualities);expected_q[lane*64:(lane+1)*64]=b'\xff'*64
@@ -108,7 +108,7 @@ def main():
                               ('new-project-resume',w/'new-project-cs1.bin',False)):
         extra=['--cs1-in',source,'--no-post','--sequencer','--internal-clock','--frames','1']
         if reset:extra+=['--step',f'-:call:{sym["store_newproj"]:#x}']
-        extra+=['--mem-dump',f'{sym["STORE"]:#x},1572864={w}/{name}-p2.bin;{sym["ch_lock_table"]:#x},131072={w}/{name}-quality.bin;{sym["ha_lanes"]:#x},75776={w}/{name}-accumulator.bin;{sym["scn_lib"]:#x},262144={w}/{name}-scenes.bin;0x10000000,0x100000={w}/{name}-cs1.bin']
+        extra+=['--mem-dump',f'{sym["STORE"]:#x},1572864={w}/{name}-p2.bin;{sym["mhc_lock_table"]:#x},131072={w}/{name}-quality.bin;{sym["ha_lanes"]:#x},75776={w}/{name}-accumulator.bin;{sym["scn_lib"]:#x},262144={w}/{name}-scenes.bin;0x10000000,0x100000={w}/{name}-cs1.bin']
         port.run(w,name,extra,image=image,card=w/'base-card.img')
         assert 'DID NOT RETURN' not in (w/f'{name}.log').read_text(),name
         for store,length in (('p2',1572864),('quality',131072),('scenes',262144)):

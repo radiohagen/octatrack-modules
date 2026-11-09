@@ -89,10 +89,10 @@ mh_voice_at: /* d0 track,d1 captured context,a0 pool; all regs preserved */
     jsr mh_size_get_at
     tst.l %d0
     bne.w .voice_fixed
-    lea ch_current,%a0
+    lea mhc_current,%a0
     moveq #0,%d0
     move.b (%a0,%d7.l),%d0
-    jsr ch_count
+    jsr mhc_count
     move.l %d0,%d6
     move.l %d7,%d0
     move.l 88(%sp),%d1
@@ -102,7 +102,7 @@ mh_voice_at: /* d0 track,d1 captured context,a0 pool; all regs preserved */
     move.l #0x3ff,%d0 /* distinct no-scale context, below source/count bits */
 .voice_scale_token:
     move.l %d0,%d5
-    lea ch_current,%a0
+    lea mhc_current,%a0
     moveq #0,%d0
     move.b (%a0,%d7.l),%d0
     lsl.l #8,%d0
@@ -351,7 +351,7 @@ mh_voice_at: /* d0 track,d1 captured context,a0 pool; all regs preserved */
     lsl.l #8,%d0
     lsl.l #2,%d0
     or.l %d0,%d5
-    lea ch_current,%a0
+    lea mhc_current,%a0
     moveq #0,%d0
     move.b (%a0,%d7.l),%d0
     move.l %d5,-(%sp)

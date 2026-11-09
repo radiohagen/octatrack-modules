@@ -13,7 +13,7 @@ convert:
 	mvz.w %d2,%d0
 	lsl.l #4,%d0
 	move.l %d0,%a2
-	add.l #ch_messages,%a2
+	add.l #mhc_messages,%a2
 	move.b 15(%a2),%d1
 	move.b %d1,27(%sp)
 	mvz.b %d1,%d4
@@ -170,7 +170,7 @@ hd_capture_message_c:
 	move.l %d3,-(%sp)
 	move.l %d2,-(%sp)
 	move.l 16(%sp),%d3
-	sub.l #ch_messages,%d3
+	sub.l #mhc_messages,%d3
 	cmp.l #4095,%d3
 	jhi .L24
 	moveq #15,%d0
@@ -284,7 +284,7 @@ hd_record_modes_c:
 	moveq #2,%d0
 	cmp.l 28(%sp),%d0
 	jcs .L38
-	lea ch_messages+13,%a2
+	lea mhc_messages+13,%a2
 	clr.l %d2
 	lea captures,%a3
 .L41:
@@ -327,7 +327,7 @@ hd_record_part_before_c:
 	lea (-24,%sp),%sp
 	movem.l #15372,(%sp)
 	move.l 28(%sp),%d3
-	lea ch_messages+13,%a3
+	lea mhc_messages+13,%a3
 	lea captures,%a2
 	lea hd_context_depends_c,%a4
 	lea hd_scale_c,%a5
@@ -382,7 +382,7 @@ hd_record_consume_c:
 	subq.l #8,%sp
 	move.l %d2,-(%sp)
 	move.l 16(%sp),%d2
-	sub.l #ch_messages,%d2
+	sub.l #mhc_messages,%d2
 	cmp.l #4095,%d2
 	jhi .L59
 	moveq #15,%d0
@@ -394,7 +394,7 @@ hd_record_consume_c:
 	tst.l %d0
 	jlt .L57
 	lsr.l #4,%d2
-	lea ch_messages,%a0
+	lea mhc_messages,%a0
 	mvs.w %d2,%d0
 	lsl.l #4,%d0
 	mvz.b 13(%a0,%d0.l),%d0

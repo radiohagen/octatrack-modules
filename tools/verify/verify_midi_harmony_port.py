@@ -702,7 +702,7 @@ def live_transpose(source):
         if mode=='chord-play':
             script=chord.PANEL+f'1700 key {8+q} down\n2000 key 0 down\n'+chord.key(2400,0x23)
         else:
-            extra+=['--step','-:poke:0x80000015=1','--step','-:poke:0x460d16f3=1','--step','-:poke:0x100b14cc=0','--step',f'-:poke:{sym["ch_live"]:#x}={q}']
+            extra+=['--step','-:poke:0x80000015=1','--step','-:poke:0x460d16f3=1','--step','-:poke:0x100b14cc=0','--step',f'-:poke:{sym["mhc_live"]:#x}={q}']
             script=chord.key(100,0x31)+chord.key(500,0x23)+'2000 key 0 down\n'
         script+=f'3000 enc 0 {delta}\n5000 key 0 up\n'
         if not arp:script+='5500 key 0 down\n6500 key 0 up\n'

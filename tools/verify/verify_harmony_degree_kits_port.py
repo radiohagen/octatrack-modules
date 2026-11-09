@@ -57,7 +57,7 @@ def recall(source,outgoing,incoming,target,sym,scenes=False,size=0):
     script.tap(2,600)
     script.tap('play',3500);script.tap('stop',1200)
     panel=w/'recall.txt';panel.write_text(script.text())
-    lock=sym['ch_lock_table']
+    lock=sym['mhc_lock_table']
     library=sym['KIMG']+kits.O_LIB
     before=f'{B:#x},0x9b340={w}/before-bank.bin;{library:#x},{kits.REC*64}={w}/before-library.bin'
     after=(f'{B:#x},0x9b340={w}/after-bank.bin;{library:#x},{kits.REC*64}={w}/after-library.bin;'
@@ -120,7 +120,7 @@ def main():
         raw=subprocess.check_output(['m68k-elf-nm',str(p.ROOT/'out/platform/runtime/runtime.elf')],text=True)
         sym={f[2]:int(f[0],16) for line in raw.splitlines() if len(f:=line.split())==3}
         (p.OUT/'candidate-all-symbols.json').write_text(json.dumps(sym,indent=2)+'\n')
-    assert all(k in sym for k in ('KIMG','hd_banks','ch_lock_table'))
+    assert all(k in sym for k in ('KIMG','hd_banks','mhc_lock_table'))
     if 'scn_lib' in sym:kits.REC=kits.REC1+4096
     selected=args.case or [f'{a}-{b}-{t}' for a in range(3) for b in range(3) for t in (2,6)]
     results={}

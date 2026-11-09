@@ -4,24 +4,24 @@
  * regenerate a voicing from UI code (AUTO would advance its history).
  */
     .text
-    .global ch_display_snapshot,ch_display_root,ch_display_quality
-    .global ch_display_notes,ch_sequence_root,ch_note_text
-ch_display_snapshot: /* d0 track, preserves all registers */
+    .global mhc_display_snapshot,mhc_display_root,mhc_display_quality
+    .global mhc_display_notes,mhc_sequence_root,mhc_note_text
+mhc_display_snapshot: /* d0 track, preserves all registers */
     lea -32(%sp),%sp
     movem.l %d0-%d5/%a0-%a1,(%sp)
     move.l %d0,%d5
     moveq #-1,%d0
-    move.b %d0,ch_display_root
-    move.l %d0,ch_display_notes
+    move.b %d0,mhc_display_root
+    move.l %d0,mhc_display_notes
     cmpi.l #7,%d5
     bhi.w .snapshot_done
     /* Prefer the latest held live root; releasing it reveals another held
      * root, or the sequencer. A remembered root alone is never sufficient. */
-    lea ch_last_root,%a0
+    lea mhc_last_root,%a0
     moveq #0,%d4
     move.b (%a0,%d5.l),%d4
     moveq #-1,%d3
-    lea ch_pressed,%a0
+    lea mhc_pressed,%a0
     moveq #8,%d2
 .snapshot_key:
     move.l (%a0)+,%d0
@@ -33,11 +33,11 @@ ch_display_snapshot: /* d0 track, preserves all registers */
     andi.l #127,%d0
     move.l %d0,%d3
     move.l %a0,%d1
-    subi.l #ch_pressed+4,%d1
+    subi.l #mhc_pressed+4,%d1
     lsr.l #2,%d1
-    lea ch_pressed_quality,%a1
+    lea mhc_pressed_quality,%a1
     move.b (%a1,%d1.l),%d1
-    move.b %d1,ch_display_quality
+    move.b %d1,mhc_display_quality
     cmp.l %d4,%d0
     beq.s .snapshot_live
 .snapshot_next_key:
@@ -53,22 +53,22 @@ ch_display_snapshot: /* d0 track, preserves all registers */
     move.l (%a0,%d0.l*4),%d0
     cmpi.l #0xfeffffff,%d0
     beq.s .snapshot_bypass
-    move.l %d0,ch_display_notes
+    move.l %d0,mhc_display_notes
     bra.s .snapshot_live_root
 .snapshot_bypass:
-    move.b %d3,ch_display_notes
+    move.b %d3,mhc_display_notes
 .snapshot_live_root:
     move.l %d3,%d0
     move.l %d5,%d1
     jsr mh_quant
-    move.b %d0,ch_display_root
+    move.b %d0,mhc_display_root
     bra.s .snapshot_validate
 .snapshot_sequence:
     move.l %d5,%d0
     lsl.l #5,%d0
     lea 0x46c77a1a,%a0 /* four {status,note} pairs; note=-1 when off */
     adda.l %d0,%a0
-    lea ch_display_notes,%a1
+    lea mhc_display_notes,%a1
     moveq #4,%d2
 .snapshot_voice:
     move.l (%a0),%d0
@@ -80,14 +80,14 @@ ch_display_snapshot: /* d0 track, preserves all registers */
     addq.l #1,%a1
     subq.l #1,%d2
     bne.s .snapshot_voice
-    lea ch_sequence_root,%a0
+    lea mhc_sequence_root,%a0
     move.b (%a0,%d5.l),%d0
-    move.b %d0,ch_display_root
-    lea ch_sequence_quality,%a0
+    move.b %d0,mhc_display_root
+    lea mhc_sequence_quality,%a0
     move.b (%a0,%d5.l),%d0
-    move.b %d0,ch_display_quality
+    move.b %d0,mhc_display_quality
 .snapshot_validate:
-    lea ch_display_notes,%a0
+    lea mhc_display_notes,%a0
     moveq #4,%d2
 .snapshot_valid_voice:
     moveq #0,%d0
@@ -97,7 +97,7 @@ ch_display_snapshot: /* d0 track, preserves all registers */
     subq.l #1,%d2
     bne.s .snapshot_valid_voice
     moveq #-1,%d0
-    move.b %d0,ch_display_root
+    move.b %d0,mhc_display_root
 .snapshot_done:
     movem.l (%sp),%d0-%d5/%a0-%a1
     lea 32(%sp),%sp
@@ -106,20 +106,20 @@ ch_display_snapshot: /* d0 track, preserves all registers */
 /* d0 first voice, d1 exclusive end -> a0 text. Two voices fit even at C#-1.
  * MIDI 60 = C4, matching native CHROMATIC PLAY's octave indication.
  */
-ch_note_text:
+mhc_note_text:
     lea -24(%sp),%sp
     movem.l %d2-%d5/%a2-%a3,(%sp)
     move.l %d0,%d4
     move.l %d1,%d5
-    lea ch_display_notes,%a3
-    lea ch_notes_text,%a2
+    lea mhc_display_notes,%a3
+    lea mhc_notes_text,%a2
     clr.b (%a2)
 .notes_voice:
     moveq #0,%d2
     move.b (%a3,%d4.l),%d2
     cmpi.l #127,%d2
     bhi.w .notes_next
-    cmpa.l #ch_notes_text,%a2
+    cmpa.l #mhc_notes_text,%a2
     beq.s .notes_pitch
     move.b #45,(%a2)+
 .notes_pitch:
@@ -150,7 +150,7 @@ ch_note_text:
     cmp.l %d5,%d4
     bcs.w .notes_voice
     clr.b (%a2)
-    lea ch_notes_text,%a0
+    lea mhc_notes_text,%a0
     movem.l (%sp),%d2-%d5/%a2-%a3
     lea 24(%sp),%sp
     rts
@@ -169,23 +169,23 @@ ch_note_text:
 .nas: .asciz "A#"
 .nb: .asciz "B"
     .balign 4
-ch_sequence_root: .space 8,255
-ch_display_root: .byte 255
-ch_display_quality: .byte 0
+mhc_sequence_root: .space 8,255
+mhc_display_root: .byte 255
+mhc_display_quality: .byte 0
     .balign 4
-ch_display_notes: .long -1
-ch_notes_text: .space 32
+mhc_display_notes: .long -1
+mhc_notes_text: .space 32
 
 /* UI task only, immediately after its queue receive. Adjacent to, but not
  * overlapping, TUNER's loop-head detour. No ISR work or kernel messages.
  * Preserve the received message and every loop constant across the poll. */
-    .global ch_display_tick
-ch_display_tick:
+    .global mhc_display_tick
+mhc_display_tick:
     lea -60(%sp),%sp
     movem.l %d0-%d7/%a0-%a6,(%sp)
     jsr hd_ui_observe_c
     jsr hd_nv_poll_c
-    bsr.w ch_display_poll
+    bsr.w mhc_display_poll
     movem.l (%sp),%d0-%d7/%a0-%a6
     lea 60(%sp),%sp
     move.l %d0,%a0
@@ -193,7 +193,7 @@ ch_display_tick:
     move.b (%a0),%d0
     extb.l %d0
     jmp 0x40056c82
-ch_display_poll:
+mhc_display_poll:
     move.l 0x460d16f0,%d0
     cmpi.l #6,%d0
     bne.w .poll_inactive
@@ -204,51 +204,51 @@ ch_display_poll:
     bne.w .poll_inactive
     moveq #0,%d0
     move.b 0x100b14cc,%d0
-    bsr.w ch_display_snapshot
-    cmp.l ch_draw_track,%d0
+    bsr.w mhc_display_snapshot
+    cmp.l mhc_draw_track,%d0
     bne.s .poll_changed
-    move.l ch_display_notes,%d1
-    cmp.l ch_draw_notes,%d1
+    move.l mhc_display_notes,%d1
+    cmp.l mhc_draw_notes,%d1
     bne.s .poll_changed
-    move.w ch_display_root,%d1
-    cmp.w ch_draw_identity,%d1
+    move.w mhc_display_root,%d1
+    cmp.w mhc_draw_identity,%d1
     bne.s .poll_changed
     move.l 0x400beba2,%d1
-    cmp.l ch_draw_octave,%d1
+    cmp.l mhc_draw_octave,%d1
     bne.s .poll_changed
-    bsr.w ch_settings_token
-    cmp.l ch_draw_settings_token,%d1
+    bsr.w mhc_settings_token
+    cmp.l mhc_draw_settings_token,%d1
     beq.s .poll_done
 .poll_changed:
-    move.l %d0,ch_draw_track
-    move.l ch_display_notes,%d1
-    move.l %d1,ch_draw_notes
-    move.w ch_display_root,%d1
-    move.w %d1,ch_draw_identity
+    move.l %d0,mhc_draw_track
+    move.l mhc_display_notes,%d1
+    move.l %d1,mhc_draw_notes
+    move.w mhc_display_root,%d1
+    move.w %d1,mhc_draw_identity
     move.l 0x400beba2,%d1
-    move.l %d1,ch_draw_octave
-    bsr.w ch_settings_token
-    move.l %d1,ch_draw_settings_token
-    jsr ch_play_guide
+    move.l %d1,mhc_draw_octave
+    bsr.w mhc_settings_token
+    move.l %d1,mhc_draw_settings_token
+    jsr mhc_play_guide
 .poll_done:
     rts
 .poll_inactive:
     moveq #-1,%d0
-    move.l %d0,ch_draw_track
+    move.l %d0,mhc_draw_track
     rts
     .balign 4
-ch_draw_track: .long -1
-ch_draw_notes: .long -1
-ch_draw_octave: .long -1
-ch_draw_settings_token: .long -1
-ch_draw_identity: .word -1
+mhc_draw_track: .long -1
+mhc_draw_notes: .long -1
+mhc_draw_octave: .long -1
+mhc_draw_settings_token: .long -1
+mhc_draw_identity: .word -1
 
 /* Full-width single-line pitches. Use the native font normally. Long lists
  * retain native letters/digits, with a three-column sharp and narrow dashes.
  * A negative-octave sign needs no trailing gap before its digit. Even four
  * sharp notes in octave -1 fit in 57 pixels; never omit a voice or octave. */
-    .global ch_draw_note_line
-ch_draw_note_line: /* a0 text */
+    .global mhc_draw_note_line
+mhc_draw_note_line: /* a0 text */
     lea -12(%sp),%sp
     movem.l %d2/%a2-%a3,(%sp)
     move.l %a0,%a2
@@ -326,9 +326,9 @@ ch_draw_note_line: /* a0 text */
 .line_dash_pixels: .long 0x80000000
 
 /* Reserve the lower row for settings. Long add9 names omit their optional
- * parentheses in this view; the full chord identity remains in ch_name_text. */
-    .global ch_draw_chord_name
-ch_draw_chord_name:
+ * parentheses in this view; the full chord identity remains in mhc_name_text. */
+    .global mhc_draw_chord_name
+mhc_draw_chord_name:
     lea -12(%sp),%sp
     movem.l %d2/%a2-%a3,(%sp)
     move.l %a0,%a2
@@ -340,7 +340,7 @@ ch_draw_chord_name:
     cmpi.l #41,%d0
     bls.s .chord_name_draw
     move.l %a2,%a0
-    lea ch_compact_name,%a3
+    lea mhc_compact_name,%a3
     move.l %a3,%a2
 .chord_name_copy:
     move.b (%a0)+,%d0
@@ -368,7 +368,7 @@ ch_draw_chord_name:
 
 /* UI settings token: use the public getters, including AUTO's separate bit.
  * d0 track preserved, d1 token; a0 scratch. */
-ch_settings_token:
+mhc_settings_token:
     lea -12(%sp),%sp
     movem.l %d0/%d2-%d3,(%sp)
     move.l %d0,%d3
@@ -391,9 +391,9 @@ ch_settings_token:
     lea 12(%sp),%sp
     rts
 
-    .global ch_settings_text,ch_draw_settings,ch_settings_buffer
-ch_settings_text: /* d0 track -> a0 compact N/V/S/R text */
-    bsr.w ch_settings_token
+    .global mhc_settings_text,mhc_draw_settings,mhc_settings_buffer
+mhc_settings_text: /* d0 track -> a0 compact N/V/S/R text */
+    bsr.w mhc_settings_token
     move.l %d1,%d0
     lsr.l #5,%d0
     andi.l #3,%d0
@@ -412,13 +412,13 @@ ch_settings_text: /* d0 track -> a0 compact N/V/S/R text */
     lea .settings_sizes,%a0
     move.l (%a0,%d1.l*4),-(%sp)
     pea .settings_format
-    pea ch_settings_buffer
+    pea mhc_settings_buffer
     jsr 0x40013a08
     lea 24(%sp),%sp
-    lea ch_settings_buffer,%a0
+    lea mhc_settings_buffer,%a0
     rts
-ch_draw_settings:
-    bsr.s ch_settings_text
+mhc_draw_settings:
+    bsr.s mhc_settings_text
     move.l %a0,-(%sp)
     pea -1
     pea 9
@@ -451,5 +451,5 @@ ch_draw_settings:
 .sr1: .asciz "R:-1"
 .sr2: .asciz "R:-2"
     .balign 4
-ch_settings_buffer: .space 24
-ch_compact_name: .space 32
+mhc_settings_buffer: .space 24
+mhc_compact_name: .space 32

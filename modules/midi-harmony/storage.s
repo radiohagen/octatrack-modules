@@ -10,7 +10,7 @@ hd_nv_dirty_c:
 	moveq #15,%d1
 	cmp.l %d0,%d1
 	jcs .L1
-	cmp.l ch_nv_bank.l,%d0
+	cmp.l mhc_nv_bank.l,%d0
 	jeq .L5
 .L1:
 	rts
@@ -40,7 +40,7 @@ hd_nv_request_c:
 | 0 "" 2
 #NO_APP
 	move.l %d1,(%sp)
-	move.l %d0,ch_nv_bank
+	move.l %d0,mhc_nv_bank
 	jsr hd_track_invalidate_c
 	addq.l #1,generation
 	moveq #1,%d0
@@ -126,7 +126,7 @@ hd_export_c:
 	lea ha_pack_c,%a6
 	lea ha_valid_c,%a5
 	add.l #hd_banks,%d6
-	add.l #ch_lock_table,%d5
+	add.l #mhc_lock_table,%d5
 .L24:
 	move.l %d3,-(%sp)
 	move.l generation,%d2
@@ -206,7 +206,7 @@ hd_import_c:
 	moveq #13,%d2
 	lsl.l %d2,%d0
 	move.l %a0,-(%sp)
-	add.l #ch_lock_table,%d0
+	add.l #mhc_lock_table,%d0
 	move.l %d0,-(%sp)
 	move.l #16768,%d0
 	muls.l %d1,%d0
@@ -263,7 +263,7 @@ hd_nv_save_c:
 	move.w #0x2700,%sr
 | 0 "" 2
 #NO_APP
-	move.l %d2,ch_nv_bank
+	move.l %d2,mhc_nv_bank
 	addq.l #4,%sp
 	addq.l #1,generation
 	tst.l available
@@ -286,13 +286,13 @@ hd_nv_save_c:
 #NO_APP
 	move.l generation,%d4
 	lea ha_pack_c,%a6
-	move.l ch_nv_bank,%d2
+	move.l mhc_nv_bank,%d2
 	lea hd_revision_c,%a2
 	lea hd_pack_c,%a3
 	move.l %d2,-(%sp)
 	jsr (%a2)
 	pea track_payload
-	lea ch_lock_status,%a5
+	lea mhc_lock_status,%a5
 	lea hd_track_write_c,%a4
 	move.l %d2,%d1
 	move.l %d0,%d5
@@ -301,7 +301,7 @@ hd_nv_save_c:
 	move.l #16768,%d0
 	muls.l %d2,%d0
 	add.l #hd_banks,%d0
-	add.l #ch_lock_table,%d1
+	add.l #mhc_lock_table,%d1
 	move.l %d1,-(%sp)
 	move.l %d0,-(%sp)
 	jsr (%a3)
@@ -325,7 +325,7 @@ hd_nv_save_c:
 | 0 "" 2
 #NO_APP
 	move.l generation,%d4
-	move.l ch_nv_bank,%d2
+	move.l mhc_nv_bank,%d2
 	move.l %d2,-(%sp)
 	jsr (%a2)
 	pea track_payload
@@ -336,7 +336,7 @@ hd_nv_save_c:
 	move.l #16768,%d0
 	muls.l %d2,%d0
 	add.l #hd_banks,%d0
-	add.l #ch_lock_table,%d1
+	add.l #mhc_lock_table,%d1
 	move.l %d1,-(%sp)
 	move.l %d0,-(%sp)
 	jsr (%a3)
@@ -406,12 +406,12 @@ hd_nv_poll_c:
 	tst.l available
 	jeq .L71
 	moveq #15,%d0
-	cmp.l ch_nv_bank.l,%d0
+	cmp.l mhc_nv_bank.l,%d0
 	jcc .L81
 .L71:
 	rts
 .L81:
-	move.l ch_nv_bank,-(%sp)
+	move.l mhc_nv_bank,-(%sp)
 	jsr hd_nv_save_c
 	addq.l #4,%sp
 	rts
@@ -441,7 +441,7 @@ hd_nv_restore_c:
 	lsl.l %d0,%d1
 	move.l 8(%fp),%d0
 	muls.l %d2,%d0
-	add.l #ch_lock_table,%d1
+	add.l #mhc_lock_table,%d1
 	move.l %d1,-(%sp)
 	add.l #hd_banks,%d0
 	move.l %d0,-(%sp)
@@ -450,14 +450,14 @@ hd_nv_restore_c:
 	tst.l %d0
 	jeq .L82
 	move.l 8(%fp),%d2
-	lea ch_lock_status,%a0
+	lea mhc_lock_status,%a0
 	lea (-1,%fp),%a1
 	move.b (%a1),(%a0,%d2.l)
 	pea track_payload+10368
 	move.l %d2,-(%sp)
 	jsr ha_unpack_c
 	move.l %d2,-(%sp)
-	move.l %d2,ch_nv_bank
+	move.l %d2,mhc_nv_bank
 	jsr hd_bank_loaded_c
 	move.l -8(%fp),%d2
 	lea (12,%sp),%sp

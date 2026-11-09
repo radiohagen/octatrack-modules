@@ -10,15 +10,15 @@
     .set CH_BANK_BYTES,8192
     .set CH_BYTES,131072
     .text
-    .global ch_lock_init,ch_lock_ptr,ch_lock_get,ch_lock_set,ch_lock_table
-    .global ch_nv_save,ch_nv_restore,ch_nv_bank,ch_lock_status
-ch_lock_init:
+    .global mhc_lock_init,mhc_lock_ptr,mhc_lock_get,mhc_lock_set,mhc_lock_table
+    .global mhc_nv_save,mhc_nv_restore,mhc_nv_bank,mhc_lock_status
+mhc_lock_init:
     lea -12(%sp),%sp
     movem.l %d0-%d1/%a0,(%sp)
-    move.l ch_initialized,%d0
+    move.l mhc_initialized,%d0
     cmpi.l #0x43485244,%d0
     beq.s .init_done
-    lea ch_lock_table,%a0
+    lea mhc_lock_table,%a0
     move.l #CH_BYTES/4,%d1
     moveq #-1,%d0
 .init_fill:
@@ -27,16 +27,16 @@ ch_lock_init:
     bne.s .init_fill
     /* Runtime BSS can contain the compressed loader's staging bytes.
      * Initialize message ownership once, before any producer can post. */
-    lea ch_messages,%a0
+    lea mhc_messages,%a0
     move.l #4096/4,%d1
     moveq #0,%d0
 .init_messages:
     move.l %d0,(%a0)+
     subq.l #1,%d1
     bne.s .init_messages
-    move.l %d0,ch_record_overflow
+    move.l %d0,mhc_record_overflow
     move.l #0x43485244,%d0
-    move.l %d0,ch_initialized
+    move.l %d0,mhc_initialized
     jsr hd_reset
 .init_done:
     movem.l (%sp),%d0-%d1/%a0
@@ -46,7 +46,7 @@ ch_lock_init:
 /* d0 bank, d1 pattern, d2 track, d3 step -> a0 (0 for invalid).
  * All input registers preserved. No lazy init in an ISR lookup.
  */
-ch_lock_ptr:
+mhc_lock_ptr:
     suba.l %a0,%a0
     cmpi.l #15,%d0
     bhi.s .ptr_done
@@ -64,14 +64,14 @@ ch_lock_ptr:
     add.l %d2,%d4
     lsl.l #6,%d4
     add.l %d3,%d4
-    lea ch_lock_table,%a0
+    lea mhc_lock_table,%a0
     adda.l %d4,%a0
     move.l (%sp)+,%d4
 .ptr_done:
     rts
-ch_lock_get:
+mhc_lock_get:
     move.l %d0,-(%sp)
-    jsr ch_lock_ptr
+    jsr mhc_lock_ptr
     move.l %a0,%d0
     beq.s .get_invalid
     moveq #0,%d0
@@ -80,7 +80,7 @@ ch_lock_get:
     bls.s .get_done
 .get_default:
     move.l (%sp),%d0
-    jsr ch_base_pattern
+    jsr mhc_base_pattern
     bra.s .get_done
 .get_invalid:
     moveq #0,%d0
@@ -91,7 +91,7 @@ ch_lock_get:
 /* Same indices, d4=quality or 255. All registers preserved.
  * Invalid inputs have no writes. Caller marks the native bank dirty.
  */
-ch_lock_set:
+mhc_lock_set:
     lea -12(%sp),%sp
     movem.l %d0-%d1/%a0,(%sp)
     cmpi.l #7,%d4
@@ -99,13 +99,13 @@ ch_lock_set:
     cmpi.l #255,%d4
     bne.s .set_done
 .set_valid:
-    jsr ch_lock_ptr
+    jsr mhc_lock_ptr
     move.l %a0,%d1
     beq.s .set_done
     move.b %d4,(%a0)
-    cmp.l ch_nv_bank,%d0
+    cmp.l mhc_nv_bank,%d0
     bne.s .set_done
-    jsr ch_nv_save
+    jsr mhc_nv_save
 .set_done:
     movem.l (%sp),%d0-%d1/%a0
     lea 12(%sp),%sp
@@ -117,15 +117,15 @@ ch_lock_set:
  * Long interrupt masks would delay the audio ISR, so only ticket/commit
  * are protected. Generation mismatch restarts using the newest bank.
  */
-ch_nv_save:
+mhc_nv_save:
     jmp hd_nv_save
 /* d0 bank -> d0=1 restored, 0 invalid; other registers preserved. */
-ch_nv_restore:
+mhc_nv_restore:
     jmp hd_nv_restore
     .balign 4
-ch_initialized: .long 0
-ch_nv_bank: .long -1
-ch_lock_status: .space 16,0
+mhc_initialized: .long 0
+mhc_nv_bank: .long -1
+mhc_lock_status: .space 16,0
     .bss
     .balign 4
-ch_lock_table: .space CH_BYTES
+mhc_lock_table: .space CH_BYTES

@@ -33,7 +33,7 @@ def main():
                 p.otp._bank_write(work/'project',int(path.stem[4:]),seed,guard=False)
             card,_=p.emu_card.stage_project(work/'project','OCTABAM','BASS',tree=work/'size-tree')
             (work/'card.img').write_bytes(card)
-            events=p.run(work,'play',['--step',f'-:poke:{sym["ch_lock_table"]+2:#x}=0;{sym["ch_lock_table"]+4:#x}=1;{sym["ch_lock_table"]+8:#x}=2',
+            events=p.run(work,'play',['--step',f'-:poke:{sym["mhc_lock_table"]+2:#x}=0;{sym["mhc_lock_table"]+4:#x}=1;{sym["mhc_lock_table"]+8:#x}=2',
                 '--sequencer','--internal-clock','--frames','7000',
                 '--mem-dump',f'{sym["mh_refs"]:#x},1024={work}/refs.bin'])
             p.balanced(events)
@@ -87,7 +87,7 @@ def main():
                 p.otp._bank_write(work/'project',int(path.stem[4:]),seed,guard=False)
             card,_=p.emu_card.stage_project(work/'project','OCTABAM','BASS',tree=work/'musical-tree')
             (work/'card.img').write_bytes(card)
-            locks=';'.join(f'{sym["ch_lock_table"]+step:#x}={q}' for step,q in zip((2,4,8),qualities))
+            locks=';'.join(f'{sym["mhc_lock_table"]+step:#x}={q}' for step,q in zip((2,4,8),qualities))
             events=p.run(work,'play',['--step','-:poke:'+locks,'--sequencer','--internal-clock','--frames','7000',
                 '--mem-dump',f'{sym["mh_refs"]:#x},1024={work}/refs.bin'])
             p.balanced(events)

@@ -94,7 +94,7 @@ def benchmark(root, remix, machine, response):
             m.uc.mem_write(m.part_address(RECEIVER, 5), bytes((mode,)))
             m.set_key(0, key)
             m.set_key(RECEIVER, 24)  # own KEY differs from inherited source KEY
-            m.uc.mem_write(symbols['ch_sequence_quality'] + RECEIVER, b'\0')
+            m.uc.mem_write(symbols['mhc_sequence_quality'] + RECEIVER, b'\0')
             m.call('bf_response_tick', 1 << RECEIVER, 0)
             m.uc.mem_write(m.scratch, b'\x24')
             m.call('bf_response_observe', regs={UC_M68K_REG_D7: RECEIVER,

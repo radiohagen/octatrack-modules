@@ -333,14 +333,14 @@ mh_direct:
     lsr.l #2,%d5
     andi.l #15,%d5
     /* d2 snapped root, d4 mask, d5 tonic. */
-    lea ch_current,%a0
+    lea mhc_current,%a0
     moveq #0,%d1
     move.b (%a0,%d7.l),%d1
     move.l %d2,%d0
     move.l %d4,%d2
     move.l %d5,%d3
     move.l %a1,%a0
-    jsr ch_build
+    jsr mhc_build
     moveq #1,%d0
     bra.w .gen_return
 .gen_invalid:
@@ -355,7 +355,7 @@ mh_sequence:
     lea -12(%sp),%sp
     movem.l %d0-%d1/%a0,(%sp)
     move.l %d7,%d0
-    jsr ch_sequence_context
+    jsr mhc_sequence_context
     moveq #0,%d1
     move.b 0x22c(%a5),%d1
     subi.l #64,%d1
@@ -367,7 +367,7 @@ mh_sequence:
     lea -4(%fp),%a0
     jsr hd_sequence_prepare
     bsr.w mh_generate
-    lea ch_sequence_root,%a0
+    lea mhc_sequence_root,%a0
     move.b -4(%fp),%d1
     move.b %d1,(%a0,%d7.l)
     lea -4(%fp),%a0
@@ -431,12 +431,12 @@ mh_prepare:
 /* Final correction also keeps stock arp step offsets inside the scale. */
     .global mh_final,mh_output
 mh_final:
-    jmp ch_final
+    jmp mhc_final
     .global mh_final_ui
 mh_final_ui:
     lea -8(%sp),%sp
     movem.l %d2/%a0,(%sp)
-    lea ch_current,%a0
+    lea mhc_current,%a0
     moveq #0,%d2
     move.b (%a0,%d1.l),%d2
     cmpi.l #5,%d2
@@ -499,7 +499,7 @@ mh_output:
     moveq #0,%d0
     move.b (%a2),%d0
     move.l %d7,%d1
-    jsr ch_output_final
+    jsr mhc_output_final
     move.b %d0,(%a2)
     movem.l (%sp),%d0-%d1/%a0
     lea 12(%sp),%sp
@@ -549,7 +549,7 @@ mh_defaults:
     clr.l 0x100b14d8
     jmp 0x40025ace
 mh_boot:
-    jsr ch_lock_init
+    jsr mhc_lock_init
     lea -12(%sp),%sp
     movem.l %d0-%d1/%a0,(%sp)
     bsr.w mh_reset
@@ -704,7 +704,7 @@ mh_keyboard:
     tst.l %d4
     beq.w .keyboard_done
     move.l %d2,%d0
-    jsr ch_live_context
+    jsr mhc_live_context
     lea 40(%sp),%a2
     move.b %d3,(%a2)
     /* All keyboard modes choose an absolute root and inherit only scale. */
@@ -1013,7 +1013,7 @@ mh_follow_shift:
     move.l %d0,%d4
     move.l %d1,%d5
     move.l %d2,%d6
-    lea ch_sequence_quality,%a0
+    lea mhc_sequence_quality,%a0
     moveq #0,%d0
     move.b (%a0,%d7.l),%d0
     cmpi.l #5,%d0

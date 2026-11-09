@@ -3,9 +3,9 @@
  * of the composed NOTE descriptor. No native Part or NOT2-4 byte is edited.
  */
     .text
-    .global ch_descriptor,ch_draw_value,ch_encoder,ch_step_encoder
-    .global ch_ui_dirty,ch_ui_redraw
-ch_descriptor:
+    .global mhc_descriptor,mhc_draw_value,mhc_encoder,mhc_step_encoder
+    .global mhc_ui_dirty,mhc_ui_redraw
+mhc_descriptor:
     tst.l 8(%fp)
     bne.w .desc_return
     moveq #0,%d0
@@ -14,25 +14,25 @@ ch_descriptor:
     tst.l %d0
     beq.w .desc_stock
     lea 0x400d3e3e,%a0
-    lea ch_note_descriptor,%a1
+    lea mhc_note_descriptor,%a1
     move.l #402/2,%d0
 .desc_copy:
     move.w (%a0)+,(%a1)+
     subq.l #1,%d0
     bne.s .desc_copy
-    lea ch_note_descriptor,%a0
+    lea mhc_note_descriptor,%a0
     jsr hd_descriptor
     moveq #0,%d0
     move.b 0x100b14cc,%d0
     jsr mh_get
     cmpi.l #1,%d0
     beq.w .desc_degree_return
-    lea ch_note_descriptor,%a0
+    lea mhc_note_descriptor,%a0
     move.l #0x43485244,%d0
     move.l %d0,0x28(%a0) /* CHRD */
     moveq #0,%d0
     move.b 0x80000002,%d0
-    lea ch_lock_status,%a1
+    lea mhc_lock_status,%a1
     move.b (%a1,%d0.l),%d0
     cmpi.b #2,%d0
     bcs.s .desc_status_ok
@@ -48,19 +48,19 @@ ch_descriptor:
     clr.w 0x38(%a0)
     clr.l 0x76(%a0)
     moveq #8,%d0
-    move.l %d0,ch_note_descriptor+0xa6
-    move.l #ch_quality_format,%d0
-    move.l %d0,ch_note_descriptor+0xd6
+    move.l %d0,mhc_note_descriptor+0xa6
+    move.l #mhc_quality_format,%d0
+    move.l %d0,mhc_note_descriptor+0xd6
     move.l #0x400467a4,%d0
-    move.l %d0,ch_note_descriptor+0x106
-    clr.l ch_note_descriptor+0x136
-    move.l ch_note_descriptor+0x18e,%d0
+    move.l %d0,mhc_note_descriptor+0x106
+    clr.l mhc_note_descriptor+0x136
+    move.l mhc_note_descriptor+0x18e,%d0
     andi.l #0xff00ffff,%d0
-    move.l %d0,ch_note_descriptor+0x18e /* disable E/F only */
+    move.l %d0,mhc_note_descriptor+0x18e /* disable E/F only */
 .desc_degree_return:
-    lea ch_note_descriptor,%a0
+    lea mhc_note_descriptor,%a0
     jsr ha_descriptor
-    move.l #ch_note_descriptor,%d0
+    move.l #mhc_note_descriptor,%d0
     bra.s .desc_return
 .desc_stock:
     move.l #0x400d3e3e,%d0
@@ -72,7 +72,7 @@ ch_descriptor:
 /* Main NOTE draw, after native lock/default selection, before widget.
  * a4 is slot, d0 value, d5 widget flags (bit0 explicit lock).
  */
-ch_draw_value:
+mhc_draw_value:
     lea -24(%sp),%sp
     movem.l %d0-%d3/%a0-%a1,(%sp)
     tst.l 8(%fp)
@@ -109,7 +109,7 @@ ch_draw_value:
     moveq #0,%d2
     move.b 0x100b14cc,%d2
     move.l %d2,%d0 /* The knob shows its Part default, never a live override. */
-    jsr ch_base_get
+    jsr mhc_base_get
     bclr #0,%d5 /* Native NOT2 locks must not highlight the CHRD default. */
     tst.l 0x460d173a /* lock-inspection flag */
     beq.s .draw_live
@@ -117,7 +117,7 @@ ch_draw_value:
     tst.l %d0
     bpl.s .draw_step
     move.l %d2,%d0
-    jsr ch_base_get
+    jsr mhc_base_get
     bra.s .draw_live
 .draw_step:
     move.l %d0,%d3
@@ -125,7 +125,7 @@ ch_draw_value:
     move.b 0x100b14d0,%d1
     moveq #0,%d0
     move.b 0x80000002,%d0
-    jsr ch_lock_ptr
+    jsr mhc_lock_ptr
     moveq #0,%d0
     bclr #0,%d5
     move.l %a0,%d1
@@ -135,7 +135,7 @@ ch_draw_value:
     bls.s .draw_locked
 .draw_default:
     move.l %d2,%d0
-    jsr ch_base_get
+    jsr mhc_base_get
     bra.s .draw_live
 .draw_locked:
     bset #0,%d5
@@ -149,7 +149,7 @@ ch_draw_value:
     jmp 0x4004e38a
 
 /* Both stock editors take (slot, delta). Only main NOTE D/E/F are owned. */
-ch_encoder:
+mhc_encoder:
     tst.l mh_page_win
     bne.w mh_page_encoder
     move.l 4(%sp),%d1
@@ -161,15 +161,15 @@ ch_encoder:
     move.l 4(%sp),%d1
     jsr hd_ui_owned
     tst.l %d0
-    beq.s .ch_encoder_ordinary
+    beq.s .mhc_encoder_ordinary
     jmp hd_encoder
-.ch_encoder_ordinary:
+.mhc_encoder_ordinary:
     move.l 4(%sp),%d1
     jsr hd_ui_disabled
     tst.l %d0
     bne.w .edit_done
     move.l 4(%sp),%d1
-    bsr.w ch_ui_owned
+    bsr.w mhc_ui_owned
     tst.l %d0
     bne.s .live_owned
     lea -48(%sp),%sp
@@ -188,21 +188,21 @@ ch_encoder:
     moveq #0,%d2
     move.b 0x100b14cc,%d2
     move.l %d2,%d0
-    jsr ch_base_get
+    jsr mhc_base_get
     move.l %d3,%d1
-    bsr.w ch_clamp_delta
+    bsr.w mhc_clamp_delta
     move.l %d0,%d1
     move.l %d2,%d0
-    jsr ch_base_set
+    jsr mhc_base_set
     move.l %d2,%d1
-    jsr ch_refresh_quality
+    jsr mhc_refresh_quality
     movem.l (%sp),%d2-%d3/%a2-%a3
     lea 16(%sp),%sp
-    bra.w ch_ui_redraw
+    bra.w mhc_ui_redraw
 .edit_done:
     rts
 
-ch_step_encoder:
+mhc_step_encoder:
     /* Native trig holds install an encoder layer above the modal. Keep
      * its releases native, but route edits to this track-only window. */
     tst.l mh_page_win
@@ -216,15 +216,15 @@ ch_step_encoder:
     move.l 4(%sp),%d1
     jsr hd_ui_owned
     tst.l %d0
-    beq.s .ch_step_encoder_ordinary
+    beq.s .mhc_step_encoder_ordinary
     jmp hd_step_encoder
-.ch_step_encoder_ordinary:
+.mhc_step_encoder_ordinary:
     move.l 4(%sp),%d1
     jsr hd_ui_disabled
     tst.l %d0
     bne.w .edit_done
     move.l 4(%sp),%d1
-    bsr.w ch_ui_owned
+    bsr.w mhc_ui_owned
     tst.l %d0
     bne.s .steps_owned
     lea -80(%sp),%sp
@@ -240,12 +240,12 @@ ch_step_encoder:
     move.l 40(%sp),%d1
     jsr mh_ui_delta
     move.l %d0,%d7
-    tst.l ch_toggle_active
+    tst.l mhc_toggle_active
     bne.s .steps_edit
     tst.l %d7
     beq.w .steps_no_change
 .steps_edit:
-    jsr ch_lock_init
+    jsr mhc_lock_init
     moveq #0,%d2
     move.b 0x100b14cc,%d2
     moveq #0,%d5
@@ -260,13 +260,13 @@ ch_step_encoder:
     move.b 0x100b14d0,%d1
     move.l %d6,%d3
     add.l 0x460d174c,%d3
-    jsr ch_lock_ptr
+    jsr mhc_lock_ptr
     move.l %a0,%d0
     beq.s .step_next
     move.l %a0,%a2
     moveq #0,%d0
     move.b (%a2),%d0
-    tst.l ch_toggle_active
+    tst.l mhc_toggle_active
     beq.s .step_turn
     cmpi.l #7,%d0
     bhi.s .step_lock_default
@@ -274,16 +274,16 @@ ch_step_encoder:
     bra.s .step_store
 .step_lock_default:
     move.l %d2,%d0
-    jsr ch_base_get
+    jsr mhc_base_get
     bra.s .step_store
 .step_turn:
     cmpi.l #7,%d0
     bls.s .step_value
     move.l %d2,%d0
-    jsr ch_base_get
+    jsr mhc_base_get
 .step_value:
     move.l %d7,%d1
-    bsr.w ch_clamp_delta
+    bsr.w mhc_clamp_delta
  .step_store:
     move.b %d0,(%a2)
     move.l %d3,-(%sp)
@@ -296,8 +296,8 @@ ch_step_encoder:
     bne.s .step_loop
     moveq #0,%d0
     move.b 0x80000002,%d0
-    jsr ch_nv_save
-    jsr ch_ui_dirty
+    jsr mhc_nv_save
+    jsr mhc_ui_dirty
     movem.l (%sp),%d2-%d7/%a2-%a3
     lea 32(%sp),%sp
     /* Native tail marks this as a held-step edit and places trigless locks
@@ -312,7 +312,7 @@ ch_step_encoder:
     rts
 
 /* d1 = NOTE-page slot. */
-ch_ui_owned:
+mhc_ui_owned:
     moveq #0,%d0
     tst.l 0x80000012
     beq.s .owned_done
@@ -343,7 +343,7 @@ ch_ui_owned:
     andi.l #1,%d0
 .owned_done:
     rts
-ch_clamp_delta:
+mhc_clamp_delta:
     cmpi.l #7,%d1
     ble.s .clamp_low
     moveq #7,%d1
@@ -361,25 +361,25 @@ ch_clamp_delta:
     moveq #7,%d0
 .clamp_done:
     rts
-ch_ui_dirty:
+mhc_ui_dirty:
     move.l 0x46c82456,%a0
     move.l #0x9b332,%d0
     moveq #1,%d1
     move.l %d1,(%a0,%d0.l)
     move.l %d1,0x100f8598
     jmp 0x40027e00
-ch_ui_redraw:
+mhc_ui_redraw:
     pea -1
     jsr 0x4004d948
     addq.l #4,%sp
     rts
     .bss
     .balign 4
-ch_note_descriptor: .space 402
+mhc_note_descriptor: .space 402
 
     .text
-    .global ch_step_push
-ch_step_push:
+    .global mhc_step_push
+mhc_step_push:
     tst.l mh_page_win
     bne.w mh_page_noop
     move.l 4(%sp),%d1
@@ -393,9 +393,9 @@ ch_step_push:
     subi.l #56,%d1
     jsr hd_ui_owned
     tst.l %d0
-    beq.s .ch_step_push_ordinary
+    beq.s .mhc_step_push_ordinary
     jmp hd_step_push
-.ch_step_push_ordinary:
+.mhc_step_push_ordinary:
     move.l 4(%sp),%d1
     subi.l #56,%d1
     jsr hd_ui_disabled
@@ -403,7 +403,7 @@ ch_step_push:
     bne.w .push_done
     move.l 4(%sp),%d1
     subi.l #56,%d1
-    bsr.w ch_ui_owned
+    bsr.w mhc_ui_owned
     tst.l %d0
     beq.s .push_stock
     move.l 4(%sp),%d0
@@ -412,12 +412,12 @@ ch_step_push:
     move.l 8(%sp),%d0
     cmpi.l #1,%d0
     bne.s .push_done
-    move.l %d0,ch_toggle_active
+    move.l %d0,mhc_toggle_active
     clr.l -(%sp)
     pea 3
-    bsr.w ch_step_encoder
+    bsr.w mhc_step_encoder
     addq.l #8,%sp
-    clr.l ch_toggle_active
+    clr.l mhc_toggle_active
 .push_done:
     rts
 .push_stock:
@@ -425,13 +425,13 @@ ch_step_push:
     movem.l %d2-%d7/%a2-%fp,(%sp)
     jmp 0x40050414
     .balign 4
-ch_toggle_active: .long 0
+mhc_toggle_active: .long 0
 
 /* EDIT EVENTS ownership predicate. No edits; d0=encoder, d1=delta.
  * Non-Harmony contexts continue through the shared dispatcher. */
     .global mh_ed_claim,mh_ed_handle
 mh_ed_handle:
-    jmp ch_step_encoder
+    jmp mhc_step_encoder
 mh_ed_claim:
     tst.l 0x80000012
     beq.s mh_ed_no
@@ -451,7 +451,7 @@ mh_ed_claim:
     tst.l %d0
     bne.s mh_ed_claimed
     move.l (%sp),%d1
-    bsr.w ch_ui_owned
+    bsr.w mhc_ui_owned
     tst.l %d0
     bne.s mh_ed_claimed
     lea 4(%sp),%sp

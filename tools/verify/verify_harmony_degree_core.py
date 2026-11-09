@@ -41,13 +41,13 @@ def main():
                                     + '.set HD_FOLLOW,1\n.set HD_SCENES,0\n')
         (out/'stub.s').write_text("""
 .data
-.global ch_lock_table,ch_nv_bank,ch_lock_status
-ch_nv_bank: .long -1
-ch_lock_status: .space 16
+.global mhc_lock_table,mhc_nv_bank,mhc_lock_status
+mhc_nv_bank: .long -1
+mhc_lock_status: .space 16
 .bss
-ch_lock_table: .space 131072
-.global ch_messages,store_part_snapshot_bank,store_part_snapshot_parts,store_part_snapshot,store_part_epochs
-ch_messages: .space 4096
+mhc_lock_table: .space 131072
+.global mhc_messages,store_part_snapshot_bank,store_part_snapshot_parts,store_part_snapshot,store_part_epochs
+mhc_messages: .space 4096
 store_part_snapshot_bank: .space 4
 store_part_snapshot_parts: .space 4
 store_part_snapshot: .space 1152
@@ -288,7 +288,7 @@ store_part_epochs: .space 256
         for slot in range(4): assert call('hd_event_fire_c',slot*8,0)==48
         # Queued physical pitch remains intact; only captured representation
         # crosses HARM/OFF. A different UI Part's edit cannot convert it.
-        msg=sym['ch_messages']
+        msg=sym['mhc_messages']
         u.mem_write(msg,bytes((70,8,48,100))+bytes(9)+bytes((0,1,0)))
         mode(0,0,0,2); put(key(0,0,0),2)
         captured=call('hd_capture_message_c',msg,48,0); put(msg+15,captured)
@@ -307,7 +307,7 @@ store_part_epochs: .space 256
         # Dense retention: all qualities and pattern lanes, no Part defaults.
         from verify_midi_sram import BASE as SRAM_BASE, OFFSETS
         payload_len=15104
-        chord=sym['ch_lock_table']
+        chord=sym['mhc_lock_table']
         def snapshot():
             bank=bytes(u.mem_read(SRAM_BASE,16*0x8ed8))
             return bytes(bank[o] for o in OFFSETS)

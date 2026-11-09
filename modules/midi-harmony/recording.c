@@ -2,12 +2,12 @@
  * used to release a key, remain unchanged. The companion metadata lasts only
  * until that message is consumed; nothing here belongs in a Part or Kit. */
 #include "core.h"
-extern uint8_t ch_messages[4096];
+extern uint8_t mhc_messages[4096];
 typedef struct { uint8_t context, attached; uint16_t scale; } Capture;
 static Capture captures[256];
 
 static int index_of(uintptr_t message) {
-    uintptr_t offset = message-(uintptr_t)ch_messages;
+    uintptr_t offset = message-(uintptr_t)mhc_messages;
     return offset < 4096 && !(offset & 15) ? (int)(offset/16) : -1;
 }
 static unsigned absolute(unsigned degree, unsigned scale) {
@@ -32,7 +32,7 @@ int hd_capture_message_c(uintptr_t message, unsigned note, unsigned track) {
 }
 static void convert(unsigned index, unsigned context, unsigned track, unsigned mode) {
     Capture *capture = &captures[index];
-    uint8_t *message = ch_messages+index*16;
+    uint8_t *message = mhc_messages+index*16;
     unsigned value = message[15];
     if (capture->attached)
         capture->scale = (uint16_t)hd_scale_c(capture->context/4,capture->context%4,track);
@@ -47,14 +47,14 @@ void hd_record_modes_c(unsigned track, unsigned mode) {
     int context = hd_ui_context_c();
     if (context < 0 || track >= 8 || mode > 2) return;
     for (unsigned i = 0; i < 256; ++i) {
-        const uint8_t *message = ch_messages+i*16;
+        const uint8_t *message = mhc_messages+i*16;
         if (message[14] && message[13] == track && captures[i].context == (unsigned)context)
             convert(i,(unsigned)context,track,mode);
     }
 }
 void hd_record_part_before_c(unsigned context) {
     for (unsigned i = 0; i < 256; ++i) {
-        const uint8_t *message = ch_messages+i*16;
+        const uint8_t *message = mhc_messages+i*16;
         Capture *capture = &captures[i];
         unsigned track = message[13];
         if (message[14] && capture->attached && hd_context_depends_c(capture->context,track,context)) {
@@ -66,7 +66,7 @@ void hd_record_part_before_c(unsigned context) {
 void hd_record_consume_c(uintptr_t message) {
     int index = index_of(message), context = hd_ui_context_c();
     if (index < 0 || context < 0) return;
-    unsigned track = ch_messages[index*16+13];
+    unsigned track = mhc_messages[index*16+13];
     if (track >= 8) return;
     convert((unsigned)index,(unsigned)context,track,
             hd_part_type_c((unsigned)context/4,(unsigned)context%4,track));

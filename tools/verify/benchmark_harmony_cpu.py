@@ -36,7 +36,7 @@ class CpuMachine(Machine):
         super().__init__(lambda:symbols,artifact_root=out)
         self.initial_sr = 0x2000
         self.call('store_part_activate',stop=0x4000f938)
-        self.call('ch_lock_init')
+        self.call('mhc_lock_init')
         self.uc.mem_write(BANK,b'\xff'*STRIDE)
         for pattern in range(16): self.put(BANK+pattern*0x8ed8+0x8e57,0)
         for part in range(8):
@@ -99,7 +99,7 @@ def observation_state(m):
     # Part data, dirty flags or the retained commit words.
     state = {name:bytes(m.uc.mem_read(m.sym[name],size)).hex()
              for name,size in (('hd_banks',128*131),('revision',128*4),
-                               ('bank_revision',4),('ch_lock_status',1))}
+                               ('bank_revision',4),('mhc_lock_status',1))}
     state['native_bank'] = bytes(m.uc.mem_read(BANK,STRIDE)).hex()
     state['live_bank'] = bytes(m.uc.mem_read(0x1001614e,STRIDE)).hex()
     return state
@@ -196,16 +196,16 @@ def cases(m):
             notes=[255 if d==255 else max(0,min(127,(d//7-1)*12+(0,2,4,5,7,9,11)[d%7])) for d in degrees]
             roots.extend(bytes(degrees+notes+[2 if density else 1,0,255]))
             qualities.extend(bytes((i+lane)%8 if lane*64+i<density else 255 for i in range(64)))
-        u.mem_write(s['hd_banks'],bytes(roots));u.mem_write(s['ch_lock_table'],bytes(qualities))
-        restore_fields=(('hd_banks',128*131),('ch_lock_table',8192),
-                        ('ha_lanes',4736),('ch_lock_status',1))
+        u.mem_write(s['hd_banks'],bytes(roots));u.mem_write(s['mhc_lock_table'],bytes(qualities))
+        restore_fields=(('hd_banks',128*131),('mhc_lock_table',8192),
+                        ('ha_lanes',4736),('mhc_lock_status',1))
         # Seeded roots already use canonical NOTE mirrors and detached
         # contexts, exactly as the persisted representation reconstructs.
         expected_restore=[1,bytes(roots).hex(),bytes(qualities).hex(),
                           bytes(u.mem_read(s['ha_lanes'],4736)).hex(),
-                          bytes(u.mem_read(s['ch_lock_status'],1)).hex()]
+                          bytes(u.mem_read(s['mhc_lock_status'],1)).hex()]
         def retain():
-            m.call('ch_nv_save',0)
+            m.call('mhc_nv_save',0)
             return retained.snapshot(m).hex()
         yield f'harmony/retain_{name}',retain
         # Host-only setup is outside the measured callback. A successful
@@ -213,7 +213,7 @@ def cases(m):
         for label,size in restore_fields:
             u.mem_write(s[label],b'\xcc'*size)
         def restore():
-            result=[m.call('ch_nv_restore',0),
+            result=[m.call('mhc_nv_restore',0),
                     *(bytes(u.mem_read(s[label],size)).hex() for label,size in restore_fields)]
             assert result==expected_restore,('restore did not reconstruct the saved bank',name)
             return result

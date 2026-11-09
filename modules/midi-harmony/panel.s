@@ -1,7 +1,7 @@
 /* Native page/editor ABI adapters. Only NOTE-page slot A in HARM is owned. */
     .text
     .global hd_ui_owned,hd_encoder,hd_step_encoder,hd_step_push,hd_draw,hd_descriptor
-hd_ui_owned: /* d1 slot -> d0 boolean; same volatile set as ch_ui_owned */
+hd_ui_owned: /* d1 slot -> d0 boolean; same volatile set as mhc_ui_owned */
     moveq #0,%d0
     tst.l %d1
     bne.s .owned_return
@@ -117,7 +117,7 @@ hd_encoder:
     tst.l %d0
     beq.s .encoder_done
     bsr.w .edit_finish
-    jmp ch_ui_redraw
+    jmp mhc_ui_redraw
 .encoder_done:
     rts
 hd_step_push:
@@ -152,8 +152,8 @@ hd_step_encoder:
 hd_edit_finish:
     moveq #0,%d0
     move.b 0x80000002,%d0
-    jsr ch_nv_save
-    jmp ch_ui_dirty
+    jsr mhc_nv_save
+    jmp mhc_ui_dirty
 .bitmaps:
     .global hd_bitmaps
 hd_bitmaps:

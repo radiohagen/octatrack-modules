@@ -16,7 +16,7 @@ def machine():
     m=h.Machine();u=m.uc
     m.setting(0,2)
     def voice(root=60,quality=0):
-        u.mem_write(m.sym['ch_current'],bytes((quality,)))
+        u.mem_write(m.sym['mhc_current'],bytes((quality,)))
         raw=m.chord(0,root)
         u.mem_write(m.scratch,bytes(raw))
         m.call('mh_voice',0,a0=m.scratch)
@@ -70,20 +70,20 @@ def machine():
     # Storage uses native Parts: every CHRD/SIZE combination, independent
     # writers, invalid bytes/edits, UI vs playing context, all eight tracks.
     for t,q,size in itertools.product(range(8),range(8),range(4)):
-        m.call('ch_base_set',t,q);m.call('mh_size_set',t,size)
-        assert m.call('ch_base_get',t)==q and m.call('mh_size_get',t)==size
+        m.call('mhc_base_set',t,q);m.call('mh_size_set',t,size)
+        assert m.call('mhc_base_get',t)==q and m.call('mh_size_get',t)==size
         assert u.mem_read(m.part_address(t,18),1)[0]==q+8*size
-        m.call('ch_base_set',t,(q+1)%8)
+        m.call('mhc_base_set',t,(q+1)%8)
         assert m.call('mh_size_get',t)==size
     for byte in (32,63,127,255):
         u.mem_write(m.part_address(0,18),bytes((byte,)))
-        assert m.call('mh_size_get',0)==m.call('ch_base_get',0)==0
+        assert m.call('mh_size_get',0)==m.call('mhc_base_get',0)==0
     for value in (4,127,0xffffffff):
         before=bytes(u.mem_read(m.part_address(0,18),1))
         assert m.call('mh_size_set',0,value)==0
         assert bytes(u.mem_read(m.part_address(0,18),1))==before
     m.call('mh_size_set',0,3)
-    assert m.call('ch_base_get',0)==0
+    assert m.call('mhc_base_get',0)==0
     u.mem_write(0x100b14cf,b'\x01')
     m.call('mh_size_set',0,1)
     assert m.call('mh_size_get',0)==1 and m.call('mh_size_get_at',0,0)==3
@@ -152,7 +152,7 @@ def machine():
         held[t]=[e[1] for e in events if e[2]]
         assert len(held[t])==2+t%3,(t,events)
     for t in range(8):
-        m.call('mh_size_set',t,(t+1)%4);m.call('ch_base_set',t,7)
+        m.call('mh_size_set',t,(t+1)%4);m.call('mhc_base_set',t,7)
         m.call('mh_root_set',t,1);m.call('mh_voic_set',t,3)
         events=k.key(t,48+t,0)
         assert sorted(e[1] for e in events if not e[2])==sorted(held[t])

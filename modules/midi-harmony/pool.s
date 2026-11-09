@@ -45,7 +45,7 @@ hd_tick:
     subi.l #64,%d1
     move.b %d1,63(%sp)
     move.l %d7,%d0
-    jsr ch_sequence_context
+    jsr mhc_sequence_context
     move.l %d7,%d0
     lea 60(%sp),%a0
     jsr hd_sequence_prepare
@@ -64,7 +64,7 @@ hd_tick:
     moveq #1,%d2
     move.b %d2,(%a1,%d7.l)
 .pool_valid:
-    lea ch_sequence_root,%a1
+    lea mhc_sequence_root,%a1
     move.b 60(%sp),%d1
     move.b %d1,(%a1,%d7.l)
     tst.l %d0

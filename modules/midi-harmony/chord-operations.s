@@ -3,7 +3,7 @@
  * destinations. Audio-track copies deliberately have no CHRD counterpart.
  */
     .text
-    .global ch_copy_mirror,ch_clear_locks,ch_clear_track,ch_place,ch_step_copy,ch_step_paste
+    .global mhc_copy_mirror,mhc_clear_locks,mhc_clear_track,mhc_place,mhc_step_copy,mhc_step_paste
 .ui_bank:
     move.l 0x46c82456,%d0
     subi.l #0x400e21e0,%d0
@@ -12,8 +12,8 @@
     rts
 .touch:
     bsr.s .ui_bank
-    jmp ch_nv_save
-ch_place:
+    jmp mhc_nv_save
+mhc_place:
     lsl.l #4,%d6
     move.l %a5,%d3
     add.l %d6,%d3
@@ -26,18 +26,18 @@ ch_place:
     move.b 0x100b14cc,%d2
     move.l #255,%d4
     jsr hd_forget
-    jsr ch_lock_set
+    jsr mhc_lock_set
     movem.l (%sp),%d0-%d2/%d4/%a0
     lea 20(%sp),%sp
     jmp 0x4005fd90
-ch_clear_locks:
+mhc_clear_locks:
     lea -32(%sp),%sp
     movem.l %d0-%d6/%a0,(%sp)
     bsr.w .ui_bank
     move.l 36(%sp),%d1
     move.l 40(%sp),%d2
     moveq #0,%d3
-    jsr ch_lock_ptr
+    jsr mhc_lock_ptr
     move.l %a0,%d0
     beq.s .clear_locks_done
     moveq #0,%d5
@@ -75,7 +75,7 @@ ch_clear_locks:
     lea -44(%sp),%sp
     movem.l %d2-%d7/%a2-%fp,(%sp)
     jmp 0x40040d4c
-ch_clear_track:
+mhc_clear_track:
     move.l 12(%sp),%d0
     btst #0,%d0
     beq.s .clear_track_stock
@@ -85,7 +85,7 @@ ch_clear_track:
     move.l 24(%sp),%d1
     move.l 28(%sp),%d2
     moveq #0,%d3
-    jsr ch_lock_ptr
+    jsr mhc_lock_ptr
     move.l %a0,%d0
     beq.s .clear_track_done
     moveq #-1,%d0
@@ -113,16 +113,16 @@ ch_clear_track:
     jmp 0x40039b08
 
 .buf_of:
-    lea ch_clip,%a1
+    lea mhc_clip,%a1
     cmpi.l #0x460c8122,%d0
     beq.s .buf_done
-    lea ch_undo,%a1
+    lea mhc_undo,%a1
     cmpi.l #0x460bf218,%d0
     beq.s .buf_done
     suba.l %a1,%a1
 .buf_done:
     rts
-ch_step_copy:
+mhc_step_copy:
     jsr hd_step_copy
     lea -36(%sp),%sp
     movem.l %d0-%d6/%a0-%a1,(%sp)
@@ -130,7 +130,7 @@ ch_step_copy:
     move.l 44(%sp),%d1
     move.l 48(%sp),%d2
     moveq #0,%d3
-    jsr ch_lock_ptr
+    jsr mhc_lock_ptr
     move.l %a0,%d0
     beq.s .step_copy_done
     move.l 40(%sp),%d0
@@ -164,7 +164,7 @@ ch_step_copy:
     jmp 0x4002bd34
 /* MIDI paste: a5 buffer, d3 source page bit, d4 destination step,
  * original sp+96 pattern, sp+100 track. */
-ch_step_paste:
+mhc_step_paste:
     lea -28(%sp),%sp
     movem.l %d0-%d5/%a0,(%sp)
     move.l %a1,-(%sp)
@@ -179,7 +179,7 @@ ch_step_paste:
     move.l 132(%sp),%d2
     move.l %d4,%d3
     move.l %d5,%d4
-    jsr ch_lock_set
+    jsr mhc_lock_set
 .paste_done:
     move.l (%sp)+,%a1
     movem.l (%sp),%d0-%d5/%a0
@@ -191,11 +191,11 @@ ch_step_paste:
  * Preserves a1 (source counterpart while resolving destination). */
 .locate:
     move.l %d0,%d1
-    lea ch_clip,%a0
+    lea mhc_clip,%a0
     subi.l #0x460c8122,%d1
     beq.w .loc_done
     move.l %d0,%d1
-    lea ch_undo,%a0
+    lea mhc_undo,%a0
     subi.l #0x460bf218,%d1
     beq.w .loc_done
     suba.l %a0,%a0
@@ -236,11 +236,11 @@ ch_step_paste:
     add.l %d0,%d3
 .loc_valid:
     lsl.l #6,%d3
-    lea ch_lock_table,%a0
+    lea mhc_lock_table,%a0
     adda.l %d3,%a0
 .loc_done:
     rts
-ch_copy_mirror:
+mhc_copy_mirror:
     move.l 12(%sp),%d0
     cmpi.l #0x8b0,%d0
     beq.s .copy_owned
@@ -269,14 +269,14 @@ ch_copy_mirror:
     subq.l #1,%d5
     bne.s .copy_loop
     move.l %a0,%d0
-    subi.l #ch_lock_table,%d0
+    subi.l #mhc_lock_table,%d0
     cmpi.l #131072,%d0
     bcc.s .copy_done
     lsr.l #8,%d0
     lsr.l #5,%d0
-    cmp.l ch_nv_bank,%d0
+    cmp.l mhc_nv_bank,%d0
     bne.s .copy_done
-    jsr ch_nv_save
+    jsr mhc_nv_save
 .copy_done:
     movem.l (%sp),%d2-%d5/%a2-%a3
     lea 24(%sp),%sp
@@ -284,12 +284,12 @@ ch_copy_mirror:
     rts
     .bss
     .balign 4
-ch_clip: .space 512
-ch_undo: .space 512
+mhc_clip: .space 512
+mhc_undo: .space 512
 
     .text
-    .global ch_bitmap_all,ch_bitmap_step
-ch_bitmap_step:
+    .global mhc_bitmap_all,mhc_bitmap_step
+mhc_bitmap_step:
     lea -12(%sp),%sp
     movem.l %d0-%d1/%a0,(%sp)
     move.l %d3,%d0
@@ -300,7 +300,7 @@ ch_bitmap_step:
     movem.l (%sp),%d2-%d4
     lea 12(%sp),%sp
     jmp 0x40033bc2
-ch_bitmap_all:
+mhc_bitmap_all:
     moveq #0,%d2
 .bitmap_track:
     moveq #0,%d3
@@ -338,7 +338,7 @@ ch_bitmap_all:
     movem.l (%sp),%d0-%d3
     lea 16(%sp),%sp
     bne.s .bitmap_set
-    jsr ch_lock_ptr
+    jsr mhc_lock_ptr
     move.l %a0,%d0
     beq.s .bitmap_done
     moveq #0,%d0

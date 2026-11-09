@@ -2,8 +2,8 @@
     .text
     .global hd_memcpy,hd_step_copy,hd_step_apply
 /* Compatibility entry points route through the system, not another client. */
-    .global ch_memcpy,mh_ed_copy_pre,mh_ed_copy_post
-ch_memcpy:
+    .global mhc_memcpy,mh_ed_copy_pre,mh_ed_copy_post
+mhc_memcpy:
 hd_memcpy:
     jmp ed_copy
 /* d0/d1/d2 = destination/source/length. Save native ABI arguments because
@@ -14,7 +14,7 @@ mh_ed_copy_pre:
     move.l %d2,-(%sp)
     move.l %d1,-(%sp)
     move.l %d0,-(%sp)
-    jsr ch_copy_mirror
+    jsr mhc_copy_mirror
     movem.l 12(%sp),%d0-%d2
     movem.l %d0-%d2,(%sp)
     jsr hd_copy_before_c
@@ -28,13 +28,13 @@ mh_ed_copy_post:
     move.b 0x80000002,%d1
     cmp.l %d1,%d0
     bne.s .copy_done
-    jsr ch_nv_save
+    jsr mhc_nv_save
 .copy_done:
     rts
 hd_step_copy: /* ordinary five-argument step-copy ABI, all registers kept */
     lea -16(%sp),%sp
     movem.l %d0-%d1/%a0-%a1,(%sp)
-    move.l 40(%sp),-(%sp) /* extra return address from ch_step_copy */
+    move.l 40(%sp),-(%sp) /* extra return address from mhc_step_copy */
     move.l 40(%sp),-(%sp)
     move.l 40(%sp),-(%sp)
     move.l 40(%sp),-(%sp)
@@ -61,7 +61,7 @@ hd_step_apply:
     move.b 0x80000002,%d1
     cmp.l %d1,%d0
     bne.s .step_done
-    jsr ch_nv_save
+    jsr mhc_nv_save
 .step_done:
     movem.l (%sp),%d0-%d1/%a0-%a1
     lea 16(%sp),%sp

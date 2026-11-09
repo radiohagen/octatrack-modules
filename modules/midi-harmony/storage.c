@@ -9,9 +9,9 @@ static uint8_t track_payload[HD_TRACK_PAYLOAD_BYTES];
 enum { QUALITY_BYTES = HD_LOCKS,
        PAYLOAD_BYTES = HD_TRACK_PAYLOAD_BYTES
 };
-extern uint8_t ch_lock_table[16 * QUALITY_BYTES];
-extern uint8_t ch_lock_status[16];
-extern volatile uint32_t ch_nv_bank;
+extern uint8_t mhc_lock_table[16 * QUALITY_BYTES];
+extern uint8_t mhc_lock_status[16];
+extern volatile uint32_t mhc_nv_bank;
 /* Initialized data: the loader's BSS may still contain staging bytes. */
 static volatile uint32_t generation = 1, available = 1;
 static volatile uint32_t pending = 1;
@@ -36,7 +36,7 @@ static uint32_t hash(const volatile uint8_t *p, unsigned n, uint32_t h) {
  * The old checkpoint must never mistake a new canonical mirror for a
  * physical NOTE edit. Bulk copying is deferred to the UI task. */
 void hd_nv_dirty_c(unsigned bank) {
-    if (bank >= HD_BANKS || ch_nv_bank != bank) return;
+    if (bank >= HD_BANKS || mhc_nv_bank != bank) return;
     invalidate();
     ++generation;
     pending = 1;
@@ -47,7 +47,7 @@ void hd_nv_dirty_c(unsigned bank) {
 void hd_nv_request_c(unsigned bank) {
     if (bank >= HD_BANKS) return;
     uint16_t sr = mask();
-    ch_nv_bank = bank;
+    mhc_nv_bank = bank;
     invalidate();
     ++generation;
     pending = 1;
@@ -57,7 +57,7 @@ void hd_nv_poll_c(void) {
     /* A UI poll is not a new edit. Re-requesting an in-flight save here
      * increments its generation forever when encoding spans a UI tick.
      * Actual edits still invalidate/increment; the outer writer retries. */
-    if (pending && available && ch_nv_bank < HD_BANKS) hd_nv_save_c(ch_nv_bank);
+    if (pending && available && mhc_nv_bank < HD_BANKS) hd_nv_save_c(mhc_nv_bank);
 }
 int hd_payload_valid_c(const uint8_t *p) {
     if (!ha_valid_c(p+HD_PAYLOAD_BYTES)) return 0;
@@ -74,7 +74,7 @@ int hd_export_c(unsigned bank, uint8_t *p) {
     do {
         ticket = generation;
         roots_ticket = hd_revision_c(bank);
-        valid = hd_pack_c(&hd_banks[bank], ch_lock_table + bank*QUALITY_BYTES, p);
+        valid = hd_pack_c(&hd_banks[bank], mhc_lock_table + bank*QUALITY_BYTES, p);
         if (valid) {
             ha_pack_c(bank,p+HD_PAYLOAD_BYTES);
             valid = ha_valid_c(p+HD_PAYLOAD_BYTES);
@@ -86,7 +86,7 @@ void hd_import_c(unsigned bank, const uint8_t *p) {
     /* hd_unpack_c validates all packed lanes before publication. Validate
      * ACC first, without scanning the packed section a second time. */
     if (bank >= 16 || !ha_valid_c(p+HD_PAYLOAD_BYTES) ||
-        !hd_unpack_c(&hd_banks[bank], ch_lock_table + bank*QUALITY_BYTES, p)) return;
+        !hd_unpack_c(&hd_banks[bank], mhc_lock_table + bank*QUALITY_BYTES, p)) return;
     ha_unpack_c(bank,p+HD_PAYLOAD_BYTES);
     hd_bank_loaded_c(bank);
 }
@@ -100,7 +100,7 @@ void hd_nv_save_c(unsigned bank) {
     if (bank >= 16) return;
     hd_checkpoint_c(bank);
     uint16_t sr = mask();
-    ch_nv_bank = bank;
+    mhc_nv_bank = bank;
     ++generation;
     /* Only the outer writer owns SRAM. A preempting save requests a retry
      * instead of committing a snapshot the interrupted writer could damage. */
@@ -110,12 +110,12 @@ void hd_nv_save_c(unsigned bank) {
     unmask(sr);
     for (;;) {
         uint32_t ticket = generation;
-        bank = ch_nv_bank;
+        bank = mhc_nv_bank;
         uint32_t roots_ticket = hd_revision_c(bank);
-        int valid = hd_pack_c(&hd_banks[bank], ch_lock_table + bank*QUALITY_BYTES, track_payload);
+        int valid = hd_pack_c(&hd_banks[bank], mhc_lock_table + bank*QUALITY_BYTES, track_payload);
         if (valid) {
             ha_pack_c(bank,track_payload+HD_PAYLOAD_BYTES);
-            valid = hd_track_write_c(track_payload, bank, ticket, ch_lock_status[bank]);
+            valid = hd_track_write_c(track_payload, bank, ticket, mhc_lock_status[bank]);
         }
         sr = mask();
         if (ticket == generation && roots_ticket == hd_revision_c(bank)) {
@@ -132,10 +132,10 @@ void hd_nv_save_c(unsigned bank) {
 int hd_nv_restore_c(unsigned bank) {
     unsigned status;
     if (!hd_track_read_c(track_payload, bank, &status) ||
-        !hd_unpack_c(&hd_banks[bank], ch_lock_table + bank*QUALITY_BYTES, track_payload)) return 0;
-    ch_lock_status[bank] = (uint8_t)status;
+        !hd_unpack_c(&hd_banks[bank], mhc_lock_table + bank*QUALITY_BYTES, track_payload)) return 0;
+    mhc_lock_status[bank] = (uint8_t)status;
     ha_unpack_c(bank,track_payload+HD_PAYLOAD_BYTES);
-    ch_nv_bank = bank;
+    mhc_nv_bank = bank;
     hd_bank_loaded_c(bank);
     return 1;
 }

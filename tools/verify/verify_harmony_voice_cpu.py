@@ -135,7 +135,7 @@ def main():
                             for setting, value in (('voic', voic), ('sprd', spread),
                                                    ('size', 0), ('root', root_mode)):
                                 m.call('mh_'+setting+'_set', 0, value)
-                            m.uc.mem_write(m.sym['ch_current'], bytes((quality,)))
+                            m.uc.mem_write(m.sym['mhc_current'], bytes((quality,)))
                         for pitch in progression:
                             results = []
                             for m in machines:
@@ -153,7 +153,7 @@ def main():
             raw = []
             for m in machines:
                 m.configure(2, 0)
-                m.uc.mem_write(m.sym['ch_current'], bytes((quality,)))
+                m.uc.mem_write(m.sym['mhc_current'], bytes((quality,)))
             for pitch in progression:
                 pools = [m.generate(pitch)[1] for m in machines]
                 assert pools[0] == pools[1], (quality, pitch, pools)

@@ -55,7 +55,7 @@ def main():
     script=work/'overlap.txt'
     script.write_text(c.PANEL+'1600 key 4 down\n2000 key 12 down\n2400 key 12 up\n2800 key 3 down\n3300 key 3 up\n3800 quit\n')
     p.run(work,'overlap',['--live-script',script,'--lcd',work/'overlap.lcd',
-          '--mem-dump',f'{sym["ch_display_root"]:#x},2={work}/identity.bin'])
+          '--mem-dump',f'{sym["mhc_display_root"]:#x},2={work}/identity.bin'])
     assert (work/'identity.bin').read_bytes()==bytes((55,4))
     subprocess.run([p.sys.executable,str(p.ROOT/'tools/emu/lcd_view.py'),str(work/'overlap.lcd'),'--png',str(work/'overlap.png')],check=True,stdout=subprocess.DEVNULL)
     results['overlap-guide']={'root':55,'quality':4,'intentionally_held_at_capture':True}

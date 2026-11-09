@@ -3,15 +3,15 @@
  * UI-only scratch; the audio/recording path never calls this routine.
  */
     .text
-    .global ch_chord_name
-ch_chord_name: /* d0 track -> a0 name; d0/d1/a1 volatile */
+    .global mhc_chord_name
+mhc_chord_name: /* d0 track -> a0 name; d0/d1/a1 volatile */
     lea -40(%sp),%sp
     movem.l %d2-%d7/%a2-%a3,(%sp)
     move.l %d0,%d7
-    lea ch_name_text,%a2
-    jsr ch_display_snapshot
+    lea mhc_name_text,%a2
+    jsr mhc_display_snapshot
     moveq #0,%d2
-    move.b ch_display_root,%d2
+    move.b mhc_display_root,%d2
     cmpi.l #127,%d2
     bhi.w .name_idle
     move.l %d2,%d0
@@ -42,13 +42,13 @@ ch_chord_name: /* d0 track -> a0 name; d0/d1/a1 volatile */
     moveq #0,%d4
     move.w (%a0,%d0.l*2),%d4
     moveq #0,%d6
-    move.b ch_display_quality,%d6
+    move.b mhc_display_quality,%d6
     move.l %d2,%d0
     move.l %d6,%d1
     move.l %d2,36(%sp)
     move.l %d4,%d2
     lea 32(%sp),%a0
-    jsr ch_build
+    jsr mhc_build
     move.l 36(%sp),%d2
     /* Near the MIDI ceiling, build at a lower octave for the name. */
     cmpi.l #100,%d2
@@ -57,7 +57,7 @@ ch_chord_name: /* d0 track -> a0 name; d0/d1/a1 volatile */
     move.l %d2,%d0
     move.l %d2,36(%sp)
     move.l %d4,%d2
-    jsr ch_build
+    jsr mhc_build
     move.l 36(%sp),%d2
 .name_intervals:
     moveq #0,%d3
@@ -135,7 +135,7 @@ ch_chord_name: /* d0 track -> a0 name; d0/d1/a1 volatile */
     bsr.s .append
 .name_done:
     clr.b (%a2)
-    lea ch_name_text,%a0
+    lea mhc_name_text,%a0
     movem.l (%sp),%d2-%d7/%a2-%a3
     lea 40(%sp),%sp
     rts
@@ -178,4 +178,4 @@ ch_chord_name: /* d0 track -> a0 name; d0/d1/a1 volatile */
 .flat5: .asciz "b5"
 .idle: .asciz ""
     .bss
-ch_name_text: .space 32
+mhc_name_text: .space 32

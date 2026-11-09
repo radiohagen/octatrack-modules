@@ -18,10 +18,10 @@
     .set FILE_VERSION,4
     .set FILE_NONE,0x48445030  /* HDP0: explicit empty companion */
     .text
-    .global ch_st_bankw_guard,ch_st_bankcopy_guard,ch_st_bankcopy_done
-    .global ch_st_loadall_post,ch_st_loadmask_post,ch_st_tocs1,ch_st_fromcs1
-    .global ch_st_newproj,ch_st_newproj_post
-    .global ch_file_read,ch_file_write,ch_native_hash
+    .global mhc_st_bankw_guard,mhc_st_bankcopy_guard,mhc_st_bankcopy_done
+    .global mhc_st_loadall_post,mhc_st_loadmask_post,mhc_st_tocs1,mhc_st_fromcs1
+    .global mhc_st_newproj,mhc_st_newproj_post
+    .global mhc_file_read,mhc_file_write,mhc_native_hash
 path:   lea     %sp@(-8),%sp
         movem.l %d2/%a2,%sp@
         movel   %d0,%d2
@@ -64,11 +64,11 @@ fclose: pea     FOBJ
         addql   #4,%sp
         rts
 
-| bank_at: d0 = bank -> a0 = its CHRD bank in ch_lock_table.
+| bank_at: d0 = bank -> a0 = its CHRD bank in mhc_lock_table.
 bank_at:
         movel   #BANK_B,%d1
         mulu.l  %d1,%d0
-        addil   #ch_lock_table,%d0
+        addil   #mhc_lock_table,%d0
         moveal  %d0,%a0
         rts
 
@@ -140,7 +140,7 @@ rn_none:
  * The identity covers all 16 patterns, all tracks and all 64 steps.
  * Unrelated CC edits and native transient/dirty fields do not invalidate it.
  */
-ch_native_hash:
+mhc_native_hash:
     move.l %d0,-(%sp)
     lea -28(%sp),%sp
     movem.l %d1-%d5/%a0-%a1,(%sp)
@@ -195,11 +195,11 @@ ch_native_hash:
 /* d0 bank -> 1 complete, negative error. Header is 32 bytes BE:
  * magic, version, bank, length, FNV payload, FNV native identity, 0, 0.
  */
-ch_file_write:
+mhc_file_write:
     lea -12(%sp),%sp
     movem.l %d2-%d3/%a2,(%sp)
     move.l %d0,%d2
-    lea ch_lock_status,%a0
+    lea mhc_lock_status,%a0
     moveq #0,%d0
     move.b (%a0,%d2.l),%d0
     cmpi.l #2,%d0
@@ -209,7 +209,7 @@ ch_file_write:
     move.l %d2,%d0
     bsr.w hdr
     move.l %d2,%d0
-    bsr.w ch_native_hash
+    bsr.w mhc_native_hash
     move.l %d0,HDR+20
     clr.l HDR+24
     clr.l HDR+28
@@ -250,11 +250,11 @@ ch_file_write:
     cmpi.l #1,%d3
     bne.s .wr_fail
     moveq #1,%d0
-    lea ch_lock_status,%a0
+    lea mhc_lock_status,%a0
     move.b %d0,(%a0,%d2.l)
     bra.s .wr_done
 .wr_fail:
-    lea ch_lock_status,%a0
+    lea mhc_lock_status,%a0
     moveq #4,%d0
     move.b %d0,(%a0,%d2.l)
 .wr_refuse:
@@ -263,7 +263,7 @@ ch_file_write:
     movem.l (%sp),%d2-%d3/%a2
     lea 12(%sp),%sp
     rts
-ch_file_read:
+mhc_file_read:
     lea -12(%sp),%sp
     movem.l %d2-%d3/%a2,(%sp)
     move.l %d0,%d2
@@ -324,7 +324,7 @@ ch_file_read:
     bne.w .rd_bad
     moveq #3,%d3
     move.l %d2,%d0
-    bsr.w ch_native_hash
+    bsr.w mhc_native_hash
     cmp.l HDR+20,%d0
     bne.w .rd_bad
     bsr.w fclose
@@ -355,7 +355,7 @@ ch_file_read:
 .rd_status:
     move.l %d2,%d0
     jsr hd_bank_loaded
-    lea ch_lock_status,%a0
+    lea mhc_lock_status,%a0
     move.b %d3,(%a0,%d2.l)
     movem.l (%sp),%d2-%d3/%a2
     lea 12(%sp),%sp
@@ -363,16 +363,16 @@ ch_file_read:
 
 /* STORE checked phase: fail before native/P2 saves if any companion fails.
  * d1 = bank mask. STORE owns the native error exit and register restoration. */
-ch_st_bankw_guard:
+mhc_st_bankw_guard:
     move.l %d1,-(%sp)
-    jsr ch_lock_init
+    jsr mhc_lock_init
     move.l (%sp)+,%d3
     moveq #0,%d4
 .sb_loop:
     btst %d4,%d3
     beq.s .sb_next
     move.l %d4,%d0
-    bsr.w ch_file_write
+    bsr.w mhc_file_write
     tst.l %d0
     bmi.s .sb_return
 .sb_next:
@@ -384,34 +384,34 @@ ch_st_bankw_guard:
     rts
 
 /* Native loads finished; identity uses the newly loaded bank. */
-ch_st_loadall_post:
+mhc_st_loadall_post:
     lea -12(%sp),%sp
     movem.l %d0/%d2-%d3,(%sp)
-    jsr ch_lock_init
+    jsr mhc_lock_init
     clr.l NEEDFILE
     moveq #0,%d2
 .la_loop:
     move.l %d2,%d0
-    bsr.w ch_file_read
+    bsr.w mhc_file_read
     addq.l #1,%d2
     cmpi.l #16,%d2
     bne.s .la_loop
     moveq #0,%d0
     move.b 0x80000002,%d0
-    jsr ch_nv_save
+    jsr mhc_nv_save
     movem.l (%sp),%d0/%d2-%d3
     lea 12(%sp),%sp
     rts
-ch_st_loadmask_post:
+mhc_st_loadmask_post:
     move.l %d1,-(%sp)
-    jsr ch_lock_init
+    jsr mhc_lock_init
     move.l (%sp)+,%d3
     moveq #0,%d2
 .lm_loop:
     btst %d2,%d3
     beq.s .lm_next
     move.l %d2,%d0
-    bsr.w ch_file_read
+    bsr.w mhc_file_read
 .lm_next:
     addq.l #1,%d2
     cmpi.l #16,%d2
@@ -420,26 +420,26 @@ ch_st_loadmask_post:
     beq.s .lm_done
     clr.l NEEDFILE
     subq.l #1,%d0
-    bsr.w ch_file_read
+    bsr.w mhc_file_read
 .lm_done:
     moveq #0,%d0
     move.b 0x80000002,%d0
-    jsr ch_nv_save
+    jsr mhc_nv_save
     rts
 
-ch_st_tocs1:
+mhc_st_tocs1:
     move.l %d0,-(%sp)
-    jsr ch_lock_init
+    jsr mhc_lock_init
     move.l (%sp)+,%d0
-    jmp ch_nv_save
+    jmp mhc_nv_save
 
 /* STORE dispatches P2 first, then Harmony, after the native CS1 restore. */
-ch_st_fromcs1:
+mhc_st_fromcs1:
     move.l %d0,-(%sp)
-    jsr ch_lock_init
+    jsr mhc_lock_init
     move.l (%sp)+,%d0
     move.l %d0,%d1
-    jsr ch_nv_restore
+    jsr mhc_nv_restore
     tst.l %d0
     bne.s .cs_restored
     addq.l #1,%d1
@@ -447,22 +447,22 @@ ch_st_fromcs1:
 .cs_restored:
     rts
 
-ch_st_newproj_post:
+mhc_st_newproj_post:
     jmp hd_ready_all
-ch_st_newproj:
+mhc_st_newproj:
     lea -12(%sp),%sp
     movem.l %d0-%d1/%a0,(%sp)
-    jsr ch_lock_init
-    lea ch_lock_table,%a0
+    jsr mhc_lock_init
+    lea mhc_lock_table,%a0
     moveq #-1,%d0
     move.l #131072/4,%d1
 .np_loop:
     move.l %d0,(%a0)+
     subq.l #1,%d1
     bne.s .np_loop
-    move.l %d0,ch_nv_bank
+    move.l %d0,mhc_nv_bank
     clr.l NEEDFILE
-    lea ch_lock_status,%a0
+    lea mhc_lock_status,%a0
     clr.l (%a0)
     clr.l 4(%a0)
     clr.l 8(%a0)
@@ -475,12 +475,12 @@ ch_st_newproj:
 
 /* Copy only after stock succeeded. Missing companion creates an explicit
  * HDP0 marker, preventing an older destination's CHRD from surviving. */
-ch_st_bankcopy_guard:
+mhc_st_bankcopy_guard:
     move.l %d1,%a0
-    jmp ch_copy_guard
+    jmp mhc_copy_guard
 
 /* d0 = destination, d1 = source; STORE calls only after native success. */
-ch_st_bankcopy_done:
+mhc_st_bankcopy_done:
     move.l %d0,%a3
     move.l %d1,%a2
     moveq #0,%d0
@@ -565,8 +565,8 @@ EXTRA: .space 4
  * a0 source path -> d0=0 allowed, -7 blocked; preserves nonvolatile registers.
  */
     .text
-    .global ch_copy_guard
-ch_copy_guard:
+    .global mhc_copy_guard
+mhc_copy_guard:
     lea -8(%sp),%sp
     movem.l %d2/%a2,(%sp)
     move.l %a0,%a2
@@ -610,7 +610,7 @@ ch_copy_guard:
     bne.s .cg_allow
     tst.b %d0
     bne.s .cg_suffix
-    lea ch_lock_status,%a0
+    lea mhc_lock_status,%a0
     moveq #0,%d0
     move.b (%a0,%d2.l),%d0
     cmpi.l #2,%d0
