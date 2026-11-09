@@ -14,8 +14,9 @@ Ionian, Dorian, Phrygian, Lydian, Mixolydian, Aeolian and Locrian. This does not
 include harmonic or melodic minor merely because they also have seven notes.
 A Harmony-compatible adapter must preserve that restriction. Unsupported scales
 must not be substituted with Major/Minor or interpreted as stored mode IDs.
-Composition rejects an adapter whose declared catalogue includes unsupported
-masks; the adapter must enforce that catalogue when loading or editing scales.
+Open catalogues are permitted. Harmony checks the effective mask at edit and
+playback boundaries; unsupported combinations show a message and preserve
+stored degree intent. Ordinary tracks retain the full provider catalogue.
 
 The adapter contract is in [scale_provider.py](scale_provider.py). Reads take a
 resolved local track and an explicit working or saved Part context, and return a
@@ -26,14 +27,23 @@ display byte. It must also resolve inherited Follow display values and keep all
 editing paths, including any chooser, read-only on followed tracks. These are
 adapter qualification requirements; declaring a mask set alone is insufficient.
 
-The unmodified [SCALES prototype](https://github.com/Djibdjib/octabam/tree/feat/scales)
+The **historical**, unmodified [SCALES prototype](https://github.com/Djibdjib/octabam/tree/feat/scales)
 at `e4fbba56d098cf79909212991609df906bf82646` is incompatible. Its extended scale
 ID occupies native MIDI SETUP byte 18, already used for Harmony CHRD/SIZE.
 Its encoder/output hooks also need Follow inheritance and Harmony output
 ownership support. A provider adapter cannot repair those ownership conflicts.
-This combination is refused until the provider supplies compatible storage and
-hooks. Existing Harmony projects keep their byte assignments; untagged prototype
+That historical prototype cannot be combined unchanged. Current upstream
+SCALES uses `scales.work`/`scales.strd` and has a separate adapter in
+`scale_scales.s`, with explicit-context reads, inherited read-only KEY and
+Harmony-owned pitch output. Existing Harmony projects keep their byte assignments; untagged prototype
 SCALES data cannot be distinguished from Harmony settings by its value alone.
+
+Current integration selects STORE, EVENTS and TRIG MODES. STORE owns retained
+storage; there is no separately selectable MIDI SRAM dependency. TRIG MODES
+combines Factory mode 2 and Harmony mode 6 with independent callbacks and
+captured releases. The full MIDI remix inherits OCTABAM and adds Harmony,
+Follow and Loopback. Loopback consumes Scenes' explicit packet/context contract;
+the historical private-offset MIDI LOOPBACK SCENES bridge is not selected.
 
 The earlier integration and validation records below apply only to their named
 commits. Source checks, linked-code checks and complete firmware captures are

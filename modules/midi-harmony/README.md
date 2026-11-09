@@ -133,7 +133,8 @@ NOTE fields are storage mirrors and can play different pitches on stock.
 Stock also resets voicing/spread/root choices and clamps extended KEY modes
 to B Minor; saving persists those changes for the bank written.
 
-Requires **STORE** (including native Part access), **MIDI SRAM** and **EVENTS**.
+Requires **STORE** (native Part access and retained storage), **EVENTS** and
+**TRIG MODES**. No separate MIDI SRAM module is needed on current Octabam.
 HARM and PLOCKS P2 register independently with EVENTS;
 no combination-specific bridge is selected. KITS libraries are per
 project; recalling a kit supplies Part defaults while pattern locks stay with
@@ -144,3 +145,15 @@ the patterns. See [storage](DEVELOPMENT.md#compact-harmony-storage) and [KITS](K
 CHORD PLAY registers mode 6 with Octabam’s TRIG MODES system service.
 The service owns the shared menu, navigation and cleanup boundary; Harmony
 retains its root keys, variations, display and captured-note ownership.
+
+SCALES and MIDI SCALES are both supported by the current integration. Other
+tracks can use all 52 SCALES choices; HARM accepts the seven diatonic modes only,
+including a KEY inherited through FOLLOW. Unsupported combinations show
+HARM NEEDS DIATONIC SCALE and suppress new Harmony notes without rewriting degree
+intent. Choose a supported scale before changing HARM, including turning it OFF.
+Existing note releases are retained.
+
+Factory's CHORDS and Harmony's CHORD PLAY coexist. Factory stores absolute
+pitches on HARM OFF tracks; Harmony stores degrees and chord choices elsewhere.
+Factory refuses live playing/recording and pattern insertion onto HARM-enabled
+tracks with CHORDS NEEDS HARM OFF. Its atelier preview remains an audition.

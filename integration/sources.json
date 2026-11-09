@@ -122,7 +122,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-harmony/README.md",
       "sha256": "2503b41cfcdfaae42effb0ec2c17a9c6a3f0ffd11f74e623d3f78d94c7d4704e",
-      "published_sha256": "2997d326a9fd113ca650bed64cdc480c35b45a89c50ac1f50a2cb6b54a8e86c6",
+      "published_sha256": "1d699b0410ad4bc972108f5f4b6a25d3b75651887d09c2c77ed1bc8c1e0ef376",
       "source_mode": "100644"
     },
     "modules/midi-harmony/VOICING.md": {
@@ -231,7 +231,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-harmony/manifest.py",
       "sha256": "8691286ad370961aafba521e00a070797d2b70f257dddea18eb4874f70893097",
-      "published_sha256": "edb74ecdc6b0fe1782fbe6078c1b1deba3c998edb99c1b6e2f488d015d14f332",
+      "published_sha256": "1e05baeeeaf5da28a2c9dca7ee55ea04a011086640a8529ca1508d1cc5749a04",
       "source_mode": "100644",
       "migration_note": "Operational author URL updated; original author name/credit preserved.",
       "update_commit": "510e0aee978275d729f0a9b1404b2b72536f7619"
@@ -304,7 +304,7 @@
       "commit": "03f7e81aee53d1d0b0c16ef1694bb10a35dcb63d",
       "path": "modules/midi-loopback/README.md",
       "sha256": "c1cb745934351515f196bcc441726a492d8cd3151d59532539fac82fe1abbf31",
-      "published_sha256": "d01e8c5ade67b04b46c44786ffcabe73f78d09f8a12749fa4cface1c112ad1b6",
+      "published_sha256": "c8d48a284f16945ca88018b70b526397df783b15de86052781758b433ad7304c",
       "source_mode": "100644",
       "update_source": {
         "repository": "https://github.com/radiohagen/octatrack-modules",

@@ -25,7 +25,7 @@ MODULE = Module(
     author_url='https://github.com/radiohagen/octatrack-modules', proof=Proof.PORT,
     proof_note='',
     doc='Scale-degree roots, generated chords and CHORD PLAY using native ARP KEY; optional MIDI Follow.',
-    requires=('STORE','MIDI SRAM','EVENTS','TRIG MODES'), select=select,
+    requires=('STORE','EVENTS','TRIG MODES'), select=select,
     linked=(Linked('chordpart', str(ROOT / 'chord-part.s'), dram=True),
             Linked('harmonytransport', str(ROOT / 'transport.s'), dram=True),
             Linked('harmonyownership', str(ROOT / 'ownership.s'), dram=True),

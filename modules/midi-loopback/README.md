@@ -81,3 +81,8 @@ or saves will preserve their flags.
 Keep a separate project backup before returning to stock.
 
 [Implementation, provenance and verification](DEVELOPMENT.md).
+
+On the current OCTABAM integration, MIDI Scenes emits through an explicit
+packet callback and exposes the actual mix Part. Loopback follows EXT/INT/BOTH
+for sequence and mixer CCs without intercepting the global USB/DIN sender or
+reading private Scenes offsets. No MIDI LOOPBACK SCENES module is selected.
