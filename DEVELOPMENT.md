@@ -10,6 +10,10 @@ It excludes ARP templates, new synth engines and unrelated effects. Existing
 stock modules in the Octabam fork are unchanged unless explicitly documented
 as a required integration fix.
 
+The separately authorized [MIDI Arp Presets](modules/midi-arp-presets/README.md)
+reintroduction has its own [scoped integration](integration/midi-arp-presets.md)
+and does not join the MIDI upstream series or change its package pin.
+
 - [Module catalogue](modules/README.md)
 - [Build and integration](integration/README.md)
 - [Source review map](docs/REVIEW_MAP.md)

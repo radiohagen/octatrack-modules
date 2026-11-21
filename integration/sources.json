@@ -64,6 +64,14 @@
       "source_commit": "33ba0c90533e925af29929fd761c5dc8f48eab4a",
       "upstream_commit": "ce17b9e4868027bafe8684054b45f28ea368bd7c",
       "status": "experimental; separate Synth Machine integration"
+    },
+    {
+      "slug": "midi-arp-presets",
+      "repository": "https://github.com/radiohagen/octabam",
+      "source_commit": "b52cd7fe1fc4e26421acc01f52f62cad0baa775d",
+      "stage": false,
+      "integration": "integration/midi-arp-presets.md",
+      "status": "Separately authorized reintroduction; outside the MIDI upstream series and current package pin."
     }
   ],
   "files": {
@@ -1829,7 +1837,7 @@
       "repository": "https://github.com/radiohagen/octatrack-modules",
       "path": "modules/README.md",
       "sha256": "ac24d8383fa03e2836422ce90ef88c6608164c0d64c7a1ac60e00f15b0a9a3fa",
-      "published_sha256": "16efb8c11c985198e2fbaad5937a47abee84cde22454ce9049cb1c797b98a098",
+      "published_sha256": "76d668cd2a8c032c543584820e99a4332bfd96f6ec7107fb01c8be9d8ebe7d82",
       "source_mode": "100644",
       "stage": false
     },
@@ -2607,6 +2615,106 @@
       "sha256": "0ce48a0d9fa468d217ffd4b0b83448568d9f0b73ab3f8731a99e039bd82ecae4",
       "published_sha256": "0ce48a0d9fa468d217ffd4b0b83448568d9f0b73ab3f8731a99e039bd82ecae4",
       "source_mode": "100644"
+    },
+    "modules/midi-arp-presets/README.md": {
+      "repository": "https://github.com/radiohagen/octabam",
+      "commit": "b52cd7fe1fc4e26421acc01f52f62cad0baa775d",
+      "path": "modules/arp-presets/README.md",
+      "sha256": "93449097bae087009a698037238d79881017604dc4187352b69d5254d890ab45",
+      "published_sha256": "b6c03ed2f8dc686536c74507229bdd385038df2be8f17427508b6c504183dc5e",
+      "source_mode": "100644",
+      "stage": false,
+      "note": "Scoped MIDI Arp Presets publication; native C/hooks unchanged. Renamed paths and selector follow the prior author-repository naming. See integration/midi-arp-presets.md."
+    },
+    "modules/midi-arp-presets/generate.py": {
+      "repository": "https://github.com/radiohagen/octabam",
+      "commit": "b52cd7fe1fc4e26421acc01f52f62cad0baa775d",
+      "path": "modules/arp-presets/generate.py",
+      "sha256": "943b8f32f5e757a7e09f9dbeb5baf6e30e2566dc1641d78139a54487a88af42f",
+      "published_sha256": "04fd6fb9c9b5f5535208d0e1e340fa07c9d2e5561fdcc1ee955a8243cbd96cee",
+      "source_mode": "100644",
+      "stage": false,
+      "note": "Scoped MIDI Arp Presets publication; native C/hooks unchanged. Renamed paths and selector follow the prior author-repository naming. See integration/midi-arp-presets.md."
+    },
+    "modules/midi-arp-presets/hooks.s": {
+      "repository": "https://github.com/radiohagen/octabam",
+      "commit": "b52cd7fe1fc4e26421acc01f52f62cad0baa775d",
+      "path": "modules/arp-presets/hooks.s",
+      "sha256": "d20fab4d816380609eae167b924b0b226c636e29d8cba5f651d1184f2cdaec6a",
+      "published_sha256": "d20fab4d816380609eae167b924b0b226c636e29d8cba5f651d1184f2cdaec6a",
+      "source_mode": "100644",
+      "stage": false,
+      "note": "Scoped MIDI Arp Presets publication; native C/hooks unchanged. Renamed paths and selector follow the prior author-repository naming. See integration/midi-arp-presets.md."
+    },
+    "modules/midi-arp-presets/manifest.py": {
+      "repository": "https://github.com/radiohagen/octabam",
+      "commit": "b52cd7fe1fc4e26421acc01f52f62cad0baa775d",
+      "path": "modules/arp-presets/manifest.py",
+      "sha256": "5cc40e08a0648b39a9c759544c791d1c10a8cc6de4f0da70462cc6554e06a15e",
+      "published_sha256": "58701a02144ef0d653b957ef643f5e333f51f8f47f0e9e5507f5344465832be6",
+      "source_mode": "100644",
+      "stage": false,
+      "note": "Scoped MIDI Arp Presets publication; native C/hooks unchanged. Renamed paths and selector follow the prior author-repository naming. See integration/midi-arp-presets.md."
+    },
+    "modules/midi-arp-presets/presets.c": {
+      "repository": "https://github.com/radiohagen/octabam",
+      "commit": "b52cd7fe1fc4e26421acc01f52f62cad0baa775d",
+      "path": "modules/arp-presets/presets.c",
+      "sha256": "3c30c1178bea11529f2ca9921b91e070f342397d13b64afcb8aa040a9a0d5b35",
+      "published_sha256": "3c30c1178bea11529f2ca9921b91e070f342397d13b64afcb8aa040a9a0d5b35",
+      "source_mode": "100644",
+      "stage": false,
+      "note": "Scoped MIDI Arp Presets publication; native C/hooks unchanged. Renamed paths and selector follow the prior author-repository naming. See integration/midi-arp-presets.md."
+    },
+    "modules/midi-arp-presets/presets.s": {
+      "repository": "https://github.com/radiohagen/octabam",
+      "commit": "b52cd7fe1fc4e26421acc01f52f62cad0baa775d",
+      "path": "modules/arp-presets/presets.s",
+      "sha256": "0cbfec86279c7d79571c74b3fd9ecc4c46c797d032ad4231cc1349ac589c8e2e",
+      "published_sha256": "8462cecdc0fd9077ca5664e44a67136bb9e172e596856d34426c6ee594c2c607",
+      "source_mode": "100644",
+      "stage": false,
+      "note": "Scoped MIDI Arp Presets publication; native C/hooks unchanged. Renamed paths and selector follow the prior author-repository naming. See integration/midi-arp-presets.md."
+    },
+    "remixes/test/midi-arp-presets/README.md": {
+      "repository": "https://github.com/radiohagen/octabam",
+      "commit": "b52cd7fe1fc4e26421acc01f52f62cad0baa775d",
+      "path": "remixes/test/arp-presets/README.md",
+      "sha256": "3ffd4644483591b648a121bedc57a84225d4f7b63c30f6cf302cfad3cbf7f18c",
+      "published_sha256": "c95e594c884016513baf085fd3bef6fbe3460976539b5091bd78e9be7dabfa14",
+      "source_mode": "100644",
+      "stage": false,
+      "note": "Scoped MIDI Arp Presets publication; native C/hooks unchanged. Renamed paths and selector follow the prior author-repository naming. See integration/midi-arp-presets.md."
+    },
+    "remixes/test/midi-arp-presets/remix.py": {
+      "repository": "https://github.com/radiohagen/octabam",
+      "commit": "b52cd7fe1fc4e26421acc01f52f62cad0baa775d",
+      "path": "remixes/test/arp-presets/remix.py",
+      "sha256": "2b173818a166fb4910eb547ad62a3a9465c50538617eb1e8d23ae5c48580e941",
+      "published_sha256": "48b842878bb7cca7931592b9f0bf42127d3d79a379b75500a096353afc91ec17",
+      "source_mode": "100644",
+      "stage": false,
+      "note": "Scoped MIDI Arp Presets publication; native C/hooks unchanged. Renamed paths and selector follow the prior author-repository naming. See integration/midi-arp-presets.md."
+    },
+    "tools/verify/verify_midi_arp_presets.py": {
+      "repository": "https://github.com/radiohagen/octabam",
+      "commit": "b52cd7fe1fc4e26421acc01f52f62cad0baa775d",
+      "path": "tools/verify/verify_arp_presets.py",
+      "sha256": "f33e2c6cda739b6d0042300db206680817d39352ccfe24e456fb79610bd490d4",
+      "published_sha256": "6364bb3181212c143536c78e10e7b0546756fe6d9cbc83f0dada98308483cf86",
+      "source_mode": "100644",
+      "stage": false,
+      "note": "Scoped MIDI Arp Presets publication; native C/hooks unchanged. Renamed paths and selector follow the prior author-repository naming. See integration/midi-arp-presets.md."
+    },
+    "tools/verify/verify_midi_arp_presets_port.py": {
+      "repository": "https://github.com/radiohagen/octabam",
+      "commit": "b52cd7fe1fc4e26421acc01f52f62cad0baa775d",
+      "path": "tools/verify/verify_arp_presets_port.py",
+      "sha256": "1ca1ba4cd42cafe506b8d98901db1d22b2396e429c6249fbf77f4461a7657233",
+      "published_sha256": "4dc4d4e8e0fa91c067447cfa7bfd72902c6d915cdd614ddf57e85d0868e0ca02",
+      "source_mode": "100644",
+      "stage": false,
+      "note": "Scoped MIDI Arp Presets publication; native C/hooks unchanged. Renamed paths and selector follow the prior author-repository naming. See integration/midi-arp-presets.md."
     }
   },
   "submodules": {},

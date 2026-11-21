@@ -23,5 +23,10 @@ and shared-event callbacks. Firmware, samples and device projects are not distri
 
 [Developer notes and verification](DEVELOPMENT.md).
 
+The separately authorized [MIDI Arp Presets](modules/midi-arp-presets/README.md)
+provides 22 rhythms and three octave versions for six rolling-bass families.
+Its [scoped integration](integration/midi-arp-presets.md) is outside the MIDI
+upstream series and does not advance the current package pin.
+
 The separately authorized [CPU Supersaw experiment](modules/supersaw/README.md)
 keeps both FX slots available. It is outside the MIDI upstream series.

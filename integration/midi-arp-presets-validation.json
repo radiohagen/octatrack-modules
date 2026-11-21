@@ -1,0 +1,75 @@
+{
+  "status": "verified software publication",
+  "recorded_on": "2026-11-21",
+  "original_implementation_commit": "b52cd7fe1fc4e26421acc01f52f62cad0baa775d",
+  "author_base": "cb11475731eab5dc35f1ec6a93a497e6dcaaf77b",
+  "integration_base": "3bd99bca5d44ae6257112747070be77fef110839",
+  "checked_integration_commit": "d4506015785e6c4fb5eb718076e354acaf0b0b45",
+  "integration_commit_availability": "local validation branch; source files and reconstruction instructions supplied in this author repository",
+  "core_c_and_hooks_identical_to_original": true,
+  "standalone_image_sha256": "5b8070e97516fb8e1d892f2a8f55f1ccfb28efb3f23ab33d0e21acf3f9b0b436",
+  "standalone_image_identical_to_original_verified_image": true,
+  "combined_image_sha256": "833e7b1c080f252a044ba62eace8c684ddd7520b95dc229301934241c27b83f9",
+  "combined_tested_image_matches_final_image": true,
+  "fixture": {
+    "project_work_sha256": "897d92f4f8d77fa3522bf16590dc6e6d41c0510af97230467367c0a54f3dd55b",
+    "private_files_published": false
+  },
+  "validated_files": {
+    "modules/midi-arp-presets/README.md": "b6c03ed2f8dc686536c74507229bdd385038df2be8f17427508b6c504183dc5e",
+    "modules/midi-arp-presets/generate.py": "04fd6fb9c9b5f5535208d0e1e340fa07c9d2e5561fdcc1ee955a8243cbd96cee",
+    "modules/midi-arp-presets/hooks.s": "d20fab4d816380609eae167b924b0b226c636e29d8cba5f651d1184f2cdaec6a",
+    "modules/midi-arp-presets/manifest.py": "58701a02144ef0d653b957ef643f5e333f51f8f47f0e9e5507f5344465832be6",
+    "modules/midi-arp-presets/presets.c": "3c30c1178bea11529f2ca9921b91e070f342397d13b64afcb8aa040a9a0d5b35",
+    "modules/midi-arp-presets/presets.s": "8462cecdc0fd9077ca5664e44a67136bb9e172e596856d34426c6ee594c2c607",
+    "remixes/test/midi-arp-presets/README.md": "c95e594c884016513baf085fd3bef6fbe3460976539b5091bd78e9be7dabfa14",
+    "remixes/test/midi-arp-presets/remix.py": "48b842878bb7cca7931592b9f0bf42127d3d79a379b75500a096353afc91ec17",
+    "tools/verify/verify_midi_arp_presets.py": "6364bb3181212c143536c78e10e7b0546756fe6d9cbc83f0dada98308483cf86",
+    "tools/verify/verify_midi_arp_presets_port.py": "4dc4d4e8e0fa91c067447cfa7bfd72902c6d915cdd614ddf57e85d0868e0ca02"
+  },
+  "checks": [
+    {
+      "command": "make check (author repository)",
+      "result": "pass",
+      "tests": 60
+    },
+    {
+      "command": ".venv/bin/python modules/midi-arp-presets/generate.py --check",
+      "result": "pass"
+    },
+    {
+      "command": "make bus REMIX=midi-arp-presets BUILD=79",
+      "result": "pass; byte-identical to original verified implementation"
+    },
+    {
+      "command": ".venv/bin/python tools/verify/verify_midi_arp_presets.py midi-arp-presets",
+      "result": "pass"
+    },
+    {
+      "command": "OT_PROJECT=<local fixture> make check REMIX=mattias-bottleservice MODULES='MIDI ARP PRESETS' BUILD=79",
+      "result": "pass",
+      "module_gates_run": 2,
+      "module_gates_failed": 0,
+      "coverage": [
+        "1408 base preset applications",
+        "all B versions across Parts, MIDI tracks and end banks",
+        "native C/F/LEVEL and rotation behavior",
+        "MIDI Scales F/A panel interaction",
+        "SEISMIC ROOT/OCT/OCT+ panel",
+        "native SAVE PROJECT/cold LOAD",
+        "held-root B switching, unchanged arp phase and balanced note releases"
+      ],
+      "skips": [
+        "Unrelated fixture CC40 probe: T2 FX2 id 0x19 is not a selected module."
+      ]
+    }
+  ],
+  "local_log_sha256": {
+    "combined-check.log": "292fd949be0d2988dfe77c6ecc9817932a6af642e0fe00f3fc8f0a73507b1c6f",
+    "verify-standalone.log": "d5283b0db21230cf90fbfb695beea4e558538d5bd56a1363ba07cbc509ef05b2"
+  },
+  "hardware_tested": false,
+  "firmware_flashes": false,
+  "current_midi_package_pin_changed": false,
+  "current_follow_harmony_adapters_qualified": false
+}

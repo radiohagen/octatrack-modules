@@ -27,6 +27,14 @@ upstream Octabam `3b3da30e`. Its source, tests, 18 screenshots and small shared
 support patch reproduce the validated standalone composition. It does not
 advance the Harmony/Follow pin or qualify a combined personal package.
 
+## MIDI Arp Presets
+
+[MIDI Arp Presets has a separate integration recipe](midi-arp-presets.md).
+Its rolling-bass library and three-way octave selector are a separately
+authorized reintroduction. The source and verification preserve the
+historical MIDI Arp Presets naming; the current Harmony/Follow integration
+pin and upstream contribution series are unchanged.
+
 ## Historical Harmony/Follow checkout
 
 1. Clone `https://github.com/radiohagen/octabam.git`, fetch branch
